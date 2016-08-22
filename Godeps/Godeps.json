@@ -1,0 +1,15 @@
+{
+	"ImportPath": "github.com/aandryashin/selenoid",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v74",
+	"Deps": [
+		{
+			"ImportPath": "github.com/aandryashin/matchers",
+			"Rev": "5eb67beb188b5076812683a96c13bef79d970fd8"
+		},
+		{
+			"ImportPath": "github.com/aandryashin/matchers/httpresp",
+			"Rev": "5eb67beb188b5076812683a96c13bef79d970fd8"
+		}
+	]
+}
