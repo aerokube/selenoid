@@ -56,11 +56,10 @@ func TestNewSessionHostDown(t *testing.T) {
 	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusInternalServerError})
-	
+
 	host := peek()
 	AssertThat(t, host, EqualTo{":4444"})
 }
-
 
 func TestNewSessionBadGateway(t *testing.T) {
 	mux := http.NewServeMux()
@@ -92,7 +91,7 @@ func TestNewSessionCreated(t *testing.T) {
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
 
-	host := peek()	
+	host := peek()
 	AssertThat(t, host, EqualTo{""})
 }
 
@@ -109,12 +108,12 @@ func TestNewSessionTimeout(t *testing.T) {
 	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
-	
-	host := peek()	
+
+	host := peek()
 	AssertThat(t, host, EqualTo{""})
-	
-	<- time.After(50 * time.Millisecond)
-	host = peek()	
+
+	<-time.After(50 * time.Millisecond)
+	host = peek()
 	AssertThat(t, host, EqualTo{hostport(driver.URL)})
 }
 
@@ -123,7 +122,7 @@ func TestProxySessionTimeout(t *testing.T) {
 	mux.HandleFunc("/wd/hub/session", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"sessionId":"123"}`))
 	})
-		mux.HandleFunc("/wd/hub/session/123", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/wd/hub/session/123", func(w http.ResponseWriter, r *http.Request) {
 	})
 	driver := httptest.NewServer(mux)
 	defer driver.Close()
@@ -133,18 +132,17 @@ func TestProxySessionTimeout(t *testing.T) {
 	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
-	
-	host := peek()	
+
+	host := peek()
 	AssertThat(t, host, EqualTo{""})
-	
+
 	<-time.After(10 * time.Millisecond)
 	rsp, err = http.Post(root("/wd/hub/session/123"), "", nil)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
 
-	
-	<- time.After(50 * time.Millisecond)
-	host = peek()	
+	<-time.After(50 * time.Millisecond)
+	host = peek()
 	AssertThat(t, host, EqualTo{hostport(driver.URL)})
 }
 
@@ -162,7 +160,7 @@ func TestUseSession(t *testing.T) {
 	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
-	
+
 	rsp, err = http.Post(root("/wd/hub/session/123"), "", nil)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
@@ -183,13 +181,12 @@ func TestDeleteSession(t *testing.T) {
 	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
-	
-	host := peek()	
+
+	host := peek()
 	AssertThat(t, host, EqualTo{""})
-	
+
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://%s/wd/hub/session/123", listen), nil)
 	http.DefaultClient.Do(req)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
 }
-
