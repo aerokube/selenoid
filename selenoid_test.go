@@ -189,4 +189,7 @@ func TestDeleteSession(t *testing.T) {
 	http.DefaultClient.Do(req)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
+
+	host = peek()
+	AssertThat(t, host, EqualTo{hostport(driver.URL)})
 }
