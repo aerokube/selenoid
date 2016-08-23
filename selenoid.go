@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+    "os"
 )
 
 const (
@@ -53,11 +54,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+    log.Println("[NEW_REQUEST] - Waiting for a free node")
 	host := <-hosts
 	r.URL.Scheme = "http"
 	r.URL.Host = host
+    log.Printf("[SESSION_ATTEMPTED] [%s]\n", host)
 	resp, err := http.Post(r.URL.String(), "", r.Body)
 	if err != nil {
+        log.Printf("[SESSION_FAILED] [%s] - [%s]\n", host, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		hosts <- host
 		return
@@ -75,9 +79,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 	lock.Lock()
 	route[s.Id] = &session{host, onTimeout(timeout, func() { deleteSession(s.Id) })}
 	lock.Unlock()
+    log.Printf("[SESSION_CREATED] [%s] [%s]\n", s.Id, host)
 }
 
 func proxy(r *http.Request) {
+    dump, _ := httputil.DumpRequest(r, true)
+    log.Println(string(dump))
 	r.URL.Scheme = "http"
 	sid := strings.Split(r.URL.Path, "/")[4]
 	lock.RLock()
@@ -96,6 +103,7 @@ func proxy(r *http.Request) {
 		delete(route, sid)
 		hosts <- s.host
 		lock.Unlock()
+        log.Printf("[SESSION_DELETED] [%s]\n", sid)
 		return
 	}
 	r.URL.Host = listen
@@ -103,6 +111,7 @@ func proxy(r *http.Request) {
 }
 
 func deleteSession(id string) {
+    log.Printf("[SESSION_TIMED_OUT] [%s] - Deleting session\n", id)
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://%s/wd/hub/session/%s", listen, id), nil)
 	if err != nil {
 		return
@@ -132,12 +141,13 @@ func handlers() http.Handler {
 
 func init() {
 	flag.StringVar(&listen, "listen", ":4444", "network address to accept connections")
-	flag.DurationVar(&timeout, "timeout", 60*time.Second, "session idle timeout")
+	flag.DurationVar(&timeout, "timeout", 60*time.Second, "session idle timeout in seconds")
 	flag.Var(&nodes, "nodes", "underlying driver nodes (required)")
 	flag.Parse()
 }
 
 func queue(nodes stringSlice) {
+    log.Println("Initializing nodes with", nodes)
 	hosts = make(chan string, len(nodes))
 	for _, h := range nodes {
 		hosts <- h
@@ -146,8 +156,10 @@ func queue(nodes stringSlice) {
 
 func main() {
 	if len(nodes) == 0 {
-		log.Fatal("underlying nodes are not set")
+        fmt.Print("Usage: selenoid [--listen=:4444] --nodes=:5555,:5556,:5557 [--timeout=120]\n")
+        os.Exit(0)
 	}
 	queue(nodes)
+    log.Printf("Listening on %s\n", listen)
 	log.Fatal(http.ListenAndServe(listen, handlers()))
 }
