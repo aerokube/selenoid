@@ -63,7 +63,7 @@ func TestNewSessionHostDown(t *testing.T) {
 
 func TestNewSessionBadGateway(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/wd/hub/session", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "", http.StatusBadRequest)
 	})
 	driver := httptest.NewServer(mux)
@@ -80,7 +80,7 @@ func TestNewSessionBadGateway(t *testing.T) {
 
 func TestNewSessionCreated(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/wd/hub/session", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"sessionId":"123"}`))
 	})
 	driver := httptest.NewServer(mux)
@@ -97,7 +97,7 @@ func TestNewSessionCreated(t *testing.T) {
 
 func TestNewSessionTimeout(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/wd/hub/session", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"sessionId":"123"}`))
 	})
 	driver := httptest.NewServer(mux)
@@ -119,10 +119,10 @@ func TestNewSessionTimeout(t *testing.T) {
 
 func TestProxySessionTimeout(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/wd/hub/session", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"sessionId":"123"}`))
 	})
-	mux.HandleFunc("/wd/hub/session/123", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/session/123", func(w http.ResponseWriter, r *http.Request) {
 	})
 	driver := httptest.NewServer(mux)
 	defer driver.Close()
@@ -148,10 +148,10 @@ func TestProxySessionTimeout(t *testing.T) {
 
 func TestUseSession(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/wd/hub/session", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"sessionId":"123"}`))
 	})
-	mux.HandleFunc("/wd/hub/session/123", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/session/123", func(w http.ResponseWriter, r *http.Request) {
 	})
 	driver := httptest.NewServer(mux)
 	defer driver.Close()
@@ -168,10 +168,10 @@ func TestUseSession(t *testing.T) {
 
 func TestDeleteSession(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/wd/hub/session", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`{"sessionId":"123"}`))
 	})
-	mux.HandleFunc("/wd/hub/session/123", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/session/123", func(w http.ResponseWriter, r *http.Request) {
 	})
 
 	driver := httptest.NewServer(mux)
@@ -189,7 +189,7 @@ func TestDeleteSession(t *testing.T) {
 	http.DefaultClient.Do(req)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
-
+	
 	host = peek()
 	AssertThat(t, host, EqualTo{hostport(driver.URL)})
 }

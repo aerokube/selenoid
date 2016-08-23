@@ -58,6 +58,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	host := <-hosts
 	r.URL.Scheme = "http"
 	r.URL.Host = host
+	r.URL.Path = strings.Replace(r.URL.Path, "/wd/hub", "", 1)
     log.Printf("[SESSION_ATTEMPTED] [%s]\n", host)
 	resp, err := http.Post(r.URL.String(), "", r.Body)
 	if err != nil {
@@ -93,6 +94,7 @@ func proxy(r *http.Request) {
 	if ok {
 		close(s.cancel)
 		r.URL.Host = s.host
+		r.URL.Path = strings.Replace(r.URL.Path, "/wd/hub", "", 1)
 		if r.Method != http.MethodDelete {
 			lock.Lock()
 			s.cancel = onTimeout(timeout, func() { deleteSession(sid) })
