@@ -189,7 +189,7 @@ func TestDeleteSession(t *testing.T) {
 	http.DefaultClient.Do(req)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
-	
+
 	host = peek()
 	AssertThat(t, host, EqualTo{hostport(driver.URL)})
 }
@@ -215,7 +215,7 @@ func TestStatus(t *testing.T) {
 
 	resp, err := http.Get(root("/status"))
 	AssertThat(t, err, Is{nil})
-	var reply map[string]string 
+	var reply map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&reply}})
 	AssertThat(t, reply["123"], EqualTo{hostport(driver.URL)})
 }
