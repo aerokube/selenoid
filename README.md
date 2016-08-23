@@ -14,4 +14,4 @@ We use [godep](https://github.com/tools/godep) for dependencies management so en
 4. Run compiled binary: ```$GOPATH/bin/selenoid```
 
 ## Running
-To run Selenoid type: ```$ selenoid -nodes :5555,:5556,:5557```. By default it listens on port 4444.
+To run Selenoid type: ```$ selenoid -nodes localhost:5555,example.com:5556```. By default it listens on port 4444.
