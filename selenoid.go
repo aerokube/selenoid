@@ -49,6 +49,16 @@ func errFunc(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Session not found", http.StatusNotFound)
 }
 
+func status(w http.ResponseWriter, r *http.Request) {
+	status := make(map[string]string)
+	lock.RLock()
+	for k, v := range route {
+		status[k] = v.host
+	}
+	lock.RUnlock()
+	json.NewEncoder(w).Encode(&status)
+}
+
 func create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -136,6 +146,7 @@ func onTimeout(t time.Duration, f func()) chan struct{} {
 func handlers() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc(errPath, errFunc)
+	mux.HandleFunc("/status", status)
 	mux.HandleFunc("/wd/hub/session", create)
 	mux.Handle("/wd/hub/session/", &httputil.ReverseProxy{Director: proxy})
 	return mux

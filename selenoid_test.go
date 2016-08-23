@@ -193,3 +193,29 @@ func TestDeleteSession(t *testing.T) {
 	host = peek()
 	AssertThat(t, host, EqualTo{hostport(driver.URL)})
 }
+
+func TestStatus(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"sessionId":"123"}`))
+	})
+	mux.HandleFunc("/session/123", func(w http.ResponseWriter, r *http.Request) {
+	})
+
+	driver := httptest.NewServer(mux)
+	defer driver.Close()
+
+	queue(stringSlice{hostport(driver.URL)})
+	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
+	host := peek()
+	AssertThat(t, host, EqualTo{""})
+
+	resp, err := http.Get(root("/status"))
+	AssertThat(t, err, Is{nil})
+	var reply map[string]string 
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&reply}})
+	AssertThat(t, reply["123"], EqualTo{hostport(driver.URL)})
+}
