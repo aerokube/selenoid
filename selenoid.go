@@ -156,8 +156,8 @@ func queue(nodes stringSlice) {
 
 func main() {
 	if len(nodes) == 0 {
-        fmt.Print("Usage: selenoid [--listen=:4444] --nodes=:5555,:5556,:5557 [--timeout=120]\n")
-        os.Exit(0)
+		flag.Usage()
+		os.Exit(1)
 	}
 	queue(nodes)
     log.Printf("Listening on %s\n", listen)
