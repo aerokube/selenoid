@@ -175,7 +175,7 @@ func main() {
 	}
 	host, port, err := net.SplitHostPort(listen)
 	if err != nil {
-		log.Fatal("invalid listem argument")
+		log.Fatal("invalid listen argument")
 	}
 	if host == "" {
 		host = "localhost"
