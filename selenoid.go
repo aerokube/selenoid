@@ -49,9 +49,9 @@ var (
 func sanitize(l string) string {
 	host, port, _ := net.SplitHostPort(l)
 	if host == "" {
-		return fmt.Sprintf("localhost:%s", port)
+		return net.JoinHostPort("localhost", port)
 	}
-	return listen
+	return l
 }
 
 func errFunc(w http.ResponseWriter, r *http.Request) {
