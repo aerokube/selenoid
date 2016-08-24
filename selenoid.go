@@ -46,6 +46,14 @@ var (
 	lock    sync.RWMutex
 )
 
+func sanitize(l string) string {
+	host, port, _ := net.SplitHostPort(l)
+	if host == "" {
+		host = "localhost"
+	}
+	return fmt.Sprintf("%s:%s", host, port)
+}
+
 func errFunc(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Session not found", http.StatusNotFound)
 }
@@ -119,18 +127,15 @@ func proxy(r *http.Request) {
 		log.Printf("[SESSION_DELETED] [%s]\n", sid)
 		return
 	}
-	host, port, _ := net.SplitHostPort(listen)
-	if host == "" {
-		host = "localhost"
-	}
-	r.URL.Host = fmt.Sprintf("%s:%s", host, port)
+	r.URL.Host = sanitize(listen)
 	r.URL.Path = errPath
 }
 
 func deleteSession(id string) {
 	log.Printf("[SESSION_TIMED_OUT] [%s] - Deleting session\n", id)
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://%s/wd/hub/session/%s", listen, id), nil)
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://%s/wd/hub/session/%s", sanitize(listen), id), nil)
 	if err != nil {
+		log.Printf("[DELETE_FAILED] [%s] - %s\n", id, err.Error())
 		return
 	}
 	http.DefaultClient.Do(req)
