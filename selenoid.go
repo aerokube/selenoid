@@ -119,7 +119,11 @@ func proxy(r *http.Request) {
 		log.Printf("[SESSION_DELETED] [%s]\n", sid)
 		return
 	}
-	r.URL.Host = listen
+	host, port, _ := net.SplitHostPort(listen)
+	if host == "" {
+		host = "localhost"
+	}
+	r.URL.Host = fmt.Sprintf("%s:%s", host, port)
 	r.URL.Path = errPath
 }
 
@@ -173,14 +177,6 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
-	host, port, err := net.SplitHostPort(listen)
-	if err != nil {
-		log.Fatal("invalid listen argument")
-	}
-	if host == "" {
-		host = "localhost"
-	}
-	listen = fmt.Sprintf("%s:%s", host, port)
 	queue(nodes)
 	log.Printf("Listening on %s\n", listen)
 	log.Fatal(http.ListenAndServe(listen, handlers()))
