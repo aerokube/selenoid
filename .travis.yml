@@ -1,5 +1,7 @@
 language: go
 
+go:
+  - 1.7
 script:
   - go test -coverprofile=coverage.txt -covermode=atomic
 
