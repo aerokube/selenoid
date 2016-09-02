@@ -35,7 +35,7 @@ var (
 
 func init() {
 	flag.StringVar(&listen, "listen", ":4444", "network address to accept connections")
-	flag.DurationVar(&timeout, "timeout", 5*time.Second, "session idle timeout in seconds")
+	flag.DurationVar(&timeout, "timeout", 60*time.Second, "session idle timeout in time.Duration format")
 	flag.BoolVar(&logHTTP, "log-http", false, "log HTTP traffic")
 	flag.Var(&nodes, "nodes", "comma separated underlying driver's or node's urls (required)")
 	flag.Parse()
