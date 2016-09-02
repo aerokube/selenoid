@@ -1,221 +1,282 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
+	"github.com/aandryashin/selenoid/handler"
+	"github.com/aandryashin/selenoid/service"
 )
 
-var (
-	srv *httptest.Server
-)
+type StartupError struct{}
 
-func hostport(u string) string {
-	uri, _ := url.Parse(u)
-	return uri.Host
+func (m *StartupError) StartWithCancel() (*url.URL, func(), error) {
+	log.Println("Starting StartupError Service...")
+	log.Println("Failed to start StartupError Service...")
+	return nil, nil, errors.New("Failed to start Service")
 }
 
-func root(p string) string {
-	return fmt.Sprintf("%s%s", srv.URL, p)
-}
+type With string
 
-func peek() (host string) {
-	select {
-	case host = <-hosts:
-	default:
-	}
-	return host
-}
-
-func init() {
-	srv = httptest.NewServer(handlers())
-	listen = hostport(srv.URL)
+func (r With) Path(p string) string {
+	return fmt.Sprintf("%s%s", r, p)
 }
 
 func TestNewSessionWithGet(t *testing.T) {
-	rsp, err := http.Get(root("/wd/hub/session"))
+	srv := httptest.NewServer(Handler(&service.HttpTest{Handler: handler.Selenium()}, 1))
+	defer srv.Close()
+
+	rsp, err := http.Get(With(srv.URL).Path("/wd/hub/session"))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusMethodNotAllowed})
+
+	AssertThat(t, len(queue), EqualTo{0})
 }
 
-func TestNewSessionNotFound(t *testing.T) {
-	queue(stringSlice{":4444"})
-	rsp, err := http.Post(root("/wd/hub/session/123"), "", nil)
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusNotFound})
-}
+func TestServiceStartupFailure(t *testing.T) {
+	srv := httptest.NewServer(Handler(&StartupError{}, 1))
+	defer srv.Close()
 
-func TestNewSessionHostDown(t *testing.T) {
-	queue(stringSlice{":4444"})
-	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusInternalServerError})
 
-	host := peek()
-	AssertThat(t, host, EqualTo{":4444"})
+	AssertThat(t, len(queue), EqualTo{0})
 }
 
-func TestNewSessionBadGateway(t *testing.T) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "", http.StatusBadRequest)
-	})
-	driver := httptest.NewServer(mux)
-	defer driver.Close()
+func TestNewSessionNotFound(t *testing.T) {
+	srv := httptest.NewServer(Handler(&service.HttpTest{Handler: handler.Selenium()}, 1))
+	defer srv.Close()
 
-	queue(stringSlice{hostport(driver.URL)})
-	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
+	rsp, err := http.Get(With(srv.URL).Path("/wd/hub/session/123"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusNotFound})
+
+	AssertThat(t, len(queue), EqualTo{0})
+}
+
+func TestNewSessionHostDown(t *testing.T) {
+	canceled := false
+	ch := make(chan bool)
+	srv := httptest.NewServer(Handler(&service.HttpTest{
+		Handler: handler.Selenium(),
+		Action: func(s *httptest.Server) {
+			log.Println("Host is going down...")
+			s.Close()
+			log.Println("Now Host is down...")
+		},
+		Cancel: ch,
+	}, 1))
+	defer srv.Close()
+
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusInternalServerError})
+
+	canceled = <-ch
+	AssertThat(t, canceled, Is{true})
+
+	AssertThat(t, len(queue), EqualTo{0})
+}
+
+func TestNewSessionBadHostResponse(t *testing.T) {
+	canceled := false
+	ch := make(chan bool)
+	srv := httptest.NewServer(Handler(&service.HttpTest{
+		Handler: handler.HttpResponse("Bad Request", http.StatusBadRequest),
+		Cancel:  ch,
+	}, 1))
+	defer srv.Close()
+
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusBadRequest})
 
-	host := peek()
-	AssertThat(t, host, EqualTo{hostport(driver.URL)})
+	canceled = <-ch
+	AssertThat(t, canceled, Is{true})
+
+	AssertThat(t, len(queue), EqualTo{0})
 }
 
-func TestNewSessionCreated(t *testing.T) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"sessionId":"123"}`))
-	})
-	driver := httptest.NewServer(mux)
-	defer driver.Close()
+func TestSessionCreated(t *testing.T) {
+	ch := make(chan string)
+	srv := httptest.NewServer(Handler(&service.HttpTest{
+		Handler: handler.Selenium(),
+		Action: func(s *httptest.Server) {
+			go func() {
+				ch <- s.URL
+			}()
+		},
+	}, 1))
+	defer srv.Close()
 
-	queue(stringSlice{hostport(driver.URL)})
-	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	driverUrl := <-ch
 	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
 
-	host := peek()
-	AssertThat(t, host, EqualTo{""})
+	resp, err = http.Get(With(srv.URL).Path("/status"))
+	AssertThat(t, err, Is{nil})
+	var stat map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&stat}})
+	AssertThat(t, stat[sess["sessionId"]], EqualTo{driverUrl})
+
+	AssertThat(t, len(queue), EqualTo{1})
+}
+
+func TestProxySession(t *testing.T) {
+	srv := httptest.NewServer(Handler(&service.HttpTest{Handler: handler.Selenium()}, 1))
+	defer srv.Close()
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	AssertThat(t, err, Is{nil})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	resp, err = http.Get(With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/url", sess["sessionId"])))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, resp, Code{http.StatusOK})
+
+	AssertThat(t, len(queue), EqualTo{1})
+}
+
+func TestSessionDeleted(t *testing.T) {
+	canceled := false
+	ch := make(chan bool)
+	srv := httptest.NewServer(Handler(&service.HttpTest{
+		Handler: handler.Selenium(),
+		Cancel:  ch,
+	}, 1))
+	defer srv.Close()
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	AssertThat(t, err, Is{nil})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	req, _ := http.NewRequest(http.MethodDelete,
+		With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s", sess["sessionId"])), nil)
+	http.DefaultClient.Do(req)
+
+	resp, err = http.Get(With(srv.URL).Path("/status"))
+	AssertThat(t, err, Is{nil})
+	var stat map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&stat}})
+	_, ok := stat[sess["sessionId"]]
+	AssertThat(t, ok, Is{false})
+
+	canceled = <-ch
+	AssertThat(t, canceled, Is{true})
+
+	AssertThat(t, len(queue), EqualTo{0})
 }
 
 func TestNewSessionTimeout(t *testing.T) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"sessionId":"123"}`))
-	})
-	driver := httptest.NewServer(mux)
-	defer driver.Close()
+	canceled := false
+	ch := make(chan bool)
+	srv := httptest.NewServer(Handler(&service.HttpTest{
+		Handler: handler.Selenium(),
+		Cancel:  ch,
+	}, 1))
+	defer srv.Close()
 
 	timeout = 30 * time.Millisecond
-	queue(stringSlice{hostport(driver.URL)})
-	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
 	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
 
-	host := peek()
-	AssertThat(t, host, EqualTo{""})
+	_, ok := sessions.Get(sess["sessionId"])
+	AssertThat(t, ok, Is{true})
 
 	<-time.After(50 * time.Millisecond)
-	host = peek()
-	AssertThat(t, host, EqualTo{hostport(driver.URL)})
+	_, ok = sessions.Get(sess["sessionId"])
+	AssertThat(t, ok, Is{false})
+
+	canceled = <-ch
+	AssertThat(t, canceled, Is{true})
+
+	AssertThat(t, len(queue), EqualTo{0})
 }
 
 func TestProxySessionTimeout(t *testing.T) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"sessionId":"123"}`))
-	})
-	mux.HandleFunc("/session/123", func(w http.ResponseWriter, r *http.Request) {
-	})
-	driver := httptest.NewServer(mux)
-	defer driver.Close()
+	canceled := false
+	ch := make(chan bool)
+	srv := httptest.NewServer(Handler(&service.HttpTest{
+		Handler: handler.Selenium(),
+		Cancel:  ch,
+	}, 1))
+	defer srv.Close()
 
 	timeout = 30 * time.Millisecond
-	queue(stringSlice{hostport(driver.URL)})
-	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
 	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
 
-	host := peek()
-	AssertThat(t, host, EqualTo{""})
+	_, ok := sessions.Get(sess["sessionId"])
+	AssertThat(t, ok, Is{true})
 
-	<-time.After(10 * time.Millisecond)
-	rsp, err = http.Post(root("/wd/hub/session/123"), "", nil)
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
+	<-time.After(20 * time.Millisecond)
+	_, ok = sessions.Get(sess["sessionId"])
+	AssertThat(t, ok, Is{true})
+	http.Get(With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/url", sess["sessionId"])))
+
+	<-time.After(20 * time.Millisecond)
+	_, ok = sessions.Get(sess["sessionId"])
+	_, ok = sessions.Get(sess["sessionId"])
+	AssertThat(t, ok, Is{true})
 
 	<-time.After(50 * time.Millisecond)
-	host = peek()
-	AssertThat(t, host, EqualTo{hostport(driver.URL)})
+	_, ok = sessions.Get(sess["sessionId"])
+	AssertThat(t, ok, Is{false})
+
+	canceled = <-ch
+	AssertThat(t, canceled, Is{true})
+
+	AssertThat(t, len(queue), EqualTo{0})
 }
 
-func TestUseSession(t *testing.T) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"sessionId":"123"}`))
-	})
-	mux.HandleFunc("/session/123", func(w http.ResponseWriter, r *http.Request) {
-	})
-	driver := httptest.NewServer(mux)
-	defer driver.Close()
+func TestForceDeleteSession(t *testing.T) {
+	canceled := false
+	ch := make(chan bool)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/wd/hub/session/") {
+			http.Error(w, "Delete session failed", http.StatusInternalServerError)
+			return
+		}
+		Handler(&service.HttpTest{
+			Handler: handler.Selenium(),
+			Cancel:  ch,
+		}, 1).ServeHTTP(w, r)
+	}))
+	defer srv.Close()
 
-	queue(stringSlice{hostport(driver.URL)})
-	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
+	timeout = 30 * time.Millisecond
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
 	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
 
-	rsp, err = http.Post(root("/wd/hub/session/123"), "", nil)
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
-}
+	_, ok := sessions.Get(sess["sessionId"])
+	AssertThat(t, ok, Is{true})
 
-func TestDeleteSession(t *testing.T) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"sessionId":"123"}`))
-	})
-	mux.HandleFunc("/session/123", func(w http.ResponseWriter, r *http.Request) {
-	})
+	<-time.After(50 * time.Millisecond)
+	_, ok = sessions.Get(sess["sessionId"])
+	AssertThat(t, ok, Is{false})
 
-	driver := httptest.NewServer(mux)
-	defer driver.Close()
+	canceled = <-ch
+	AssertThat(t, canceled, Is{true})
 
-	queue(stringSlice{hostport(driver.URL)})
-	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
-
-	host := peek()
-	AssertThat(t, host, EqualTo{""})
-
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://%s/wd/hub/session/123", listen), nil)
-	http.DefaultClient.Do(req)
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
-
-	host = peek()
-	AssertThat(t, host, EqualTo{hostport(driver.URL)})
-}
-
-func TestStatus(t *testing.T) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/session", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`{"sessionId":"123"}`))
-	})
-	mux.HandleFunc("/session/123", func(w http.ResponseWriter, r *http.Request) {
-	})
-
-	driver := httptest.NewServer(mux)
-	defer driver.Close()
-
-	queue(stringSlice{hostport(driver.URL)})
-	rsp, err := http.Post(root("/wd/hub/session"), "", nil)
-	AssertThat(t, err, Is{nil})
-	AssertThat(t, rsp, Code{http.StatusOK})
-
-	host := peek()
-	AssertThat(t, host, EqualTo{""})
-
-	resp, err := http.Get(root("/status"))
-	AssertThat(t, err, Is{nil})
-	var reply map[string]string
-	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&reply}})
-	AssertThat(t, reply["123"], EqualTo{hostport(driver.URL)})
+	AssertThat(t, len(queue), EqualTo{0})
 }
