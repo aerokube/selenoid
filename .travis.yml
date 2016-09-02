@@ -3,7 +3,7 @@ language: go
 go:
   - 1.7
 script:
-  - go test -coverprofile=coverage.txt -covermode=atomic -coverpkg github.com/aandryashin/selenoid/handler,github.com/aandryashin/selenoid/session,github.com/aandryashin/selenoid/service
+  - go test -coverprofile=coverage.txt -covermode=atomic -coverpkg .,github.com/aandryashin/selenoid/handler,github.com/aandryashin/selenoid/session,github.com/aandryashin/selenoid/service
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
