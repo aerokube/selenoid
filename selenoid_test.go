@@ -22,7 +22,7 @@ type StartupError struct{}
 func (m *StartupError) StartWithCancel() (*url.URL, func(), error) {
 	log.Println("Starting StartupError Service...")
 	log.Println("Failed to start StartupError Service...")
-	return nil, nil, errors.New("Failed to start Service")
+	return nil, func() {}, errors.New("Failed to start Service")
 }
 
 type With string

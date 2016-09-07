@@ -19,7 +19,7 @@ func (m *HttpTest) StartWithCancel() (*url.URL, func(), error) {
 	u, err := url.Parse(s.URL)
 	if err != nil {
 		log.Println("Failed to start HttpTest Service...")
-		return nil, nil, err
+		return nil, func() {}, err
 	}
 	log.Println("HttpTest Service started...")
 	if m.Action != nil {
