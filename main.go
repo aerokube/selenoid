@@ -5,12 +5,16 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/aandryashin/selenoid/handler"
 	"github.com/aandryashin/selenoid/service"
+	"github.com/aandryashin/selenoid/session"
 )
 
 type stringSlice []string
@@ -27,29 +31,50 @@ func (sslice *stringSlice) Set(value string) error {
 }
 
 var (
-	listen  string
-	timeout time.Duration
-	logHTTP bool
-	nodes   stringSlice
+	listen      string
+	timeout     time.Duration
+	logHTTP     bool
+	dockerImage string
+	driverPort  string
+	driverPath  string
 )
 
 func init() {
 	flag.StringVar(&listen, "listen", ":4444", "network address to accept connections")
+	flag.StringVar(&dockerImage, "docker-image", "", "Docker container image (required)")
+	flag.StringVar(&driverPort, "driver-port", "4444", "Underlying webdriver port")
+	flag.StringVar(&driverPath, "driver-path", "", "Underlying webdriver path e.g. /wd/hub")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "session idle timeout in time.Duration format")
 	flag.BoolVar(&logHTTP, "log-http", false, "log HTTP traffic")
-	flag.Var(&nodes, "nodes", "comma separated underlying driver's or node's urls (required)")
 	flag.Parse()
 }
 
+func cancelOnSignal() {
+	sig := make(chan os.Signal)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sig
+		sessions.Each(func(k string, s *session.Session) {
+			s.Cancel()
+		})
+		os.Exit(1)
+	}()
+}
+
 func main() {
-	d, err := service.NewDriver(nodes)
-	if err != nil {
+	if dockerImage == "" {
 		flag.Usage()
-		fmt.Fprintln(os.Stderr, "error:", err)
+		fmt.Println("error: docker-image is not set")
 		os.Exit(1)
 	}
-	log.Println("Initializing nodes with", nodes)
-	h := Handler(d, len(nodes))
+	u := fmt.Sprintf("http://localhost:%s%s", driverPort, driverPath)
+	if _, err := url.Parse(u); err != nil {
+		flag.Usage()
+		fmt.Println("error: invalid port number or driver path")
+		os.Exit(1)
+	}
+	h := Handler(&service.Docker{dockerImage, driverPort, driverPath}, 5)
+	cancelOnSignal()
 	if logHTTP {
 		h = handler.Dumper(h)
 	}
