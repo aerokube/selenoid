@@ -34,6 +34,7 @@ var (
 	listen      string
 	timeout     time.Duration
 	logHTTP     bool
+	limit       int
 	dockerImage string
 	driverPort  string
 	driverPath  string
@@ -42,6 +43,7 @@ var (
 func init() {
 	flag.StringVar(&listen, "listen", ":4444", "network address to accept connections")
 	flag.StringVar(&dockerImage, "docker-image", "", "Docker container image (required)")
+	flag.IntVar(&limit, "limit", 5, "Simultanious container runs")
 	flag.StringVar(&driverPort, "driver-port", "4444", "Underlying webdriver port")
 	flag.StringVar(&driverPath, "driver-path", "", "Underlying webdriver path e.g. /wd/hub")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "session idle timeout in time.Duration format")
@@ -73,7 +75,7 @@ func main() {
 		fmt.Println("error: invalid port number or driver path")
 		os.Exit(1)
 	}
-	h := Handler(&service.Docker{dockerImage, driverPort, driverPath}, 5)
+	h := Handler(&service.Docker{dockerImage, driverPort, driverPath}, limit)
 	cancelOnSignal()
 	if logHTTP {
 		h = handler.Dumper(h)
