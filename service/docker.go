@@ -96,7 +96,8 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 	case <-time.After(10 * time.Second):
 		err := errors.New(fmt.Sprintf("error: service does not respond in %v", 10*time.Second))
 		log.Println(err)
-		return nil, func() { stop(ctx, cli, resp.ID) }, err
+		stop(ctx, cli, resp.ID)
+		return nil, nil, err
 	case <-done:
 		close(done)
 	}

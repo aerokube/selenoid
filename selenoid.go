@@ -74,7 +74,6 @@ func create(w http.ResponseWriter, r *http.Request) {
 		log.Printf("[SERVICE_STARTUP_FAILED] [%s]\n", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		<-queue
-		cancel()
 		return
 	}
 	r.URL.Host, r.URL.Path = u.Host, u.Path+r.URL.Path
