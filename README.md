@@ -13,23 +13,7 @@ We use [godep](https://github.com/tools/godep) for dependencies management so en
 3. Build as usually: ```$ go build```
 4. Run compiled binary: ```$GOPATH/bin/selenoid```
 
-## Usage
-
-Usage of ./selenoid:
-  -docker-image string
-    	Docker container image (required)
-  -driver-path string
-    	Underlying webdriver path e.g. /wd/hub
-  -driver-port string
-    	Underlying webdriver port (default "4444")
-  -httptest.serve string
-    	if non-empty, httptest.NewServer serves on this address and blocks
-  -listen string
-    	network address to accept connections (default ":4444")
-  -log-http
-    	log HTTP traffic
-  -timeout duration
-    	session idle timeout in time.Duration format (default 1m0s)
-
 ## Running
-To run Selenoid type: ```$ selenoid -nodes http://localhost:5555,http://example.com:5556/wd/hub```. By default it listens on port 4444.
+To run Selenoid type:
+```$ docker pull selenium/standalone-firefox```
+```$ selenoid -docker-image=selenium/standalone-firefox -driver-port=4444 -driver-path=/wd/hub```. By default it listens on port 4444.
