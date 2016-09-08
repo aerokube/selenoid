@@ -15,5 +15,8 @@ We use [godep](https://github.com/tools/godep) for dependencies management so en
 
 ## Running
 To run Selenoid type:
-```$ docker pull selenium/standalone-firefox```
-```$ selenoid -docker-image=selenium/standalone-firefox -driver-port=4444 -driver-path=/wd/hub```. By default it listens on port 4444.
+```
+$ docker pull selenium/standalone-firefox
+$ selenoid -docker-image=selenium/standalone-firefox -driver-port=4444 -driver-path=/wd/hub
+```
+By default it listens on port 4444.
