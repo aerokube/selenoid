@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -82,4 +83,12 @@ func Selenium() http.Handler {
 		lock.Unlock()
 	})
 	return mux
+}
+
+func Ok(w http.ResponseWriter, r *http.Request) {
+	log.Println("registered new node...")
+}
+
+func Success(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, `{"success":true}`)
 }

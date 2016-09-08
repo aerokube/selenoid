@@ -46,6 +46,9 @@ func Handler(s Starter, size int) http.Handler {
 		}))
 	root.HandleFunc(errorPath, errorHandler)
 	root.HandleFunc("/status", status)
+	root.Handle("/grid/api/hub", handler.OnlyPost(handler.Ok))
+	root.Handle("/grid/register", handler.OnlyPost(handler.Ok))
+	root.HandleFunc("/grid/api/proxy", handler.Success)
 	return root
 }
 
