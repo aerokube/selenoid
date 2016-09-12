@@ -80,8 +80,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.URL.Host, r.URL.Path = u.Host, u.Path+r.URL.Path
+	req, _ := http.NewRequest(http.MethodPost, r.URL.String(), r.Body)
+	if r.ContentLength > 0 {
+		req.ContentLength = r.ContentLength
+	}
 	log.Printf("[SESSION_ATTEMPTED] [%s]\n", u.String())
-	resp, err := http.Post(r.URL.String(), "", r.Body)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Printf("[SESSION_FAILED] [%s] - [%s]\n", u.String(), err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
