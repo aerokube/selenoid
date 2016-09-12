@@ -89,6 +89,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		cancel()
 		return
 	}
+	defer resp.Body.Close()
 	w.WriteHeader(resp.StatusCode)
 	var s struct {
 		Id string `json:"sessionId"`
