@@ -20,3 +20,10 @@ $ docker pull selenium/standalone-firefox
 $ selenoid -docker-image=selenium/standalone-firefox -driver-port=4444 -driver-path=/wd/hub
 ```
 By default it listens on port 4444.
+
+## Example containers
+Example containers can be pulled from [Docker Hub](https://hub.docker.com/u/selenoid/):
+```
+$ docker pull selenoid/firefox_48.0
+```
+Also take a look at container [source files](http://github.com/vania-pooh/selenoid-containers).
