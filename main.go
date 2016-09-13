@@ -15,6 +15,7 @@ import (
 	"github.com/aandryashin/selenoid/handler"
 	"github.com/aandryashin/selenoid/service"
 	"github.com/aandryashin/selenoid/session"
+	"github.com/docker/engine-api/client"
 )
 
 type stringSlice []string
@@ -75,7 +76,13 @@ func main() {
 		fmt.Println("error: invalid port number or driver path")
 		os.Exit(1)
 	}
-	h := Handler(&service.Docker{dockerImage, driverPort, driverPath}, limit)
+	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
+	cli, err := client.NewClient("unix:///var/run/docker.sock", client.DefaultVersion, nil, defaultHeaders)
+	if err != nil {
+		fmt.Println("error: unable to create client connection to docker daemon")
+		os.Exit(1)
+	}
+	h := Handler(&service.Docker{dockerImage, driverPort, driverPath, cli}, limit)
 	cancelOnSignal()
 	if logHTTP {
 		h = handler.Dumper(h)

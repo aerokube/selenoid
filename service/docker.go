@@ -17,24 +17,20 @@ import (
 )
 
 type Docker struct {
-	Image string
-	Port  string
-	Path  string
+	Image  string
+	Port   string
+	Path   string
+	Client *client.Client
 }
 
 func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
-	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
-	cli, err := client.NewClient("unix:///var/run/docker.sock", client.DefaultVersion, nil, defaultHeaders)
-	if err != nil {
-		return nil, nil, err
-	}
 	port, err := nat.NewPort("tcp", d.Port)
 	if err != nil {
 		return nil, nil, err
 	}
 	ctx := context.Background()
 	log.Println("Creating Docker container", d.Image, "...")
-	resp, err := cli.ContainerCreate(ctx,
+	resp, err := d.Client.ContainerCreate(ctx,
 		&container.Config{
 			Hostname:     "localhost",
 			Image:        d.Image,
@@ -54,13 +50,13 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 		return nil, nil, err
 	}
 	log.Println("Starting container...")
-	err = cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
+	err = d.Client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	if err != nil {
 		log.Println("error starting container:", err)
 		return nil, nil, err
 	}
 	log.Printf("Container %s started\n", resp.ID)
-	stat, err := cli.ContainerInspect(ctx, resp.ID)
+	stat, err := d.Client.ContainerInspect(ctx, resp.ID)
 	if err != nil {
 		log.Printf("unable to inspect container %s: %s\n", resp.ID, err)
 		return nil, nil, err
@@ -98,7 +94,7 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 	case <-time.After(10 * time.Second):
 		err := errors.New(fmt.Sprintf("error: service does not respond in %v", 10*time.Second))
 		log.Println(err)
-		stop(ctx, cli, resp.ID)
+		stop(ctx, d.Client, resp.ID)
 		return nil, nil, err
 	case <-done:
 		close(done)
@@ -106,7 +102,7 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 	log.Println(time.Since(s))
 	u, _ := url.Parse(host)
 	log.Println("proxying requests to:", host)
-	return u, func() { stop(ctx, cli, resp.ID) }, nil
+	return u, func() { stop(ctx, d.Client, resp.ID) }, nil
 }
 
 func stop(ctx context.Context, cli *client.Client, id string) {
