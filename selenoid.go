@@ -149,6 +149,7 @@ func deleteSession(host, id string, cancel func()) {
 	log.Printf("[SESSION_TIMED_OUT] [%s] - Deleting session\n", id)
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://%s/wd/hub/session/%s", host, id), nil)
 	if err == nil {
+		req.Close = true
 		resp, err := http.DefaultClient.Do(req)
 		if err == nil && resp.StatusCode == http.StatusOK {
 			return
