@@ -27,7 +27,8 @@ const (
 var (
 	starter  Starter
 	queue    chan struct{}
-	sessions *session.Map = session.NewMap()
+	await    chan struct{} = make(chan struct{}, 2^64-1)
+	sessions *session.Map  = session.NewMap()
 )
 
 func Handler(s Starter, size int) http.Handler {
@@ -46,6 +47,7 @@ func Handler(s Starter, size int) http.Handler {
 		}))
 	root.HandleFunc(errorPath, errorHandler)
 	root.HandleFunc("/status", status)
+	root.HandleFunc("/queue", queueHandler)
 	root.Handle("/grid/api/hub", handler.OnlyPost(handler.Ok))
 	root.Handle("/grid/register", handler.OnlyPost(handler.Ok))
 	root.HandleFunc("/grid/api/proxy", handler.Success)
@@ -60,6 +62,12 @@ func errorHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, `{"value" : {"message" : "Session not found"}, "status" : 13}`, http.StatusNotFound)
 }
 
+func queueHandler(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode(struct {
+		Q int `json:"queue"`
+	}{len(await)})
+}
+
 func status(w http.ResponseWriter, r *http.Request) {
 	status := make(map[string]string)
 	sessions.Each(func(id string, sess *session.Session) {
@@ -70,7 +78,11 @@ func status(w http.ResponseWriter, r *http.Request) {
 
 func create(w http.ResponseWriter, r *http.Request) {
 	log.Println("[NEW_REQUEST] - Waiting for a free node")
+	go func() {
+		await <- struct{}{}
+	}()
 	queue <- struct{}{}
+	<-await
 	log.Println("[NEW_REQUEST_ACCEPTED]")
 	u, cancel, err := starter.StartWithCancel()
 	if err != nil {
