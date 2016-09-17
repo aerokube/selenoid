@@ -81,8 +81,9 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 		for {
 			select {
 			case <-time.After(50 * time.Millisecond):
-				_, err := http.Get(host)
+				r, err := http.Get(host)
 				if err == nil {
+					r.Body.Close()
 					done <- struct{}{}
 				}
 			case <-done:
@@ -112,6 +113,7 @@ func stop(ctx context.Context, cli *client.Client, id string) {
 		log.Println("error: unable to stop container", id, err)
 		return
 	}
+	cli.ContainerWait(ctx, id)
 	fmt.Printf("Container %s stopped\n", id)
 	err = cli.ContainerRemove(ctx, id, types.ContainerRemoveOptions{Force: true})
 	if err != nil {

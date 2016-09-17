@@ -93,6 +93,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	r.URL.Host, r.URL.Path = u.Host, u.Path+r.URL.Path
 	req, _ := http.NewRequest(http.MethodPost, r.URL.String(), r.Body)
+	req.Close = true
 	if r.ContentLength > 0 {
 		req.ContentLength = r.ContentLength
 	}
