@@ -1,0 +1,20 @@
+{
+	"firefox" : {
+		"default" : "48.0",
+		"versions" : {
+			"48.0" : {
+				"image" : "firefox_48.0",
+				"port"  : "4444"
+			}
+		}
+	},
+	"chrome" : {
+		"default" : "53.0",
+		"versions" : {
+			"53.0" : {
+				"image" : "chrome_53.0",
+				"port"  : "4444"
+			}
+		}
+	}
+}

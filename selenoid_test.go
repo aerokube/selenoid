@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"log"
@@ -17,6 +18,40 @@ import (
 	"github.com/aandryashin/selenoid/service"
 )
 
+type HttpTest struct {
+	Handler http.Handler
+	Action  func(s *httptest.Server)
+	Cancel  chan bool
+}
+
+func (m *HttpTest) StartWithCancel() (*url.URL, func(), error) {
+	log.Println("Starting HttpTest Service...")
+	s := httptest.NewServer(m.Handler)
+	u, err := url.Parse(s.URL)
+	if err != nil {
+		log.Println("Failed to start HttpTest Service...")
+		return nil, func() {}, err
+	}
+	log.Println("HttpTest Service started...")
+	if m.Action != nil {
+		m.Action(s)
+	}
+	return u, func() {
+		log.Println("Stopping HttpTest Service...")
+		s.Close()
+		log.Println("HttpTest Service stopped...")
+		if m.Cancel != nil {
+			go func() {
+				m.Cancel <- true
+			}()
+		}
+	}, nil
+}
+
+func (m *HttpTest) Find(s, v string) (service.Starter, bool) {
+	return m, true
+}
+
 type StartupError struct{}
 
 func (m *StartupError) StartWithCancel() (*url.URL, func(), error) {
@@ -25,15 +60,33 @@ func (m *StartupError) StartWithCancel() (*url.URL, func(), error) {
 	return nil, nil, errors.New("Failed to start Service")
 }
 
+func (m *StartupError) Find(s, v string) (service.Starter, bool) {
+	return m, true
+}
+
+type BrowserNotFound struct{}
+
+func (m *BrowserNotFound) Find(s, v string) (service.Starter, bool) {
+	return nil, false
+}
+
 type With string
 
 func (r With) Path(p string) string {
 	return fmt.Sprintf("%s%s", r, p)
 }
 
+var (
+	srv *httptest.Server
+)
+
+func init() {
+	queue = make(chan struct{}, 1)
+	srv = httptest.NewServer(Handler())
+}
+
 func TestNewSessionWithGet(t *testing.T) {
-	srv := httptest.NewServer(Handler(&service.HttpTest{Handler: handler.Selenium()}, 1))
-	defer srv.Close()
+	manager = &HttpTest{Handler: handler.Selenium()}
 
 	rsp, err := http.Get(With(srv.URL).Path("/wd/hub/session"))
 	AssertThat(t, err, Is{nil})
@@ -42,20 +95,36 @@ func TestNewSessionWithGet(t *testing.T) {
 	AssertThat(t, len(queue), EqualTo{0})
 }
 
-func TestServiceStartupFailure(t *testing.T) {
-	srv := httptest.NewServer(Handler(&StartupError{}, 1))
-	defer srv.Close()
-
+func TestBadJsonFormat(t *testing.T) {
 	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusBadRequest})
+
+	AssertThat(t, len(queue), EqualTo{0})
+}
+
+func TestServiceStartupFailure(t *testing.T) {
+	manager = &StartupError{}
+
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusInternalServerError})
 
 	AssertThat(t, len(queue), EqualTo{0})
 }
 
+func TestBrowserNotFound(t *testing.T) {
+	manager = &BrowserNotFound{}
+
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusBadRequest})
+
+	AssertThat(t, len(queue), EqualTo{0})
+}
+
 func TestNewSessionNotFound(t *testing.T) {
-	srv := httptest.NewServer(Handler(&service.HttpTest{Handler: handler.Selenium()}, 1))
-	defer srv.Close()
+	manager = &HttpTest{Handler: handler.Selenium()}
 
 	rsp, err := http.Get(With(srv.URL).Path("/wd/hub/session/123"))
 	AssertThat(t, err, Is{nil})
@@ -67,7 +136,7 @@ func TestNewSessionNotFound(t *testing.T) {
 func TestNewSessionHostDown(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
-	srv := httptest.NewServer(Handler(&service.HttpTest{
+	manager = &HttpTest{
 		Handler: handler.Selenium(),
 		Action: func(s *httptest.Server) {
 			log.Println("Host is going down...")
@@ -75,10 +144,9 @@ func TestNewSessionHostDown(t *testing.T) {
 			log.Println("Now Host is down...")
 		},
 		Cancel: ch,
-	}, 1))
-	defer srv.Close()
+	}
 
-	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusInternalServerError})
 
@@ -91,13 +159,12 @@ func TestNewSessionHostDown(t *testing.T) {
 func TestNewSessionBadHostResponse(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
-	srv := httptest.NewServer(Handler(&service.HttpTest{
+	manager = &HttpTest{
 		Handler: handler.HttpResponse("Bad Request", http.StatusBadRequest),
 		Cancel:  ch,
-	}, 1))
-	defer srv.Close()
+	}
 
-	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusBadRequest})
 
@@ -109,17 +176,16 @@ func TestNewSessionBadHostResponse(t *testing.T) {
 
 func TestSessionCreated(t *testing.T) {
 	ch := make(chan string)
-	srv := httptest.NewServer(Handler(&service.HttpTest{
+	manager = &HttpTest{
 		Handler: handler.Selenium(),
 		Action: func(s *httptest.Server) {
 			go func() {
 				ch <- s.URL
 			}()
 		},
-	}, 1))
-	defer srv.Close()
+	}
 
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	driverUrl := <-ch
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
@@ -132,13 +198,13 @@ func TestSessionCreated(t *testing.T) {
 	AssertThat(t, stat[sess["sessionId"]], EqualTo{driverUrl})
 
 	AssertThat(t, len(queue), EqualTo{1})
+	<-queue
 }
 
 func TestProxySession(t *testing.T) {
-	srv := httptest.NewServer(Handler(&service.HttpTest{Handler: handler.Selenium()}, 1))
-	defer srv.Close()
+	manager = &HttpTest{Handler: handler.Selenium()}
 
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
@@ -148,18 +214,18 @@ func TestProxySession(t *testing.T) {
 	AssertThat(t, resp, Code{http.StatusOK})
 
 	AssertThat(t, len(queue), EqualTo{1})
+	<-queue
 }
 
 func TestSessionDeleted(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
-	srv := httptest.NewServer(Handler(&service.HttpTest{
+	manager = &HttpTest{
 		Handler: handler.Selenium(),
 		Cancel:  ch,
-	}, 1))
-	defer srv.Close()
+	}
 
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
@@ -184,14 +250,13 @@ func TestSessionDeleted(t *testing.T) {
 func TestNewSessionTimeout(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
-	srv := httptest.NewServer(Handler(&service.HttpTest{
+	manager = &HttpTest{
 		Handler: handler.Selenium(),
 		Cancel:  ch,
-	}, 1))
-	defer srv.Close()
+	}
 
 	timeout = 30 * time.Millisecond
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
@@ -212,14 +277,13 @@ func TestNewSessionTimeout(t *testing.T) {
 func TestProxySessionTimeout(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
-	srv := httptest.NewServer(Handler(&service.HttpTest{
+	manager = &HttpTest{
 		Handler: handler.Selenium(),
 		Cancel:  ch,
-	}, 1))
-	defer srv.Close()
+	}
 
 	timeout = 30 * time.Millisecond
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
@@ -250,20 +314,21 @@ func TestProxySessionTimeout(t *testing.T) {
 func TestForceDeleteSession(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	manager = &HttpTest{
+		Handler: handler.Selenium(),
+		Cancel:  ch,
+	}
+	selenium := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/wd/hub/session/") {
 			http.Error(w, "Delete session failed", http.StatusInternalServerError)
 			return
 		}
-		Handler(&service.HttpTest{
-			Handler: handler.Selenium(),
-			Cancel:  ch,
-		}, 1).ServeHTTP(w, r)
+		Handler().ServeHTTP(w, r)
 	}))
-	defer srv.Close()
+	defer selenium.Close()
 
 	timeout = 30 * time.Millisecond
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", nil)
+	resp, err := http.Post(With(selenium.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})

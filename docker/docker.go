@@ -1,14 +1,18 @@
-package service
+package docker
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
+	"github.com/aandryashin/selenoid/service"
 	"github.com/docker/engine-api/client"
 	"github.com/docker/engine-api/types"
 	"github.com/docker/engine-api/types/container"
@@ -16,24 +20,78 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-type Docker struct {
-	Image  string
-	Port   string
-	Path   string
+type Service struct {
+	Image string `json:"image"`
+	Port  string `json:"port"`
+	Path  string `json:"path"`
+}
+
+type Versions struct {
+	Default  string              `json:"default"`
+	Versions map[string]*Service `json:"versions"`
+}
+
+type Config map[string]*Versions
+
+func NewConfig(fn string) (*Config, error) {
+	f, err := ioutil.ReadFile(fn)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("error reading configuration file %s: %v", f, err))
+	}
+	c := make(Config)
+	if err := json.Unmarshal(f, &c); err != nil {
+		return nil, errors.New(fmt.Sprintf("error parsing configuration file %s: %v", f, err))
+	}
+	return &c, nil
+}
+
+func (config Config) Find(s, v string) (*Service, bool) {
+	service, ok := config[s]
+	if !ok {
+		return nil, false
+	}
+	if v == "" {
+		if v = service.Default; v == "" {
+			return nil, false
+		}
+	}
+	for k, s := range service.Versions {
+		if strings.HasPrefix(k, v) {
+			return s, true
+		}
+	}
+	return nil, false
+}
+
+type Manager struct {
 	Client *client.Client
+	Config *Config
+}
+
+func (m *Manager) Find(s, v string) (service.Starter, bool) {
+	service, ok := m.Config.Find(s, v)
+	if !ok {
+		return nil, false
+	}
+	return &Docker{m.Client, service}, true
+}
+
+type Docker struct {
+	Client  *client.Client
+	Service *Service
 }
 
 func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
-	port, err := nat.NewPort("tcp", d.Port)
+	port, err := nat.NewPort("tcp", d.Service.Port)
 	if err != nil {
 		return nil, nil, err
 	}
 	ctx := context.Background()
-	log.Println("Creating Docker container", d.Image, "...")
+	log.Println("Creating Docker container", d.Service.Image, "...")
 	resp, err := d.Client.ContainerCreate(ctx,
 		&container.Config{
 			Hostname:     "localhost",
-			Image:        d.Image,
+			Image:        d.Service.Image,
 			ExposedPorts: map[nat.Port]struct{}{port: struct{}{}},
 		},
 		&container.HostConfig{
@@ -73,7 +131,7 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 		return nil, nil, err
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
-	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, d.Path)
+	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, d.Service.Path)
 	s := time.Now()
 	done := make(chan struct{})
 	go func() {

@@ -1,14 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"strings"
 	"time"
 
@@ -16,24 +17,16 @@ import (
 	"github.com/aandryashin/selenoid/session"
 )
 
-type Starter interface {
-	StartWithCancel() (*url.URL, func(), error)
-}
-
 const (
 	errorPath = "/error"
 )
 
 var (
-	starter  Starter
-	queue    chan struct{}
 	await    chan struct{} = make(chan struct{}, 2^64-1)
 	sessions *session.Map  = session.NewMap()
 )
 
-func Handler(s Starter, size int) http.Handler {
-	starter = s
-	queue = make(chan struct{}, size)
+func Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("/session", handler.OnlyPost(create))
 	mux.Handle("/session/", handler.AnyMethod(proxy))
@@ -84,6 +77,34 @@ func create(w http.ResponseWriter, r *http.Request) {
 	queue <- struct{}{}
 	<-await
 	log.Println("[NEW_REQUEST_ACCEPTED]")
+	body, err := ioutil.ReadAll(r.Body)
+	r.Body.Close()
+	if err != nil {
+		log.Printf("[ERROR_READING_REQUEST] [%s]\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		<-queue
+		return
+	}
+	var browser struct {
+		Caps struct {
+			Name    string `json:"browserName"`
+			Version string `json:"version"`
+		} `json:"desiredCapabilities"`
+	}
+	err = json.Unmarshal(body, &browser)
+	if err != nil {
+		log.Printf("[BAD_JSON_FORMAT] [%s]\n", err.Error())
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		<-queue
+		return
+	}
+	starter, ok := manager.Find(browser.Caps.Name, browser.Caps.Version)
+	if !ok {
+		log.Printf("[ENVIRONMENT_NOT_AVAILABLE] [%s-%s]\n", browser.Caps.Name, browser.Caps.Version)
+		http.Error(w, "Requested environment is not available", http.StatusBadRequest)
+		<-queue
+		return
+	}
 	u, cancel, err := starter.StartWithCancel()
 	if err != nil {
 		log.Printf("[SERVICE_STARTUP_FAILED] [%s]\n", err.Error())
@@ -93,10 +114,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	r.URL.Host, r.URL.Path = u.Host, u.Path+r.URL.Path
 	req, _ := http.NewRequest(http.MethodPost, r.URL.String(), r.Body)
-	req.Close = true
 	if r.ContentLength > 0 {
 		req.ContentLength = r.ContentLength
 	}
+	req.Body = ioutil.NopCloser(bytes.NewReader(body))
 	log.Printf("[SESSION_ATTEMPTED] [%s]\n", u.String())
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
