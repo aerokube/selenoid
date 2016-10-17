@@ -43,7 +43,7 @@ type Config struct {
 }
 
 func NewConfig(fn string, limit int) (*Config, error) {
-	config := &Config{File: fn, Limit: limit}
+	config := &Config{File: fn, Limit: limit, Browsers: make(map[string]*Versions)}
 	err := config.Load()
 	if err != nil {
 		return nil, err
@@ -58,11 +58,9 @@ func (config *Config) Load() error {
 	if err != nil {
 		return errors.New(fmt.Sprintf("error reading configuration file %s: %v", f, err))
 	}
-	var browsers map[string]*Versions
-	if err := json.Unmarshal(f, &browsers); err != nil {
+	if err := json.Unmarshal(f, &config.Browsers); err != nil {
 		return errors.New(fmt.Sprintf("error parsing configuration file %s: %v", f, err))
 	}
-	config.Browsers = browsers
 	return nil
 }
 

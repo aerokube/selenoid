@@ -24,7 +24,7 @@ var (
 	limit   int
 	cfgfile string
 	queue   chan struct{}
-	conf    config.Config
+	conf    *config.Config
 	manager service.Finder
 )
 
@@ -35,7 +35,23 @@ func init() {
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
 	flag.BoolVar(&logHTTP, "log-http", false, "Log HTTP traffic")
 	flag.Parse()
+
 	queue = make(chan struct{}, limit)
+
+	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
+	cli, err := client.NewClient("unix:///var/run/docker.sock", client.DefaultVersion, nil, defaultHeaders)
+	if err != nil {
+		log.Fatalf("error: unable to create client connection to docker daemon")
+	}
+
+	conf, err = config.NewConfig(cfgfile, limit)
+	if err != nil {
+		log.Fatalf("error loading configuration: %s\n", err)
+	}
+
+	manager = &docker.Manager{cli, conf}
+
+	cancelOnSignal()
 }
 
 func cancelOnSignal() {
@@ -51,18 +67,7 @@ func cancelOnSignal() {
 }
 
 func main() {
-	conf, err := config.NewConfig(cfgfile, limit)
-	if err != nil {
-		log.Fatalf("error loading configuration: %s\n", err)
-	}
-	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
-	cli, err := client.NewClient("unix:///var/run/docker.sock", client.DefaultVersion, nil, defaultHeaders)
-	if err != nil {
-		log.Fatalf("error: unable to create client connection to docker daemon")
-	}
-	manager = &docker.Manager{cli, conf}
 	h := Handler()
-	cancelOnSignal()
 	if logHTTP {
 		h = handler.Dumper(h)
 	}
