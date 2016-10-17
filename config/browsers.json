@@ -1,18 +1,18 @@
 {
 	"firefox" : {
-		"default" : "48.0",
+		"default" : "49.0",
 		"versions" : {
-			"48.0" : {
-				"image" : "firefox_48.0",
+			"49.0" : {
+				"image" : "firefox_49.0",
 				"port"  : "4444"
 			}
 		}
 	},
 	"chrome" : {
-		"default" : "53.0",
+		"default" : "54.0",
 		"versions" : {
-			"53.0" : {
-				"image" : "chrome_53.0",
+			"54.0" : {
+				"image" : "chrome_54.0",
 				"port"  : "4444"
 			}
 		}

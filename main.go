@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/aandryashin/selenoid/config"
 	"github.com/aandryashin/selenoid/docker"
 	"github.com/aandryashin/selenoid/handler"
 	"github.com/aandryashin/selenoid/service"
@@ -22,14 +22,15 @@ var (
 	timeout time.Duration
 	logHTTP bool
 	limit   int
-	conf    string
+	cfgfile string
 	queue   chan struct{}
+	conf    config.Config
 	manager service.Finder
 )
 
 func init() {
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
-	flag.StringVar(&conf, "conf", "browsers.json", "Browsers configuration file")
+	flag.StringVar(&cfgfile, "conf", "config/browsers.json", "Browsers configuration file")
 	flag.IntVar(&limit, "limit", 5, "Simultanious container runs")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
 	flag.BoolVar(&logHTTP, "log-http", false, "Log HTTP traffic")
@@ -50,18 +51,16 @@ func cancelOnSignal() {
 }
 
 func main() {
-	config, err := docker.NewConfig(conf)
+	conf, err := config.NewConfig(cfgfile, limit)
 	if err != nil {
-		fmt.Printf("error loading configuration: %s\n", err)
-		os.Exit(1)
+		log.Fatalf("error loading configuration: %s\n", err)
 	}
 	defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
 	cli, err := client.NewClient("unix:///var/run/docker.sock", client.DefaultVersion, nil, defaultHeaders)
 	if err != nil {
-		fmt.Println("error: unable to create client connection to docker daemon")
-		os.Exit(1)
+		log.Fatalf("error: unable to create client connection to docker daemon")
 	}
-	manager = &docker.Manager{cli, config}
+	manager = &docker.Manager{cli, conf}
 	h := Handler()
 	cancelOnSignal()
 	if logHTTP {

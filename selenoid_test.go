@@ -14,6 +14,7 @@ import (
 
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
+	"github.com/aandryashin/selenoid/config"
 	"github.com/aandryashin/selenoid/handler"
 	"github.com/aandryashin/selenoid/service"
 )
@@ -48,7 +49,7 @@ func (m *HttpTest) StartWithCancel() (*url.URL, func(), error) {
 	}, nil
 }
 
-func (m *HttpTest) Find(s, v string) (service.Starter, bool) {
+func (m *HttpTest) Find(s string, v *string) (service.Starter, bool) {
 	return m, true
 }
 
@@ -60,13 +61,13 @@ func (m *StartupError) StartWithCancel() (*url.URL, func(), error) {
 	return nil, nil, errors.New("Failed to start Service")
 }
 
-func (m *StartupError) Find(s, v string) (service.Starter, bool) {
+func (m *StartupError) Find(s string, v *string) (service.Starter, bool) {
 	return m, true
 }
 
 type BrowserNotFound struct{}
 
-func (m *BrowserNotFound) Find(s, v string) (service.Starter, bool) {
+func (m *BrowserNotFound) Find(s string, v *string) (service.Starter, bool) {
 	return nil, false
 }
 
@@ -175,29 +176,20 @@ func TestNewSessionBadHostResponse(t *testing.T) {
 }
 
 func TestSessionCreated(t *testing.T) {
-	ch := make(chan string)
-	manager = &HttpTest{
-		Handler: handler.Selenium(),
-		Action: func(s *httptest.Server) {
-			go func() {
-				ch <- s.URL
-			}()
-		},
-	}
+	manager = &HttpTest{Handler: handler.Selenium()}
 
 	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
-	driverUrl := <-ch
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
 
 	resp, err = http.Get(With(srv.URL).Path("/status"))
 	AssertThat(t, err, Is{nil})
-	var stat map[string]string
-	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&stat}})
-	AssertThat(t, stat[sess["sessionId"]], EqualTo{driverUrl})
-
+	var state config.State
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
+	AssertThat(t, state.Used, EqualTo{1})
 	AssertThat(t, len(queue), EqualTo{1})
+	sessions.Remove(sess["sessionId"])
 	<-queue
 }
 
@@ -214,6 +206,7 @@ func TestProxySession(t *testing.T) {
 	AssertThat(t, resp, Code{http.StatusOK})
 
 	AssertThat(t, len(queue), EqualTo{1})
+	sessions.Remove(sess["sessionId"])
 	<-queue
 }
 
@@ -236,10 +229,9 @@ func TestSessionDeleted(t *testing.T) {
 
 	resp, err = http.Get(With(srv.URL).Path("/status"))
 	AssertThat(t, err, Is{nil})
-	var stat map[string]string
-	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&stat}})
-	_, ok := stat[sess["sessionId"]]
-	AssertThat(t, ok, Is{false})
+	var state config.State
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
+	AssertThat(t, state.Used, EqualTo{0})
 
 	canceled = <-ch
 	AssertThat(t, canceled, Is{true})

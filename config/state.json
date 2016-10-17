@@ -1,0 +1,27 @@
+{
+	"limit" : 50,
+	"used" : 50,
+	"queued" : 0,
+	"browsers" : {
+		"firefox": {
+			"46.0" : {
+				"unknown" : 15,
+				"user": 3
+			},
+			"48.0" : {
+				"unknown" : 15,
+				"user": 3
+			}
+		},
+		"chrome": {
+			"52.0" : {
+				"unknown" : 15,
+				"user": 3
+			},
+			"53.0" : {
+				"unknown" : 15,
+				"user": 3
+			}
+		}
+	}
+}

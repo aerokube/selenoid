@@ -2,16 +2,14 @@ package docker
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
+	"github.com/aandryashin/selenoid/config"
 	"github.com/aandryashin/selenoid/service"
 	"github.com/docker/engine-api/client"
 	"github.com/docker/engine-api/types"
@@ -20,55 +18,12 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
-type Service struct {
-	Image string `json:"image"`
-	Port  string `json:"port"`
-	Path  string `json:"path"`
-}
-
-type Versions struct {
-	Default  string              `json:"default"`
-	Versions map[string]*Service `json:"versions"`
-}
-
-type Config map[string]*Versions
-
-func NewConfig(fn string) (*Config, error) {
-	f, err := ioutil.ReadFile(fn)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error reading configuration file %s: %v", f, err))
-	}
-	c := make(Config)
-	if err := json.Unmarshal(f, &c); err != nil {
-		return nil, errors.New(fmt.Sprintf("error parsing configuration file %s: %v", f, err))
-	}
-	return &c, nil
-}
-
-func (config Config) Find(s, v string) (*Service, bool) {
-	service, ok := config[s]
-	if !ok {
-		return nil, false
-	}
-	if v == "" {
-		if v = service.Default; v == "" {
-			return nil, false
-		}
-	}
-	for k, s := range service.Versions {
-		if strings.HasPrefix(k, v) {
-			return s, true
-		}
-	}
-	return nil, false
-}
-
 type Manager struct {
 	Client *client.Client
-	Config *Config
+	Config *config.Config
 }
 
-func (m *Manager) Find(s, v string) (service.Starter, bool) {
+func (m *Manager) Find(s string, v *string) (service.Starter, bool) {
 	service, ok := m.Config.Find(s, v)
 	if !ok {
 		return nil, false
@@ -78,7 +33,7 @@ func (m *Manager) Find(s, v string) (service.Starter, bool) {
 
 type Docker struct {
 	Client  *client.Client
-	Service *Service
+	Service *config.Browser
 }
 
 func (d *Docker) StartWithCancel() (*url.URL, func(), error) {

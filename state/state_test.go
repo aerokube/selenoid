@@ -10,8 +10,8 @@ import (
 func TestNewState(t *testing.T) {
 	config, _ := docker.NewConfig("../browsers.json")
 	state := NewState(config, 1)
-	AssertThat(t, len(state.status.Browsers["firefox"]["48.0"]), EqualTo{0})
-	AssertThat(t, len(state.status.Browsers["chrome"]["53.0"]), EqualTo{0})
+	AssertThat(t, len(state.status.Browsers["firefox"]["49.0"]), EqualTo{0})
+	AssertThat(t, len(state.status.Browsers["chrome"]["54.0"]), EqualTo{0})
 }
 
 func TestNewSession(t *testing.T) {
@@ -19,13 +19,13 @@ func TestNewSession(t *testing.T) {
 	state := NewState(config, 1)
 
 	state.NewSession("1", "quota", "firefox", "")
-	AssertThat(t, state.status.Browsers["firefox"]["48.0"]["quota"], EqualTo{1})
+	AssertThat(t, state.status.Browsers["firefox"]["49.0"]["quota"], EqualTo{1})
 
-	state.NewSession("2", "quota", "firefox", "48")
-	AssertThat(t, state.status.Browsers["firefox"]["48.0"]["quota"], EqualTo{2})
+	state.NewSession("2", "quota", "firefox", "49")
+	AssertThat(t, state.status.Browsers["firefox"]["49.0"]["quota"], EqualTo{2})
 
-	state.NewSession("3", "quota", "firefox", "48.0")
-	AssertThat(t, state.status.Browsers["firefox"]["48.0"]["quota"], EqualTo{3})
+	state.NewSession("3", "quota", "firefox", "49.0")
+	AssertThat(t, state.status.Browsers["firefox"]["49.0"]["quota"], EqualTo{3})
 }
 
 func TestDeleteSession(t *testing.T) {
@@ -33,11 +33,11 @@ func TestDeleteSession(t *testing.T) {
 	state := NewState(config, 1)
 
 	state.NewSession("1", "quota", "firefox", "")
-	AssertThat(t, state.status.Browsers["firefox"]["48.0"]["quota"], EqualTo{1})
+	AssertThat(t, state.status.Browsers["firefox"]["49.0"]["quota"], EqualTo{1})
 
 	state.DeleteSession("2")
-	AssertThat(t, state.status.Browsers["firefox"]["48.0"]["quota"], EqualTo{1})
+	AssertThat(t, state.status.Browsers["firefox"]["49.0"]["quota"], EqualTo{1})
 
 	state.DeleteSession("1")
-	AssertThat(t, state.status.Browsers["firefox"]["48.0"]["quota"], EqualTo{0})
+	AssertThat(t, state.status.Browsers["firefox"]["49.0"]["quota"], EqualTo{0})
 }

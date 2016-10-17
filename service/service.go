@@ -7,5 +7,5 @@ type Starter interface {
 }
 
 type Finder interface {
-	Find(s, v string) (Starter, bool)
+	Find(s string, v *string) (Starter, bool)
 }

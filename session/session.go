@@ -6,6 +6,9 @@ import (
 )
 
 type Session struct {
+	Quota   string
+	Browser string
+	Version string
 	Url     *url.URL
 	Cancel  func()
 	Timeout chan struct{}

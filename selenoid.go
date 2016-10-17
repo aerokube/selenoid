@@ -40,7 +40,6 @@ func Handler() http.Handler {
 		}))
 	root.HandleFunc(errorPath, errorHandler)
 	root.HandleFunc("/status", status)
-	root.HandleFunc("/queue", queueHandler)
 	return root
 }
 
@@ -52,18 +51,9 @@ func errorHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, `{"value" : {"message" : "Session not found"}, "status" : 13}`, http.StatusNotFound)
 }
 
-func queueHandler(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(struct {
-		Q int `json:"queue"`
-	}{len(await)})
-}
-
 func status(w http.ResponseWriter, r *http.Request) {
-	status := make(map[string]string)
-	sessions.Each(func(id string, sess *session.Session) {
-		status[id] = sess.Url.String()
-	})
-	json.NewEncoder(w).Encode(&status)
+	state := conf.State(sessions, len(await))
+	json.NewEncoder(w).Encode(&state)
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
@@ -74,6 +64,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 	queue <- struct{}{}
 	<-await
 	log.Println("[NEW_REQUEST_ACCEPTED]")
+	quota, _, ok := r.BasicAuth()
+	if !ok {
+		quota = "unknown"
+	}
 	body, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
@@ -95,7 +89,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		<-queue
 		return
 	}
-	starter, ok := manager.Find(browser.Caps.Name, browser.Caps.Version)
+	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version)
 	if !ok {
 		log.Printf("[ENVIRONMENT_NOT_AVAILABLE] [%s-%s]\n", browser.Caps.Name, browser.Caps.Version)
 		http.Error(w, "Requested environment is not available", http.StatusBadRequest)
@@ -137,9 +131,15 @@ func create(w http.ResponseWriter, r *http.Request) {
 		cancel()
 		return
 	}
-	sessions.Put(s.Id, &session.Session{u, cancel, onTimeout(timeout, func() {
-		deleteSession(localaddr(r), s.Id, cancel)
-	})})
+	sessions.Put(s.Id, &session.Session{
+		quota,
+		browser.Caps.Name,
+		browser.Caps.Version,
+		u,
+		cancel,
+		onTimeout(timeout, func() {
+			deleteSession(localaddr(r), s.Id, cancel)
+		})})
 	log.Printf("[SESSION_CREATED] [%s] [%s]\n", s.Id, u)
 }
 
