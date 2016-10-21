@@ -1,35 +1,20 @@
-package docker
+package service
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/aandryashin/selenoid/config"
-	"github.com/aandryashin/selenoid/service"
 	"github.com/docker/engine-api/client"
 	"github.com/docker/engine-api/types"
 	"github.com/docker/engine-api/types/container"
 	"github.com/docker/engine-api/types/network"
 	"github.com/docker/go-connections/nat"
 )
-
-type Manager struct {
-	Client *client.Client
-	Config *config.Config
-}
-
-func (m *Manager) Find(s string, v *string) (service.Starter, bool) {
-	service, ok := m.Config.Find(s, v)
-	if !ok {
-		return nil, false
-	}
-	return &Docker{m.Client, service}, true
-}
 
 type Docker struct {
 	Client  *client.Client
@@ -46,7 +31,7 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 	resp, err := d.Client.ContainerCreate(ctx,
 		&container.Config{
 			Hostname:     "localhost",
-			Image:        d.Service.Image,
+			Image:        d.Service.Image.(string),
 			ExposedPorts: map[nat.Port]struct{}{port: struct{}{}},
 		},
 		&container.HostConfig{
@@ -88,30 +73,10 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 	addr := stat.NetworkSettings.Ports[port][0]
 	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, d.Service.Path)
 	s := time.Now()
-	done := make(chan struct{})
-	go func() {
-	loop:
-		for {
-			select {
-			case <-time.After(50 * time.Millisecond):
-				r, err := http.Get(host)
-				if err == nil {
-					r.Body.Close()
-					done <- struct{}{}
-				}
-			case <-done:
-				break loop
-			}
-		}
-	}()
-	select {
-	case <-time.After(10 * time.Second):
-		err := errors.New(fmt.Sprintf("error: service does not respond in %v", 10*time.Second))
+	err = wait(host, 10*time.Second)
+	if err != nil {
 		log.Println(err)
-		stop(ctx, d.Client, resp.ID)
 		return nil, nil, err
-	case <-done:
-		close(done)
 	}
 	log.Println(time.Since(s))
 	u, _ := url.Parse(host)

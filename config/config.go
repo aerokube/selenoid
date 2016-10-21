@@ -2,10 +2,9 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
-	"strings"
+	"log"
 	"sync"
 
 	"github.com/aandryashin/selenoid/session"
@@ -25,9 +24,9 @@ type State struct {
 }
 
 type Browser struct {
-	Image string `json:"image"`
-	Port  string `json:"port"`
-	Path  string `json:"path"`
+	Image interface{} `json:"image"`
+	Port  string      `json:"port"`
+	Path  string      `json:"path"`
 }
 
 type Versions struct {
@@ -56,10 +55,10 @@ func (config *Config) Load() error {
 	defer config.lock.RUnlock()
 	f, err := ioutil.ReadFile(config.File)
 	if err != nil {
-		return errors.New(fmt.Sprintf("error reading configuration file %s: %v", f, err))
+		return fmt.Errorf("error reading configuration file %s: %v", f, err)
 	}
 	if err := json.Unmarshal(f, &config.Browsers); err != nil {
-		return errors.New(fmt.Sprintf("error parsing configuration file %s: %v", f, err))
+		return fmt.Errorf("error parsing configuration file %s: %v", f, err)
 	}
 	return nil
 }
@@ -72,14 +71,14 @@ func (config *Config) Find(name string, version *string) (*Browser, bool) {
 		return nil, false
 	}
 	if *version == "" {
+		log.Println("Using default version:", browser.Default)
 		*version = browser.Default
 		if *version == "" {
 			return nil, false
 		}
 	}
 	for v, b := range browser.Versions {
-		if strings.HasPrefix(v, *version) {
-			*version = v
+		if v == *version {
 			return b, true
 		}
 	}

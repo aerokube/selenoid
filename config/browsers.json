@@ -1,18 +1,26 @@
 {
 	"firefox" : {
-		"default" : "49.0",
+		"default" : "49.0:docker",
 		"versions" : {
-			"49.0" : {
+			"49.0:docker" : {
 				"image" : "firefox_49.0",
+				"port"  : "4444"
+			},
+			"49.0" : {
+				"image" : ["geckodriver"],
 				"port"  : "4444"
 			}
 		}
 	},
 	"chrome" : {
-		"default" : "54.0",
+		"default" : "54.0:docker",
 		"versions" : {
-			"54.0" : {
+			"54.0:docker" : {
 				"image" : "chrome_54.0",
+				"port"  : "4444"
+			},
+			"54.0" : {
+				"image" : ["chromedriver"],
 				"port"  : "4444"
 			}
 		}

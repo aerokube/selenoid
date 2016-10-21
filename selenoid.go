@@ -13,56 +13,54 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aandryashin/selenoid/handler"
 	"github.com/aandryashin/selenoid/session"
 )
 
-const (
-	errorPath = "/error"
-)
-
-var (
-	await    chan struct{} = make(chan struct{}, 2^64-1)
-	sessions *session.Map  = session.NewMap()
-)
-
-func Handler() http.Handler {
-	mux := http.NewServeMux()
-	mux.Handle("/session", handler.OnlyPost(create))
-	mux.Handle("/session/", handler.AnyMethod(proxy))
-	root := http.NewServeMux()
-	root.Handle("/wd/hub/", http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			r.URL.Scheme = "http"
-			r.URL.Host = localaddr(r)
-			r.URL.Path = strings.TrimPrefix(r.URL.Path, "/wd/hub")
-			mux.ServeHTTP(w, r)
-		}))
-	root.HandleFunc(errorPath, errorHandler)
-	root.HandleFunc("/status", status)
-	return root
+type request struct {
+	*http.Request
 }
 
-func localaddr(r *http.Request) string {
+type sess struct {
+	addr string
+	id   string
+}
+
+func (r request) localaddr() string {
 	return r.Context().Value(http.LocalAddrContextKey).(net.Addr).String()
 }
 
-func errorHandler(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, `{"value" : {"message" : "Session not found"}, "status" : 13}`, http.StatusNotFound)
+func (r request) session(id string) *sess {
+	return &sess{r.localaddr(), id}
 }
 
-func status(w http.ResponseWriter, r *http.Request) {
-	state := conf.State(sessions, len(await))
-	json.NewEncoder(w).Encode(&state)
+func (s *sess) url() string {
+	return fmt.Sprintf("http://%s/wd/hub/session/%s", s.addr, s.id)
+}
+
+func (s *sess) Delete(cancel func()) {
+	log.Printf("[SESSION_TIMED_OUT] [%s] - Deleting session\n", s.id)
+	req, err := http.NewRequest(http.MethodDelete, s.url(), nil)
+	if err == nil {
+		req.Close = true
+		resp, err := http.DefaultClient.Do(req)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			return
+		}
+	}
+	log.Printf("[DELETE_FAILED]")
+	<-queue
+	cancel()
+	sessions.Remove(s.id)
+	log.Printf("[FORCED_SESSION_REMOVAL] [%s]\n", s.id)
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
 	log.Println("[NEW_REQUEST] - Waiting for a free node")
 	go func() {
-		await <- struct{}{}
+		queued <- struct{}{}
 	}()
 	queue <- struct{}{}
-	<-await
+	<-queued
 	log.Println("[NEW_REQUEST_ACCEPTED]")
 	quota, _, ok := r.BasicAuth()
 	if !ok {
@@ -138,7 +136,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		u,
 		cancel,
 		onTimeout(timeout, func() {
-			deleteSession(localaddr(r), s.Id, cancel)
+			request{r}.session(s.Id).Delete(cancel)
 		})})
 	log.Printf("[SESSION_CREATED] [%s] [%s]\n", s.Id, u)
 }
@@ -159,7 +157,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 					close(sess.Timeout)
 					if r.Method != http.MethodDelete {
 						sess.Timeout = onTimeout(timeout, func() {
-							deleteSession(localaddr(r), id, sess.Cancel)
+							request{r}.session(id).Delete(cancel.fn)
 						})
 						return
 					}
@@ -169,28 +167,11 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 					log.Printf("[SESSION_DELETED] [%s]\n", id)
 					return
 				}
-				r.URL.Path = errorPath
+				r.URL.Path = "/error"
 			},
 		}).ServeHTTP(w, r)
 	}()
 	(<-done).fn()
-}
-
-func deleteSession(host, id string, cancel func()) {
-	log.Printf("[SESSION_TIMED_OUT] [%s] - Deleting session\n", id)
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://%s/wd/hub/session/%s", host, id), nil)
-	if err == nil {
-		req.Close = true
-		resp, err := http.DefaultClient.Do(req)
-		if err == nil && resp.StatusCode == http.StatusOK {
-			return
-		}
-	}
-	log.Printf("[DELETE_FAILED]")
-	<-queue
-	cancel()
-	sessions.Remove(id)
-	log.Printf("[FORCED_SESSION_REMOVAL] [%s]\n", id)
 }
 
 func onTimeout(t time.Duration, f func()) chan struct{} {
