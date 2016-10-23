@@ -3,8 +3,11 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"io"
 	"log"
 	"net/http"
+	"net/http/httptest"
+	"net/http/httputil"
 	"os"
 	"os/signal"
 	"strings"
@@ -12,7 +15,8 @@ import (
 	"time"
 
 	"github.com/aandryashin/selenoid/config"
-	"github.com/aandryashin/selenoid/handler"
+	"github.com/aandryashin/selenoid/ensure"
+	"github.com/aandryashin/selenoid/protect"
 	"github.com/aandryashin/selenoid/service"
 	"github.com/aandryashin/selenoid/session"
 	"github.com/docker/engine-api/client"
@@ -27,10 +31,9 @@ var (
 	logHTTP       bool
 	limit         int
 	conf          string
-	queue         chan struct{}
-	queued        chan struct{} = make(chan struct{}, 2^64-1)
-	sessions      *session.Map  = session.NewMap()
+	sessions      *session.Map = session.NewMap()
 	cfg           *config.Config
+	queue         *protect.Queue
 	manager       service.Manager
 )
 
@@ -43,7 +46,7 @@ func init() {
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
 	flag.BoolVar(&logHTTP, "log-http", false, "Log HTTP traffic")
 	flag.Parse()
-	queue = make(chan struct{}, limit)
+	queue = protect.New(limit)
 	var err error
 	cfg, err = config.NewConfig(conf, limit)
 	if err != nil {
@@ -72,17 +75,21 @@ func cancelOnSignal() {
 	}()
 }
 
-func Handler() http.Handler {
+func mux() http.Handler {
 	mux := http.NewServeMux()
-	mux.Handle("/session", handler.OnlyPost(create))
-	mux.Handle("/session/", handler.AnyMethod(proxy))
+	mux.HandleFunc("/session", ensure.Post(queue.Protect(create)))
+	mux.HandleFunc("/session/", proxy)
+	return mux
+}
+
+func Handler() http.Handler {
 	root := http.NewServeMux()
 	root.Handle("/wd/hub/", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			r.URL.Scheme = "http"
 			r.URL.Host = (&request{r}).localaddr()
 			r.URL.Path = strings.TrimPrefix(r.URL.Path, "/wd/hub")
-			mux.ServeHTTP(w, r)
+			mux().ServeHTTP(w, r)
 		}))
 	root.Handle("/error", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
@@ -90,15 +97,28 @@ func Handler() http.Handler {
 		}))
 	root.Handle("/status", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			json.NewEncoder(w).Encode(cfg.State(sessions, len(queued)))
+			json.NewEncoder(w).Encode(cfg.State(sessions, queue.Used()))
 		}))
 	return root
+}
+
+func Dumper(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rdmp, _ := httputil.DumpRequest(r, true)
+		log.Println(string(rdmp))
+		wr := httptest.NewRecorder()
+		h.ServeHTTP(wr, r)
+		wdmp, _ := httputil.DumpResponse(wr.Result(), true)
+		log.Println(string(wdmp))
+		w.WriteHeader(wr.Result().StatusCode)
+		io.Copy(w, wr.Result().Body)
+	})
 }
 
 func main() {
 	h := Handler()
 	if logHTTP {
-		h = handler.Dumper(h)
+		h = Dumper(h)
 	}
 	log.Printf("Listening on %s\n", listen)
 	log.Fatal(http.ListenAndServe(listen, h))

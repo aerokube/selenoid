@@ -48,20 +48,13 @@ func (s *sess) Delete(cancel func()) {
 		}
 	}
 	log.Printf("[DELETE_FAILED]")
-	<-queue
+	queue.Release()
 	cancel()
 	sessions.Remove(s.id)
 	log.Printf("[FORCED_SESSION_REMOVAL] [%s]\n", s.id)
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
-	log.Println("[NEW_REQUEST] - Waiting for a free node")
-	go func() {
-		queued <- struct{}{}
-	}()
-	queue <- struct{}{}
-	<-queued
-	log.Println("[NEW_REQUEST_ACCEPTED]")
 	quota, _, ok := r.BasicAuth()
 	if !ok {
 		quota = "unknown"
@@ -71,7 +64,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("[ERROR_READING_REQUEST] [%s]\n", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		<-queue
+		queue.Release()
 		return
 	}
 	var browser struct {
@@ -84,21 +77,21 @@ func create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("[BAD_JSON_FORMAT] [%s]\n", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		<-queue
+		queue.Release()
 		return
 	}
 	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version)
 	if !ok {
 		log.Printf("[ENVIRONMENT_NOT_AVAILABLE] [%s-%s]\n", browser.Caps.Name, browser.Caps.Version)
 		http.Error(w, "Requested environment is not available", http.StatusBadRequest)
-		<-queue
+		queue.Release()
 		return
 	}
 	u, cancel, err := starter.StartWithCancel()
 	if err != nil {
 		log.Printf("[SERVICE_STARTUP_FAILED] [%s]\n", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		<-queue
+		queue.Release()
 		return
 	}
 	r.URL.Host, r.URL.Path = u.Host, u.Path+r.URL.Path
@@ -112,7 +105,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("[SESSION_FAILED] [%s] - [%s]\n", u.String(), err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		<-queue
+		queue.Release()
 		cancel()
 		return
 	}
@@ -125,7 +118,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(tee).Decode(&s)
 	if s.Id == "" {
 		log.Printf("[SESSION_FAILED] Bad response from [%s] - [%v]\n", u.String(), resp.Status)
-		<-queue
+		queue.Release()
 		cancel()
 		return
 	}
@@ -163,7 +156,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 					}
 					cancel.fn = sess.Cancel
 					sessions.Remove(id)
-					<-queue
+					queue.Release()
 					log.Printf("[SESSION_DELETED] [%s]\n", id)
 					return
 				}

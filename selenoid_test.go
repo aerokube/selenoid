@@ -2,87 +2,26 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 	"time"
 
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
+	"github.com/aandryashin/probe/handler"
 	"github.com/aandryashin/selenoid/config"
-	"github.com/aandryashin/selenoid/handler"
-	"github.com/aandryashin/selenoid/service"
 )
-
-type HttpTest struct {
-	Handler http.Handler
-	Action  func(s *httptest.Server)
-	Cancel  chan bool
-}
-
-func (m *HttpTest) StartWithCancel() (*url.URL, func(), error) {
-	log.Println("Starting HttpTest Service...")
-	s := httptest.NewServer(m.Handler)
-	u, err := url.Parse(s.URL)
-	if err != nil {
-		log.Println("Failed to start HttpTest Service...")
-		return nil, func() {}, err
-	}
-	log.Println("HttpTest Service started...")
-	if m.Action != nil {
-		m.Action(s)
-	}
-	return u, func() {
-		log.Println("Stopping HttpTest Service...")
-		s.Close()
-		log.Println("HttpTest Service stopped...")
-		if m.Cancel != nil {
-			go func() {
-				m.Cancel <- true
-			}()
-		}
-	}, nil
-}
-
-func (m *HttpTest) Find(s string, v *string) (service.Starter, bool) {
-	return m, true
-}
-
-type StartupError struct{}
-
-func (m *StartupError) StartWithCancel() (*url.URL, func(), error) {
-	log.Println("Starting StartupError Service...")
-	log.Println("Failed to start StartupError Service...")
-	return nil, nil, errors.New("Failed to start Service")
-}
-
-func (m *StartupError) Find(s string, v *string) (service.Starter, bool) {
-	return m, true
-}
-
-type BrowserNotFound struct{}
-
-func (m *BrowserNotFound) Find(s string, v *string) (service.Starter, bool) {
-	return nil, false
-}
-
-type With string
-
-func (r With) Path(p string) string {
-	return fmt.Sprintf("%s%s", r, p)
-}
 
 var (
 	srv *httptest.Server
 )
 
 func init() {
-	queue = make(chan struct{}, 1)
+	//queue = make(chan struct{}, 1)
 	srv = httptest.NewServer(Handler())
 }
 
@@ -93,7 +32,7 @@ func TestNewSessionWithGet(t *testing.T) {
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusMethodNotAllowed})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
 func TestBadJsonFormat(t *testing.T) {
@@ -101,7 +40,7 @@ func TestBadJsonFormat(t *testing.T) {
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusBadRequest})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
 func TestServiceStartupFailure(t *testing.T) {
@@ -111,7 +50,7 @@ func TestServiceStartupFailure(t *testing.T) {
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusInternalServerError})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
 func TestBrowserNotFound(t *testing.T) {
@@ -121,7 +60,7 @@ func TestBrowserNotFound(t *testing.T) {
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusBadRequest})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
 func TestNewSessionNotFound(t *testing.T) {
@@ -131,7 +70,7 @@ func TestNewSessionNotFound(t *testing.T) {
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusNotFound})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
 func TestNewSessionHostDown(t *testing.T) {
@@ -154,7 +93,7 @@ func TestNewSessionHostDown(t *testing.T) {
 	canceled = <-ch
 	AssertThat(t, canceled, Is{true})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
 func TestNewSessionBadHostResponse(t *testing.T) {
@@ -172,7 +111,7 @@ func TestNewSessionBadHostResponse(t *testing.T) {
 	canceled = <-ch
 	AssertThat(t, canceled, Is{true})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
 func TestSessionCreated(t *testing.T) {
@@ -188,9 +127,9 @@ func TestSessionCreated(t *testing.T) {
 	var state config.State
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
 	AssertThat(t, state.Used, EqualTo{1})
-	AssertThat(t, len(queue), EqualTo{1})
+	AssertThat(t, queue.Used(), EqualTo{1})
 	sessions.Remove(sess["sessionId"])
-	<-queue
+	queue.Release()
 }
 
 func TestProxySession(t *testing.T) {
@@ -205,9 +144,9 @@ func TestProxySession(t *testing.T) {
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, resp, Code{http.StatusOK})
 
-	AssertThat(t, len(queue), EqualTo{1})
+	AssertThat(t, queue.Used(), EqualTo{1})
 	sessions.Remove(sess["sessionId"])
-	<-queue
+	queue.Release()
 }
 
 func TestSessionDeleted(t *testing.T) {
@@ -236,7 +175,7 @@ func TestSessionDeleted(t *testing.T) {
 	canceled = <-ch
 	AssertThat(t, canceled, Is{true})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
 func TestNewSessionTimeout(t *testing.T) {
@@ -263,7 +202,7 @@ func TestNewSessionTimeout(t *testing.T) {
 	canceled = <-ch
 	AssertThat(t, canceled, Is{true})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
 func TestProxySessionTimeout(t *testing.T) {
@@ -300,7 +239,7 @@ func TestProxySessionTimeout(t *testing.T) {
 	canceled = <-ch
 	AssertThat(t, canceled, Is{true})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
 func TestForceDeleteSession(t *testing.T) {
@@ -335,5 +274,5 @@ func TestForceDeleteSession(t *testing.T) {
 	canceled = <-ch
 	AssertThat(t, canceled, Is{true})
 
-	AssertThat(t, len(queue), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
 }

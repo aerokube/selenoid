@@ -21,17 +21,17 @@ type Docker struct {
 	Service *config.Browser
 }
 
-func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
-	port, err := nat.NewPort("tcp", d.Service.Port)
+func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
+	port, err := nat.NewPort("tcp", docker.Service.Port)
 	if err != nil {
 		return nil, nil, err
 	}
 	ctx := context.Background()
-	log.Println("Creating Docker container", d.Service.Image, "...")
-	resp, err := d.Client.ContainerCreate(ctx,
+	log.Println("Creating Docker container", docker.Service.Image, "...")
+	resp, err := docker.Client.ContainerCreate(ctx,
 		&container.Config{
 			Hostname:     "localhost",
-			Image:        d.Service.Image.(string),
+			Image:        docker.Service.Image.(string),
 			ExposedPorts: map[nat.Port]struct{}{port: struct{}{}},
 		},
 		&container.HostConfig{
@@ -48,13 +48,13 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 		return nil, nil, err
 	}
 	log.Println("Starting container...")
-	err = d.Client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
+	err = docker.Client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	if err != nil {
 		log.Println("error starting container:", err)
 		return nil, nil, err
 	}
 	log.Printf("Container %s started\n", resp.ID)
-	stat, err := d.Client.ContainerInspect(ctx, resp.ID)
+	stat, err := docker.Client.ContainerInspect(ctx, resp.ID)
 	if err != nil {
 		log.Printf("unable to inspect container %s: %s\n", resp.ID, err)
 		return nil, nil, err
@@ -71,7 +71,7 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 		return nil, nil, err
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
-	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, d.Service.Path)
+	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, docker.Service.Path)
 	s := time.Now()
 	err = wait(host, 10*time.Second)
 	if err != nil {
@@ -81,7 +81,12 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 	log.Println(time.Since(s))
 	u, _ := url.Parse(host)
 	log.Println("proxying requests to:", host)
-	return u, func() { stop(ctx, d.Client, resp.ID) }, nil
+	//	reader, _ := docker.Client.ContainerLogs(context.Background(), resp.ID, types.ContainerLogsOptions{
+	//		ShowStdout: true,
+	//		ShowStderr: true,
+	//		Follow:     true,
+	//	})
+	return u, func() { stop(ctx, docker.Client, resp.ID) }, nil
 }
 
 func stop(ctx context.Context, cli *client.Client, id string) {
