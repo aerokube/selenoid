@@ -12,7 +12,6 @@ import (
 
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
-	"github.com/aandryashin/probe/handler"
 	"github.com/aandryashin/selenoid/config"
 )
 
@@ -26,7 +25,7 @@ func init() {
 }
 
 func TestNewSessionWithGet(t *testing.T) {
-	manager = &HttpTest{Handler: handler.Selenium()}
+	manager = &HttpTest{Handler: Selenium()}
 
 	rsp, err := http.Get(With(srv.URL).Path("/wd/hub/session"))
 	AssertThat(t, err, Is{nil})
@@ -64,7 +63,7 @@ func TestBrowserNotFound(t *testing.T) {
 }
 
 func TestNewSessionNotFound(t *testing.T) {
-	manager = &HttpTest{Handler: handler.Selenium()}
+	manager = &HttpTest{Handler: Selenium()}
 
 	rsp, err := http.Get(With(srv.URL).Path("/wd/hub/session/123"))
 	AssertThat(t, err, Is{nil})
@@ -77,7 +76,7 @@ func TestNewSessionHostDown(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
 	manager = &HttpTest{
-		Handler: handler.Selenium(),
+		Handler: Selenium(),
 		Action: func(s *httptest.Server) {
 			log.Println("Host is going down...")
 			s.Close()
@@ -100,7 +99,7 @@ func TestNewSessionBadHostResponse(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
 	manager = &HttpTest{
-		Handler: handler.HttpResponse("Bad Request", http.StatusBadRequest),
+		Handler: HttpResponse("Bad Request", http.StatusBadRequest),
 		Cancel:  ch,
 	}
 
@@ -115,7 +114,7 @@ func TestNewSessionBadHostResponse(t *testing.T) {
 }
 
 func TestSessionCreated(t *testing.T) {
-	manager = &HttpTest{Handler: handler.Selenium()}
+	manager = &HttpTest{Handler: Selenium()}
 
 	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
@@ -133,7 +132,7 @@ func TestSessionCreated(t *testing.T) {
 }
 
 func TestProxySession(t *testing.T) {
-	manager = &HttpTest{Handler: handler.Selenium()}
+	manager = &HttpTest{Handler: Selenium()}
 
 	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
@@ -153,7 +152,7 @@ func TestSessionDeleted(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
 	manager = &HttpTest{
-		Handler: handler.Selenium(),
+		Handler: Selenium(),
 		Cancel:  ch,
 	}
 
@@ -182,7 +181,7 @@ func TestNewSessionTimeout(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
 	manager = &HttpTest{
-		Handler: handler.Selenium(),
+		Handler: Selenium(),
 		Cancel:  ch,
 	}
 
@@ -209,7 +208,7 @@ func TestProxySessionTimeout(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
 	manager = &HttpTest{
-		Handler: handler.Selenium(),
+		Handler: Selenium(),
 		Cancel:  ch,
 	}
 
@@ -246,7 +245,7 @@ func TestForceDeleteSession(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
 	manager = &HttpTest{
-		Handler: handler.Selenium(),
+		Handler: Selenium(),
 		Cancel:  ch,
 	}
 	selenium := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
