@@ -1,27 +1,31 @@
 {
-	"firefox" : {
-		"default" : "49.0:docker",
-		"versions" : {
-			"49.0:docker" : {
-				"image" : "selenoid/firefox",
-				"port"  : "4444"
+	"firefox": {
+		"default": "49.0:docker",
+		"versions": {
+			"49.0:docker": {
+				"image": "selenoid/firefox",
+				"port": "4444"
 			},
-			"49.0" : {
-				"image" : ["geckodriver"],
-				"port"  : "4444"
+			"49.0": {
+				"image": [
+					"geckodriver"
+				],
+				"port": "4444"
 			}
 		}
 	},
-	"chrome" : {
-		"default" : "54.0:docker",
-		"versions" : {
-			"54.0:docker" : {
-				"image" : "selenoid/chrome",
-				"port"  : "4444"
+	"chrome": {
+		"default": "54.0:docker",
+		"versions": {
+			"54.0:docker": {
+				"image": "selenoid/chrome",
+				"port": "4444"
 			},
-			"54.0" : {
-				"image" : ["chromedriver"],
-				"port"  : "4444"
+			"54.0": {
+				"image": [
+					"chromedriver"
+				],
+				"port": "4444"
 			}
 		}
 	}
