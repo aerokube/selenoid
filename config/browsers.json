@@ -3,7 +3,7 @@
 		"default" : "49.0:docker",
 		"versions" : {
 			"49.0:docker" : {
-				"image" : "firefox_49.0",
+				"image" : "selenoid/firefox",
 				"port"  : "4444"
 			},
 			"49.0" : {
@@ -16,7 +16,7 @@
 		"default" : "54.0:docker",
 		"versions" : {
 			"54.0:docker" : {
-				"image" : "chrome_54.0",
+				"image" : "selenoid/chrome",
 				"port"  : "4444"
 			},
 			"54.0" : {
