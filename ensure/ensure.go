@@ -1,9 +1,6 @@
 package ensure
 
-import (
-	"log"
-	"net/http"
-)
+import "net/http"
 
 func CloseNotifier(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
