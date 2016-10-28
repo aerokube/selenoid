@@ -54,16 +54,16 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	log.Printf("Container %s started\n", resp.ID)
 	stat, err := docker.Client.ContainerInspect(ctx, resp.ID)
 	if err != nil {
-		stop(ctx, docker.Client, resp.ID)
+		stopContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, fmt.Errorf("unable to inspect container %s: %s\n", resp.ID, err)
 	}
 	_, ok := stat.NetworkSettings.Ports[port]
 	if !ok {
-		stop(ctx, docker.Client, resp.ID)
+		stopContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, fmt.Errorf("no bingings available for %v...\n", port)
 	}
 	if len(stat.NetworkSettings.Ports[port]) != 1 {
-		stop(ctx, docker.Client, resp.ID)
+		stopContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, fmt.Errorf("error: wrong number of port bindings")
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
@@ -75,16 +75,16 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	s := time.Now()
 	err = wait(host, 10*time.Second)
 	if err != nil {
-		stop(ctx, docker.Client, resp.ID)
+		stopContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, err
 	}
 	log.Println(time.Since(s))
 	u, _ := url.Parse(host)
 	log.Println("proxying requests to:", host)
-	return u, func() { stop(ctx, docker.Client, resp.ID) }, nil
+	return u, func() { stopContainer(ctx, docker.Client, resp.ID) }, nil
 }
 
-func stop(ctx context.Context, cli *client.Client, id string) {
+func stopContainer(ctx context.Context, cli *client.Client, id string) {
 	fmt.Println("Stopping container", id)
 	err := cli.ContainerStop(ctx, id, nil)
 	if err != nil {
