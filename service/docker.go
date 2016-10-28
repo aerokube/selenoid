@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"net/url"
@@ -45,43 +44,37 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 		},
 		&network.NetworkingConfig{}, "")
 	if err != nil {
-		log.Println("error creating container:", err)
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("error creating container: %v", err)
 	}
 	log.Println("Starting container...")
 	err = docker.Client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	if err != nil {
-		log.Println("error starting container:", err)
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("error starting container: %v", err)
 	}
 	log.Printf("Container %s started\n", resp.ID)
 	stat, err := docker.Client.ContainerInspect(ctx, resp.ID)
 	if err != nil {
-		log.Printf("unable to inspect container %s: %s\n", resp.ID, err)
-		return nil, nil, err
+		stop(ctx, docker.Client, resp.ID)
+		return nil, nil, fmt.Errorf("unable to inspect container %s: %s\n", resp.ID, err)
 	}
 	_, ok := stat.NetworkSettings.Ports[port]
 	if !ok {
-		err := errors.New(fmt.Sprintf("no bingings available for %v...\n", port))
-		log.Println(err)
-		return nil, nil, err
+		stop(ctx, docker.Client, resp.ID)
+		return nil, nil, fmt.Errorf("no bingings available for %v...\n", port)
 	}
 	if len(stat.NetworkSettings.Ports[port]) != 1 {
-		err := errors.New(fmt.Sprintf("error: wrong number of port bindings"))
-		log.Println(err)
-		return nil, nil, err
+		stop(ctx, docker.Client, resp.ID)
+		return nil, nil, fmt.Errorf("error: wrong number of port bindings")
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
 	_, err = os.Stat(".dockerenv")
 	if err == nil {
 		addr.HostIP = "172.17.0.1"
 	}
-	log.Println(addr.HostIP, addr.HostPort)
 	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, docker.Service.Path)
 	s := time.Now()
 	err = wait(host, 10*time.Second)
 	if err != nil {
-		log.Println(err)
 		stop(ctx, docker.Client, resp.ID)
 		return nil, nil, err
 	}
