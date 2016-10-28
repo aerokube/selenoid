@@ -3,7 +3,7 @@
 		"default": "latest",
 		"versions": {
 			"latest": {
-				"image": "selenoid/firefox",
+				"image": ["geckodriver"],
 				"port": "4444"
 			}
 		}
@@ -12,7 +12,7 @@
 		"default": "latest",
 		"versions": {
 			"latest": {
-				"image": "selenoid/chrome",
+				"image": ["chromedriver"],
 				"port": "4444"
 			}
 		}

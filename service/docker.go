@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/aandryashin/selenoid/config"
@@ -37,7 +38,7 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 		&container.HostConfig{
 			AutoRemove: true,
 			PortBindings: nat.PortMap{
-				port: []nat.PortBinding{nat.PortBinding{HostIP: "127.0.0.1"}},
+				port: []nat.PortBinding{nat.PortBinding{HostIP: "0.0.0.0"}},
 			},
 			ShmSize:    268435456,
 			Privileged: true,
@@ -71,21 +72,22 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 		return nil, nil, err
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
+	_, err = os.Stat(".dockerenv")
+	if err == nil {
+		addr.HostIP = "172.17.0.1"
+	}
+	log.Println(addr.HostIP, addr.HostPort)
 	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, docker.Service.Path)
 	s := time.Now()
 	err = wait(host, 10*time.Second)
 	if err != nil {
 		log.Println(err)
+		stop(ctx, docker.Client, resp.ID)
 		return nil, nil, err
 	}
 	log.Println(time.Since(s))
 	u, _ := url.Parse(host)
 	log.Println("proxying requests to:", host)
-	//	reader, _ := docker.Client.ContainerLogs(context.Background(), resp.ID, types.ContainerLogsOptions{
-	//		ShowStdout: true,
-	//		ShowStderr: true,
-	//		Follow:     true,
-	//	})
 	return u, func() { stop(ctx, docker.Client, resp.ID) }, nil
 }
 
