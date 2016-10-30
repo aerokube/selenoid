@@ -121,7 +121,7 @@ func TestSessionCreated(t *testing.T) {
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
 
-	resp, err = http.Get(With(srv.URL).Path("/wd/hub/status"))
+	resp, err = http.Get(With(srv.URL).Path("/status"))
 	AssertThat(t, err, Is{nil})
 	var state config.State
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
@@ -165,7 +165,7 @@ func TestSessionDeleted(t *testing.T) {
 		With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s", sess["sessionId"])), nil)
 	http.DefaultClient.Do(req)
 
-	resp, err = http.Get(With(srv.URL).Path("/wd/hub/status"))
+	resp, err = http.Get(With(srv.URL).Path("/status"))
 	AssertThat(t, err, Is{nil})
 	var state config.State
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})

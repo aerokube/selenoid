@@ -102,7 +102,7 @@ func Handler() http.Handler {
 		func(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, `{"value":{"message":"Session not found"},"status":13}`, http.StatusNotFound)
 		}))
-	root.Handle("/wd/hub/status", http.HandlerFunc(
+	root.Handle("/status", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(cfg.State(sessions, queue.Used()))
 		}))
