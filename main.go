@@ -5,9 +5,11 @@ import (
 	"flag"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -56,11 +58,16 @@ func init() {
 	if !disableDocker {
 		cli, err = client.NewClient(dockerApi, client.DefaultVersion, nil, dockerHeaders)
 		if err != nil {
-			log.Fatal("warning: unable to create client connection to docker daemon.")
+			log.Fatal("unable to create client connection to docker daemon.")
 		}
 	}
+	u, err := url.Parse(dockerApi)
+	if err != nil {
+		log.Fatalf("malformed docker api url %s: %v\n,", dockerApi, err)
+	}
+	ip, _, _ := net.SplitHostPort(u.Host)
 	cancelOnSignal()
-	manager = &service.DefaultManager{cli, cfg}
+	manager = &service.DefaultManager{ip, cli, cfg}
 }
 
 func cancelOnSignal() {

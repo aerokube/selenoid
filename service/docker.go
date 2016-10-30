@@ -17,6 +17,7 @@ import (
 )
 
 type Docker struct {
+	Ip      string
 	Client  *client.Client
 	Service *config.Browser
 }
@@ -67,11 +68,15 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 		return nil, nil, fmt.Errorf("error: wrong number of port bindings")
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
-	_, err = os.Stat("/.dockerenv")
-	if err != nil {
-		addr.HostIP = "127.0.0.1"
+	if docker.Ip == "" {
+		_, err = os.Stat("/.dockerenv")
+		if err != nil {
+			addr.HostIP = "127.0.0.1"
+		} else {
+			addr.HostIP = "172.17.0.1"
+		}
 	} else {
-		addr.HostIP = "172.17.0.1"
+		addr.HostIP = docker.Ip
 	}
 	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, docker.Service.Path)
 	s := time.Now()

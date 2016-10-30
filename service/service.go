@@ -20,6 +20,7 @@ type Manager interface {
 }
 
 type DefaultManager struct {
+	Ip     string
 	Client *client.Client
 	Config *config.Config
 }
@@ -36,7 +37,7 @@ func (m *DefaultManager) Find(s string, v *string) (Starter, bool) {
 			return nil, false
 		}
 		log.Printf("Using docker service for %s %s\n", s, *v)
-		return &Docker{m.Client, service}, true
+		return &Docker{m.Ip, m.Client, service}, true
 	case []interface{}:
 		log.Printf("Using driver service for %s %s\n", s, *v)
 		return &Driver{service}, true
