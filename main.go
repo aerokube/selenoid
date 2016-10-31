@@ -21,7 +21,7 @@ import (
 	"github.com/aandryashin/selenoid/protect"
 	"github.com/aandryashin/selenoid/service"
 	"github.com/aandryashin/selenoid/session"
-	"github.com/docker/engine-api/client"
+	"github.com/docker/docker/client"
 )
 
 var (

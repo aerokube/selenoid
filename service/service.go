@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/aandryashin/selenoid/config"
-	"github.com/docker/engine-api/client"
+	"github.com/docker/docker/client"
 )
 
 type Starter interface {
