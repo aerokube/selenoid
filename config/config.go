@@ -41,7 +41,7 @@ type Config struct {
 	Browsers map[string]*Versions
 }
 
-func NewConfig(fn string, limit int) (*Config, error) {
+func New(fn string, limit int) (*Config, error) {
 	config := &Config{File: fn, Limit: limit, Browsers: make(map[string]*Versions)}
 	err := config.Load()
 	if err != nil {

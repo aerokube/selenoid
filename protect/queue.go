@@ -9,9 +9,9 @@ import (
 )
 
 type Queue struct {
-	queued chan struct{}
-	used   chan struct{}
-	size   int
+	queued  chan struct{}
+	pending chan struct{}
+	size    int
 }
 
 func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
@@ -27,7 +27,7 @@ func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
 			<-q.queued
 			log.Printf("connection from %s closed by client after %s waiting in queue\n", r.RemoteAddr, time.Since(s))
 			return
-		case q.used <- struct{}{}:
+		case q.pending <- struct{}{}:
 		}
 		<-q.queued
 		log.Println("[NEW_REQUEST_ACCEPTED]")
@@ -35,8 +35,8 @@ func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-func (q *Queue) Used() int {
-	return len(q.used)
+func (q *Queue) Pending() int {
+	return len(q.pending)
 }
 
 func (q *Queue) Queued() int {
@@ -48,7 +48,7 @@ func (q *Queue) Size() int {
 }
 
 func (q *Queue) Release() {
-	<-q.used
+	<-q.pending
 }
 
 func New(size int) *Queue {

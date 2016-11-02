@@ -27,7 +27,6 @@ import (
 var (
 	disableDocker bool
 	dockerApi     string
-	dockerHeaders = map[string]string{"User-Agent": "engine-api-cli-1.0"}
 	listen        string
 	timeout       time.Duration
 	logHTTP       bool
@@ -50,13 +49,13 @@ func init() {
 	flag.Parse()
 	queue = protect.New(limit)
 	var err error
-	cfg, err = config.NewConfig(conf, limit)
+	cfg, err = config.New(conf, limit)
 	if err != nil {
 		log.Fatalf("error loading configuration: %s\n", err)
 	}
 	var cli *client.Client
 	if !disableDocker {
-		cli, err = client.NewClient(dockerApi, client.DefaultVersion, nil, dockerHeaders)
+		cli, err = client.NewClient(dockerApi, client.DefaultVersion, nil, nil)
 		if err != nil {
 			log.Fatal("unable to create client connection to docker daemon.")
 		}
