@@ -103,7 +103,7 @@ func Handler() http.Handler {
 		}))
 	root.Handle("/status", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			json.NewEncoder(w).Encode(cfg.State(sessions, queue.Queued()))
+			json.NewEncoder(w).Encode(cfg.State(sessions, queue.Queued(), queue.Pending()))
 		}))
 	return root
 }

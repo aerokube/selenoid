@@ -48,9 +48,9 @@ func (s *sess) Delete(cancel func()) {
 		}
 	}
 	log.Printf("[DELETE_FAILED]")
-	queue.Release()
 	cancel()
 	sessions.Remove(s.id)
+	queue.Release()
 	log.Printf("[FORCED_SESSION_REMOVAL] [%s]\n", s.id)
 }
 
@@ -64,7 +64,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("[ERROR_READING_REQUEST] [%s]\n", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		queue.Release()
+		queue.Drop()
 		return
 	}
 	var browser struct {
@@ -77,21 +77,21 @@ func create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("[BAD_JSON_FORMAT] [%s]\n", err.Error())
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		queue.Release()
+		queue.Drop()
 		return
 	}
 	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version)
 	if !ok {
 		log.Printf("[ENVIRONMENT_NOT_AVAILABLE] [%s-%s]\n", browser.Caps.Name, browser.Caps.Version)
 		http.Error(w, "Requested environment is not available", http.StatusBadRequest)
-		queue.Release()
+		queue.Drop()
 		return
 	}
 	u, cancel, err := starter.StartWithCancel()
 	if err != nil {
 		log.Printf("[SERVICE_STARTUP_FAILED] [%s]\n", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		queue.Release()
+		queue.Drop()
 		return
 	}
 	r.URL.Host, r.URL.Path = u.Host, u.Path+r.URL.Path
@@ -105,7 +105,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("[SESSION_FAILED] [%s] - [%s]\n", u.String(), err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		queue.Release()
+		queue.Drop()
 		cancel()
 		return
 	}
@@ -118,7 +118,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(tee).Decode(&s)
 	if s.Id == "" {
 		log.Printf("[SESSION_FAILED] Bad response from [%s] - [%v]\n", u.String(), resp.Status)
-		queue.Release()
+		queue.Drop()
 		cancel()
 		return
 	}
@@ -131,6 +131,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		onTimeout(timeout, func() {
 			request{r}.session(s.Id).Delete(cancel)
 		})})
+	queue.Create()
 	log.Printf("[SESSION_CREATED] [%s] [%s]\n", s.Id, u)
 }
 

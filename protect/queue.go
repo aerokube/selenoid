@@ -9,8 +9,10 @@ import (
 )
 
 type Queue struct {
+	limit   chan struct{}
 	queued  chan struct{}
 	pending chan struct{}
+	used    chan struct{}
 	size    int
 }
 
@@ -27,12 +29,17 @@ func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
 			<-q.queued
 			log.Printf("connection from %s closed by client after %s waiting in queue\n", r.RemoteAddr, time.Since(s))
 			return
-		case q.pending <- struct{}{}:
+		case q.limit <- struct{}{}:
+			q.pending <- struct{}{}
 		}
 		<-q.queued
 		log.Println("[NEW_REQUEST_ACCEPTED]")
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (q *Queue) Used() int {
+	return len(q.used)
 }
 
 func (q *Queue) Pending() int {
@@ -43,14 +50,31 @@ func (q *Queue) Queued() int {
 	return len(q.queued)
 }
 
+func (q *Queue) Drop() {
+	<-q.limit
+	<-q.pending
+}
+
+func (q *Queue) Create() {
+	q.used <- <-q.pending
+}
+
+func (q *Queue) Release() {
+	<-q.limit
+	<-q.used
+}
+
 func (q *Queue) Size() int {
 	return q.size
 }
 
-func (q *Queue) Release() {
-	<-q.pending
-}
-
 func New(size int) *Queue {
-	return &Queue{make(chan struct{}, 2^64-1), make(chan struct{}, size), size}
+	max := 2 ^ 64 - 1
+	return &Queue{
+		make(chan struct{}, size),
+		make(chan struct{}, max),
+		make(chan struct{}, max),
+		make(chan struct{}, max),
+		size,
+	}
 }

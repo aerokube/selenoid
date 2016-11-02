@@ -20,7 +20,6 @@ var (
 )
 
 func init() {
-	//queue = make(chan struct{}, 1)
 	srv = httptest.NewServer(Handler())
 }
 

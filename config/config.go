@@ -20,6 +20,7 @@ type State struct {
 	Total    int      `json:"total"`
 	Used     int      `json:"used"`
 	Queued   int      `json:"queued"`
+	Pending  int      `json:"pending"`
 	Browsers Browsers `json:"browsers"`
 }
 
@@ -85,10 +86,10 @@ func (config *Config) Find(name string, version *string) (*Browser, bool) {
 	return nil, false
 }
 
-func (config *Config) State(sessions *session.Map, queued int) *State {
+func (config *Config) State(sessions *session.Map, queued, pending int) *State {
 	config.lock.RLock()
 	defer config.lock.RUnlock()
-	state := &State{config.Limit, 0, queued, make(Browsers)}
+	state := &State{config.Limit, 0, queued, pending, make(Browsers)}
 	for n, b := range config.Browsers {
 		state.Browsers[n] = make(Version)
 		for v := range b.Versions {
