@@ -3,13 +3,6 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "H5ris9wA2DUEyQJcdEIozccnYc0=",
-			"origin": "github.com/docker/docker/vendor/github.com/Microsoft/go-winio",
-			"path": "github.com/Microsoft/go-winio",
-			"revision": "c1cdfe78f6eb71b33afbba4dd2a6a713a959177f",
-			"revisionTime": "2016-11-07T18:34:22Z"
-		},
-		{
 			"checksumSHA1": "CujWu7+PWlZSX5+zAPJH91O5AVQ=",
 			"origin": "github.com/docker/docker/vendor/github.com/Sirupsen/logrus",
 			"path": "github.com/Sirupsen/logrus",
@@ -39,8 +32,8 @@
 			"checksumSHA1": "g5k6qkpBmFbbscKLEq5OfrfLSCM=",
 			"origin": "github.com/docker/docker/vendor/github.com/docker/distribution/reference",
 			"path": "github.com/docker/distribution/reference",
-			"revision": "a2611c7520ce8e567aea6e14e0de4c35ac103a7d",
-			"revisionTime": "2016-11-04T17:08:40Z"
+			"revision": "c1cdfe78f6eb71b33afbba4dd2a6a713a959177f",
+			"revisionTime": "2016-11-07T18:34:22Z"
 		},
 		{
 			"checksumSHA1": "mJPxRGJ/4v25UHB9Cls3x7xCTJY=",
@@ -140,31 +133,30 @@
 		},
 		{
 			"checksumSHA1": "JbiWTzH699Sqz25XmDlsARpMN9w=",
-			"origin": "github.com/aandryashin/selenoid/vendor/github.com/docker/go-connections/nat",
 			"path": "github.com/docker/go-connections/nat",
 			"revision": "f512407a188ecb16f31a33dbc9c4e4814afc1b03",
 			"revisionTime": "2016-10-31T18:22:14Z"
 		},
 		{
-			"checksumSHA1": "AeoH23qpdto4UR0eb04eLUH6JL4=",
+			"checksumSHA1": "h3oLQ75ZQpIeIhomHyjEvowO0GA=",
 			"origin": "github.com/docker/docker/vendor/github.com/docker/go-connections/sockets",
 			"path": "github.com/docker/go-connections/sockets",
-			"revision": "f512407a188ecb16f31a33dbc9c4e4814afc1b03",
-			"revisionTime": "2016-10-31T18:22:14Z"
+			"revision": "c1cdfe78f6eb71b33afbba4dd2a6a713a959177f",
+			"revisionTime": "2016-11-07T18:34:22Z"
 		},
 		{
 			"checksumSHA1": "DYKVPp+oYtFl91zBUk0o45CQw7Q=",
 			"origin": "github.com/docker/docker/vendor/github.com/docker/go-connections/tlsconfig",
 			"path": "github.com/docker/go-connections/tlsconfig",
-			"revision": "f512407a188ecb16f31a33dbc9c4e4814afc1b03",
-			"revisionTime": "2016-10-31T18:22:14Z"
+			"revision": "c1cdfe78f6eb71b33afbba4dd2a6a713a959177f",
+			"revisionTime": "2016-11-07T18:34:22Z"
 		},
 		{
-			"checksumSHA1": "fInaxX723rCKOcfKMY8/x6f1o8E=",
+			"checksumSHA1": "PGX9v+2lw0lTySHVfrL9afqJnTo=",
 			"origin": "github.com/docker/docker/vendor/github.com/docker/go-units",
 			"path": "github.com/docker/go-units",
-			"revision": "8a7beacffa3009a9ac66bad506b18ffdd110cf97",
-			"revisionTime": "2016-10-20T21:32:27Z"
+			"revision": "c1cdfe78f6eb71b33afbba4dd2a6a713a959177f",
+			"revisionTime": "2016-11-07T18:34:22Z"
 		},
 		{
 			"checksumSHA1": "3AoPMXlmVq2+iWMpsdJZkcUKHB8=",
@@ -180,25 +172,25 @@
 			"revisionTime": "2016-10-05T15:16:09Z"
 		},
 		{
-			"checksumSHA1": "ynJSWoF6v+3zMnh9R0QmmG6iGV8=",
+			"checksumSHA1": "XvRDR0LXWDol6uyWoUqMbO5P1M8=",
 			"origin": "github.com/docker/docker/vendor/github.com/pkg/errors",
 			"path": "github.com/pkg/errors",
-			"revision": "248dadf4e9068a0b3e79f02ed0a610d935de5302",
-			"revisionTime": "2016-10-29T09:36:37Z"
+			"revision": "c1cdfe78f6eb71b33afbba4dd2a6a713a959177f",
+			"revisionTime": "2016-11-07T18:34:22Z"
 		},
 		{
-			"checksumSHA1": "9jjO5GjLa0XF/nfWihF02RoH4qc=",
+			"checksumSHA1": "9QKY4bQlbQ/VZZFP8/1WtH4b0mA=",
 			"origin": "github.com/docker/docker/vendor/golang.org/x/net/context",
 			"path": "golang.org/x/net/context",
-			"revision": "55a3084c9119aeb9ba2437d595b0a7e9cb635da9",
-			"revisionTime": "2016-11-04T22:18:50Z"
+			"revision": "c1cdfe78f6eb71b33afbba4dd2a6a713a959177f",
+			"revisionTime": "2016-11-07T18:34:22Z"
 		},
 		{
-			"checksumSHA1": "WHc3uByvGaMcnSoI21fhzYgbOgg=",
+			"checksumSHA1": "EJMLw8rk55bsqmIpSMtVORJpSGo=",
 			"origin": "github.com/docker/docker/vendor/golang.org/x/net/context/ctxhttp",
 			"path": "golang.org/x/net/context/ctxhttp",
-			"revision": "55a3084c9119aeb9ba2437d595b0a7e9cb635da9",
-			"revisionTime": "2016-11-04T22:18:50Z"
+			"revision": "c1cdfe78f6eb71b33afbba4dd2a6a713a959177f",
+			"revisionTime": "2016-11-07T18:34:22Z"
 		},
 		{
 			"checksumSHA1": "LvdVRE0FqdR68SvVpRkHs1rxhcA=",
@@ -218,8 +210,8 @@
 			"checksumSHA1": "fpW2dhGFC6SrVzipJx7fjg2DIH8=",
 			"origin": "github.com/docker/docker/vendor/golang.org/x/sys/windows",
 			"path": "golang.org/x/sys/windows",
-			"revision": "c200b10b5d5e122be351b67af224adc6128af5bf",
-			"revisionTime": "2016-10-22T18:22:21Z"
+			"revision": "c1cdfe78f6eb71b33afbba4dd2a6a713a959177f",
+			"revisionTime": "2016-11-07T18:34:22Z"
 		}
 	],
 	"rootPath": "github.com/aandryashin/selenoid"
