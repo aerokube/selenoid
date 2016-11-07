@@ -3,6 +3,8 @@ language: go
 go:
   - 1.7
 script:
+  - go get -u github.com/kardianos/govendor
+  - govendor fetch +out
   - go test -coverprofile=coverage.txt -covermode=atomic -coverpkg .,github.com/aandryashin/selenoid/session,github.com/aandryashin/selenoid/config
 
 after_success:

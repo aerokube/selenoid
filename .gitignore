@@ -1,5 +1,5 @@
 .idea
 *.iml
 selenoid
-vendor
+vendor/*/
 Dockerfile
