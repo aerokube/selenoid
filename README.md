@@ -54,4 +54,4 @@ You can easily configure the number of simultaneously running containers:
 
 ## Usage
 
-Access to remote web driver as regular selenium hub - `http://host:4444/wd/hub`
+Access to remote web driver as regular selenium hub  -  `http://host:4444/wd/hub`
