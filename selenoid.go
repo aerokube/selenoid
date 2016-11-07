@@ -144,21 +144,22 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 		}()
 		(&httputil.ReverseProxy{
 			Director: func(r *http.Request) {
-				id := strings.Split(r.URL.Path, "/")[2]
+				fragments := strings.Split(r.URL.Path, "/")
+				id := fragments[2]
 				sess, ok := sessions.Get(id)
 				if ok {
 					r.URL.Host, r.URL.Path = sess.Url.Host, sess.Url.Path+r.URL.Path
 					close(sess.Timeout)
-					if r.Method != http.MethodDelete {
+					if r.Method == http.MethodDelete && len(fragments) == 3 {
+						cancel.fn = sess.Cancel
+						sessions.Remove(id)
+						queue.Release()
+						log.Printf("[SESSION_DELETED] [%s]\n", id)
+					} else {
 						sess.Timeout = onTimeout(timeout, func() {
 							request{r}.session(id).Delete(cancel.fn)
 						})
-						return
 					}
-					cancel.fn = sess.Cancel
-					sessions.Remove(id)
-					queue.Release()
-					log.Printf("[SESSION_DELETED] [%s]\n", id)
 					return
 				}
 				r.URL.Path = "/error"

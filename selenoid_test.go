@@ -176,6 +176,23 @@ func TestSessionDeleted(t *testing.T) {
 	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
+func TestSessionOnClose(t *testing.T) {
+	manager = &HttpTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	req, _ := http.NewRequest(http.MethodDelete,
+		With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/window", sess["sessionId"])), nil)
+	http.DefaultClient.Do(req)
+
+	AssertThat(t, queue.Used(), EqualTo{1})
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
 func TestNewSessionTimeout(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
