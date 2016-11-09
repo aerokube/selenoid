@@ -8,8 +8,10 @@ This repository contains a powerful [Go](http://golang.org/) implementation of o
 ## Building
 * Install [Go Lang](https://golang.org/doc/install)
 * Don't forget to setup `$GOPATH` [properly](https://github.com/golang/go/wiki/GOPATH)
-* Download project - `go get github.com/aandryashin/selenoid`
+* Download govendor - `go get -u github.com/kardianos/govendor`
+* Download selenoid - `go get -d github.com/aandryashin/selenoid`
 * Go to project directory - `cd $GOTPATH/src/github.com/aandryashin/selenoid`
+* Checkout dependencies - `govendor sync`
 * Build the project - `go build`
 * Show selenoid help - `./selenoid --help`
 
