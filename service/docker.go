@@ -116,5 +116,4 @@ func stopContainer(ctx context.Context, cli *client.Client, id string) {
 	}
 	cli.ContainerWait(ctx, id)
 	fmt.Printf("Container %s stopped\n", id)
-	removeContainer(ctx, cli, id)
 }
