@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/url"
 	"os/exec"
-	"syscall"
 	"time"
 
 	"github.com/aandryashin/selenoid/config"
@@ -41,7 +40,6 @@ func (d *Driver) StartWithCancel() (*url.URL, func(), error) {
 	log.Println("Available port is:", port)
 	cmdLine = append(cmdLine, fmt.Sprintf("--port=%s", port))
 	cmd := exec.Command(cmdLine[0], cmdLine[1:]...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	l.Close()
 	log.Println("Starting process:", cmdLine)
 	s := time.Now()
@@ -63,12 +61,7 @@ func (d *Driver) StartWithCancel() (*url.URL, func(), error) {
 
 func stopProcess(cmd *exec.Cmd) {
 	log.Println("Terminating process", cmd.Process.Pid)
-	pgid, err := syscall.Getpgid(cmd.Process.Pid)
-	if err != nil {
-		log.Println("cannot get process group id: %v", err)
-		return
-	}
-	err = syscall.Kill(-pgid, syscall.SIGTERM)
+	err := cmd.Process.Kill()
 	if err != nil {
 		log.Println("cannot terminate process %d: %v", cmd.Process.Pid, err)
 		return
