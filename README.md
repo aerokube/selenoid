@@ -10,7 +10,7 @@ This repository contains a powerful [Go](http://golang.org/) implementation of o
 * Don't forget to setup `$GOPATH` [properly](https://github.com/golang/go/wiki/GOPATH)
 * Download govendor - `go get -u github.com/kardianos/govendor`
 * Download selenoid - `go get -d github.com/aandryashin/selenoid`
-* Go to project directory - `cd $GOTPATH/src/github.com/aandryashin/selenoid`
+* Go to project directory - `cd $GOPATH/src/github.com/aandryashin/selenoid`
 * Checkout dependencies - `govendor sync`
 * Build the project - `go build`
 * Show selenoid help - `./selenoid --help`
@@ -20,7 +20,7 @@ This repository contains a powerful [Go](http://golang.org/) implementation of o
 * Pull docker images: 
  * `docker pull selenoid/firefox`
  * `docker pull selenoid/chrome`
-* Copy selenoid binary from previous section - `cp $GOTPATH/src/github.com/aandryashin/selenoid /usr/bin/selenoid`
+* Copy selenoid binary from previous section - `cp $GOPATH/src/github.com/aandryashin/selenoid /usr/bin/selenoid`
 * Copy the following configration file to `/etc/selenoid/browsers.json`
 ```json
 {
