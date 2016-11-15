@@ -45,7 +45,7 @@ func (d *Driver) StartWithCancel() (*url.URL, func(), error) {
 	s := time.Now()
 	err = cmd.Start()
 	if err != nil {
-		e := fmt.Errorf("cannot start process %v: %v", cmdLine, err)
+		e := fmt.Errorf("Cannot start process %v: %v", cmdLine, err)
 		log.Println(e)
 		return nil, nil, e
 	}
@@ -63,7 +63,7 @@ func stopProcess(cmd *exec.Cmd) {
 	log.Println("Terminating process", cmd.Process.Pid)
 	err := cmd.Process.Kill()
 	if err != nil {
-		log.Println("cannot terminate process %d: %v", cmd.Process.Pid, err)
+		log.Printf("Cannot terminate process %d: %v\n", cmd.Process.Pid, err)
 		return
 	}
 	log.Printf("Process %d terminated\n", cmd.Process.Pid)
