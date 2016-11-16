@@ -25,8 +25,11 @@ type sess struct {
 	id   string
 }
 
+// TODO There is simpler way to do this
 func (r request) localaddr() string {
-	return r.Context().Value(http.LocalAddrContextKey).(net.Addr).String()
+	addr := r.Context().Value(http.LocalAddrContextKey).(net.Addr).String()
+	_, port, _ := net.SplitHostPort(addr)
+	return net.JoinHostPort("localhost", port)
 }
 
 func (r request) session(id string) *sess {
