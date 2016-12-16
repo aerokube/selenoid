@@ -30,7 +30,7 @@ This repository contains a powerful [Go](http://golang.org/) implementation of o
       "latest": {
         "image": "selenoid/firefox:latest",
         "port": "4444"
-      },
+      }
     }
   },
   "chrome": {
@@ -39,7 +39,7 @@ This repository contains a powerful [Go](http://golang.org/) implementation of o
       "latest": {
         "image": "selenoid/chrome:latest",
         "port": "4444"
-      },
+      }
     }
   }
 }
