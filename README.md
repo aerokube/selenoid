@@ -20,7 +20,7 @@ This repository contains a powerful [Go](http://golang.org/) implementation of o
 * Pull docker images: 
  * `docker pull selenoid/firefox`
  * `docker pull selenoid/chrome`
-* Copy selenoid binary from previous section - `cp $GOPATH/src/github.com/aandryashin/selenoid /usr/bin/selenoid`
+* Copy selenoid binary from previous section - `cp $GOPATH/src/github.com/aandryashin/selenoid/selenoid /usr/bin/selenoid`
 * Copy the following configration file to `/etc/selenoid/browsers.json`
 ```json
 {
