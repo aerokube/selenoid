@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/aandryashin/selenoid/config"
+	"errors"
 )
 
 type Driver struct {
@@ -28,7 +29,7 @@ func (d *Driver) StartWithCancel() (*url.URL, func(), error) {
 		cmdLine = append(cmdLine, c.(string))
 	}
 	if len(cmdLine) == 0 {
-		return nil, nil, fmt.Errorf("configuration error: image is empty")
+		return nil, nil, errors.New("configuration error: image is empty")
 	}
 	log.Println("Trying to allocate port")
 	l, err := net.Listen("tcp", "localhost:0")

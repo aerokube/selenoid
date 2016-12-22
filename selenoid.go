@@ -50,7 +50,7 @@ func (s *sess) Delete(cancel func()) {
 			return
 		}
 	}
-	log.Printf("[DELETE_FAILED]")
+	log.Printf("[DELETE_FAILED] [%v]\n", err)
 	cancel()
 	sessions.Remove(s.id)
 	queue.Release()

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aandryashin/selenoid/ensure"
+	"math"
 )
 
 type Queue struct {
@@ -69,12 +70,11 @@ func (q *Queue) Size() int {
 }
 
 func New(size int) *Queue {
-	max := 2 ^ 64 - 1
 	return &Queue{
 		make(chan struct{}, size),
-		make(chan struct{}, max),
-		make(chan struct{}, max),
-		make(chan struct{}, max),
+		make(chan struct{}, math.MaxUint32),
+		make(chan struct{}, math.MaxUint32),
+		make(chan struct{}, math.MaxUint32),
 		size,
 	}
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"errors"
 )
 
 type Docker struct {
@@ -66,7 +67,7 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	}
 	if len(stat.NetworkSettings.Ports[port]) != 1 {
 		stopAndRemoveContainer(ctx, docker.Client, resp.ID)
-		return nil, nil, fmt.Errorf("error: wrong number of port bindings")
+		return nil, nil, errors.New("error: wrong number of port bindings")
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
 	if docker.Ip == "" {
