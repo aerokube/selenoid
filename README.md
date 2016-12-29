@@ -1,6 +1,7 @@
 # Selenoid
 [![Build Status](https://travis-ci.org/aandryashin/selenoid.svg?branch=master)](https://travis-ci.org/aandryashin/selenoid)
 [![Coverage](https://codecov.io/github/aandryashin/selenoid/coverage.svg)](https://codecov.io/gh/aandryashin/selenoid)
+[![GoReport](https://goreportcard.com/badge/github.com/aandryashin/selenoid)](https://goreportcard.com/badge/github.com/aandryashin/selenoid)
 [![Release](https://img.shields.io/github/release/aandryashin/selenoid.svg)](https://github.com/aandryashin/selenoid/releases/latest)
 
 This repository contains a powerful [Go](http://golang.org/) implementation of original [Selenium](http://github.com/SeleniumHQ/selenium) hub code.
