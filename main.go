@@ -23,13 +23,12 @@ import (
 
 var (
 	disableDocker bool
-	dockerApi     string
+	dockerAPI     string
 	listen        string
 	timeout       time.Duration
-	logHTTP       bool
 	limit         int
 	conf          string
-	sessions      *session.Map = session.NewMap()
+	sessions      = session.NewMap()
 	cfg           *config.Config
 	queue         *protect.Queue
 	manager       service.Manager
@@ -39,7 +38,7 @@ func init() {
 	flag.BoolVar(&disableDocker, "disable-docker", false, "Disable docker support")
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
 	flag.StringVar(&conf, "conf", "config/browsers.json", "Browsers configuration file")
-	flag.StringVar(&dockerApi, "docker-api", "unix:///var/run/docker.sock", "Docker api url")
+	flag.StringVar(&dockerAPI, "docker-api", "unix:///var/run/docker.sock", "Docker api url")
 	flag.IntVar(&limit, "limit", 5, "Simultanious container runs")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
 	flag.Parse()
@@ -51,14 +50,14 @@ func init() {
 	}
 	var cli *client.Client
 	if !disableDocker {
-		cli, err = client.NewClient(dockerApi, client.DefaultVersion, nil, nil)
+		cli, err = client.NewClient(dockerAPI, client.DefaultVersion, nil, nil)
 		if err != nil {
 			log.Fatal("unable to create client connection to docker daemon.")
 		}
 	}
-	u, err := url.Parse(dockerApi)
+	u, err := url.Parse(dockerAPI)
 	if err != nil {
-		log.Fatalf("malformed docker api url %s: %v\n,", dockerApi, err)
+		log.Fatalf("malformed docker api url %s: %v\n,", dockerAPI, err)
 	}
 	ip, _, _ := net.SplitHostPort(u.Host)
 	cancelOnSignal()
@@ -84,7 +83,7 @@ func mux() http.Handler {
 	return mux
 }
 
-func Handler() http.Handler {
+func handler() http.Handler {
 	root := http.NewServeMux()
 	root.Handle("/wd/hub/", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
@@ -106,5 +105,5 @@ func Handler() http.Handler {
 
 func main() {
 	log.Printf("Listening on %s\n", listen)
-	log.Fatal(http.ListenAndServe(listen, Handler()))
+	log.Fatal(http.ListenAndServe(listen, handler()))
 }

@@ -8,13 +8,13 @@ import (
 	"os"
 	"time"
 
+	"errors"
 	"github.com/aandryashin/selenoid/config"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
-	"errors"
 )
 
 type Docker struct {

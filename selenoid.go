@@ -43,14 +43,21 @@ func (s *sess) url() string {
 func (s *sess) Delete(cancel func()) {
 	log.Printf("[SESSION_TIMED_OUT] [%s] - Deleting session\n", s.id)
 	req, err := http.NewRequest(http.MethodDelete, s.url(), nil)
+	var resp *http.Response
 	if err == nil {
-		req.Close = true
-		resp, err := http.DefaultClient.Do(req)
+		resp, err = http.DefaultClient.Do(req)
+		if resp != nil {
+			defer resp.Body.Close()
+		}
 		if err == nil && resp.StatusCode == http.StatusOK {
 			return
 		}
 	}
-	log.Printf("[DELETE_FAILED] [%v]\n", err)
+	if err != nil {
+		log.Printf("[DELETE_FAILED] [%v]\n", err)
+	} else {
+		log.Printf("[DELETE_FAILED] [%s]\n", resp.Status)
+	}
 	cancel()
 	sessions.Remove(s.id)
 	queue.Release()
@@ -105,6 +112,9 @@ func create(w http.ResponseWriter, r *http.Request) {
 	req.Body = ioutil.NopCloser(bytes.NewReader(body))
 	log.Printf("[SESSION_ATTEMPTED] [%s]\n", u.String())
 	resp, err := http.DefaultClient.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		log.Printf("[SESSION_FAILED] [%s] - [%s]\n", u.String(), err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -112,30 +122,29 @@ func create(w http.ResponseWriter, r *http.Request) {
 		cancel()
 		return
 	}
-	defer resp.Body.Close()
 	w.WriteHeader(resp.StatusCode)
 	var s struct {
-		Id string `json:"sessionId"`
+		ID string `json:"sessionId"`
 	}
 	tee := io.TeeReader(resp.Body, w)
 	json.NewDecoder(tee).Decode(&s)
-	if s.Id == "" {
+	if s.ID == "" {
 		log.Printf("[SESSION_FAILED] Bad response from [%s] - [%v]\n", u.String(), resp.Status)
 		queue.Drop()
 		cancel()
 		return
 	}
-	sessions.Put(s.Id, &session.Session{
+	sessions.Put(s.ID, &session.Session{
 		quota,
 		browser.Caps.Name,
 		browser.Caps.Version,
 		u,
 		cancel,
 		onTimeout(timeout, func() {
-			request{r}.session(s.Id).Delete(cancel)
+			request{r}.session(s.ID).Delete(cancel)
 		})})
 	queue.Create()
-	log.Printf("[SESSION_CREATED] [%s] [%s]\n", s.Id, u)
+	log.Printf("[SESSION_CREATED] [%s] [%s]\n", s.ID, u)
 }
 
 func proxy(w http.ResponseWriter, r *http.Request) {

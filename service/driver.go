@@ -8,8 +8,8 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/aandryashin/selenoid/config"
 	"errors"
+	"github.com/aandryashin/selenoid/config"
 )
 
 type Driver struct {

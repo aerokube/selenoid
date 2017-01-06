@@ -15,34 +15,34 @@ import (
 	"github.com/pborman/uuid"
 )
 
-type HttpTest struct {
+type HTTPTest struct {
 	Handler http.Handler
 	Action  func(s *httptest.Server)
 	Cancel  chan bool
 }
 
-func HttpResponse(msg string, status int) http.Handler {
+func HTTPResponse(msg string, status int) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, msg, status)
 	})
 }
 
-func (m *HttpTest) StartWithCancel() (*url.URL, func(), error) {
-	log.Println("Starting HttpTest Service...")
+func (m *HTTPTest) StartWithCancel() (*url.URL, func(), error) {
+	log.Println("Starting HTTPTest Service...")
 	s := httptest.NewServer(m.Handler)
 	u, err := url.Parse(s.URL)
 	if err != nil {
-		log.Println("Failed to start HttpTest Service...")
+		log.Println("Failed to start HTTPTest Service...")
 		return nil, func() {}, err
 	}
-	log.Println("HttpTest Service started...")
+	log.Println("HTTPTest Service started...")
 	if m.Action != nil {
 		m.Action(s)
 	}
 	return u, func() {
-		log.Println("Stopping HttpTest Service...")
+		log.Println("Stopping HTTPTest Service...")
 		s.Close()
-		log.Println("HttpTest Service stopped...")
+		log.Println("HTTPTest Service stopped...")
 		if m.Cancel != nil {
 			go func() {
 				m.Cancel <- true
@@ -51,7 +51,7 @@ func (m *HttpTest) StartWithCancel() (*url.URL, func(), error) {
 	}, nil
 }
 
-func (m *HttpTest) Find(s string, v *string) (service.Starter, bool) {
+func (m *HTTPTest) Find(s string, v *string) (service.Starter, bool) {
 	return m, true
 }
 
