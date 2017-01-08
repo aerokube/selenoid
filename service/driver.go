@@ -12,10 +12,12 @@ import (
 	"github.com/aandryashin/selenoid/config"
 )
 
+// Driver - driver processes manager
 type Driver struct {
 	Service *config.Browser
 }
 
+// StartWithCancel - Starter interface implementation
 func (d *Driver) StartWithCancel() (*url.URL, func(), error) {
 	slice, ok := d.Service.Image.([]interface{})
 	if !ok {

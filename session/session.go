@@ -5,24 +5,28 @@ import (
 	"sync"
 )
 
+// Session - holds session info
 type Session struct {
 	Quota   string
 	Browser string
 	Version string
-	Url     *url.URL
+	URL     *url.URL
 	Cancel  func()
 	Timeout chan struct{}
 }
 
+// Map - session uuid to sessions mapping
 type Map struct {
 	m map[string]*Session
 	l sync.RWMutex
 }
 
+// NewMap - create session map
 func NewMap() *Map {
 	return &Map{m: make(map[string]*Session)}
 }
 
+// Get - synchronous get session
 func (m *Map) Get(k string) (*Session, bool) {
 	m.l.RLock()
 	defer m.l.RUnlock()
@@ -30,18 +34,21 @@ func (m *Map) Get(k string) (*Session, bool) {
 	return s, ok
 }
 
+// Put - synchronous put session
 func (m *Map) Put(k string, v *Session) {
 	m.l.Lock()
 	defer m.l.Unlock()
 	m.m[k] = v
 }
 
+// Remove - synchronous remove session
 func (m *Map) Remove(k string) {
 	m.l.Lock()
 	defer m.l.Unlock()
 	delete(m.m, k)
 }
 
+// Each - synchronous iterate through sessions
 func (m *Map) Each(fn func(k string, v *Session)) {
 	m.l.RLock()
 	defer m.l.RUnlock()

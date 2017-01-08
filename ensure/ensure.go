@@ -2,6 +2,7 @@ package ensure
 
 import "net/http"
 
+// CloseNotifier - handler to ensure http.CloseNotifier implementation
 func CloseNotifier(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_, ok := w.(http.CloseNotifier)
@@ -13,6 +14,7 @@ func CloseNotifier(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// Post - handler to allow only POST methods
 func Post(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {

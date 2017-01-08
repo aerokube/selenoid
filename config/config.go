@@ -10,12 +10,16 @@ import (
 	"github.com/aandryashin/selenoid/session"
 )
 
+// Quota - number of sessions for quota user
 type Quota map[string]int
 
+// Version - browser version for quota
 type Version map[string]Quota
 
+// Browsers - browser names for versions
 type Browsers map[string]Version
 
+// State - current state
 type State struct {
 	Total    int      `json:"total"`
 	Used     int      `json:"used"`
@@ -24,17 +28,20 @@ type State struct {
 	Browsers Browsers `json:"browsers"`
 }
 
+// Browser configuration
 type Browser struct {
 	Image interface{} `json:"image"`
 	Port  string      `json:"port"`
 	Path  string      `json:"path"`
 }
 
+// Versions configuration
 type Versions struct {
 	Default  string              `json:"default"`
 	Versions map[string]*Browser `json:"versions"`
 }
 
+// Config current configuration
 type Config struct {
 	lock     sync.RWMutex
 	File     string
@@ -42,6 +49,7 @@ type Config struct {
 	Browsers map[string]*Versions
 }
 
+// New configuration
 func New(fn string, limit int) (*Config, error) {
 	config := &Config{File: fn, Limit: limit, Browsers: make(map[string]*Versions)}
 	err := config.Load()
@@ -51,6 +59,7 @@ func New(fn string, limit int) (*Config, error) {
 	return config, nil
 }
 
+// Load configuration file
 func (config *Config) Load() error {
 	config.lock.RLock()
 	defer config.lock.RUnlock()
@@ -64,6 +73,7 @@ func (config *Config) Load() error {
 	return nil
 }
 
+// Find - find concrete browser
 func (config *Config) Find(name string, version *string) (*Browser, bool) {
 	config.lock.RLock()
 	defer config.lock.RUnlock()
@@ -86,6 +96,7 @@ func (config *Config) Find(name string, version *string) (*Browser, bool) {
 	return nil, false
 }
 
+// State - get current state
 func (config *Config) State(sessions *session.Map, queued, pending int) *State {
 	config.lock.RLock()
 	defer config.lock.RUnlock()

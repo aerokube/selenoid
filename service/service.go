@@ -11,20 +11,24 @@ import (
 	"github.com/docker/docker/client"
 )
 
+// Starter - interface to create session with cancellation ability
 type Starter interface {
 	StartWithCancel() (*url.URL, func(), error)
 }
 
+// Manager - interface to choose appropriate starter
 type Manager interface {
 	Find(s string, v *string) (Starter, bool)
 }
 
+// DefaultManager - struct for default implementation
 type DefaultManager struct {
-	Ip     string
+	IP     string
 	Client *client.Client
 	Config *config.Config
 }
 
+// Find - default implementation Manager interface
 func (m *DefaultManager) Find(s string, v *string) (Starter, bool) {
 	log.Printf("Locating the service for %s %s\n", s, *v)
 	service, ok := m.Config.Find(s, v)
@@ -37,7 +41,7 @@ func (m *DefaultManager) Find(s string, v *string) (Starter, bool) {
 			return nil, false
 		}
 		log.Printf("Using docker service for %s %s\n", s, *v)
-		return &Docker{m.Ip, m.Client, service}, true
+		return &Docker{m.IP, m.Client, service}, true
 	case []interface{}:
 		log.Printf("Using driver service for %s %s\n", s, *v)
 		return &Driver{service}, true

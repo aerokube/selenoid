@@ -160,7 +160,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				id := fragments[2]
 				sess, ok := sessions.Get(id)
 				if ok {
-					r.URL.Host, r.URL.Path = sess.Url.Host, sess.Url.Path+r.URL.Path
+					r.URL.Host, r.URL.Path = sess.URL.Host, sess.URL.Path+r.URL.Path
 					close(sess.Timeout)
 					if r.Method == http.MethodDelete && len(fragments) == 3 {
 						cancel.fn = sess.Cancel

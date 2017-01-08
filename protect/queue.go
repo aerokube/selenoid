@@ -9,6 +9,7 @@ import (
 	"math"
 )
 
+// Queue - struct to hold a number of sessions
 type Queue struct {
 	limit   chan struct{}
 	queued  chan struct{}
@@ -17,6 +18,7 @@ type Queue struct {
 	size    int
 }
 
+// Protect - handler to control limit of sessions
 func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
 	return ensure.CloseNotifier(func(w http.ResponseWriter, r *http.Request) {
 		log.Println("[NEW_REQUEST]")
@@ -39,36 +41,44 @@ func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
+// Used - get created sessions
 func (q *Queue) Used() int {
 	return len(q.used)
 }
 
+// Pending - get pending sessions
 func (q *Queue) Pending() int {
 	return len(q.pending)
 }
 
+// Queued - get queued sessions
 func (q *Queue) Queued() int {
 	return len(q.queued)
 }
 
+// Drop - session is not created
 func (q *Queue) Drop() {
 	<-q.limit
 	<-q.pending
 }
 
+// Create - session is created
 func (q *Queue) Create() {
 	q.used <- <-q.pending
 }
 
+// Release - session is closed
 func (q *Queue) Release() {
 	<-q.limit
 	<-q.used
 }
 
+// Size - limit of sessions
 func (q *Queue) Size() int {
 	return q.size
 }
 
+// New - create and initialize queue
 func New(size int) *Queue {
 	return &Queue{
 		make(chan struct{}, size),

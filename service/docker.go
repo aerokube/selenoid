@@ -17,12 +17,14 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+// Docker - docker container manager
 type Docker struct {
-	Ip      string
+	IP      string
 	Client  *client.Client
 	Service *config.Browser
 }
 
+// StartWithCancel - Starter interface implementation
 func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	port, err := nat.NewPort("tcp", docker.Service.Port)
 	if err != nil {
@@ -58,19 +60,19 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	stat, err := docker.Client.ContainerInspect(ctx, resp.ID)
 	if err != nil {
 		stopAndRemoveContainer(ctx, docker.Client, resp.ID)
-		return nil, nil, fmt.Errorf("unable to inspect container %s: %s\n", resp.ID, err)
+		return nil, nil, fmt.Errorf("unable to inspect container %s: %s", resp.ID, err)
 	}
 	_, ok := stat.NetworkSettings.Ports[port]
 	if !ok {
 		stopAndRemoveContainer(ctx, docker.Client, resp.ID)
-		return nil, nil, fmt.Errorf("no bingings available for %v...\n", port)
+		return nil, nil, fmt.Errorf("no bingings available for %v", port)
 	}
 	if len(stat.NetworkSettings.Ports[port]) != 1 {
 		stopAndRemoveContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, errors.New("error: wrong number of port bindings")
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
-	if docker.Ip == "" {
+	if docker.IP == "" {
 		_, err = os.Stat("/.dockerenv")
 		if err != nil {
 			addr.HostIP = "127.0.0.1"
@@ -78,7 +80,7 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 			addr.HostIP = "172.17.0.1"
 		}
 	} else {
-		addr.HostIP = docker.Ip
+		addr.HostIP = docker.IP
 	}
 	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, docker.Service.Path)
 	s := time.Now()
