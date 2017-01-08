@@ -36,12 +36,12 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 		&container.Config{
 			Hostname:     "localhost",
 			Image:        docker.Service.Image.(string),
-			ExposedPorts: map[nat.Port]struct{}{port: struct{}{}},
+			ExposedPorts: map[nat.Port]struct{}{port: {}},
 		},
 		&container.HostConfig{
 			AutoRemove: true,
 			PortBindings: nat.PortMap{
-				port: []nat.PortBinding{nat.PortBinding{HostIP: "0.0.0.0"}},
+				port: []nat.PortBinding{{HostIP: "0.0.0.0"}},
 			},
 			ShmSize:    268435456,
 			Privileged: true,

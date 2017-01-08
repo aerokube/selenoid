@@ -39,7 +39,7 @@ func init() {
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
 	flag.StringVar(&conf, "conf", "config/browsers.json", "Browsers configuration file")
 	flag.StringVar(&dockerAPI, "docker-api", "unix:///var/run/docker.sock", "Docker api url")
-	flag.IntVar(&limit, "limit", 5, "Simultanious container runs")
+	flag.IntVar(&limit, "limit", 5, "Simultaneous container runs")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
 	flag.Parse()
 	queue = protect.New(limit)
