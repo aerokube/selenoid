@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"context"
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
 	"github.com/aandryashin/selenoid/config"
@@ -193,6 +194,41 @@ func TestSessionOnClose(t *testing.T) {
 	queue.Release()
 }
 
+func TestProxySessionCanceled(t *testing.T) {
+	canceled := false
+	ch := make(chan bool)
+	manager = &HTTPTest{
+		Handler: Selenium(),
+		Cancel:  ch,
+	}
+
+	timeout = 100 * time.Millisecond
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	_, ok := sessions.Get(sess["sessionId"])
+	AssertThat(t, ok, Is{true})
+
+	req, _ := http.NewRequest(http.MethodGet, With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/url?timeout=1s", sess["sessionId"])), nil)
+	ctx, cancel := context.WithCancel(context.Background())
+	req = req.WithContext(ctx)
+	go func() {
+		http.DefaultClient.Do(req)
+	}()
+	<-time.After(50 * time.Millisecond)
+	cancel()
+	<-time.After(100 * time.Millisecond)
+	_, ok = sessions.Get(sess["sessionId"])
+	AssertThat(t, ok, Is{false})
+
+	canceled = <-ch
+	AssertThat(t, canceled, Is{true})
+
+	AssertThat(t, queue.Used(), EqualTo{0})
+}
+
 func TestNewSessionTimeout(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
@@ -243,7 +279,6 @@ func TestProxySessionTimeout(t *testing.T) {
 	http.Get(With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/url", sess["sessionId"])))
 
 	<-time.After(20 * time.Millisecond)
-	_, ok = sessions.Get(sess["sessionId"])
 	_, ok = sessions.Get(sess["sessionId"])
 	AssertThat(t, ok, Is{true})
 

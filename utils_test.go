@@ -13,6 +13,7 @@ import (
 
 	"github.com/aandryashin/selenoid/service"
 	"github.com/pborman/uuid"
+	"time"
 )
 
 type HTTPTest struct {
@@ -105,7 +106,9 @@ func Selenium() http.Handler {
 			http.Error(w, "Session not found", http.StatusNotFound)
 			return
 		}
+		d, _ := time.ParseDuration(r.FormValue("timeout"))
 		if r.Method != http.MethodDelete {
+			<-time.After(d)
 			return
 		}
 		lock.Lock()
