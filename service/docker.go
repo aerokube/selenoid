@@ -59,16 +59,16 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	log.Printf("Container %s started\n", resp.ID)
 	stat, err := docker.Client.ContainerInspect(ctx, resp.ID)
 	if err != nil {
-		stopAndRemoveContainer(ctx, docker.Client, resp.ID)
+		removeContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, fmt.Errorf("unable to inspect container %s: %s", resp.ID, err)
 	}
 	_, ok := stat.NetworkSettings.Ports[port]
 	if !ok {
-		stopAndRemoveContainer(ctx, docker.Client, resp.ID)
+		removeContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, fmt.Errorf("no bingings available for %v", port)
 	}
 	if len(stat.NetworkSettings.Ports[port]) != 1 {
-		stopAndRemoveContainer(ctx, docker.Client, resp.ID)
+		removeContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, errors.New("error: wrong number of port bindings")
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
@@ -86,18 +86,13 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	s := time.Now()
 	err = wait(host, 10*time.Second)
 	if err != nil {
-		stopAndRemoveContainer(ctx, docker.Client, resp.ID)
+		removeContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, err
 	}
 	log.Println(time.Since(s))
 	u, _ := url.Parse(host)
 	log.Println("proxying requests to:", host)
-	return u, func() { stopAndRemoveContainer(ctx, docker.Client, resp.ID) }, nil
-}
-
-func stopAndRemoveContainer(ctx context.Context, cli *client.Client, id string) {
-	stopContainer(ctx, cli, id)
-	removeContainer(ctx, cli, id)
+	return u, func() { removeContainer(ctx, docker.Client, resp.ID) }, nil
 }
 
 func removeContainer(ctx context.Context, cli *client.Client, id string) {
@@ -108,15 +103,4 @@ func removeContainer(ctx context.Context, cli *client.Client, id string) {
 		return
 	}
 	fmt.Printf("Container %s removed\n", id)
-}
-
-func stopContainer(ctx context.Context, cli *client.Client, id string) {
-	fmt.Println("Stopping container", id)
-	err := cli.ContainerStop(ctx, id, nil)
-	if err != nil {
-		log.Println("error: unable to stop container", id, err)
-		return
-	}
-	cli.ContainerWait(ctx, id)
-	fmt.Printf("Container %s stopped\n", id)
 }
