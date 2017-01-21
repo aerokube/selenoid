@@ -43,7 +43,7 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 			PortBindings: nat.PortMap{
 				port: []nat.PortBinding{{HostIP: "0.0.0.0"}},
 			},
-			Tmpfs: docker.Service.Tmpfs,
+			Tmpfs:      docker.Service.Tmpfs,
 			ShmSize:    268435456,
 			Privileged: true,
 		},
