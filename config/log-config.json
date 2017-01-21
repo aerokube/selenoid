@@ -1,0 +1,7 @@
+{
+    "Type" : "syslog",
+    "Config" : {
+      "syslog-address" : "tcp://192.168.0.42:123",
+      "syslog-facility" : "daemon"
+    }
+}
