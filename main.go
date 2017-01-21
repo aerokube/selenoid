@@ -19,6 +19,7 @@ import (
 	"github.com/aandryashin/selenoid/service"
 	"github.com/aandryashin/selenoid/session"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/api/types/container"
 )
 
 var (
@@ -35,18 +36,27 @@ var (
 )
 
 func init() {
+	lcFilename := ""
 	flag.BoolVar(&disableDocker, "disable-docker", false, "Disable docker support")
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
 	flag.StringVar(&conf, "conf", "config/browsers.json", "Browsers configuration file")
+	flag.StringVar(&lcFilename, "log-conf", "", "Container logging configuration file")
 	flag.StringVar(&dockerAPI, "docker-api", "unix:///var/run/docker.sock", "Docker api url")
 	flag.IntVar(&limit, "limit", 5, "Simultaneous container runs")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
 	flag.Parse()
+	var lc container.LogConfig
+	if lcFilename != "" {
+		err := config.Load(lcFilename, &lc)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	queue = protect.New(limit)
 	var err error
 	cfg, err = config.New(conf, limit)
 	if err != nil {
-		log.Fatalf("error loading configuration: %s\n", err)
+		log.Fatalf("error loading configuration: %v\n", err)
 	}
 	var cli *client.Client
 	if !disableDocker {
@@ -61,7 +71,7 @@ func init() {
 	}
 	ip, _, _ := net.SplitHostPort(u.Host)
 	cancelOnSignal()
-	manager = &service.DefaultManager{ip, cli, cfg}
+	manager = &service.DefaultManager{ip, cli, cfg, lc}
 }
 
 func cancelOnSignal() {

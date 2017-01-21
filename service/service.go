@@ -9,6 +9,7 @@ import (
 
 	"github.com/aandryashin/selenoid/config"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/api/types/container"
 )
 
 // Starter - interface to create session with cancellation ability
@@ -23,9 +24,10 @@ type Manager interface {
 
 // DefaultManager - struct for default implementation
 type DefaultManager struct {
-	IP     string
-	Client *client.Client
-	Config *config.Config
+	IP        string
+	Client    *client.Client
+	Config    *config.Config
+	LogConfig container.LogConfig
 }
 
 // Find - default implementation Manager interface
@@ -41,7 +43,7 @@ func (m *DefaultManager) Find(s string, v *string) (Starter, bool) {
 			return nil, false
 		}
 		log.Printf("Using docker service for %s %s\n", s, *v)
-		return &Docker{m.IP, m.Client, service}, true
+		return &Docker{m.IP, m.Client, service, m.LogConfig}, true
 	case []interface{}:
 		log.Printf("Using driver service for %s %s\n", s, *v)
 		return &Driver{service}, true

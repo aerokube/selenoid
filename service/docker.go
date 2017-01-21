@@ -19,9 +19,10 @@ import (
 
 // Docker - docker container manager
 type Docker struct {
-	IP      string
-	Client  *client.Client
-	Service *config.Browser
+	IP        string
+	Client    *client.Client
+	Service   *config.Browser
+	LogConfig container.LogConfig
 }
 
 // StartWithCancel - Starter interface implementation
@@ -43,6 +44,7 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 			PortBindings: nat.PortMap{
 				port: []nat.PortBinding{{HostIP: "0.0.0.0"}},
 			},
+			LogConfig:  docker.LogConfig,
 			Tmpfs:      docker.Service.Tmpfs,
 			ShmSize:    268435456,
 			Privileged: true,

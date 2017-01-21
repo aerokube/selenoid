@@ -60,18 +60,22 @@ func New(fn string, limit int) (*Config, error) {
 	return config, nil
 }
 
-// Load configuration file
-func (config *Config) Load() error {
-	config.lock.RLock()
-	defer config.lock.RUnlock()
-	f, err := ioutil.ReadFile(config.File)
+func Load(fileName string, v interface{}) error {
+	buf, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		return fmt.Errorf("error reading configuration file %s: %v", f, err)
+		return fmt.Errorf("error reading configuration file %q: %v", fileName, err)
 	}
-	if err := json.Unmarshal(f, &config.Browsers); err != nil {
-		return fmt.Errorf("error parsing configuration file %s: %v", f, err)
+	if err := json.Unmarshal(buf, v); err != nil {
+		return fmt.Errorf("error parsing configuration file %q: %v", fileName, err)
 	}
 	return nil
+}
+
+// Load configuration file
+func (config *Config) Load() error {
+	config.lock.Lock()
+	defer config.lock.Unlock()
+	return Load(config.File, &config.Browsers)
 }
 
 // Find - find concrete browser
