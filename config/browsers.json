@@ -4,7 +4,8 @@
 		"versions": {
 			"latest": {
 				"image": "selenoid/firefox",
-				"port": "4444"
+				"port": "4444",
+				"tmpfs": {"/tmp":"size=512m"}
 			}
 		}
 	},
@@ -13,7 +14,8 @@
 		"versions": {
 			"latest": {
 				"image": "selenoid/chrome",
-				"port": "4444"
+				"port": "4444",
+				"tmpfs": {"/tmp":"size=512m"}
 			}
 		}
 	}

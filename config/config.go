@@ -33,6 +33,7 @@ type Browser struct {
 	Image interface{} `json:"image"`
 	Port  string      `json:"port"`
 	Path  string      `json:"path"`
+	Tmpfs map[string]string
 }
 
 // Versions configuration
