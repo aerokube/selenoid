@@ -18,8 +18,8 @@ import (
 	"github.com/aandryashin/selenoid/protect"
 	"github.com/aandryashin/selenoid/service"
 	"github.com/aandryashin/selenoid/session"
-	"github.com/docker/docker/client"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 )
 
 var (

@@ -1,14 +1,14 @@
 package main
 
 import (
-	"testing"
-	"os"
+	. "github.com/aandryashin/matchers"
+	"github.com/aandryashin/selenoid/config"
+	"github.com/aandryashin/selenoid/session"
 	"io/ioutil"
 	"log"
+	"os"
 	"strings"
-	. "github.com/aandryashin/matchers"
-	"github.com/aandryashin/selenoid/session"
-	"github.com/aandryashin/selenoid/config"
+	"testing"
 )
 
 func configfile(s string) string {
@@ -177,7 +177,7 @@ func TestConfigConcurrentLoad(t *testing.T) {
 	defer os.Remove(fn)
 	cfg, _ = config.New(fn, 1)
 	done := make(chan struct{})
-	go func () {
+	go func() {
 		cfg.LoadNew()
 		done <- struct{}{}
 	}()
@@ -193,7 +193,7 @@ func TestConfigConcurrentLoadAndRead(t *testing.T) {
 		t.Error(err)
 	}
 	done := make(chan string)
-	go func () {
+	go func() {
 		v := ""
 		browser, _ := cfg.Find("firefox", &v)
 		done <- browser.Tmpfs["/tmp"]
@@ -210,14 +210,16 @@ func TestConfigConcurrentRead(t *testing.T) {
 		t.Error(err)
 	}
 	done := make(chan string)
-	go func () {
+	go func() {
 		v := ""
 		browser, _ := cfg.Find("firefox", &v)
-		done <- browser.Tmpfs["/tmp"]	}()
-	go func () {
+		done <- browser.Tmpfs["/tmp"]
+	}()
+	go func() {
 		v := ""
 		browser, _ := cfg.Find("firefox", &v)
-		done <- browser.Tmpfs["/tmp"]	}()
+		done <- browser.Tmpfs["/tmp"]
+	}()
 	<-done
 	<-done
 }

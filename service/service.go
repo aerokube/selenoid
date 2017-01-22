@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/aandryashin/selenoid/config"
-	"github.com/docker/docker/client"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 )
 
 // Starter - interface to create session with cancellation ability

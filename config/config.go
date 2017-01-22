@@ -51,7 +51,7 @@ type Config struct {
 	browsers map[string]*Versions
 }
 
-// Create and init new config
+// New config with proper init
 func New(filename string, limit int) (*Config, error) {
 	conf := &Config{Filename: filename, Limit: limit}
 	err := conf.LoadNew()
@@ -73,7 +73,7 @@ func Load(filename string, v interface{}) error {
 	return nil
 }
 
-// Load file to new object map
+// LoadNew load file to new object map
 func (config *Config) LoadNew() error {
 	browsers := make(map[string]*Versions)
 	err := Load(config.Filename, &browsers)
