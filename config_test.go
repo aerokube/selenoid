@@ -1,14 +1,14 @@
-package config
+package main
 
 import (
+	"testing"
+	"os"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
-	"testing"
-
 	. "github.com/aandryashin/matchers"
 	"github.com/aandryashin/selenoid/session"
+	"github.com/aandryashin/selenoid/config"
 )
 
 func configfile(s string) string {
@@ -30,28 +30,28 @@ func configfile(s string) string {
 func TestConfig(t *testing.T) {
 	fn := configfile(`{}`)
 	defer os.Remove(fn)
-	_, err := New(fn, 1)
+	_, err := config.New(fn, 1)
 	AssertThat(t, err, Is{nil})
 }
 
 func TestConfigError(t *testing.T) {
 	fn := configfile(`{}`)
 	os.Remove(fn)
-	_, err := New(fn, 1)
+	_, err := config.New(fn, 1)
 	AssertThat(t, strings.HasPrefix(err.Error(), "error reading configuration file"), Is{true})
 }
 
 func TestConfigParseError(t *testing.T) {
 	fn := configfile(`{`)
 	defer os.Remove(fn)
-	_, err := New(fn, 1)
+	_, err := config.New(fn, 1)
 	AssertThat(t, strings.HasPrefix(err.Error(), "error parsing configuration file"), Is{true})
 }
 
 func TestConfigEmptyState(t *testing.T) {
 	fn := configfile(`{}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 0)
+	config, _ := config.New(fn, 0)
 
 	state := config.State(session.NewMap(), 0, 0)
 	AssertThat(t, state.Total, EqualTo{0})
@@ -62,7 +62,7 @@ func TestConfigEmptyState(t *testing.T) {
 func TestConfigNonEmptyState(t *testing.T) {
 	fn := configfile(`{}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 1)
+	config, _ := config.New(fn, 1)
 
 	sessions := session.NewMap()
 	sessions.Put("0", &session.Session{Browser: "firefox", Version: "49.0", Quota: "unknown"})
@@ -76,7 +76,7 @@ func TestConfigNonEmptyState(t *testing.T) {
 func TestConfigEmptyVersions(t *testing.T) {
 	fn := configfile(`{"firefox":{}}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 1)
+	config, _ := config.New(fn, 1)
 
 	sessions := session.NewMap()
 	sessions.Put("0", &session.Session{Browser: "firefox", Version: "49.0", Quota: "unknown"})
@@ -90,7 +90,7 @@ func TestConfigEmptyVersions(t *testing.T) {
 func TestConfigNonEmptyVersions(t *testing.T) {
 	fn := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{}}}}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 1)
+	config, _ := config.New(fn, 1)
 
 	sessions := session.NewMap()
 	sessions.Put("0", &session.Session{Browser: "firefox", Version: "49.0", Quota: "unknown"})
@@ -104,7 +104,7 @@ func TestConfigNonEmptyVersions(t *testing.T) {
 func TestConfigFindMissingBrowser(t *testing.T) {
 	fn := configfile(`{}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 1)
+	config, _ := config.New(fn, 1)
 	v := ""
 	_, ok := config.Find("firefox", &v)
 	AssertThat(t, ok, Is{false})
@@ -113,7 +113,7 @@ func TestConfigFindMissingBrowser(t *testing.T) {
 func TestConfigFindDefaultVersionError(t *testing.T) {
 	fn := configfile(`{"firefox":{"default":""}}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 1)
+	config, _ := config.New(fn, 1)
 	v := ""
 	_, ok := config.Find("firefox", &v)
 	AssertThat(t, ok, Is{false})
@@ -122,7 +122,7 @@ func TestConfigFindDefaultVersionError(t *testing.T) {
 func TestConfigFindDefaultVersion(t *testing.T) {
 	fn := configfile(`{"firefox":{"default":"49.0"}}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 1)
+	config, _ := config.New(fn, 1)
 	v := ""
 	_, ok := config.Find("firefox", &v)
 	AssertThat(t, ok, Is{false})
@@ -132,7 +132,7 @@ func TestConfigFindDefaultVersion(t *testing.T) {
 func TestConfigFindFoundByEmptyPrefix(t *testing.T) {
 	fn := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{}}}}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 1)
+	config, _ := config.New(fn, 1)
 	v := ""
 	_, ok := config.Find("firefox", &v)
 	AssertThat(t, ok, Is{true})
@@ -142,7 +142,7 @@ func TestConfigFindFoundByEmptyPrefix(t *testing.T) {
 func TestConfigFindFoundByPrefix(t *testing.T) {
 	fn := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{}}}}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 1)
+	config, _ := config.New(fn, 1)
 	v := "49"
 	_, ok := config.Find("firefox", &v)
 	AssertThat(t, ok, Is{true})
@@ -152,7 +152,7 @@ func TestConfigFindFoundByPrefix(t *testing.T) {
 func TestConfigFindFoundByMatch(t *testing.T) {
 	fn := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{}}}}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 1)
+	config, _ := config.New(fn, 1)
 	v := "49.0"
 	_, ok := config.Find("firefox", &v)
 	AssertThat(t, ok, Is{true})
@@ -162,7 +162,7 @@ func TestConfigFindFoundByMatch(t *testing.T) {
 func TestConfigFindImage(t *testing.T) {
 	fn := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{"image":"image","port":"5555", "path":"/"}}}}`)
 	defer os.Remove(fn)
-	config, _ := New(fn, 1)
+	config, _ := config.New(fn, 1)
 	v := "49.0"
 	b, ok := config.Find("firefox", &v)
 	AssertThat(t, ok, Is{true})
@@ -171,3 +171,4 @@ func TestConfigFindImage(t *testing.T) {
 	AssertThat(t, b.Port, EqualTo{"5555"})
 	AssertThat(t, b.Path, EqualTo{"/"})
 }
+
