@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/aandryashin/selenoid/session"
+	"strings"
 )
 
 // Quota - number of sessions for quota user
@@ -94,7 +95,8 @@ func (config *Config) Find(name string, version *string) (*Browser, bool) {
 		}
 	}
 	for v, b := range browser.Versions {
-		if v == *version {
+		if strings.HasPrefix(v, *version) {
+			*version = v
 			return b, true
 		}
 	}
