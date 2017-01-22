@@ -38,14 +38,14 @@ func TestConfigError(t *testing.T) {
 	fn := configfile(`{}`)
 	os.Remove(fn)
 	_, err := config.New(fn, 1)
-	AssertThat(t, strings.HasPrefix(err.Error(), "error reading configuration file"), Is{true})
+	AssertThat(t, strings.HasPrefix(err.Error(), "config: read error:"), Is{true})
 }
 
 func TestConfigParseError(t *testing.T) {
 	fn := configfile(`{`)
 	defer os.Remove(fn)
 	_, err := config.New(fn, 1)
-	AssertThat(t, strings.HasPrefix(err.Error(), "error parsing configuration file"), Is{true})
+	AssertThat(t, strings.HasPrefix(err.Error(), "config: parse error:"), Is{true})
 }
 
 func TestConfigEmptyState(t *testing.T) {
@@ -172,3 +172,52 @@ func TestConfigFindImage(t *testing.T) {
 	AssertThat(t, b.Path, EqualTo{"/"})
 }
 
+func TestConfigConcurrentLoad(t *testing.T) {
+	fn := configfile(`{"firefox":{"default":""}}`)
+	defer os.Remove(fn)
+	cfg, _ = config.New(fn, 1)
+	done := make(chan struct{})
+	go func () {
+		cfg.LoadNew()
+		done <- struct{}{}
+	}()
+	cfg.LoadNew()
+	<-done
+}
+
+func TestConfigConcurrentLoadAndRead(t *testing.T) {
+	fn := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{"image":"image","port":"5555", "path":"/", "tmpfs": {"/tmp":"size=64k"}}}}}`)
+	defer os.Remove(fn)
+	cfg, err := config.New(fn, 1)
+	if err != nil {
+		t.Error(err)
+	}
+	done := make(chan string)
+	go func () {
+		v := ""
+		browser, _ := cfg.Find("firefox", &v)
+		done <- browser.Tmpfs["/tmp"]
+	}()
+	cfg.LoadNew()
+	<-done
+}
+
+func TestConfigConcurrentRead(t *testing.T) {
+	fn := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{"image":"image","port":"5555", "path":"/", "tmpfs": {"/tmp":"size=64k"}}}}}`)
+	defer os.Remove(fn)
+	cfg, err := config.New(fn, 1)
+	if err != nil {
+		t.Error(err)
+	}
+	done := make(chan string)
+	go func () {
+		v := ""
+		browser, _ := cfg.Find("firefox", &v)
+		done <- browser.Tmpfs["/tmp"]	}()
+	go func () {
+		v := ""
+		browser, _ := cfg.Find("firefox", &v)
+		done <- browser.Tmpfs["/tmp"]	}()
+	<-done
+	<-done
+}

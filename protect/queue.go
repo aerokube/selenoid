@@ -15,7 +15,6 @@ type Queue struct {
 	queued  chan struct{}
 	pending chan struct{}
 	used    chan struct{}
-	size    int
 }
 
 // Protect - handler to control limit of sessions
@@ -73,11 +72,6 @@ func (q *Queue) Release() {
 	<-q.used
 }
 
-// Size - limit of sessions
-func (q *Queue) Size() int {
-	return q.size
-}
-
 // New - create and initialize queue
 func New(size int) *Queue {
 	return &Queue{
@@ -85,6 +79,5 @@ func New(size int) *Queue {
 		make(chan struct{}, math.MaxUint32),
 		make(chan struct{}, math.MaxUint32),
 		make(chan struct{}, math.MaxUint32),
-		size,
 	}
 }

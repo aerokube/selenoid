@@ -45,45 +45,52 @@ type Versions struct {
 
 // Config current configuration
 type Config struct {
-	lock     sync.RWMutex
-	File     string
+	Filename string
 	Limit    int
-	Browsers map[string]*Versions
+	lock     sync.RWMutex
+	browsers map[string]*Versions
 }
 
-// New configuration
-func New(fn string, limit int) (*Config, error) {
-	config := &Config{File: fn, Limit: limit, Browsers: make(map[string]*Versions)}
-	err := config.Load()
+// Create and init new config
+func New(filename string, limit int) (*Config, error) {
+	conf := &Config{Filename: filename, Limit: limit}
+	err := conf.LoadNew()
 	if err != nil {
 		return nil, err
 	}
-	return config, nil
+	return conf, nil
 }
 
-func Load(fileName string, v interface{}) error {
-	buf, err := ioutil.ReadFile(fileName)
+// Load file with any json structure
+func Load(filename string, v interface{}) error {
+	buf, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return fmt.Errorf("error reading configuration file %q: %v", fileName, err)
+		return fmt.Errorf("config: read error: %v", err)
 	}
-	if err := json.Unmarshal(buf, v); err != nil {
-		return fmt.Errorf("error parsing configuration file %q: %v", fileName, err)
+	if err := json.Unmarshal(buf, &v); err != nil {
+		return fmt.Errorf("config: parse error: %v", err)
 	}
 	return nil
 }
 
-// Load configuration file
-func (config *Config) Load() error {
+// Load file to new object map
+func (config *Config) LoadNew() error {
+	browsers := make(map[string]*Versions)
+	err := Load(config.Filename, &browsers)
+	if err != nil {
+		return err
+	}
 	config.lock.Lock()
-	defer config.lock.Unlock()
-	return Load(config.File, &config.Browsers)
+	config.browsers = browsers
+	config.lock.Unlock()
+	return nil
 }
 
 // Find - find concrete browser
 func (config *Config) Find(name string, version *string) (*Browser, bool) {
 	config.lock.RLock()
 	defer config.lock.RUnlock()
-	browser, ok := config.Browsers[name]
+	browser, ok := config.browsers[name]
 	if !ok {
 		return nil, false
 	}
@@ -108,7 +115,7 @@ func (config *Config) State(sessions *session.Map, queued, pending int) *State {
 	config.lock.RLock()
 	defer config.lock.RUnlock()
 	state := &State{config.Limit, 0, queued, pending, make(Browsers)}
-	for n, b := range config.Browsers {
+	for n, b := range config.browsers {
 		state.Browsers[n] = make(Version)
 		for v := range b.Versions {
 			state.Browsers[n][v] = make(Quota)
