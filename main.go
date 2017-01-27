@@ -20,6 +20,7 @@ import (
 	"github.com/aandryashin/selenoid/session"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/facebookgo/grace/gracehttp"
 )
 
 var (
@@ -115,5 +116,9 @@ func handler() http.Handler {
 
 func main() {
 	log.Printf("Listening on %s\n", listen)
-	log.Fatal(http.ListenAndServe(listen, handler()))
+	log.Fatal(
+		gracehttp.Serve([]*http.Server{
+			{Addr: listen, Handler: handler()},
+		}...),
+	)
 }

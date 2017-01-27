@@ -58,3 +58,10 @@ You can easily configure the number of simultaneously running containers:
 ## Usage
 
 Access to remote web driver as regular selenium hub - `http://host:4444/wd/hub`
+
+## Graceful Restart
+* To **gracefully restart** (without losing connections) send **SIGUSR2**:
+```
+# kill -USR2 <pid>
+# docker kill -s USR2 <container-id-or-name>
+```
