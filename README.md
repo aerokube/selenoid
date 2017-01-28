@@ -7,61 +7,38 @@
 This repository contains a powerful [Go](http://golang.org/) implementation of original [Selenium](http://github.com/SeleniumHQ/selenium) hub code.
 
 ## Building
-* Install [Go Lang](https://golang.org/doc/install)
-* Don't forget to setup `$GOPATH` [properly](https://github.com/golang/go/wiki/GOPATH)
-* Download govendor - `go get -u github.com/kardianos/govendor`
-* Download selenoid - `go get -d github.com/aandryashin/selenoid`
-* Go to project directory - `cd $GOPATH/src/github.com/aandryashin/selenoid`
-* Checkout dependencies - `govendor sync`
-* Build the project - `go build`
-* Show selenoid help - `./selenoid --help`
-
-## Running
-* Install [Docker](https://docs.docker.com/engine/installation/)
-* Pull docker images: 
- * `docker pull selenoid/firefox`
- * `docker pull selenoid/chrome`
-* Copy selenoid binary from previous section - `cp $GOPATH/src/github.com/aandryashin/selenoid/selenoid /usr/bin/selenoid`
-* Copy the following configration file to `/etc/selenoid/browsers.json`
-```json
-{
-  "firefox": {
-    "default": "latest",
-    "versions": {
-      "latest": {
-        "image": "selenoid/firefox:latest",
-        "port": "4444"
-      }
-    }
-  },
-  "chrome": {
-    "default": "latest",
-    "versions": {
-      "latest": {
-        "image": "selenoid/chrome:latest",
-        "port": "4444"
-      }
-    }
-  }
-}
+1) Install [Golang](https://golang.org/doc/install)
+2) Setup `$GOPATH` [properly](https://github.com/golang/go/wiki/GOPATH)
+3) Install [govendor](https://github.com/kardianos/govendor): 
 ```
-* Run selenoid - `selenoid -conf /etc/selenoid/browsers.json`
-
-## Configuration
-
-### Limit
-
-You can easily configure the number of simultaneously running containers:
-
-`selenoid -limit 10 -conf /etc/selenoid/browsers.json`
+$ go get -u github.com/kardianos/govendor
+```
+4) Get Selenoid source:
+```
+$ go get -d github.com/aandryashin/selenoid
+```
+5) Go to project directory:
+```
+$ cd $GOPATH/src/github.com/aandryashin/selenoid
+```
+6) Checkout dependencies:
+```
+$ govendor sync
+```
+7) Build source:
+```
+$ go build
+```
+* Run Selenoid:
+```
+$ ./selenoid --help
+```
+* To build Docker container type:
+```
+$ GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build
+$ docker build -t selenoid:latest .
+```
 
 ## Usage
 
-Access to remote web driver as regular selenium hub - `http://host:4444/wd/hub`
-
-## Graceful Restart
-* To **gracefully restart** (without losing connections) send **SIGUSR2**:
-```
-# kill -USR2 <pid>
-# docker kill -s USR2 <container-id-or-name>
-```
+See https://godoc.org/github.com/aandryashin/selenoid.
