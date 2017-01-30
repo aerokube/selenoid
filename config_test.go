@@ -59,7 +59,6 @@ func TestConfigEmptyState(t *testing.T) {
 	conf.Load(confFile, logConfPath)
 
 	state := conf.State(session.NewMap(), 0, 0, 0)
-	fmt.Println(state)
 	AssertThat(t, state.Total, EqualTo{0})
 	AssertThat(t, state.Queued, EqualTo{0})
 	AssertThat(t, state.Pending, EqualTo{0})
