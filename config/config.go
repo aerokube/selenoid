@@ -1,14 +1,15 @@
 package config
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"sync"
 
 	"github.com/aandryashin/selenoid/session"
 	"strings"
+	"sync"
+	"io/ioutil"
+	"fmt"
+	"encoding/json"
+	"github.com/docker/docker/api/types/container"
 )
 
 // Quota - number of sessions for quota user
@@ -45,44 +46,47 @@ type Versions struct {
 
 // Config current configuration
 type Config struct {
-	Filename string
-	Limit    int
-	lock     sync.RWMutex
-	browsers map[string]*Versions
+	lock               sync.RWMutex
+	Browsers           map[string]Versions
+	ContainerLogs *container.LogConfig
 }
 
-// New config with proper init
-func New(filename string, limit int) (*Config, error) {
-	conf := &Config{Filename: filename, Limit: limit}
-	err := conf.LoadNew()
-	if err != nil {
-		return nil, err
-	}
-	return conf, nil
+// NewConfig creates new config
+func NewConfig() *Config {
+	return &Config{Browsers: make(map[string]Versions), ContainerLogs: new(container.LogConfig)}
 }
 
-// Load file with any json structure
-func Load(filename string, v interface{}) error {
+func loadJSON(filename string, v interface{}) error {
 	buf, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return fmt.Errorf("config: read error: %v", err)
+		return fmt.Errorf("read error: %v", err)
 	}
-	if err := json.Unmarshal(buf, &v); err != nil {
-		return fmt.Errorf("config: parse error: %v", err)
+	if err := json.Unmarshal(buf, v); err != nil {
+		return fmt.Errorf("parse error: %v", err)
 	}
 	return nil
 }
 
-// LoadNew load file to new object map
-func (config *Config) LoadNew() error {
-	browsers := make(map[string]*Versions)
-	err := Load(config.Filename, &browsers)
+// Load loads config from file
+func (config *Config) Load(browsers, containerLogs string) error {
+	log.Println("Loading configuration files...")
+	br := make(map[string]Versions)
+	err := loadJSON(browsers, &br)
 	if err != nil {
-		return err
+		return fmt.Errorf("browsers config: %v", err)
+	}
+	log.Printf("Loaded configuration from [%s]\n", browsers)
+	var cl *container.LogConfig
+	err = loadJSON(containerLogs, &cl)
+	if err != nil {
+		log.Printf("Using default containers log configuration because of: %v\n", err)
+		cl = &container.LogConfig{}
+	} else {
+		log.Printf("Loaded configuration from [%s]\n", containerLogs)
 	}
 	config.lock.Lock()
-	config.browsers = browsers
-	config.lock.Unlock()
+	defer config.lock.Unlock()
+	config.Browsers, config.ContainerLogs = br, cl
 	return nil
 }
 
@@ -90,7 +94,7 @@ func (config *Config) LoadNew() error {
 func (config *Config) Find(name string, version *string) (*Browser, bool) {
 	config.lock.RLock()
 	defer config.lock.RUnlock()
-	browser, ok := config.browsers[name]
+	browser, ok := config.Browsers[name]
 	if !ok {
 		return nil, false
 	}
@@ -111,11 +115,11 @@ func (config *Config) Find(name string, version *string) (*Browser, bool) {
 }
 
 // State - get current state
-func (config *Config) State(sessions *session.Map, queued, pending int) *State {
+func (config *Config) State(sessions *session.Map, limit, queued, pending int) *State {
 	config.lock.RLock()
 	defer config.lock.RUnlock()
-	state := &State{config.Limit, 0, queued, pending, make(Browsers)}
-	for n, b := range config.browsers {
+	state := &State{limit, 0, queued, pending, make(Browsers)}
+	for n, b := range config.Browsers {
 		state.Browsers[n] = make(Version)
 		for v := range b.Versions {
 			state.Browsers[n][v] = make(Quota)

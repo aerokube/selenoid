@@ -3,7 +3,7 @@ language: go
 go:
   - 1.7
 script:
-  - go test -coverprofile=coverage.txt -covermode=atomic -coverpkg .,github.com/aandryashin/selenoid/session,github.com/aandryashin/selenoid/config,github.com/aandryashin/selenoid/ensure,github.com/aandryashin/selenoid/protect
+  - go test -coverprofile=coverage.txt -covermode=atomic -coverpkg .,github.com/aandryashin/selenoid/session,github.com/aandryashin/selenoid/config,github.com/aandryashin/selenoid/protect
 
 before_install:
   - go get -u github.com/kardianos/govendor

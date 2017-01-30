@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/aandryashin/selenoid/ensure"
 	"math"
 )
 
@@ -19,7 +18,7 @@ type Queue struct {
 
 // Protect - handler to control limit of sessions
 func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
-	return ensure.CloseNotifier(func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println("[NEW_REQUEST]")
 		cn := w.(http.CloseNotifier)
 		s := time.Now()
@@ -37,7 +36,7 @@ func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
 		<-q.queued
 		log.Println("[NEW_REQUEST_ACCEPTED]")
 		next.ServeHTTP(w, r)
-	})
+	}
 }
 
 // Used - get created sessions

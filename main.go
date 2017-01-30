@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -14,65 +13,66 @@ import (
 	"time"
 
 	"github.com/aandryashin/selenoid/config"
-	"github.com/aandryashin/selenoid/ensure"
 	"github.com/aandryashin/selenoid/protect"
 	"github.com/aandryashin/selenoid/service"
 	"github.com/aandryashin/selenoid/session"
-	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
-	"github.com/facebookgo/grace/gracehttp"
 )
 
 var (
 	disableDocker bool
-	dockerAPI     string
 	listen        string
 	timeout       time.Duration
 	limit         int
-	conf          string
 	sessions      = session.NewMap()
-	cfg           *config.Config
+	confPath      string
+	logConfPath   string
+	conf          *config.Config
 	queue         *protect.Queue
 	manager       service.Manager
 )
 
 func init() {
-	lcFilename := ""
 	flag.BoolVar(&disableDocker, "disable-docker", false, "Disable docker support")
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
-	flag.StringVar(&conf, "conf", "config/browsers.json", "Browsers configuration file")
-	flag.StringVar(&lcFilename, "log-conf", "", "Container logging configuration file")
-	flag.StringVar(&dockerAPI, "docker-api", "unix:///var/run/docker.sock", "Docker api url")
+	flag.StringVar(&confPath, "conf", "config/browsers.json", "Browsers configuration file")
+	flag.StringVar(&logConfPath, "log-conf", "config/container-logs.json", "Container logging configuration file")
 	flag.IntVar(&limit, "limit", 5, "Simultaneous container runs")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
 	flag.Parse()
-	var lc container.LogConfig
-	if lcFilename != "" {
-		err := config.Load(lcFilename, &lc)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+
 	queue = protect.New(limit)
-	var err error
-	cfg, err = config.New(conf, limit)
+	conf = config.NewConfig()
+	err := conf.Load(confPath, logConfPath)
 	if err != nil {
-		log.Fatalf("error loading configuration: %v\n", err)
+		log.Fatalf("%s: %v", os.Args[0], err)
+	}
+	onSIGHUP(func() {
+		err := conf.Load(confPath, logConfPath)
+		if err != nil {
+			log.Printf("%s: %v", os.Args[0], err)
+		}
+	})
+	cancelOnSignal()
+	if disableDocker {
+		manager = &service.DefaultManager{Config: conf}
+		return
 	}
 	var cli *client.Client
-	if !disableDocker {
-		cli, err = client.NewClient(dockerAPI, client.DefaultVersion, nil, nil)
-		if err != nil {
-			log.Fatal("unable to create client connection to docker daemon.")
-		}
+	dockerHost := os.Getenv("DOCKER_HOST")
+	if dockerHost == "" {
+		dockerHost = client.DefaultDockerHost
 	}
-	u, err := url.Parse(dockerAPI)
+	_, addr, _, err := client.ParseHost(dockerHost)
 	if err != nil {
-		log.Fatalf("malformed docker api url %s: %v\n,", dockerAPI, err)
+		log.Fatal(err)
 	}
-	ip, _, _ := net.SplitHostPort(u.Host)
-	cancelOnSignal()
-	manager = &service.DefaultManager{ip, cli, cfg, lc}
+	ip, _, _ := net.SplitHostPort(addr)
+	cli, err = client.NewClient(dockerHost, client.DefaultVersion, nil, nil)
+	if err != nil {
+		log.Fatalf("docker error: %v\n", err)
+	}
+	manager = &service.DefaultManager{ip, cli, conf}
 }
 
 func cancelOnSignal() {
@@ -87,11 +87,32 @@ func cancelOnSignal() {
 	}()
 }
 
+func onSIGHUP(fn func()) {
+	sig := make(chan os.Signal)
+	signal.Notify(sig, syscall.SIGHUP)
+	go func() {
+		for {
+			<-sig
+			fn()
+		}
+	}()
+}
+
 func mux() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/session", ensure.Post(queue.Protect(create)))
+	mux.HandleFunc("/session", queue.Protect(post(create)))
 	mux.HandleFunc("/session/", proxy)
 	return mux
+}
+
+func post(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		next.ServeHTTP(w, r)
+	}
 }
 
 func handler() http.Handler {
@@ -109,16 +130,12 @@ func handler() http.Handler {
 		}))
 	root.Handle("/status", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			json.NewEncoder(w).Encode(cfg.State(sessions, queue.Queued(), queue.Pending()))
+			json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
 		}))
 	return root
 }
 
 func main() {
 	log.Printf("Listening on %s\n", listen)
-	log.Fatal(
-		gracehttp.Serve([]*http.Server{
-			{Addr: listen, Handler: handler()},
-		}...),
-	)
+	log.Fatal(http.ListenAndServe(listen, handler()))
 }
