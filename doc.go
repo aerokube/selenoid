@@ -4,6 +4,7 @@ Selenoid is a powerful implementation of Selenium Hub using Docker or standalone
 Usage
 
 1) Install [Docker](https://docs.docker.com/engine/installation/)
+
 2) Pull browser images:
   $ docker pull selenoid/firefox:latest
   $ docker pull selenoid/chrome:latest
