@@ -8,7 +8,9 @@ This repository contains a powerful [Go](http://golang.org/) implementation of o
 
 ## Building
 1) Install [Golang](https://golang.org/doc/install)
+
 2) Setup `$GOPATH` [properly](https://github.com/golang/go/wiki/GOPATH)
+
 3) Install [govendor](https://github.com/kardianos/govendor): 
 ```
 $ go get -u github.com/kardianos/govendor
