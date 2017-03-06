@@ -33,7 +33,7 @@ Usage
     }
   }
 5) Run Selenoid container:
-  $ docker run -d --name selenoid -v /etc/selenoid:/etc/selenoid:ro -v /var/run:/var/run --net host aandryashin/selenoid:1.0.0
+  $ docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.0.0
 6) Access Selenoid as regular Selenium hub:
   http://localhost:4444/wd/hub
 
