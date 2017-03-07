@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"errors"
+
 	"github.com/aandryashin/selenoid/config"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -100,7 +101,7 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 
 func removeContainer(ctx context.Context, cli *client.Client, id string) {
 	fmt.Println("Removing container", id)
-	err := cli.ContainerRemove(ctx, id, types.ContainerRemoveOptions{Force: true})
+	err := cli.ContainerRemove(ctx, id, types.ContainerRemoveOptions{Force: true, RemoveVolumes: true})
 	if err != nil {
 		fmt.Println("error: unable to remove container", id, err)
 		return
