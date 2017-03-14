@@ -17,6 +17,7 @@ import (
 	"github.com/aandryashin/selenoid/service"
 	"github.com/aandryashin/selenoid/session"
 	"github.com/docker/docker/client"
+	"fmt"
 )
 
 var (
@@ -126,7 +127,9 @@ func handler() http.Handler {
 		}))
 	root.Handle("/error", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			http.Error(w, `{"value":{"message":"Session not found"},"status":13}`, http.StatusNotFound)
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			fmt.Fprintln(w, `{"value":{"message":"Session not found"},"status":13}`)
 		}))
 	root.Handle("/status", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
