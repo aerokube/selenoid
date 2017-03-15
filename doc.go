@@ -45,6 +45,7 @@ To gracefully restart (without losing connections) send SIGUSR2:
 
 Flags
 
+The following flags are supported:
   -conf /path/to/config.json - path to main Selenoid config (default - config/browsers.json)
   -disable-docker - whether to disable Docker functionality (used to start processes instead of containers, default - false)
   -log-conf /path/to/container-logs.json - path to container logging Selenoid config (default - config/container-logs.json)
