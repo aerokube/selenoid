@@ -46,12 +46,18 @@ To gracefully restart (without losing connections) send SIGUSR2:
 Flags
 
 The following flags are supported:
-  -conf /path/to/config.json - path to main Selenoid config (default - config/browsers.json)
-  -disable-docker - whether to disable Docker functionality (used to start processes instead of containers, default - false)
-  -log-conf /path/to/container-logs.json - path to container logging Selenoid config (default - config/container-logs.json)
-  -limit 5 - max number of simultaneous sessions to create (default - 5)
-  -listen host:port - host and port to listen on (default - :4444)
-  -timeout 60s - session idle timeout, written like 30s, 1m and so on (default - 60s)
+  -conf string
+    	Browsers configuration file (default "config/browsers.json")
+  -disable-docker
+    	Disable docker support
+  -limit int
+    	Simultaneous container runs (default 5)
+  -listen string
+    	Network address to accept connections (default ":4444")
+  -log-conf string
+    	Container logging configuration file (default "config/container-logs.json")
+  -timeout duration
+    	Session idle timeout in time.Duration format (default 1m0s)
 
 Building
 
