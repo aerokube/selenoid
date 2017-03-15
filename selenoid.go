@@ -124,10 +124,16 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(resp.StatusCode)
 	var s struct {
+		Value struct {
+			ID string `json:"sessionId"`
+		}
 		ID string `json:"sessionId"`
 	}
 	tee := io.TeeReader(resp.Body, w)
 	json.NewDecoder(tee).Decode(&s)
+	if s.ID == "" {
+		s.ID = s.Value.ID
+	}
 	if s.ID == "" {
 		log.Printf("[SESSION_FAILED] Bad response from [%s] - [%v]\n", u.String(), resp.Status)
 		queue.Drop()
