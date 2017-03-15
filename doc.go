@@ -43,6 +43,15 @@ To gracefully restart (without losing connections) send SIGUSR2:
   # kill -USR2 <pid>
   # docker kill -s USR2 <container-id-or-name>
 
+Flags
+
+  -conf /path/to/config.json - path to main Selenoid config (default - config/browsers.json)
+  -disable-docker - whether to disable Docker functionality (used to start processes instead of containers, default - false)
+  -log-conf /path/to/container-logs.json - path to container logging Selenoid config (default - config/container-logs.json)
+  -limit 5 - max number of simultaneous sessions to create (default - 5)
+  -listen host:port - host and port to listen on (default - :4444)
+  -timeout 60s - session idle timeout, written like 30s, 1m and so on (default - 60s)
+
 Building
 
 See https://github.com/aandryashin/selenoid.
