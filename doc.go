@@ -85,6 +85,7 @@ Users are extracted from basic HTTP authentication headers.
 Sending status to external systems
 
 To send Selenoid status data described above you can use Telegraf (https://github.com/influxdata/telegraf). The following steps show how to send status to Graphite:
+
 1) Pull latest Telegraf Docker container:
   # docker pull telegraf:alpine
 2) Generate configuration file:
