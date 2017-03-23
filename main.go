@@ -12,12 +12,13 @@ import (
 	"syscall"
 	"time"
 
+	"fmt"
+
 	"github.com/aandryashin/selenoid/config"
 	"github.com/aandryashin/selenoid/protect"
 	"github.com/aandryashin/selenoid/service"
 	"github.com/aandryashin/selenoid/session"
 	"github.com/docker/docker/client"
-	"fmt"
 )
 
 var (
