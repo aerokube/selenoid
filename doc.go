@@ -37,6 +37,11 @@ Usage
 6) Access Selenoid as regular Selenium hub:
   http://localhost:4444/wd/hub
 
+Timezone
+
+When used in Docker container Selenoid will have timezone set to UTC. To set custom timezone pass TZ environment variable to Docker:
+   $ docker run -d --name selenoid -p 4444:4444 -e TZ=Europe/Moscow -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.0.0
+
 Graceful Restart
 
 To gracefully restart (without losing connections) send SIGUSR2:
