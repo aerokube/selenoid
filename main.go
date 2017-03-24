@@ -140,6 +140,7 @@ func handler() http.Handler {
 }
 
 func main() {
+	log.Printf("Timezone: %s\n", time.Local)
 	log.Printf("Listening on %s\n", listen)
 	log.Fatal(http.ListenAndServe(listen, handler()))
 }

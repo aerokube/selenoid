@@ -34,8 +34,7 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	}
 	ctx := context.Background()
 	log.Println("Creating Docker container", docker.Service.Image, "...")
-	tz, _ := time.Now().Zone()
-	env := []string{fmt.Sprintf("TZ=%s", tz)}
+	env := []string{fmt.Sprintf("TZ=%s", time.Local)}
 	resp, err := docker.Client.ContainerCreate(ctx,
 		&container.Config{
 			Hostname:     "localhost",
