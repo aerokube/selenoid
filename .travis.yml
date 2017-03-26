@@ -3,6 +3,9 @@ language: go
 go:
   - 1.8
 
+services:
+  - docker
+
 script:
   - go test -coverprofile=coverage.txt -covermode=atomic -coverpkg .,github.com/aandryashin/selenoid/session,github.com/aandryashin/selenoid/config,github.com/aandryashin/selenoid/protect
   - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build  
