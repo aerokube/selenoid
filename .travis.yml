@@ -17,12 +17,12 @@ before_install:
 
 deploy:
   - provider: script
-    script: docker-push.sh latest
+    script: travis/docker-push.sh latest
     skip_cleanup: true
     on:
       branch: master
   - provider: script
-    script: docker-push.sh $TRAVIS_TAG
+    script: travis/docker-push.sh $TRAVIS_TAG
     skip_cleanup: true
     on:
       tags: true
