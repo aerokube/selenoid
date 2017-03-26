@@ -1,13 +1,27 @@
 language: go
 
 go:
-  - 1.7
+  - 1.8
+
 script:
   - go test -coverprofile=coverage.txt -covermode=atomic -coverpkg .,github.com/aandryashin/selenoid/session,github.com/aandryashin/selenoid/config,github.com/aandryashin/selenoid/protect
+  - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build  
 
 before_install:
   - go get -u github.com/kardianos/govendor
   - govendor sync
+
+deploy:
+  - provider: script
+    script: docker-push.sh latest
+    skip_cleanup: true
+    on:
+      branch: master
+  - provider: script
+    script: docker-push.sh $TRAVIS_TAG
+    skip_cleanup: true
+    on:
+      tags: true
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
