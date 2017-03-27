@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"errors"
+
 	"github.com/aandryashin/selenoid/config"
 )
 
@@ -52,7 +53,7 @@ func (d *Driver) StartWithCancel() (*url.URL, func(), error) {
 		log.Println(e)
 		return nil, nil, e
 	}
-	err = wait(u.String(), 10*time.Second)
+	err = wait(u.String(), 30*time.Second)
 	if err != nil {
 		stopProcess(cmd)
 		return nil, nil, err

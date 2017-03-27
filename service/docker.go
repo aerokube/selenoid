@@ -90,7 +90,7 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	}
 	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, docker.Service.Path)
 	s := time.Now()
-	err = wait(host, 10*time.Second)
+	err = wait(host, 30*time.Second)
 	if err != nil {
 		removeContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, err
