@@ -121,6 +121,7 @@ func handler() http.Handler {
 	root := http.NewServeMux()
 	root.Handle("/wd/hub/", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Content-Type", "application/json")
 			r.URL.Scheme = "http"
 			r.URL.Host = (&request{r}).localaddr()
 			r.URL.Path = strings.TrimPrefix(r.URL.Path, "/wd/hub")
