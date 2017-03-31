@@ -45,3 +45,9 @@ $ docker build -t selenoid:latest .
 ## Usage
 
 See https://godoc.org/github.com/aandryashin/selenoid.
+
+## Simple UI
+
+Selenoid has standalone UI to show current quota, queue and browser usage
+
+https://github.com/lanwen/selenoid-ui
