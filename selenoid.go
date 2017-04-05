@@ -167,7 +167,11 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				sess, ok := sessions.Get(id)
 				if ok {
 					r.URL.Host, r.URL.Path = sess.URL.Host, sess.URL.Path+r.URL.Path
-					close(sess.Timeout)
+					select {
+					case <-sess.Timeout:
+					default:
+						close(sess.Timeout)
+					}
 					if r.Method == http.MethodDelete && len(fragments) == 3 {
 						cancel.fn = sess.Cancel
 						sessions.Remove(id)
