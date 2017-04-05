@@ -155,7 +155,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 
 func proxy(w http.ResponseWriter, r *http.Request) {
 	done := make(chan struct{ fn func() })
-	go func() {
+	go func(w http.ResponseWriter, r *http.Request) {
 		cancel := struct{ fn func() }{func() {}}
 		defer func() {
 			done <- cancel
@@ -183,7 +183,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				r.URL.Path = "/error"
 			},
 		}).ServeHTTP(w, r)
-	}()
+	}(w, r)
 	(<-done).fn()
 }
 
