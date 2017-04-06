@@ -77,7 +77,7 @@ The following flags are supported by ```selenoid``` command:
     Session idle timeout in time.Duration format (default 1m0s)
 ```
 
-### Main Configuration File
+### Browsers Configuration File
 
 Selenoid uses simple JSON configuration files of the following format (we use **#** for comments here):
 ```
@@ -147,6 +147,32 @@ The last field - **path** is needed to specify relative path to the URL where a 
 When used in Docker container Selenoid will have timezone set to UTC. To set custom timezone pass TZ environment variable to Docker:
 ```
 $ docker run -d --name selenoid -p 4444:4444 -e TZ=Europe/Moscow -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.0.0
+```
+
+### Logging Configuration File
+By default Docker container logs are saved to host machine hard drive. When using Selenoid for local development that's ok. But in big Selenium cluster you may want to send logs to some centralized storage like [Logstash](https://www.elastic.co/products/logstash) or [Graylog](https://www.graylog.org/). Docker provides such functionality by so-called [logging drivers](https://docs.docker.com/engine/admin/logging/overview/). Selenoid logging configuration file allows to specify which logging driver to use globally for all started Docker containers with browsers. Configuration file has the following format:
+```
+{
+    "Type" : "<driver-type>",
+    "Config" : {
+      "key1" : "value1",
+      "key2" : "value2"
+    }
+}
+```
+Here **<driver-type>** - is a supported Docker logging driver type like ```syslog```, ```journald``` or ```awslogs```. ```Config``` is a list of key-value pairs used to configure selected driver. For example these Docker logging parameters...
+```
+--log-driver=syslog --log-opt syslog-address=tcp://192.168.0.42:123 --log-opt syslog-facility=daemon
+```
+... are equivalent to the following Selenoid logging configuration:
+```
+{
+    "Type" : "syslog",
+    "Config" : {
+      "syslog-address" : "tcp://192.168.0.42:123",
+      "syslog-facility" : "daemon"
+    }
+}
 ```
 
 ### Reloading Configuration
