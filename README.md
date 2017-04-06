@@ -158,7 +158,7 @@ By default Docker container logs are saved to host machine hard drive. When usin
     }
 }
 ```
-Here **<driver-type>** - is a supported Docker logging driver type like ```syslog```, ```journald``` or ```awslogs```. ```Config``` is a list of key-value pairs used to configure selected driver. For example these Docker logging parameters...
+Here ```<driver-type>``` - is a supported Docker logging driver type like ```syslog```, ```journald``` or ```awslogs```. ```Config``` is a list of key-value pairs used to configure selected driver. For example these Docker logging parameters...
 ```
 --log-driver=syslog --log-opt syslog-address=tcp://192.168.0.42:123 --log-opt syslog-facility=daemon
 ```
