@@ -181,7 +181,7 @@ To reload configuration without restart send SIGHUP:
 # docker kill -s HUP <container-id-or-name>
 ```
 
-### Usage statistics
+## Usage statistics
 
 Selenoid calculates usage statistics that can be accessed with HTTP request:
 ```
@@ -206,7 +206,7 @@ $ curl http://localhost:4444/status
 ```
 Users are extracted from basic HTTP authentication headers.
 
-## Sending statistics to external systems
+### Sending statistics to external systems
 
 To send Selenoid statistics described in previous section you can use [Telegraf](https://github.com/influxdata/telegraf). For example to send status to [Graphite](https://github.com/graphite-project):
 
