@@ -7,8 +7,6 @@
 
 Selenoid is a powerful [Go](http://golang.org/) implementation of original [Selenium](http://github.com/SeleniumHQ/selenium) hub code. It is using Docker to launch browsers.
 
-![selenoid](selenoid.png)
-
 ## Quick Start Guide
 1) Install [Docker](https://docs.docker.com/engine/installation/)
 2) Pull browser images, e.g.:
