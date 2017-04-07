@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"regexp"
 	"strings"
 	"time"
 
@@ -79,8 +80,9 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	var browser struct {
 		Caps struct {
-			Name    string `json:"browserName"`
-			Version string `json:"version"`
+			Name             string `json:"browserName"`
+			Version          string `json:"version"`
+			ScreenResolution string `json:"screenResolution"`
 		} `json:"desiredCapabilities"`
 	}
 	err = json.Unmarshal(body, &browser)
@@ -90,7 +92,15 @@ func create(w http.ResponseWriter, r *http.Request) {
 		queue.Drop()
 		return
 	}
-	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version)
+	if browser.Caps.ScreenResolution != "" {
+		exp := regexp.MustCompile(`^[0-9]+x[0-9]+x(8|16|24)$`)
+		if !exp.MatchString(browser.Caps.ScreenResolution) {
+			http.Error(w, "Malformed screenResolution capability.", http.StatusBadRequest)
+			queue.Drop()
+			return
+		}
+	}
+	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version, browser.Caps.ScreenResolution)
 	if !ok {
 		log.Printf("[ENVIRONMENT_NOT_AVAILABLE] [%s-%s]\n", browser.Caps.Name, browser.Caps.Version)
 		http.Error(w, "Requested environment is not available", http.StatusBadRequest)

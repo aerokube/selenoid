@@ -62,6 +62,16 @@ func TestBrowserNotFound(t *testing.T) {
 	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
+func TestMalformedScreeResolutionCapability(t *testing.T) {
+	manager = &BrowserNotFound{}
+
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities":{"screenResolution":"1024x768"}}`)))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusBadRequest})
+
+	AssertThat(t, queue.Used(), EqualTo{0})
+}
+
 func TestNewSessionNotFound(t *testing.T) {
 	manager = &HTTPTest{Handler: Selenium()}
 

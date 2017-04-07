@@ -18,18 +18,18 @@ type Starter interface {
 
 // Manager - interface to choose appropriate starter
 type Manager interface {
-	Find(s string, v *string) (Starter, bool)
+	Find(s string, v *string, sr string) (Starter, bool)
 }
 
 // DefaultManager - struct for default implementation
 type DefaultManager struct {
-	IP        string
-	Client    *client.Client
-	Config    *config.Config
+	IP     string
+	Client *client.Client
+	Config *config.Config
 }
 
 // Find - default implementation Manager interface
-func (m *DefaultManager) Find(s string, v *string) (Starter, bool) {
+func (m *DefaultManager) Find(s string, v *string, sr string) (Starter, bool) {
 	log.Printf("Locating the service for %s %s\n", s, *v)
 	service, ok := m.Config.Find(s, v)
 	if !ok {
@@ -41,7 +41,7 @@ func (m *DefaultManager) Find(s string, v *string) (Starter, bool) {
 			return nil, false
 		}
 		log.Printf("Using docker service for %s %s\n", s, *v)
-		return &Docker{m.IP, m.Client, service, m.Config.ContainerLogs}, true
+		return &Docker{m.IP, m.Client, service, m.Config.ContainerLogs, sr}, true
 	case []interface{}:
 		log.Printf("Using driver service for %s %s\n", s, *v)
 		return &Driver{service}, true

@@ -11,9 +11,10 @@ import (
 	"strings"
 	"sync"
 
+	"time"
+
 	"github.com/aandryashin/selenoid/service"
 	"github.com/pborman/uuid"
-	"time"
 )
 
 type HTTPTest struct {
@@ -52,7 +53,7 @@ func (m *HTTPTest) StartWithCancel() (*url.URL, func(), error) {
 	}, nil
 }
 
-func (m *HTTPTest) Find(s string, v *string) (service.Starter, bool) {
+func (m *HTTPTest) Find(s string, v *string, sr string) (service.Starter, bool) {
 	return m, true
 }
 
@@ -64,13 +65,13 @@ func (m *StartupError) StartWithCancel() (*url.URL, func(), error) {
 	return nil, nil, errors.New("Failed to start Service")
 }
 
-func (m *StartupError) Find(s string, v *string) (service.Starter, bool) {
+func (m *StartupError) Find(s string, v *string, sr string) (service.Starter, bool) {
 	return m, true
 }
 
 type BrowserNotFound struct{}
 
-func (m *BrowserNotFound) Find(s string, v *string) (service.Starter, bool) {
+func (m *BrowserNotFound) Find(s string, v *string, sr string) (service.Starter, bool) {
 	return nil, false
 }
 

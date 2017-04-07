@@ -20,10 +20,11 @@ import (
 
 // Docker - docker container manager
 type Docker struct {
-	IP        string
-	Client    *client.Client
-	Service   *config.Browser
-	LogConfig *container.LogConfig
+	IP               string
+	Client           *client.Client
+	Service          *config.Browser
+	LogConfig        *container.LogConfig
+	ScreenResolution string
 }
 
 // StartWithCancel - Starter interface implementation
@@ -34,7 +35,10 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	}
 	ctx := context.Background()
 	log.Println("Creating Docker container", docker.Service.Image, "...")
-	env := []string{fmt.Sprintf("TZ=%s", time.Local)}
+	env := []string{
+		fmt.Sprintf("TZ=%s", time.Local),
+		fmt.Sprintf("SCREEN_RESOLUTION=%s", docker.ScreenResolution),
+	}
 	resp, err := docker.Client.ContainerCreate(ctx,
 		&container.Config{
 			Hostname:     "localhost",
