@@ -177,11 +177,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				sess, ok := sessions.Get(id)
 				if ok {
 					r.URL.Host, r.URL.Path = sess.URL.Host, sess.URL.Path+r.URL.Path
-					select {
-					case <-sess.Timeout:
-					default:
-						close(sess.Timeout)
-					}
+					close(sess.Timeout)
 					if r.Method == http.MethodDelete && len(fragments) == 3 {
 						cancel.fn = sess.Cancel
 						sessions.Remove(id)
@@ -203,12 +199,12 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 
 func onTimeout(t time.Duration, f func()) chan struct{} {
 	cancel := make(chan struct{})
-	go func() {
+	go func(cancel chan struct{}) {
 		select {
 		case <-time.After(t):
 			f()
 		case <-cancel:
 		}
-	}()
+	}(cancel)
 	return cancel
 }
