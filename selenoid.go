@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -45,9 +46,12 @@ func (s *sess) Delete() {
 	log.Printf("[SESSION_TIMED_OUT] [%s]\n", s.id)
 	r, err := http.NewRequest(http.MethodDelete, s.url(), nil)
 	if err != nil {
-		log.Fatalf("[DELETE_FAILED] [%s] [%v]\n", s.id, err)
+		log.Printf("[DELETE_FAILED] [%s] [%v]\n", s.id, err)
+		return
 	}
-	resp, err := http.DefaultClient.Do(r)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	resp, err := http.DefaultClient.Do(r.WithContext(ctx))
 	if resp != nil {
 		defer resp.Body.Close()
 	}
@@ -55,9 +59,9 @@ func (s *sess) Delete() {
 		return
 	}
 	if err != nil {
-		log.Fatalf("[DELETE_FAILED] [%s] [%v]\n", s.id, err)
+		log.Printf("[DELETE_FAILED] [%s] [%v]\n", s.id, err)
 	} else {
-		log.Fatalf("[DELETE_FAILED] [%s] [%s]\n", s.id, resp.Status)
+		log.Printf("[DELETE_FAILED] [%s] [%s]\n", s.id, resp.Status)
 	}
 }
 
@@ -178,7 +182,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 						cancel = sess.Cancel
 						sessions.Remove(id)
 						queue.Release()
-						log.Printf("[SESSION_DELETED] [%s]\n", s.id)
+						log.Printf("[SESSION_DELETED] [%s]\n", id)
 					} else {
 						sess.Timeout = onTimeout(timeout, func() {
 							request{r}.session(id).Delete()
