@@ -52,7 +52,6 @@ func (s *sess) Delete() {
 		defer resp.Body.Close()
 	}
 	if err == nil && resp.StatusCode == http.StatusOK {
-		log.Printf("[SESSION_DELETED] [%s]\n", s.id)
 		return
 	}
 	if err != nil {
@@ -179,6 +178,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 						cancel = sess.Cancel
 						sessions.Remove(id)
 						queue.Release()
+						log.Printf("[SESSION_DELETED] [%s]\n", s.id)
 					} else {
 						sess.Timeout = onTimeout(timeout, func() {
 							request{r}.session(id).Delete()
