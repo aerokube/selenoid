@@ -74,7 +74,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("docker error: %v\n", err)
 	}
-	manager = &service.DefaultManager{ip, cli, conf}
+	manager = &service.DefaultManager{IP: ip, Client: cli, Config: conf}
 }
 
 func cancelOnSignal() {

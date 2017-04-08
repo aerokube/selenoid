@@ -55,7 +55,7 @@ func wait(u string, t time.Duration) error {
 	loop:
 		for {
 			select {
-			case <-time.After(50 * time.Millisecond):
+			case <-time.After(5 * time.Millisecond):
 				r, err := http.Head(u)
 				if err == nil {
 					r.Body.Close()
@@ -68,7 +68,7 @@ func wait(u string, t time.Duration) error {
 	}()
 	select {
 	case <-time.After(t):
-		return fmt.Errorf("error: %s does not respond in %v", u, t)
+		return fmt.Errorf("%s does not respond in %v", u, t)
 	case <-done:
 		close(done)
 	}

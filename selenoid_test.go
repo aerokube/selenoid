@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
@@ -290,41 +289,6 @@ func TestProxySessionTimeout(t *testing.T) {
 
 	<-time.After(20 * time.Millisecond)
 	_, ok = sessions.Get(sess["sessionId"])
-	AssertThat(t, ok, Is{true})
-
-	<-time.After(50 * time.Millisecond)
-	_, ok = sessions.Get(sess["sessionId"])
-	AssertThat(t, ok, Is{false})
-
-	canceled = <-ch
-	AssertThat(t, canceled, Is{true})
-
-	AssertThat(t, queue.Used(), EqualTo{0})
-}
-
-func TestForceDeleteSession(t *testing.T) {
-	canceled := false
-	ch := make(chan bool)
-	manager = &HTTPTest{
-		Handler: Selenium(),
-		Cancel:  ch,
-	}
-	selenium := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/wd/hub/session/") {
-			http.Error(w, "Delete session failed", http.StatusInternalServerError)
-			return
-		}
-		handler().ServeHTTP(w, r)
-	}))
-	defer selenium.Close()
-
-	timeout = 30 * time.Millisecond
-	resp, err := http.Post(With(selenium.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
-	AssertThat(t, err, Is{nil})
-	var sess map[string]string
-	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
-
-	_, ok := sessions.Get(sess["sessionId"])
 	AssertThat(t, ok, Is{true})
 
 	<-time.After(50 * time.Millisecond)

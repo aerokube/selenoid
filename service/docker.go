@@ -58,19 +58,20 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 		},
 		&network.NetworkingConfig{}, "")
 	if err != nil {
-		return nil, nil, fmt.Errorf("error creating container: %v", err)
+		return nil, nil, fmt.Errorf("create container: %v", err)
 	}
-	log.Println("Starting container...")
+	containerStartTime := time.Now()
+	log.Println("[STARTING_CONTAINER]")
 	err = docker.Client.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	if err != nil {
 		removeContainer(ctx, docker.Client, resp.ID)
-		return nil, nil, fmt.Errorf("error starting container: %v", err)
+		return nil, nil, fmt.Errorf("start container: %v", err)
 	}
-	log.Printf("Container %s started\n", resp.ID)
+	log.Printf("[CONTAINER_STARTED] [%s] [%v]\n", resp.ID, time.Since(containerStartTime))
 	stat, err := docker.Client.ContainerInspect(ctx, resp.ID)
 	if err != nil {
 		removeContainer(ctx, docker.Client, resp.ID)
-		return nil, nil, fmt.Errorf("unable to inspect container %s: %s", resp.ID, err)
+		return nil, nil, fmt.Errorf("inspect container %s: %s", resp.ID, err)
 	}
 	_, ok := stat.NetworkSettings.Ports[port]
 	if !ok {
@@ -79,7 +80,7 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 	}
 	if len(stat.NetworkSettings.Ports[port]) != 1 {
 		removeContainer(ctx, docker.Client, resp.ID)
-		return nil, nil, errors.New("error: wrong number of port bindings")
+		return nil, nil, errors.New("wrong number of port bindings")
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
 	if docker.IP == "" {
@@ -93,24 +94,24 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 		addr.HostIP = docker.IP
 	}
 	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, docker.Service.Path)
-	s := time.Now()
+	serviceStartTime := time.Now()
 	err = wait(host, 30*time.Second)
 	if err != nil {
 		removeContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, err
 	}
-	log.Println(time.Since(s))
+	log.Printf("[SERVICE_STARTED] [%s] [%v]\n", resp.ID, time.Since(serviceStartTime))
 	u, _ := url.Parse(host)
 	log.Println("proxying requests to:", host)
 	return u, func() { removeContainer(ctx, docker.Client, resp.ID) }, nil
 }
 
 func removeContainer(ctx context.Context, cli *client.Client, id string) {
-	fmt.Println("Removing container", id)
+	log.Printf("[REMOVE_CONTAINER] [%s]\n", id)
 	err := cli.ContainerRemove(ctx, id, types.ContainerRemoveOptions{Force: true, RemoveVolumes: true})
 	if err != nil {
-		fmt.Println("error: unable to remove container", id, err)
+		log.Println("error: unable to remove container", id, err)
 		return
 	}
-	fmt.Printf("Container %s removed\n", id)
+	log.Printf("[CONTAINER_REMOVED] [%s]\n", id)
 }

@@ -41,28 +41,25 @@ func (s *sess) url() string {
 	return fmt.Sprintf("http://%s/wd/hub/session/%s", s.addr, s.id)
 }
 
-func (s *sess) Delete(cancel func()) {
-	log.Printf("[SESSION_TIMED_OUT] [%s] - Deleting session\n", s.id)
-	req, err := http.NewRequest(http.MethodDelete, s.url(), nil)
-	var resp *http.Response
-	if err == nil {
-		resp, err = http.DefaultClient.Do(req)
-		if resp != nil {
-			defer resp.Body.Close()
-		}
-		if err == nil && resp.StatusCode == http.StatusOK {
-			return
-		}
+func (s *sess) Delete() {
+	log.Printf("[SESSION_TIMED_OUT] [%s]\n", s.id)
+	r, err := http.NewRequest(http.MethodDelete, s.url(), nil)
+	if err != nil {
+		log.Fatalf("[DELETE_FAILED] [%s] [%v]\n", s.id, err)
+	}
+	resp, err := http.DefaultClient.Do(r)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	if err == nil && resp.StatusCode == http.StatusOK {
+		log.Printf("[SESSION_DELETED] [%s]\n", s.id)
+		return
 	}
 	if err != nil {
-		log.Printf("[DELETE_FAILED] [%v]\n", err)
+		log.Fatalf("[DELETE_FAILED] [%s] [%v]\n", s.id, err)
 	} else {
-		log.Printf("[DELETE_FAILED] [%s]\n", resp.Status)
+		log.Fatalf("[DELETE_FAILED] [%s] [%s]\n", s.id, resp.Status)
 	}
-	cancel()
-	sessions.Remove(s.id)
-	queue.Release()
-	log.Printf("[FORCED_SESSION_REMOVAL] [%s]\n", s.id)
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
@@ -151,22 +148,22 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sessions.Put(s.ID, &session.Session{
-		quota,
-		browser.Caps.Name,
-		browser.Caps.Version,
-		u,
-		cancel,
-		onTimeout(timeout, func() {
-			request{r}.session(s.ID).Delete(cancel)
+		Quota:   quota,
+		Browser: browser.Caps.Name,
+		Version: browser.Caps.Version,
+		URL:     u,
+		Cancel:  cancel,
+		Timeout: onTimeout(timeout, func() {
+			request{r}.session(s.ID).Delete()
 		})})
 	queue.Create()
 	log.Printf("[SESSION_CREATED] [%s] [%s]\n", s.ID, u)
 }
 
 func proxy(w http.ResponseWriter, r *http.Request) {
-	done := make(chan struct{ fn func() })
+	done := make(chan func())
 	go func(w http.ResponseWriter, r *http.Request) {
-		cancel := struct{ fn func() }{func() {}}
+		cancel := func() {}
 		defer func() {
 			done <- cancel
 		}()
@@ -179,13 +176,12 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 					r.URL.Host, r.URL.Path = sess.URL.Host, sess.URL.Path+r.URL.Path
 					close(sess.Timeout)
 					if r.Method == http.MethodDelete && len(fragments) == 3 {
-						cancel.fn = sess.Cancel
+						cancel = sess.Cancel
 						sessions.Remove(id)
 						queue.Release()
-						log.Printf("[SESSION_DELETED] [%s]\n", id)
 					} else {
 						sess.Timeout = onTimeout(timeout, func() {
-							request{r}.session(id).Delete(cancel.fn)
+							request{r}.session(id).Delete()
 						})
 					}
 					return
@@ -194,7 +190,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 			},
 		}).ServeHTTP(w, r)
 	}(w, r)
-	(<-done).fn()
+	go (<-done)()
 }
 
 func onTimeout(t time.Duration, f func()) chan struct{} {
