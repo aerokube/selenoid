@@ -95,7 +95,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 	if browser.Caps.ScreenResolution != "" {
 		exp := regexp.MustCompile(`^[0-9]+x[0-9]+x(8|16|24)$`)
 		if !exp.MatchString(browser.Caps.ScreenResolution) {
-			http.Error(w, "Malformed screenResolution capability.", http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("Malformed screenResolution capability: %s. Correct format is WxHxD, e.g. 1920x1080x24.",
+				browser.Caps.ScreenResolution), http.StatusBadRequest)
 			queue.Drop()
 			return
 		}
