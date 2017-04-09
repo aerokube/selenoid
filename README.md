@@ -44,7 +44,7 @@ $ cat /etc/selenoid/browsers.json
 ```
 5) Run Selenoid container:
 ```
-$ docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.0.0
+# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.0.0
 ```
 6) Access Selenoid as regular Selenium hub:
 ```
@@ -80,6 +80,14 @@ The following flags are supported by ```selenoid``` command:
     Container logging configuration file (default "config/container-logs.json")
 -timeout duration
     Session idle timeout in time.Duration format (default 1m0s)
+```
+For example:
+```
+$ ./selenoid -conf /my/custom/browsers.json -limit 10
+```
+When using Selenoid inside Docker container these flags are passed like the following:
+```
+# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.0.0 -conf /my/custom/browsers.json -limit 10
 ```
 
 ### Browsers Configuration File
