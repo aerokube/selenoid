@@ -7,3 +7,4 @@ docker tag $TRAVIS_REPO_SLUG $TRAVIS_REPO_SLUG:$1
 docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 docker push $TRAVIS_REPO_SLUG
 docker push $TRAVIS_REPO_SLUG:$1
+docker push selenoid/hub:$1
