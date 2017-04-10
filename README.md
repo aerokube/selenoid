@@ -90,6 +90,9 @@ When using Selenoid inside Docker container these flags are passed like the foll
 # docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.1.0 -conf /my/custom/browsers.json -limit 10
 ```
 
+### Simultaneously Running Containers
+Total number of simultaneously running containers (adjusted via ```-limit``` flag) depends on your host machine hardware. Our experience shows that depending on your tests the recommended limit is something like: ```1.5-2.0 x numCores```, where ```numCores``` is total number of cores on your host machine.
+
 ### Browsers Configuration File
 
 Selenoid uses simple JSON configuration files of the following format (we use **#** for comments here):
