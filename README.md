@@ -16,7 +16,7 @@ $ docker pull selenoid/chrome:latest
 ```
 3) Pull Selenoid image:
 ```
-$ docker pull aandryashin/selenoid:1.0.0
+$ docker pull aandryashin/selenoid:1.1.0
 ```
 4) Create the following configuration file:
 ```
@@ -44,7 +44,7 @@ $ cat /etc/selenoid/browsers.json
 ```
 5) Run Selenoid container:
 ```
-# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.0.0
+# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.1.0
 ```
 6) Access Selenoid as regular Selenium hub:
 ```
@@ -87,7 +87,7 @@ $ ./selenoid -conf /my/custom/browsers.json -limit 10
 ```
 When using Selenoid inside Docker container these flags are passed like the following:
 ```
-# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.0.0 -conf /my/custom/browsers.json -limit 10
+# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.1.0 -conf /my/custom/browsers.json -limit 10
 ```
 
 ### Browsers Configuration File
@@ -159,7 +159,7 @@ The last field - **path** is needed to specify relative path to the URL where a 
 
 When used in Docker container Selenoid will have timezone set to UTC. To set custom timezone pass TZ environment variable to Docker:
 ```
-$ docker run -d --name selenoid -p 4444:4444 -e TZ=Europe/Moscow -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.0.0
+$ docker run -d --name selenoid -p 4444:4444 -e TZ=Europe/Moscow -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.1.0
 ```
 
 ### Logging Configuration File
