@@ -8,8 +8,6 @@ import (
 	"os"
 	"time"
 
-	"errors"
-
 	"github.com/aandryashin/selenoid/config"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -78,9 +76,10 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 		removeContainer(ctx, docker.Client, resp.ID)
 		return nil, nil, fmt.Errorf("no bingings available for %v", port)
 	}
-	if len(stat.NetworkSettings.Ports[port]) != 1 {
+	numBundings := len(stat.NetworkSettings.Ports[port])
+	if numBundings != 1 {
 		removeContainer(ctx, docker.Client, resp.ID)
-		return nil, nil, errors.New("wrong number of port bindings")
+		return nil, nil, fmt.Errorf("wrong number of port bindings: %d", numBundings)
 	}
 	addr := stat.NetworkSettings.Ports[port][0]
 	if docker.IP == "" {
@@ -88,7 +87,8 @@ func (docker *Docker) StartWithCancel() (*url.URL, func(), error) {
 		if err != nil {
 			addr.HostIP = "127.0.0.1"
 		} else {
-			addr.HostIP = "172.17.0.1"
+			addr.HostIP = stat.NetworkSettings.IPAddress
+			addr.HostPort = docker.Service.Port
 		}
 	} else {
 		addr.HostIP = docker.IP

@@ -31,7 +31,7 @@ type sess struct {
 func (r request) localaddr() string {
 	addr := r.Context().Value(http.LocalAddrContextKey).(net.Addr).String()
 	_, port, _ := net.SplitHostPort(addr)
-	return net.JoinHostPort("localhost", port)
+	return net.JoinHostPort("127.0.0.1", port)
 }
 
 func (r request) session(id string) *sess {

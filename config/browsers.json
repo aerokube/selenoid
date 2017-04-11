@@ -5,6 +5,7 @@
 			"latest": {
 				"image": "selenoid/firefox",
 				"port": "4444",
+				"path": "/wd/hub",
 				"tmpfs": {"/tmp":"size=512m"}
 			}
 		}
