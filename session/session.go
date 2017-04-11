@@ -13,6 +13,7 @@ type Session struct {
 	URL     *url.URL
 	Cancel  func()
 	Timeout chan struct{}
+	Lock    sync.Mutex
 }
 
 // Map - session uuid to sessions mapping
