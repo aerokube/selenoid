@@ -32,6 +32,7 @@ var (
 	conf          *config.Config
 	queue         *protect.Queue
 	manager       service.Manager
+	cli           *client.Client
 )
 
 func init() {
@@ -60,7 +61,6 @@ func init() {
 		manager = &service.DefaultManager{Config: conf}
 		return
 	}
-	var cli *client.Client
 	dockerHost := os.Getenv("DOCKER_HOST")
 	if dockerHost == "" {
 		dockerHost = client.DefaultDockerHost
@@ -85,6 +85,10 @@ func cancelOnSignal() {
 		sessions.Each(func(k string, s *session.Session) {
 			s.Cancel()
 		})
+		err := cli.Close()
+		if err != nil {
+			log.Fatalf("close docker client: %v", err)
+		}
 		os.Exit(0)
 	}()
 }
