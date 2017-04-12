@@ -27,7 +27,8 @@ $ cat /etc/selenoid/browsers.json
       "versions": {
         "latest": {
           "image": "selenoid/firefox:latest",
-          "port": "4444"
+          "port": "4444",
+          "path": "/wd/hub"
         }
       }
     },
