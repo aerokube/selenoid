@@ -54,7 +54,7 @@ http://localhost:4444/wd/hub
 
 ## Simple UI
 
-Selenoid has standalone UI to show current quota, queue and browser usage: https://github.com/lanwen/selenoid-ui.  
+Selenoid has standalone UI to show current quota, queue and browser usage: https://github.com/aerokube/selenoid-ui.  
 
 ## Browser Images
 We maintain a set of prebuilt Docker container images for different browsers including:
