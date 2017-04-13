@@ -14,10 +14,10 @@ import (
 
 	"fmt"
 
-	"github.com/aandryashin/selenoid/config"
-	"github.com/aandryashin/selenoid/protect"
-	"github.com/aandryashin/selenoid/service"
-	"github.com/aandryashin/selenoid/session"
+	"github.com/aerokube/selenoid/config"
+	"github.com/aerokube/selenoid/protect"
+	"github.com/aerokube/selenoid/service"
+	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/client"
 )
 

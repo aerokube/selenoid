@@ -8,7 +8,7 @@ services:
   - docker
 
 script:
-  - go test -coverprofile=coverage.txt -covermode=atomic -coverpkg .,github.com/aandryashin/selenoid/session,github.com/aandryashin/selenoid/config,github.com/aandryashin/selenoid/protect
+  - go test -coverprofile=coverage.txt -covermode=atomic -coverpkg .,github.com/aerokube/selenoid/session,github.com/aerokube/selenoid/config,github.com/aerokube/selenoid/protect
   - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build  
 
 before_install:

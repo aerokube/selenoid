@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	. "github.com/aandryashin/matchers"
-	"github.com/aandryashin/selenoid/config"
-	"github.com/aandryashin/selenoid/session"
+	"github.com/aerokube/selenoid/config"
+	"github.com/aerokube/selenoid/session"
 	"io/ioutil"
 	"log"
 	"os"

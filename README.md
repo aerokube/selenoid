@@ -1,9 +1,9 @@
 # Selenoid
-[![Build Status](https://travis-ci.org/aandryashin/selenoid.svg?branch=master)](https://travis-ci.org/aandryashin/selenoid)
-[![Coverage](https://codecov.io/github/aandryashin/selenoid/coverage.svg)](https://codecov.io/gh/aandryashin/selenoid)
-[![Go Report Card](https://goreportcard.com/badge/github.com/aandryashin/selenoid)](https://goreportcard.com/report/github.com/aandryashin/selenoid)
-[![Release](https://img.shields.io/github/release/aandryashin/selenoid.svg)](https://github.com/aandryashin/selenoid/releases/latest)
-[![GoDoc](https://godoc.org/github.com/aandryashin/selenoid?status.svg)](https://godoc.org/github.com/aandryashin/selenoid)
+[![Build Status](https://travis-ci.org/aerokube/selenoid.svg?branch=master)](https://travis-ci.org/aerokube/selenoid)
+[![Coverage](https://codecov.io/github/aerokube/selenoid/coverage.svg)](https://codecov.io/gh/aerokube/selenoid)
+[![Go Report Card](https://goreportcard.com/badge/github.com/aerokube/selenoid)](https://goreportcard.com/report/github.com/aerokube/selenoid)
+[![Release](https://img.shields.io/github/release/aerokube/selenoid.svg)](https://github.com/aerokube/selenoid/releases/latest)
+[![GoDoc](https://godoc.org/github.com/aerokube/selenoid?status.svg)](https://godoc.org/github.com/aerokube/selenoid)
 
 Selenoid is a powerful [Go](http://golang.org/) implementation of original [Selenium](http://github.com/SeleniumHQ/selenium) hub code. It is using Docker to launch browsers.
 
@@ -16,7 +16,7 @@ $ docker pull selenoid/chrome:latest
 ```
 3) Pull Selenoid image:
 ```
-$ docker pull aandryashin/selenoid:1.1.0
+$ docker pull aerokube/selenoid:1.1.0
 ```
 4) Create the following configuration file:
 ```
@@ -45,7 +45,7 @@ $ cat /etc/selenoid/browsers.json
 ```
 5) Run Selenoid container:
 ```
-# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.1.0
+# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.0
 ```
 6) Access Selenoid as regular Selenium hub:
 ```
@@ -97,7 +97,7 @@ $ ./selenoid -conf /my/custom/browsers.json -limit 10
 ```
 When using Selenoid inside Docker container these flags are passed like the following:
 ```
-# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.1.0 -conf /my/custom/browsers.json -limit 10
+# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.0 -conf /my/custom/browsers.json -limit 10
 ```
 
 ### Simultaneously Running Containers
@@ -172,7 +172,7 @@ The last field - **path** is needed to specify relative path to the URL where a 
 
 When used in Docker container Selenoid will have timezone set to UTC. To set custom timezone pass TZ environment variable to Docker:
 ```
-$ docker run -d --name selenoid -p 4444:4444 -e TZ=Europe/Moscow -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aandryashin/selenoid:1.1.0
+$ docker run -d --name selenoid -p 4444:4444 -e TZ=Europe/Moscow -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.0
 ```
 
 ### Logging Configuration File
@@ -293,11 +293,11 @@ $ go get -u github.com/kardianos/govendor
 ```
 4) Get Selenoid source:
 ```
-$ go get -d github.com/aandryashin/selenoid
+$ go get -d github.com/aerokube/selenoid
 ```
 5) Go to project directory:
 ```
-$ cd $GOPATH/src/github.com/aandryashin/selenoid
+$ cd $GOPATH/src/github.com/aerokube/selenoid
 ```
 6) Checkout dependencies:
 ```

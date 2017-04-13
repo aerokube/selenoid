@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aandryashin/selenoid/session"
+	"github.com/aerokube/selenoid/session"
 )
 
 type request struct {

@@ -13,7 +13,7 @@ import (
 
 	"time"
 
-	"github.com/aandryashin/selenoid/service"
+	"github.com/aerokube/selenoid/service"
 	"github.com/pborman/uuid"
 )
 

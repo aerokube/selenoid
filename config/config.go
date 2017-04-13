@@ -3,7 +3,7 @@ package config
 import (
 	"log"
 
-	"github.com/aandryashin/selenoid/session"
+	"github.com/aerokube/selenoid/session"
 	"strings"
 	"sync"
 	"io/ioutil"

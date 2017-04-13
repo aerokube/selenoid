@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/aandryashin/selenoid/config"
+	"github.com/aerokube/selenoid/config"
 	"github.com/docker/docker/client"
 )
 
