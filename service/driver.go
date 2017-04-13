@@ -10,7 +10,7 @@ import (
 
 	"errors"
 
-	"github.com/aandryashin/selenoid/config"
+	"github.com/aerokube/selenoid/config"
 )
 
 // Driver - driver processes manager

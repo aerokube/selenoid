@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/aandryashin/selenoid/config"
+	"github.com/aerokube/selenoid/config"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"

@@ -12,7 +12,7 @@ import (
 
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
-	"github.com/aandryashin/selenoid/config"
+	"github.com/aerokube/selenoid/config"
 )
 
 var (
