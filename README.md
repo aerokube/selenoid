@@ -9,6 +9,7 @@ Selenoid is a powerful [Go](http://golang.org/) implementation of original [Sele
 
 ## Quick Start Guide
 1) Install [Docker](https://docs.docker.com/engine/installation/)
+
 2) Pull browser images, e.g.:
 ```
 $ docker pull selenoid/firefox:latest
@@ -18,8 +19,10 @@ $ docker pull selenoid/chrome:latest
 ```
 $ docker pull aerokube/selenoid:1.1.0
 ```
+
 4) Create the following configuration file:
-```
+
+```bash
 $ cat /etc/selenoid/browsers.json
 {
     "firefox": {
@@ -68,6 +71,7 @@ All these images are free to use. See image tags for a list of supported version
 ## Features
 ### Custom Screen Resolution
 Selenoid allows you to set custom screen resolution in containers being run. To do that simply pass ```screenResolution``` capability in your tests in form ```width x height x color-depth```:
+
 ```
 screenResolution: 1280x1024x24
 ```
@@ -106,24 +110,24 @@ Total number of simultaneously running containers (adjusted via ```-limit``` fla
 ### Browsers Configuration File
 
 Selenoid uses simple JSON configuration files of the following format (we use **#** for comments here):
-```
+```js
 {
-    "firefox": { # Browser name
-      "default": "46.0", # Default browser version
-      "versions": { # A list of available browser versions
-        "46.0": { # Version name
-          "image": "selenoid/firefox:46.0", # Image name or driver binary command
-          "port": "4444", # Port to proxy connections to, see below
-          "tmpfs": {"/tmp": "size=512m"}, # Optional. Add in memory filesystem (tmpfs) to container, see below
-          "path" : "/wd/hub" # Optional. Path relative to / where we request a new session, see below 
+    "firefox": {                            // Browser name
+      "default": "46.0",                    // Default browser version
+      "versions": {                         // A list of available browser versions
+        "46.0": {                           // Version name
+          "image": "selenoid/firefox:46.0", // Image name or driver binary command
+          "port": "4444",                   // Port to proxy connections to, see below
+          "tmpfs": {"/tmp": "size=512m"},   // Optional. Add in memory filesystem (tmpfs) to container, see below
+          "path" : "/wd/hub"                // Optional. Path relative to / where we request a new session, see below 
         },
         "50.0" :{
-            # ...
+            // ...
         }
       }
     },
     "chrome": {
-        # ...
+        // ...
     }
 }
 ```
@@ -146,8 +150,8 @@ my-internal-docker-hub.example.com/selenoid/firefox:46.0 # This comes from inter
 selenoid/firefox:46.0 # This is downloaded from hub.docker.com
 ```
 If you wish to use a standalone binary instead of Docker container, then image field should contain command specification in square brackets:
-```
-"46.0": { # Version name
+```js
+"46.0": { // Version name
     "image": ["/usr/bin/mybinary", "-arg1", "foo", "-arg2", "bar", "-arg3"],
     "port": ...
     "tmpfs": ...
@@ -158,8 +162,8 @@ Selenoid proxies connections to either Selenium server or standalone driver bina
 
 #### Port, Tmpfs and Path
 You should use **port** field to specify the real port that Selenium server or driver will listen on. For Docker containers this is a port inside container. **tmpfs** and **path** fields are optional. You may probably know that moving browser cache to in-memory filesystem ([tmpfs](https://en.wikipedia.org/wiki/Tmpfs)) can dramatically improve its performance. Selenoid can automatically attach one or more in-memory filesystems as volumes to Docker container being run. To achieve this define one or more mount points and their respective sizes in optional **tmpfs** field:
-```
-"46.0": { # Version name
+```js
+"46.0": { // Version name
     "image": ...
     "port": ...
     "tmpfs": {"/tmp": "size=512m", "/var": "size=128m"},
@@ -177,7 +181,7 @@ $ docker run -d --name selenoid -p 4444:4444 -e TZ=Europe/Moscow -v /etc/selenoi
 
 ### Logging Configuration File
 By default Docker container logs are saved to host machine hard drive. When using Selenoid for local development that's ok. But in big Selenium cluster you may want to send logs to some centralized storage like [Logstash](https://www.elastic.co/products/logstash) or [Graylog](https://www.graylog.org/). Docker provides such functionality by so-called [logging drivers](https://docs.docker.com/engine/admin/logging/overview/). Selenoid logging configuration file allows to specify which logging driver to use globally for all started Docker containers with browsers. Configuration file has the following format:
-```
+```js
 {
     "Type" : "<driver-type>",
     "Config" : {
@@ -191,7 +195,7 @@ Here ```<driver-type>``` - is a supported Docker logging driver type like ```sys
 --log-driver=syslog --log-opt syslog-address=tcp://192.168.0.42:123 --log-opt syslog-facility=daemon
 ```
 ... are equivalent to the following Selenoid logging configuration:
-```
+```js
 {
     "Type" : "syslog",
     "Config" : {
@@ -212,7 +216,7 @@ To reload configuration without restart send SIGHUP:
 ## Usage statistics
 
 Selenoid calculates usage statistics that can be accessed with HTTP request:
-```
+```bash
 $ curl http://localhost:4444/status
 {
     "total": 80,
@@ -248,7 +252,7 @@ To send Selenoid statistics described in previous section you can use [Telegraf]
 # docker run --rm telegraf:alpine --input-filter httpjson --output-filter graphite config > /etc/telegraf/telegraf.conf
 ```
 3) Edit file like the following (three dots mean some not shown lines):
-```
+```go
 ...
 [agent]
 interval = "10s" # <- adjust this if needed
