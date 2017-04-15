@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -115,7 +116,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		queue.Drop()
 		return
 	}
-	r.URL.Host, r.URL.Path = u.Host, u.Path+r.URL.Path
+	r.URL.Host, r.URL.Path = u.Host, path.Clean(u.Path+r.URL.Path)
 	req, _ := http.NewRequest(http.MethodPost, r.URL.String(), r.Body)
 	if r.ContentLength > 0 {
 		req.ContentLength = r.ContentLength
@@ -179,7 +180,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				if ok {
 					sess.Lock.Lock()
 					defer sess.Lock.Unlock()
-					r.URL.Host, r.URL.Path = sess.URL.Host, sess.URL.Path+r.URL.Path
+					r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
 					close(sess.Timeout)
 					if r.Method == http.MethodDelete && len(fragments) == 3 {
 						cancel = sess.Cancel
