@@ -3,12 +3,13 @@ package config
 import (
 	"log"
 
-	"github.com/aerokube/selenoid/session"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"strings"
 	"sync"
-	"io/ioutil"
-	"fmt"
-	"encoding/json"
+
+	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types/container"
 )
 
@@ -35,7 +36,7 @@ type Browser struct {
 	Image interface{}       `json:"image"`
 	Port  string            `json:"port"`
 	Path  string            `json:"path"`
-	Tmpfs map[string]string `json:"tmpfs"`
+	Tmpfs map[string]string `json:"tmpfs,omitempty"`
 }
 
 // Versions configuration
@@ -46,8 +47,8 @@ type Versions struct {
 
 // Config current configuration
 type Config struct {
-	lock               sync.RWMutex
-	Browsers           map[string]Versions
+	lock          sync.RWMutex
+	Browsers      map[string]Versions
 	ContainerLogs *container.LogConfig
 }
 
