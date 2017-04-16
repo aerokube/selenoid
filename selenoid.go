@@ -43,6 +43,18 @@ func (s *sess) url() string {
 	return fmt.Sprintf("http://%s/wd/hub/session/%s", s.addr, s.id)
 }
 
+func jsonError(w http.ResponseWriter, msg string, code int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(
+		map[string]interface{}{
+			"value": map[string]string{
+				"message": msg,
+			},
+			"status": 13,
+		})
+}
+
 func (s *sess) Delete() {
 	log.Printf("[SESSION_TIMED_OUT] [%s]\n", s.id)
 	r, err := http.NewRequest(http.MethodDelete, s.url(), nil)
@@ -75,7 +87,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	r.Body.Close()
 	if err != nil {
 		log.Printf("[ERROR_READING_REQUEST] [%s]\n", err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
@@ -89,14 +101,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &browser)
 	if err != nil {
 		log.Printf("[BAD_JSON_FORMAT] [%s]\n", err.Error())
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
 	if browser.Caps.ScreenResolution != "" {
 		exp := regexp.MustCompile(`^[0-9]+x[0-9]+x(8|16|24)$`)
 		if !exp.MatchString(browser.Caps.ScreenResolution) {
-			http.Error(w, fmt.Sprintf("Malformed screenResolution capability: %s. Correct format is WxHxD, e.g. 1920x1080x24.",
+			jsonError(w, fmt.Sprintf("Malformed screenResolution capability: %s. Correct format is WxHxD, e.g. 1920x1080x24.",
 				browser.Caps.ScreenResolution), http.StatusBadRequest)
 			queue.Drop()
 			return
@@ -105,35 +117,56 @@ func create(w http.ResponseWriter, r *http.Request) {
 	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version, browser.Caps.ScreenResolution)
 	if !ok {
 		log.Printf("[ENVIRONMENT_NOT_AVAILABLE] [%s-%s]\n", browser.Caps.Name, browser.Caps.Version)
-		http.Error(w, "Requested environment is not available", http.StatusBadRequest)
+		jsonError(w, "Requested environment is not available", http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
 	u, cancel, err := starter.StartWithCancel()
 	if err != nil {
 		log.Printf("[SERVICE_STARTUP_FAILED] [%s]\n", err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		jsonError(w, err.Error(), http.StatusInternalServerError)
 		queue.Drop()
 		return
 	}
 	r.URL.Host, r.URL.Path = u.Host, path.Clean(u.Path+r.URL.Path)
-	req, _ := http.NewRequest(http.MethodPost, r.URL.String(), r.Body)
-	if r.ContentLength > 0 {
-		req.ContentLength = r.ContentLength
+	var resp *http.Response
+	for i := 1; ; i++ {
+		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(body))
+		ctx, _ := context.WithTimeout(r.Context(), 10*time.Second)
+		log.Printf("[SESSION_ATTEMPTED] [%s] [%d]\n", u.String(), i)
+		rsp, err := http.DefaultClient.Do(req.WithContext(ctx))
+		select {
+		case <-ctx.Done():
+			if rsp != nil {
+				rsp.Body.Close()
+			}
+			switch ctx.Err() {
+			case context.DeadlineExceeded:
+				log.Printf("[SESSION_ATTEMPT_TIMEDOUT]\n")
+				continue
+			case context.Canceled:
+				log.Printf("[CLIENT_DISCONNECTED]\n")
+				queue.Drop()
+				cancel()
+				return
+			}
+		default:
+		}
+		if err != nil {
+			if rsp != nil {
+				rsp.Body.Close()
+			}
+			log.Printf("[SESSION_FAILED] [%s] - [%s]\n", u.String(), err)
+			jsonError(w, err.Error(), http.StatusInternalServerError)
+			queue.Drop()
+			cancel()
+			return
+		} else {
+			resp = rsp
+			break
+		}
 	}
-	req.Body = ioutil.NopCloser(bytes.NewReader(body))
-	log.Printf("[SESSION_ATTEMPTED] [%s]\n", u.String())
-	resp, err := http.DefaultClient.Do(req)
-	if resp != nil {
-		defer resp.Body.Close()
-	}
-	if err != nil {
-		log.Printf("[SESSION_FAILED] [%s] - [%s]\n", u.String(), err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		queue.Drop()
-		cancel()
-		return
-	}
+	defer resp.Body.Close()
 	w.WriteHeader(resp.StatusCode)
 	var s struct {
 		Value struct {
