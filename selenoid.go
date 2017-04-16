@@ -142,7 +142,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			}
 			switch ctx.Err() {
 			case context.DeadlineExceeded:
-				log.Printf("[SESSION_ATTEMPT_TIMEDOUT]\n")
+				log.Printf("[SESSION_ATTEMPT_TIMED_OUT]\n")
 				continue
 			case context.Canceled:
 				log.Printf("[CLIENT_DISCONNECTED]\n")
