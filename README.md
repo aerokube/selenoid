@@ -109,7 +109,7 @@ Total number of simultaneously running containers (adjusted via ```-limit``` fla
 
 ### Browsers Configuration File
 
-Selenoid uses simple JSON configuration files of the following format (we use **#** for comments here):
+Selenoid uses simple JSON configuration files of the following format:
 ```js
 {
     "firefox": {                            // Browser name
