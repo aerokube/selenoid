@@ -133,7 +133,7 @@ Selenoid uses simple JSON configuration files of the following format:
 ```
 This file represents a mapping between a list of supported browser versions and Docker container images or driver binaries.
 #### Browser Name and Version
-Browser name and version are just strings that are matched against Selenium desired capabilities: browserName and version. If no version capability is present default version is used. When there is no exact version match we also try match by prefix. That means version string in JSON should start with version string from capabilities. The following request matches...
+Browser name and version are just strings that are matched against Selenium desired capabilities: browserName and version. If no version capability is present default version is used. When there is no exact version match we also try to match by prefix. That means version string in JSON should start with version string from capabilities. The following request matches...
 ```
 versionFromConfig = 46.0
 versionFromCapabilities = 46 # 46.0 starts with 46
@@ -144,7 +144,7 @@ versionFromConfig = 46.0
 versionFromCapabilities = 46.1 # 46.0 does not start with 46.1  
 ```
 #### Image
-Image by default is a string with container specification in Docker format (hub.example.com/project/image:tag). The following image names are valid:
+Image by default is a string with container specification in Docker format (```hub.example.com/project/image:tag```). The following image names are valid:
 ```
 my-internal-docker-hub.example.com/selenoid/firefox:46.0 # This comes from internal Docker hub
 selenoid/firefox:46.0 # This is downloaded from hub.docker.com
