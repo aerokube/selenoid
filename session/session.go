@@ -11,6 +11,7 @@ type Session struct {
 	Browser string
 	Version string
 	URL     *url.URL
+	VNC     string
 	Cancel  func()
 	Timeout chan struct{}
 	Lock    sync.Mutex

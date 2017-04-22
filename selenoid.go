@@ -16,6 +16,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/net/websocket"
+
 	"github.com/aerokube/selenoid/session"
 	"sync"
 )
@@ -112,6 +114,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			Name             string `json:"browserName"`
 			Version          string `json:"version"`
 			ScreenResolution string `json:"screenResolution"`
+			VNC              bool   `json:"enableVNC"`
 		} `json:"desiredCapabilities"`
 	}
 	err = json.Unmarshal(body, &browser)
@@ -131,14 +134,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version, browser.Caps.ScreenResolution, id)
+	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version, browser.Caps.ScreenResolution, browser.Caps.VNC, id)
 	if !ok {
 		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s-%s]\n", id, quota, browser.Caps.Name, browser.Caps.Version)
 		jsonError(w, "Requested environment is not available", http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
-	u, cancel, err := starter.StartWithCancel()
+	u, vnc, cancel, err := starter.StartWithCancel()
 	if err != nil {
 		log.Printf("[%d] [SERVICE_STARTUP_FAILED] [%s] [%v]\n", id, quota, err)
 		jsonError(w, err.Error(), http.StatusInternalServerError)
@@ -150,7 +153,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 	i := 1
 	for ; ; i++ {
 		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(body))
-		ctx, _ := context.WithTimeout(r.Context(), 10*time.Second)
+		ctx, done := context.WithTimeout(r.Context(), 10*time.Second)
+		defer done()
 		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%s] [%d]\n", id, quota, u.String(), i)
 		rsp, err := http.DefaultClient.Do(req.WithContext(ctx))
 		select {
@@ -208,6 +212,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		Browser: browser.Caps.Name,
 		Version: browser.Caps.Version,
 		URL:     u,
+		VNC:     vnc,
 		Cancel:  cancel,
 		Timeout: onTimeout(timeout, func() {
 			request{r}.session(s.ID).Delete()
@@ -250,6 +255,24 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 		}).ServeHTTP(w, r)
 	}(w, r)
 	go (<-done)()
+}
+
+func vnc(wsconn *websocket.Conn) {
+	defer wsconn.Close()
+	sid := strings.Split(wsconn.Request().URL.Path, "/")[2]
+	sess, ok := sessions.Get(sid)
+	if ok && sess.VNC != "" {
+		log.Printf("[VNC_ENABLED] [%s]", sid)
+		conn, err := net.Dial("tcp", sess.VNC)
+		if err != nil {
+			log.Printf("vnc : %v", err)
+			return
+		}
+		defer conn.Close()
+		wsconn.PayloadType = websocket.BinaryFrame
+		go io.Copy(wsconn, conn)
+		io.Copy(conn, wsconn)
+	}
 }
 
 func onTimeout(t time.Duration, f func()) chan struct{} {

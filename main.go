@@ -12,6 +12,8 @@ import (
 	"syscall"
 	"time"
 
+	"golang.org/x/net/websocket"
+
 	"fmt"
 
 	"github.com/aerokube/selenoid/config"
@@ -141,6 +143,7 @@ func handler() http.Handler {
 		func(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
 		}))
+	root.Handle("/vnc/", websocket.Handler(vnc))
 	return root
 }
 
