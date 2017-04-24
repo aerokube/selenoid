@@ -13,8 +13,20 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-// Quota - number of sessions for quota user
-type Quota map[string]int
+// Session - session id and vnc flaf
+type Session struct {
+	ID  string `json:"id"`
+	VNC bool   `json:"vnc"`
+}
+
+// Sessions - used count and individual sessions for quota user
+type Sessions struct {
+	Count    int       `json:"count"`
+	Sessions []Session `json:"sessions"`
+}
+
+// Quota - list of sessions for quota user
+type Quota map[string]*Sessions
 
 // Version - browser version for quota
 type Version map[string]Quota
@@ -136,11 +148,17 @@ func (config *Config) State(sessions *session.Map, limit, queued, pending int) *
 		if !ok {
 			state.Browsers[session.Browser][session.Version] = make(Quota)
 		}
-		_, ok = state.Browsers[session.Browser][session.Version][session.Quota]
+		v, ok := state.Browsers[session.Browser][session.Version][session.Quota]
 		if !ok {
-			state.Browsers[session.Browser][session.Version][session.Quota] = 0
+			v = &Sessions{0, []Session{}}
+			state.Browsers[session.Browser][session.Version][session.Quota] = v
 		}
-		state.Browsers[session.Browser][session.Version][session.Quota]++
+		v.Count++
+		vnc := false
+		if session.VNC != "" {
+			vnc = true
+		}
+		v.Sessions = append(v.Sessions, Session{id, vnc})
 	})
 	return state
 }

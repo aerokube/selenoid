@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	. "github.com/aandryashin/matchers"
-	"github.com/aerokube/selenoid/config"
-	"github.com/aerokube/selenoid/session"
 	"io/ioutil"
 	"log"
 	"os"
 	"testing"
+
+	. "github.com/aandryashin/matchers"
+	"github.com/aerokube/selenoid/config"
+	"github.com/aerokube/selenoid/session"
 )
 
 func configfile(s string) string {
@@ -78,7 +79,7 @@ func TestConfigNonEmptyState(t *testing.T) {
 	AssertThat(t, state.Queued, EqualTo{0})
 	AssertThat(t, state.Pending, EqualTo{0})
 	AssertThat(t, state.Used, EqualTo{1})
-	AssertThat(t, state.Browsers["firefox"]["49.0"]["unknown"], EqualTo{1})
+	AssertThat(t, state.Browsers["firefox"]["49.0"]["unknown"].Count, EqualTo{1})
 }
 
 func TestConfigEmptyVersions(t *testing.T) {
@@ -94,7 +95,7 @@ func TestConfigEmptyVersions(t *testing.T) {
 	AssertThat(t, state.Queued, EqualTo{0})
 	AssertThat(t, state.Pending, EqualTo{0})
 	AssertThat(t, state.Used, EqualTo{1})
-	AssertThat(t, state.Browsers["firefox"]["49.0"]["unknown"], EqualTo{1})
+	AssertThat(t, state.Browsers["firefox"]["49.0"]["unknown"].Count, EqualTo{1})
 }
 
 func TestConfigNonEmptyVersions(t *testing.T) {
@@ -110,7 +111,7 @@ func TestConfigNonEmptyVersions(t *testing.T) {
 	AssertThat(t, state.Queued, EqualTo{0})
 	AssertThat(t, state.Pending, EqualTo{0})
 	AssertThat(t, state.Used, EqualTo{1})
-	AssertThat(t, state.Browsers["firefox"]["49.0"]["unknown"], EqualTo{1})
+	AssertThat(t, state.Browsers["firefox"]["49.0"]["unknown"].Count, EqualTo{1})
 }
 
 func TestConfigFindMissingBrowser(t *testing.T) {
