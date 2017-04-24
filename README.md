@@ -8,49 +8,18 @@
 Selenoid is a powerful [Go](http://golang.org/) implementation of original [Selenium](http://github.com/SeleniumHQ/selenium) hub code. It is using Docker to launch browsers.
 
 ## Quick Start Guide
-1) Install [Docker](https://docs.docker.com/engine/installation/)
+1) Make sure you have [Docker](https://docs.docker.com/engine/installation/) installed
 
-2) Pull browser images, e.g.:
+2) Download browser images and generate configuration file:
 ```
-$ docker pull selenoid/firefox:latest
-$ docker pull selenoid/chrome:latest
+$ mkdir -p /etc/selenoid
+$ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aerokube/cm:1.0.0 selenoid --last-versions 2 --tmpfs 128 --pull > /etc/selenoid/browsers.json
 ```
-3) Pull Selenoid image:
-```
-$ docker pull aerokube/selenoid:1.1.0
-```
-
-4) Create the following configuration file:
-
-```bash
-$ cat /etc/selenoid/browsers.json
-{
-    "firefox": {
-      "default": "latest",
-      "versions": {
-        "latest": {
-          "image": "selenoid/firefox:latest",
-          "port": "4444",
-          "path": "/wd/hub"
-        }
-      }
-    },
-    "chrome": {
-      "default": "latest",
-      "versions": {
-        "latest": {
-          "image": "selenoid/chrome:latest",
-          "port": "4444"
-        }
-      }
-    }
-}
-```
-5) Run Selenoid container:
+3) Start Selenoid:
 ```
 # docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.0
 ```
-6) Access Selenoid as regular Selenium hub:
+4) Access Selenoid as regular Selenium hub:
 ```
 http://localhost:4444/wd/hub
 ```
