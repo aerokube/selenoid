@@ -15,8 +15,9 @@ import (
 
 // Session - session id and vnc flaf
 type Session struct {
-	ID  string `json:"id"`
-	VNC bool   `json:"vnc"`
+	ID     string `json:"id"`
+	VNC    bool   `json:"vnc"`
+	Screen string `json:"screen"`
 }
 
 // Sessions - used count and individual sessions for quota user
@@ -158,7 +159,7 @@ func (config *Config) State(sessions *session.Map, limit, queued, pending int) *
 		if session.VNC != "" {
 			vnc = true
 		}
-		v.Sessions = append(v.Sessions, Session{id, vnc})
+		v.Sessions = append(v.Sessions, Session{ID: id, VNC: vnc, Screen: session.Screen})
 	})
 	return state
 }
