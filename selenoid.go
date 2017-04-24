@@ -17,6 +17,13 @@ import (
 	"time"
 
 	"github.com/aerokube/selenoid/session"
+	"sync"
+)
+
+
+var (
+	num      uint64
+	numLock  sync.Mutex
 )
 
 type request struct {
@@ -78,7 +85,16 @@ func (s *sess) Delete() {
 	}
 }
 
+func serial() uint64 {
+	numLock.Lock()
+	defer numLock.Unlock()
+	id := num
+	num++
+	return id
+}
+
 func create(w http.ResponseWriter, r *http.Request) {
+	id := serial()
 	quota, _, ok := r.BasicAuth()
 	if !ok {
 		quota = "unknown"
@@ -86,7 +102,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
-		log.Printf("[ERROR_READING_REQUEST] [%s]\n", err.Error())
+		log.Printf("[%d] [ERROR_READING_REQUEST] [%s] [%v]\n", id, quota, err)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
@@ -100,7 +116,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	err = json.Unmarshal(body, &browser)
 	if err != nil {
-		log.Printf("[BAD_JSON_FORMAT] [%s]\n", err.Error())
+		log.Printf("[%d] [BAD_JSON_FORMAT] [%s] [%v]\n", id, quota, err)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
@@ -108,6 +124,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	if browser.Caps.ScreenResolution != "" {
 		exp := regexp.MustCompile(`^[0-9]+x[0-9]+x(8|16|24)$`)
 		if !exp.MatchString(browser.Caps.ScreenResolution) {
+			log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s] [%s]\n", id, quota, browser.Caps.ScreenResolution)
 			jsonError(w, fmt.Sprintf("Malformed screenResolution capability: %s. Correct format is WxHxD, e.g. 1920x1080x24.",
 				browser.Caps.ScreenResolution), http.StatusBadRequest)
 			queue.Drop()
@@ -116,24 +133,25 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version, browser.Caps.ScreenResolution)
 	if !ok {
-		log.Printf("[ENVIRONMENT_NOT_AVAILABLE] [%s-%s]\n", browser.Caps.Name, browser.Caps.Version)
+		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s-%s]\n", id, quota, browser.Caps.Name, browser.Caps.Version)
 		jsonError(w, "Requested environment is not available", http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
 	u, cancel, err := starter.StartWithCancel()
 	if err != nil {
-		log.Printf("[SERVICE_STARTUP_FAILED] [%s]\n", err.Error())
+		log.Printf("[%d] [SERVICE_STARTUP_FAILED] [%s] [%v]\n", id, quota, err)
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		queue.Drop()
 		return
 	}
 	r.URL.Host, r.URL.Path = u.Host, path.Clean(u.Path+r.URL.Path)
 	var resp *http.Response
-	for i := 1; ; i++ {
+	i := 1
+	for ; ; i++ {
 		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(body))
 		ctx, _ := context.WithTimeout(r.Context(), 10*time.Second)
-		log.Printf("[SESSION_ATTEMPTED] [%s] [%d]\n", u.String(), i)
+		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%s] [%d]\n", id, quota, u.String(), i)
 		rsp, err := http.DefaultClient.Do(req.WithContext(ctx))
 		select {
 		case <-ctx.Done():
@@ -142,10 +160,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 			}
 			switch ctx.Err() {
 			case context.DeadlineExceeded:
-				log.Printf("[SESSION_ATTEMPT_TIMED_OUT]\n")
+				log.Printf("[%d] [SESSION_ATTEMPT_TIMED_OUT] [%s]\n", id, quota)
 				continue
 			case context.Canceled:
-				log.Printf("[CLIENT_DISCONNECTED]\n")
+				log.Printf("[%d] [CLIENT_DISCONNECTED] [%s]\n", id, quota)
 				queue.Drop()
 				cancel()
 				return
@@ -156,7 +174,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			if rsp != nil {
 				rsp.Body.Close()
 			}
-			log.Printf("[SESSION_FAILED] [%s] - [%s]\n", u.String(), err)
+			log.Printf("[%d] [SESSION_FAILED] [%s] - [%s]\n", id, u.String(), err)
 			jsonError(w, err.Error(), http.StatusInternalServerError)
 			queue.Drop()
 			cancel()
@@ -180,7 +198,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		s.ID = s.Value.ID
 	}
 	if s.ID == "" {
-		log.Printf("[SESSION_FAILED] Bad response from [%s] - [%v]\n", u.String(), resp.Status)
+		log.Printf("[%d] [SESSION_FAILED] [%s] [Bad response from %s - %v]\n", id, quota, u.String(), resp.Status)
 		queue.Drop()
 		cancel()
 		return
@@ -195,7 +213,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			request{r}.session(s.ID).Delete()
 		})})
 	queue.Create()
-	log.Printf("[SESSION_CREATED] [%s] [%s]\n", s.ID, u)
+	log.Printf("[%d] [SESSION_CREATED] [%s] [%s] [%s] [%d]\n", id, quota, s.ID, u, i)
 }
 
 func proxy(w http.ResponseWriter, r *http.Request) {
