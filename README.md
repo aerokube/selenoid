@@ -17,7 +17,7 @@ $ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aerokube/cm:1.0.0
 ```
 3) Start Selenoid:
 ```
-# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.0
+# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.1
 ```
 4) Access Selenoid as regular Selenium hub:
 ```
@@ -70,7 +70,7 @@ $ ./selenoid -conf /my/custom/browsers.json -limit 10
 ```
 When using Selenoid inside Docker container these flags are passed like the following:
 ```
-# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.0 -conf /my/custom/browsers.json -limit 10
+# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.1 -conf /my/custom/browsers.json -limit 10
 ```
 
 ### Simultaneously Running Containers
@@ -145,7 +145,7 @@ The last field - **path** is needed to specify relative path to the URL where a 
 
 When used in Docker container Selenoid will have timezone set to UTC. To set custom timezone pass TZ environment variable to Docker:
 ```
-$ docker run -d --name selenoid -p 4444:4444 -e TZ=Europe/Moscow -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.0
+$ docker run -d --name selenoid -p 4444:4444 -e TZ=Europe/Moscow -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.1
 ```
 
 ### Logging Configuration File
