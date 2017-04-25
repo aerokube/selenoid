@@ -131,7 +131,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version, browser.Caps.ScreenResolution)
+	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version, browser.Caps.ScreenResolution, id)
 	if !ok {
 		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s-%s]\n", id, quota, browser.Caps.Name, browser.Caps.Version)
 		jsonError(w, "Requested environment is not available", http.StatusBadRequest)

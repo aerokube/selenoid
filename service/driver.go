@@ -16,10 +16,12 @@ import (
 // Driver - driver processes manager
 type Driver struct {
 	Service *config.Browser
+	RequestId uint64
 }
 
 // StartWithCancel - Starter interface implementation
 func (d *Driver) StartWithCancel() (*url.URL, func(), error) {
+	requestId := d.RequestId
 	slice, ok := d.Service.Image.([]interface{})
 	if !ok {
 		return nil, nil, fmt.Errorf("configuration error: image is not an array: %v", d.Service.Image)
@@ -34,41 +36,41 @@ func (d *Driver) StartWithCancel() (*url.URL, func(), error) {
 	if len(cmdLine) == 0 {
 		return nil, nil, errors.New("configuration error: image is empty")
 	}
-	log.Println("Trying to allocate port")
+	log.Printf("[%d] [ALLOCATING_PORT]\n", requestId)
 	l, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		return nil, nil, fmt.Errorf("cannot bind to port: %v", err)
 	}
 	u := &url.URL{Scheme: "http", Host: l.Addr().String()}
 	_, port, _ := net.SplitHostPort(l.Addr().String())
-	log.Println("Available port is:", port)
+	log.Printf("[%d] [ALLOCATED_PORT] [%s]\n", requestId, port)
 	cmdLine = append(cmdLine, fmt.Sprintf("--port=%s", port))
 	cmd := exec.Command(cmdLine[0], cmdLine[1:]...)
 	l.Close()
-	log.Println("Starting process:", cmdLine)
+	log.Printf("[%d] [STARTING_PROCESS] [%s]\n", requestId, cmdLine)
 	s := time.Now()
 	err = cmd.Start()
 	if err != nil {
-		e := fmt.Errorf("Cannot start process %v: %v", cmdLine, err)
-		log.Println(e)
+		e := fmt.Errorf("cannot start process %v: %v", cmdLine, err)
 		return nil, nil, e
 	}
 	err = wait(u.String(), 30*time.Second)
 	if err != nil {
-		stopProcess(cmd)
+		d.stopProcess(cmd)
 		return nil, nil, err
 	}
-	log.Printf("Process %d started in: %v\n", cmd.Process.Pid, time.Since(s))
-	log.Println("Proxying requests to:", u.String())
-	return u, func() { stopProcess(cmd) }, nil
+	log.Printf("[%d] [PROCESS_STARTED] [%d] [%v]\n", requestId, cmd.Process.Pid, time.Since(s))
+	log.Printf("[%d] [PROXYING_REQUESTS] [%s]\n", requestId, u.String())
+	return u, func() { d.stopProcess(cmd) }, nil
 }
 
-func stopProcess(cmd *exec.Cmd) {
-	log.Println("Terminating process", cmd.Process.Pid)
+func (d *Driver) stopProcess(cmd *exec.Cmd) {
+	requestId := d.RequestId
+	log.Printf("[%d] [TERMINATING_PROCESS] [%d]\n", requestId, cmd.Process.Pid)
 	err := cmd.Process.Kill()
 	if err != nil {
-		log.Printf("Cannot terminate process %d: %v\n", cmd.Process.Pid, err)
+		log.Printf("[%d] [FAILED_TO_TERMINATE_PROCESS] [%d]: %v\n", requestId, cmd.Process.Pid, err)
 		return
 	}
-	log.Printf("Process %d terminated\n", cmd.Process.Pid)
+	log.Printf("[%d] [TERMINATED_PROCESS] [%d]\n", requestId, cmd.Process.Pid)
 }

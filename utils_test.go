@@ -53,7 +53,7 @@ func (m *HTTPTest) StartWithCancel() (*url.URL, func(), error) {
 	}, nil
 }
 
-func (m *HTTPTest) Find(s string, v *string, sr string) (service.Starter, bool) {
+func (m *HTTPTest) Find(s string, v *string, sr string, requestId uint64) (service.Starter, bool) {
 	return m, true
 }
 
@@ -65,13 +65,13 @@ func (m *StartupError) StartWithCancel() (*url.URL, func(), error) {
 	return nil, nil, errors.New("Failed to start Service")
 }
 
-func (m *StartupError) Find(s string, v *string, sr string) (service.Starter, bool) {
+func (m *StartupError) Find(s string, v *string, sr string, requestId uint64) (service.Starter, bool) {
 	return m, true
 }
 
 type BrowserNotFound struct{}
 
-func (m *BrowserNotFound) Find(s string, v *string, sr string) (service.Starter, bool) {
+func (m *BrowserNotFound) Find(s string, v *string, sr string, requestId uint64) (service.Starter, bool) {
 	return nil, false
 }
 

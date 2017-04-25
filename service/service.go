@@ -18,7 +18,7 @@ type Starter interface {
 
 // Manager - interface to choose appropriate starter
 type Manager interface {
-	Find(s string, v *string, sr string) (Starter, bool)
+	Find(s string, v *string, sr string, requestId uint64) (Starter, bool)
 }
 
 // DefaultManager - struct for default implementation
@@ -29,8 +29,8 @@ type DefaultManager struct {
 }
 
 // Find - default implementation Manager interface
-func (m *DefaultManager) Find(s string, v *string, sr string) (Starter, bool) {
-	log.Printf("Locating the service for %s %s\n", s, *v)
+func (m *DefaultManager) Find(s string, v *string, sr string, requestId uint64) (Starter, bool) {
+	log.Printf("[%d] [LOCATING_SERVICE] [%s-%s]\n", requestId, s, *v)
 	service, ok := m.Config.Find(s, v)
 	if !ok {
 		return nil, false
@@ -40,11 +40,11 @@ func (m *DefaultManager) Find(s string, v *string, sr string) (Starter, bool) {
 		if m.Client == nil {
 			return nil, false
 		}
-		log.Printf("Using docker service for %s %s\n", s, *v)
-		return &Docker{m.IP, m.Client, service, m.Config.ContainerLogs, sr}, true
+		log.Printf("[%d] [USING_DOCKER] [%s-%s]\n", requestId, s, *v)
+		return &Docker{m.IP, m.Client, service, m.Config.ContainerLogs, sr, requestId}, true
 	case []interface{}:
-		log.Printf("Using driver service for %s %s\n", s, *v)
-		return &Driver{service}, true
+		log.Printf("[%d] [USING_DRIVER] [%s-%s]\n", requestId, s, *v)
+		return &Driver{service, requestId}, true
 	}
 	return nil, false
 }
