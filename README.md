@@ -23,6 +23,7 @@ $ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aerokube/cm:1.0.0
 ```
 http://localhost:4444/wd/hub
 ```
+This URL only works with Selenium client library (which is doing POST request). Trying to open it in browser (GET request) returns 404 and this is the expected behavior.
 
 ## Simple UI
 
