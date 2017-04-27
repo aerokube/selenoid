@@ -183,7 +183,42 @@ To reload configuration without restart send SIGHUP:
 # docker kill -s HUP <container-id-or-name>
 ```
 
-## Usage statistics
+### Using Selenoid with Webdriver Binaries
+Selenoid is using containers to start browsers. However cases exist when running browser in container is not possible. For example on Windows you have Internet Explorer which can not be run inside container. Selenoid can be used as a lightweight Selenium server replacement to run IE, Firefox or Chrome on Windows. For example to use Selenoid with IE:
+
+1) Download latest [IEDriverServer](http://www.seleniumhq.org/download/) archive and unpack it to some directory (```C:\``` in this example).
+2) Download latest [Selenoid](https://github.com/aerokube/selenoid/releases/latest) binary.
+3) Create ```browsers.json``` configuration file:
+```json
+{
+  "internet explorer": {
+    "default": "11",
+    "versions": {
+      "11": {
+        "image": ["C:\\IEDriverServer.exe", "--log-level=DEBUG"]
+      }
+    }
+  }
+}
+```
+Notice that backslashes in Windows paths should be escaped as ```\\```.
+In this example we define a browser with name ```internet explorer```  and version ```11```.
+4) Start Selenoid:
+```
+./selenoid_win_amd64.exe -conf ./browsers.json -disable-docker
+```
+5) Run your tests against...
+```
+http://localhost:4444/wd/hub
+```
+... with the following capabilities:
+```
+browserName = internet explorer
+version = 11
+```
+6) To start [Chrome](https://www.google.com/chrome/) instead just download [Chromedriver](https://sites.google.com/a/chromium.org/chromedriver/) binary and modify ```browsers.json``` accordingly.
+
+## Usage Statistics
 
 Selenoid calculates usage statistics that can be accessed with HTTP request:
 ```bash
@@ -208,7 +243,7 @@ $ curl http://localhost:4444/status
 ```
 Users are extracted from basic HTTP authentication headers.
 
-### Sending statistics to external systems
+### Sending Statistics to External Systems
 
 To send Selenoid statistics described in previous section you can use [Telegraf](https://github.com/influxdata/telegraf). For example to send status to [Graphite](https://github.com/graphite-project):
 
@@ -222,7 +257,7 @@ To send Selenoid statistics described in previous section you can use [Telegraf]
 # docker run --rm telegraf:alpine --input-filter httpjson --output-filter graphite config > /etc/telegraf/telegraf.conf
 ```
 3) Edit file like the following (three dots mean some not shown lines):
-```go
+```
 ...
 [agent]
 interval = "10s" # <- adjust this if needed
