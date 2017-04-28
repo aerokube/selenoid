@@ -257,7 +257,7 @@ To send Selenoid statistics described in previous section you can use [Telegraf]
 # docker run --rm telegraf:alpine --input-filter httpjson --output-filter graphite config > /etc/telegraf/telegraf.conf
 ```
 3) Edit file like the following (three dots mean some not shown lines):
-```
+```go
 ...
 [agent]
 interval = "10s" # <- adjust this if needed
