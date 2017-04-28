@@ -74,8 +74,12 @@ When using Selenoid inside Docker container these flags are passed like the foll
 # docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.1 -conf /my/custom/browsers.json -limit 10
 ```
 
-### Simultaneously Running Containers
-Total number of simultaneously running containers (adjusted via ```-limit``` flag) depends on your host machine hardware. Our experience shows that depending on your tests the recommended limit is something like: ```1.5-2.0 x numCores```, where ```numCores``` is total number of cores on your host machine.
+### Docker Settings
+* We recommend to use modern Docker storage drivers like [AUFS](https://en.wikipedia.org/wiki/Aufs) or [OverfayFS](https://en.wikipedia.org/wiki/OverlayFS). Never use [Device Mapper](https://en.wikipedia.org/wiki/Device_mapper) - it is very slow. See [this](https://docs.docker.com/engine/userguide/storagedriver/selectadriver/) page on how to adjust Docker storage driver. To check your currently used driver type:
+```
+# docker info | grep Storage
+```
+* Total number of simultaneously running containers (adjusted via ```-limit``` flag) depends on your host machine hardware. Our experience shows that depending on your tests the recommended limit is something like: ```1.5-2.0 x numCores```, where ```numCores``` is total number of cores on your host machine.
 
 ### Browsers Configuration File
 
@@ -103,7 +107,7 @@ Selenoid uses simple JSON configuration files of the following format:
 ```
 This file represents a mapping between a list of supported browser versions and Docker container images or driver binaries.
 #### Browser Name and Version
-Browser name and version are just strings that are matched against Selenium desired capabilities: browserName and version. If no version capability is present default version is used. When there is no exact version match we also try to match by prefix. That means version string in JSON should start with version string from capabilities. The following request matches...
+Browser name and version are just strings that are matched against Selenium desired capabilities: ```browserName``` and ```version```. If no version capability is present default version is used. When there is no exact version match we also try to match by prefix. That means version string in JSON should start with version string from capabilities. The following request matches...
 ```
 versionFromConfig = 46.0
 versionFromCapabilities = 46 # 46.0 starts with 46
@@ -131,7 +135,7 @@ If you wish to use a standalone binary instead of Docker container, then image f
 Selenoid proxies connections to either Selenium server or standalone driver binary. Depending on operating system both can be packaged inside Docker container.
 
 #### Port, Tmpfs and Path
-You should use **port** field to specify the real port that Selenium server or driver will listen on. For Docker containers this is a port inside container. **tmpfs** and **path** fields are optional. You may probably know that moving browser cache to in-memory filesystem ([tmpfs](https://en.wikipedia.org/wiki/Tmpfs)) can dramatically improve its performance. Selenoid can automatically attach one or more in-memory filesystems as volumes to Docker container being run. To achieve this define one or more mount points and their respective sizes in optional **tmpfs** field:
+You should use ```port``` field to specify the real port that Selenium server or driver will listen on. For Docker containers this is a port inside container. ```tmpfs``` and ```path``` fields are optional. You may probably know that moving browser cache to in-memory filesystem ([tmpfs](https://en.wikipedia.org/wiki/Tmpfs)) can dramatically improve its performance. Selenoid can automatically attach one or more in-memory filesystems as volumes to Docker container being run. To achieve this define one or more mount points and their respective sizes in optional ```tmpfs``` field:
 ```js
 "46.0": { // Version name
     "image": ...
@@ -140,7 +144,7 @@ You should use **port** field to specify the real port that Selenium server or d
     "path" : ... 
 },
 ```
-The last field - **path** is needed to specify relative path to the URL where a new session is created (default is **/**). 
+The last field - ```path``` is needed to specify relative path to the URL where a new session is created (default is ```/```). Which value to specify in this field depends on container contents. For example most of Firefox containers have [Selenium server](http://seleniumhq.org/) inside - thus you need to specify ```/wd/hub```. Chrome and Opera containers use web driver binary as entrypoint application which is accepting requests at ```/```. We recommend to use our [configuration tool](https://github.com/aerokube/cm) to avoid errors with this field.
 
 ### Timezone
 
