@@ -207,6 +207,7 @@ Selenoid is using containers to start browsers. However cases exist when running
 ```
 Notice that backslashes in Windows paths should be escaped as ```\\```.
 In this example we define a browser with name ```internet explorer```  and version ```11```.
+
 4) Start Selenoid:
 ```
 ./selenoid_win_amd64.exe -conf ./browsers.json -disable-docker
