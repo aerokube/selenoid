@@ -75,8 +75,8 @@ func (q *Queue) Release() {
 func New(size int) *Queue {
 	return &Queue{
 		make(chan struct{}, size),
-		make(chan struct{}, math.MaxUint32),
-		make(chan struct{}, math.MaxUint32),
-		make(chan struct{}, math.MaxUint32),
+		make(chan struct{}, math.MaxInt32),
+		make(chan struct{}, math.MaxInt32),
+		make(chan struct{}, math.MaxInt32),
 	}
 }
