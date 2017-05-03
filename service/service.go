@@ -1,24 +1,24 @@
 package service
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/aerokube/selenoid/config"
 	"github.com/docker/docker/client"
+	"net/http"
+	"fmt"
 )
 
 // Starter - interface to create session with cancellation ability
 type Starter interface {
-	StartWithCancel() (*url.URL, func(), error)
+	StartWithCancel() (*url.URL, string, func(), error)
 }
 
 // Manager - interface to choose appropriate starter
 type Manager interface {
-	Find(s string, v *string, sr string, requestId uint64) (Starter, bool)
+	Find(s string, v *string, sr string, vnc bool, requestId uint64) (Starter, bool)
 }
 
 // DefaultManager - struct for default implementation
@@ -29,7 +29,7 @@ type DefaultManager struct {
 }
 
 // Find - default implementation Manager interface
-func (m *DefaultManager) Find(s string, v *string, sr string, requestId uint64) (Starter, bool) {
+func (m *DefaultManager) Find(s string, v *string, sr string, vnc bool, requestId uint64) (Starter, bool) {
 	log.Printf("[%d] [LOCATING_SERVICE] [%s-%s]\n", requestId, s, *v)
 	service, ok := m.Config.Find(s, v)
 	if !ok {
@@ -41,7 +41,7 @@ func (m *DefaultManager) Find(s string, v *string, sr string, requestId uint64) 
 			return nil, false
 		}
 		log.Printf("[%d] [USING_DOCKER] [%s-%s]\n", requestId, s, *v)
-		return &Docker{m.IP, m.Client, service, m.Config.ContainerLogs, sr, requestId}, true
+		return &Docker{m.IP, m.Client, service, m.Config.ContainerLogs, sr, vnc, requestId}, true
 	case []interface{}:
 		log.Printf("[%d] [USING_DRIVER] [%s-%s]\n", requestId, s, *v)
 		return &Driver{service, requestId}, true

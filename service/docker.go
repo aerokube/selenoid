@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"net/url"
 	"os"
 	"time"
@@ -23,15 +24,27 @@ type Docker struct {
 	Service          *config.Browser
 	LogConfig        *container.LogConfig
 	ScreenResolution string
+	VNC              bool
 	RequestId uint64
 }
 
 // StartWithCancel - Starter interface implementation
-func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
+func (d *Docker) StartWithCancel() (*url.URL, string, func(), error) {
 	requestId := d.RequestId
-	port, err := nat.NewPort("tcp", d.Service.Port)
+	selenium, err := nat.NewPort("tcp", d.Service.Port)
 	if err != nil {
-		return nil, nil, err
+		return nil, "", nil, err
+	}
+	exposedPorts := map[nat.Port]struct{}{selenium: {}}
+	portBindings := nat.PortMap{selenium: []nat.PortBinding{{HostIP: "0.0.0.0"}}}
+	var vnc nat.Port
+	if d.VNC {
+		vnc, err = nat.NewPort("tcp", "5900")
+		if err != nil {
+			return nil, "", nil, err
+		}
+		exposedPorts[vnc] = struct{}{}
+		portBindings[vnc] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
 	}
 	ctx := context.Background()
 	imageRef := d.Service.Image.(string)
@@ -39,27 +52,26 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 	env := []string{
 		fmt.Sprintf("TZ=%s", time.Local),
 		fmt.Sprintf("SCREEN_RESOLUTION=%s", d.ScreenResolution),
+		fmt.Sprintf("ENABLE_VNC=%v", d.VNC),
 	}
 	resp, err := d.Client.ContainerCreate(ctx,
 		&container.Config{
 			Hostname:     "localhost",
 			Image:        d.Service.Image.(string),
 			Env:          env,
-			ExposedPorts: map[nat.Port]struct{}{port: {}},
+			ExposedPorts: exposedPorts,
 		},
 		&container.HostConfig{
-			AutoRemove: true,
-			PortBindings: nat.PortMap{
-				port: []nat.PortBinding{{HostIP: "0.0.0.0"}},
-			},
-			LogConfig:  *d.LogConfig,
-			Tmpfs:      d.Service.Tmpfs,
-			ShmSize:    268435456,
-			Privileged: true,
+			AutoRemove:   true,
+			PortBindings: portBindings,
+			LogConfig:    *d.LogConfig,
+			Tmpfs:        d.Service.Tmpfs,
+			ShmSize:      268435456,
+			Privileged:   true,
 		},
 		&network.NetworkingConfig{}, "")
 	if err != nil {
-		return nil, nil, fmt.Errorf("create container: %v", err)
+		return nil, "", nil, fmt.Errorf("create container: %v", err)
 	}
 	containerStartTime := time.Now()
 	containerId := resp.ID
@@ -67,25 +79,20 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 	err = d.Client.ContainerStart(ctx, containerId, types.ContainerStartOptions{})
 	if err != nil {
 		d.removeContainer(ctx, d.Client, containerId)
-		return nil, nil, fmt.Errorf("start container: %v", err)
+		return nil, "", nil, fmt.Errorf("start container: %v", err)
 	}
 	log.Printf("[%d] [CONTAINER_STARTED] [%s] [%s] [%v]\n", requestId, imageRef, containerId, time.Since(containerStartTime))
 	stat, err := d.Client.ContainerInspect(ctx, containerId)
 	if err != nil {
 		d.removeContainer(ctx, d.Client, containerId)
-		return nil, nil, fmt.Errorf("inspect container %s: %s", containerId, err)
+		return nil, "", nil, fmt.Errorf("inspect container %s: %s", containerId, err)
 	}
-	_, ok := stat.NetworkSettings.Ports[port]
+	_, ok := stat.NetworkSettings.Ports[selenium]
 	if !ok {
 		d.removeContainer(ctx, d.Client, containerId)
-		return nil, nil, fmt.Errorf("no bindings available for %v", port)
+		return nil, "", nil, fmt.Errorf("no bingings available for %v", selenium)
 	}
-	numBundings := len(stat.NetworkSettings.Ports[port])
-	if numBundings != 1 {
-		d.removeContainer(ctx, d.Client, containerId)
-		return nil, nil, fmt.Errorf("wrong number of port bindings: %d", numBundings)
-	}
-	addr := stat.NetworkSettings.Ports[port][0]
+	addr := stat.NetworkSettings.Ports[selenium][0]
 	if d.IP == "" {
 		_, err = os.Stat("/.dockerenv")
 		if err != nil {
@@ -97,17 +104,22 @@ func (d *Docker) StartWithCancel() (*url.URL, func(), error) {
 	} else {
 		addr.HostIP = d.IP
 	}
+	vncHostPort := ""
+	if d.VNC {
+		vncPort := stat.NetworkSettings.Ports[vnc][0].HostPort
+		vncHostPort = net.JoinHostPort(addr.HostIP, vncPort)
+	}
 	host := fmt.Sprintf("http://%s:%s%s", addr.HostIP, addr.HostPort, d.Service.Path)
 	serviceStartTime := time.Now()
 	err = wait(host, 30*time.Second)
 	if err != nil {
 		d.removeContainer(ctx, d.Client, containerId)
-		return nil, nil, err
+		return nil, "", nil, err
 	}
 	log.Printf("[%d] [SERVICE_STARTED] [%s] [%s] [%v]\n", requestId, imageRef, containerId, time.Since(serviceStartTime))
 	u, _ := url.Parse(host)
 	log.Println("proxying requests to:", host)
-	return u, func() { d.removeContainer(ctx, d.Client, resp.ID) }, nil
+	return u, vncHostPort, func() { d.removeContainer(ctx, d.Client, containerId) }, nil
 }
 
 func (docker *Docker) removeContainer(ctx context.Context, cli *client.Client, id string) {
@@ -118,5 +130,5 @@ func (docker *Docker) removeContainer(ctx context.Context, cli *client.Client, i
 		log.Printf("[%d] [FAILED_TO_REMOVE_CONTAINER] [%s] [%v]\n", requestId, id, err)
 		return
 	}
-	log.Printf("[%s] [CONTAINER_REMOVED] [%s]\n", requestId, id)
+	log.Printf("[%d] [CONTAINER_REMOVED] [%s]\n", requestId, id)
 }
