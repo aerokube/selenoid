@@ -265,10 +265,10 @@ func vnc(wsconn *websocket.Conn) {
 	sid := strings.Split(wsconn.Request().URL.Path, "/")[2]
 	sess, ok := sessions.Get(sid)
 	if ok && sess.VNC != "" {
-		log.Printf("[VNC_ENABLED] [%s]", sid)
+		log.Printf("[VNC_ENABLED] [%s]\n", sid)
 		conn, err := net.Dial("tcp", sess.VNC)
 		if err != nil {
-			log.Printf("vnc : %v", err)
+			log.Printf("[VNC_ERROR] [%v]\n", err)
 			return
 		}
 		defer conn.Close()
@@ -276,6 +276,7 @@ func vnc(wsconn *websocket.Conn) {
 		go io.Copy(wsconn, conn)
 		io.Copy(conn, wsconn)
 	}
+	log.Printf("[VNC_CLIENT_DISCONNECTED] [%s]\n", sid)
 }
 
 func onTimeout(t time.Duration, f func()) chan struct{} {

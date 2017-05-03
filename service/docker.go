@@ -113,13 +113,13 @@ func (d *Docker) StartWithCancel() (*url.URL, string, func(), error) {
 	serviceStartTime := time.Now()
 	err = wait(host, 30*time.Second)
 	if err != nil {
-		d.removeContainer(ctx, d.Client, resp.ID)
+		d.removeContainer(ctx, d.Client, containerId)
 		return nil, "", nil, err
 	}
 	log.Printf("[%d] [SERVICE_STARTED] [%s] [%s] [%v]\n", requestId, imageRef, containerId, time.Since(serviceStartTime))
 	u, _ := url.Parse(host)
 	log.Println("proxying requests to:", host)
-	return u, vncHostPort, func() { d.removeContainer(ctx, d.Client, resp.ID) }, nil
+	return u, vncHostPort, func() { d.removeContainer(ctx, d.Client, containerId) }, nil
 }
 
 func (docker *Docker) removeContainer(ctx context.Context, cli *client.Client, id string) {
@@ -130,5 +130,5 @@ func (docker *Docker) removeContainer(ctx context.Context, cli *client.Client, i
 		log.Printf("[%d] [FAILED_TO_REMOVE_CONTAINER] [%s] [%v]\n", requestId, id, err)
 		return
 	}
-	log.Printf("[%s] [CONTAINER_REMOVED] [%s]\n", requestId, id)
+	log.Printf("[%d] [CONTAINER_REMOVED] [%s]\n", requestId, id)
 }
