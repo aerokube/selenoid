@@ -5,10 +5,11 @@ import (
 	"net/url"
 	"time"
 
+	"fmt"
+	"net/http"
+
 	"github.com/aerokube/selenoid/config"
 	"github.com/docker/docker/client"
-	"net/http"
-	"fmt"
 )
 
 // Starter - interface to create session with cancellation ability
@@ -51,7 +52,7 @@ func (m *DefaultManager) Find(s string, v *string, sr string, vnc bool, requestI
 
 func wait(u string, t time.Duration) error {
 	done := make(chan struct{})
-	go func() {
+	go func(done chan struct{}) {
 	loop:
 		for {
 			select {
@@ -65,12 +66,12 @@ func wait(u string, t time.Duration) error {
 				break loop
 			}
 		}
-	}()
+	}(done)
 	select {
 	case <-time.After(t):
+		close(done)
 		return fmt.Errorf("%s does not respond in %v", u, t)
 	case <-done:
-		close(done)
 	}
 	return nil
 }
