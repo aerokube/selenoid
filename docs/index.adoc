@@ -1,0 +1,23 @@
+= Selenoid
+version: 1.2.0
+
+Selenoid is a powerful http://golang.org/[Go] implementation of original http://github.com/SeleniumHQ/selenium[Selenium] hub code. It is using Docker to launch browsers.
+
+== Getting Started
+include::quick-start-guide.adoc[leveloffset=+1]
+include::user-interface.adoc[leveloffset=+1]
+include::browser-images.adoc[leveloffset=+1]
+
+== Advanced Features
+include::live-browser-screen.adoc[leveloffset=+1]
+include::custom-screen-resolution.adoc[leveloffset=+1]
+include::selenoid-without-docker.adoc[leveloffset=+1]
+include::usage-statistics.adoc[leveloffset=+1]
+
+== Configuration
+include::docker-settings.adoc[leveloffset=+1]
+include::browsers-configuration-file.adoc[leveloffset=+1]
+include::logging-configuration-file.adoc[leveloffset=+1]
+include::timezone.adoc[leveloffset=+1]
+include::reloading-configuration.adoc[leveloffset=+1]
+include::flags.adoc[leveloffset=+1]

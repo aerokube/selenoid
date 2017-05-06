@@ -1,0 +1,8 @@
+== Reloading Configuration
+
+To reload configuration without restart send SIGHUP:
+```
+# kill -HUP <pid>
+# docker kill -s HUP <container-id-or-name>
+```
+NOTE: Use only one of these commands.
