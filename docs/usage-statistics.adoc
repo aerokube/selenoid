@@ -1,0 +1,83 @@
+== Usage Statistics
+
+Selenoid calculates usage statistics that can be accessed with HTTP request:
+```bash
+$ curl http://localhost:4444/status
+{
+    "total": 80,
+    "used": 10,
+    "queued": 0,
+    "pending": 1,
+    "browsers": {
+      "firefox": {
+        "46.0": {
+          "user1": {"count":1, "sessions":[
+            {"id":"a7a2b801-21db-4dae-a99b-4cbc0b81de96","vnc":false,"screen":"1920x1080x24"}
+          ]},
+          "user2": {"count":6, "sessions":[
+            ...
+          ]},
+        },
+        "48.0": {
+          "user2": {"count":3, "sessions":[
+                ...
+          ]}
+        }
+      }
+    }
+}
+```
+Users are extracted from basic HTTP authentication headers.
+
+=== Sending Statistics to External Systems
+
+To send Selenoid statistics described in previous section you can use https://github.com/influxdata/telegraf[Telegraf]. For example to send status to https://github.com/graphite-project[Graphite]:
+
+. Pull latest Telegraf Docker container:
++
+```
+# docker pull telegraf:alpine
+```
+. Generate configuration file:
++
+```
+# mkdir -p /etc/telegraf
+# docker run --rm telegraf:alpine --input-filter httpjson --output-filter graphite config > /etc/telegraf/telegraf.conf
+```
+. Edit file like the following (three dots mean some not shown lines):
++
+```go
+...
+[agent]
+interval = "10s" # <- adjust this if needed
+...
+[[outputs.graphite]]
+...
+servers = ["my-graphite-host.example.com:2024"] # <- adjust host and port
+...
+prefix = "one_min" # <- something before hostname, can be blank
+...
+template = "host.measurement.field"
+...
+[[inputs.httpjson]]
+...
+name = "selenoid"
+...
+servers = [
+"http://localhost:4444/status" # <- this is localhost only if Telegraf is run on Selenoid host
+]
+```
+. Start Telegraf container:
++
+```
+# docker run --net host -d --name telegraf -v /etc/telegraf:/etc telegraf:alpine --config /etc/telegraf.conf
+```
++
+Metrics will be sent to my-graphite-host.example.com:2024. Metric names will be like the following:
++
+```
+one_min.selenoid_example_com.httpjson_selenoid.pending
+one_min.selenoid_example_com.httpjson_selenoid.queued
+one_min.selenoid_example_com.httpjson_selenoid.total
+...
+```

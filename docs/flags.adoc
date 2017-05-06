@@ -1,0 +1,25 @@
+== Selenoid Flags
+
+The following flags are supported by ```selenoid``` command:
+```
+-conf string
+    Browsers configuration file (default "config/browsers.json")
+-disable-docker
+    Disable docker support
+-limit int
+    Simultaneous container runs (default 5)
+-listen string
+    Network address to accept connections (default ":4444")
+-log-conf string
+    Container logging configuration file (default "config/container-logs.json")
+-timeout duration
+    Session idle timeout in time.Duration format (default 1m0s)
+```
+For example:
+```
+$ ./selenoid -conf /my/custom/browsers.json -limit 10
+```
+When using Selenoid inside Docker container these flags are passed like the following:
+```
+# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.1 -conf /my/custom/browsers.json -limit 10
+```

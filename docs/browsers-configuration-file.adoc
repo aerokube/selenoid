@@ -1,0 +1,65 @@
+== Browsers Configuration File
+
+Selenoid uses simple JSON configuration files of the following format:
+```js
+{
+    "firefox": {                            // Browser name
+      "default": "46.0",                    // Default browser version
+      "versions": {                         // A list of available browser versions
+        "46.0": {                           // Version name
+          "image": "selenoid/firefox:46.0", // Image name or driver binary command
+          "port": "4444",                   // Port to proxy connections to, see below
+          "tmpfs": {"/tmp": "size=512m"},   // Optional. Add in memory filesystem (tmpfs) to container, see below
+          "path" : "/wd/hub"                // Optional. Path relative to / where we request a new session, see below 
+        },
+        "50.0" :{
+            // ...
+        }
+      }
+    },
+    "chrome": {
+        // ...
+    }
+}
+```
+This file represents a mapping between a list of supported browser versions and Docker container images or driver binaries.
+
+=== Browser Name and Version
+Browser name and version are just strings that are matched against Selenium desired capabilities: ```browserName``` and ```version```. If no version capability is present default version is used. When there is no exact version match we also try to match by prefix. That means version string in JSON should start with version string from capabilities. The following request matches...
+```
+versionFromConfig = 46.0
+versionFromCapabilities = 46 # 46.0 starts with 46
+```
+\... and the following does not:
+```
+versionFromConfig = 46.0
+versionFromCapabilities = 46.1 # 46.0 does not start with 46.1  
+```
+=== Image
+Image by default is a string with container specification in Docker format (```hub.example.com/project/image:tag```). The following image names are valid:
+```
+my-internal-docker-hub.example.com/selenoid/firefox:46.0 # This comes from internal Docker hub
+selenoid/firefox:46.0 # This is downloaded from hub.docker.com
+```
+If you wish to use a standalone binary instead of Docker container, then image field should contain command specification in square brackets:
+```js
+"46.0": { // Version name
+    "image": ["/usr/bin/mybinary", "-arg1", "foo", "-arg2", "bar", "-arg3"],
+    "port": ...
+    "tmpfs": ...
+    "path" : ... 
+},
+```
+Selenoid proxies connections to either Selenium server or standalone driver binary. Depending on operating system both can be packaged inside Docker container.
+
+=== Port, Tmpfs and Path
+You should use ```port``` field to specify the real port that Selenium server or driver will listen on. For Docker containers this is a port inside container. ```tmpfs``` and ```path``` fields are optional. You may probably know that moving browser cache to in-memory filesystem (https://en.wikipedia.org/wiki/Tmpfs)[Tmpfs] can dramatically improve its performance. Selenoid can automatically attach one or more in-memory filesystems as volumes to Docker container being run. To achieve this define one or more mount points and their respective sizes in optional ```tmpfs``` field:
+```js
+"46.0": { // Version name
+    "image": ...
+    "port": ...
+    "tmpfs": {"/tmp": "size=512m", "/var": "size=128m"},
+    "path" : ... 
+},
+```
+The last field - ```path``` is needed to specify relative path to the URL where a new session is created (default is ```/```). Which value to specify in this field depends on container contents. For example most of Firefox containers have http://seleniumhq.org/[Selenium server] inside - thus you need to specify ```/wd/hub```. Chrome and Opera containers use web driver binary as entrypoint application which is accepting requests at ```/```. We recommend to use our https://github.com/aerokube/cm[configuration tool] to avoid errors with this field.
