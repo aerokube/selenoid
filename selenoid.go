@@ -95,6 +95,7 @@ func serial() uint64 {
 }
 
 func create(w http.ResponseWriter, r *http.Request) {
+	sessionStartTime := time.Now()
 	id := serial()
 	quota, _, ok := r.BasicAuth()
 	if !ok {
@@ -220,7 +221,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			request{r}.session(s.ID).Delete()
 		})})
 	queue.Create()
-	log.Printf("[%d] [SESSION_CREATED] [%s] [%s] [%s] [%d]\n", id, quota, s.ID, u, i)
+	log.Printf("[%d] [SESSION_CREATED] [%s] [%s] [%s] [%d] [%v]\n", id, quota, s.ID, u, i, time.Since(sessionStartTime))
 }
 
 func proxy(w http.ResponseWriter, r *http.Request) {

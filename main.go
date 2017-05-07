@@ -77,7 +77,7 @@ func init() {
 		log.Fatal(err)
 	}
 	ip, _, _ := net.SplitHostPort(addr)
-	cli, err = client.NewClient(dockerHost, client.DefaultVersion, nil, nil)
+	cli, err = client.NewEnvClient()
 	if err != nil {
 		log.Fatalf("new docker client: %v\n", err)
 	}
