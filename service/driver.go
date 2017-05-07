@@ -15,7 +15,8 @@ import (
 
 // Driver - driver processes manager
 type Driver struct {
-	Service *config.Browser
+	InDocker  bool
+	Service   *config.Browser
 	RequestId uint64
 }
 

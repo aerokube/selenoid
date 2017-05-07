@@ -22,10 +22,9 @@ import (
 	"sync"
 )
 
-
 var (
-	num      uint64
-	numLock  sync.Mutex
+	num     uint64
+	numLock sync.Mutex
 )
 
 type request struct {
