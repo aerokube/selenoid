@@ -59,8 +59,13 @@ func init() {
 		}
 	})
 	cancelOnSignal()
+	inDocker := false
+	_, err = os.Stat("/.dockerenv")
+	if err == nil {
+		inDocker = true
+	}
 	if disableDocker {
-		manager = &service.DefaultManager{Config: conf}
+		manager = &service.DefaultManager{InDocker: inDocker, Config: conf}
 		return
 	}
 	dockerHost := os.Getenv("DOCKER_HOST")
@@ -74,9 +79,9 @@ func init() {
 	ip, _, _ := net.SplitHostPort(addr)
 	cli, err = client.NewClient(dockerHost, client.DefaultVersion, nil, nil)
 	if err != nil {
-		log.Fatalf("docker error: %v\n", err)
+		log.Fatalf("new docker client: %v\n", err)
 	}
-	manager = &service.DefaultManager{IP: ip, Client: cli, Config: conf}
+	manager = &service.DefaultManager{IP: ip, InDocker: inDocker, Client: cli, Config: conf}
 }
 
 func cancelOnSignal() {

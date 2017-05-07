@@ -24,9 +24,10 @@ type Manager interface {
 
 // DefaultManager - struct for default implementation
 type DefaultManager struct {
-	IP     string
-	Client *client.Client
-	Config *config.Config
+	IP       string
+	InDocker bool
+	Client   *client.Client
+	Config   *config.Config
 }
 
 // Find - default implementation Manager interface
@@ -42,10 +43,10 @@ func (m *DefaultManager) Find(s string, v *string, sr string, vnc bool, requestI
 			return nil, false
 		}
 		log.Printf("[%d] [USING_DOCKER] [%s-%s]\n", requestId, s, *v)
-		return &Docker{m.IP, m.Client, service, m.Config.ContainerLogs, sr, vnc, requestId}, true
+		return &Docker{m.IP, m.InDocker, m.Client, service, m.Config.ContainerLogs, sr, vnc, requestId}, true
 	case []interface{}:
 		log.Printf("[%d] [USING_DRIVER] [%s-%s]\n", requestId, s, *v)
-		return &Driver{service, requestId}, true
+		return &Driver{m.InDocker, service, requestId}, true
 	}
 	return nil, false
 }
