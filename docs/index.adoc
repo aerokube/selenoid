@@ -1,5 +1,11 @@
 = Selenoid
-version: 1.2.0
+:revdate: {docdate}
+:toc: left
+:sectanchors:
+:Author: Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community
+:revnumber: latest
+
+This reference for version: _{revnumber}_
 
 Selenoid is a powerful http://golang.org/[Go] implementation of original http://github.com/SeleniumHQ/selenium[Selenium] hub code. It is using Docker to launch browsers.
 
