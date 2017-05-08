@@ -37,6 +37,16 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
+  - provider: script
+    script: travis/docs.sh latest
+    skip_cleanup: true
+    on:
+      branch: master
+  - provider: script
+    script: travis/docs.sh $TRAVIS_TAG
+    skip_cleanup: true
+    on:
+      tags: true
 
 after_success:
 - bash <(curl -s https://codecov.io/bash) -F unittests
