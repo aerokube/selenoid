@@ -1,8 +1,16 @@
 == Usage Statistics
 
 Selenoid calculates usage statistics that can be accessed with HTTP request:
-```bash
+
+.Request
+[source,bash]
+----
 $ curl http://localhost:4444/status
+----
+
+.Result
+[source,javascript]
+----
 {
     "total": 80,
     "used": 10,
@@ -11,22 +19,36 @@ $ curl http://localhost:4444/status
     "browsers": {
       "firefox": {
         "46.0": {
-          "user1": {"count":1, "sessions":[
-            {"id":"a7a2b801-21db-4dae-a99b-4cbc0b81de96","vnc":false,"screen":"1920x1080x24"}
-          ]},
-          "user2": {"count":6, "sessions":[
-            ...
-          ]},
+          "user1": {
+            "count":1,
+            "sessions":[
+                {
+                    "id": "a7a2b801-21db-4dae-a99b-4cbc0b81de96",
+                    "vnc": false,
+                    "screen": "1920x1080x24"
+                 }
+            ]
+          },
+          "user2": {
+            "count":6,
+            "sessions":[
+                //...
+            ]
+          },
         },
         "48.0": {
-          "user2": {"count":3, "sessions":[
-                ...
-          ]}
+          "user2": {
+            "count":3,
+            "sessions":[
+                //...
+            ]
+          }
         }
       }
     }
 }
-```
+----
+
 Users are extracted from basic HTTP authentication headers.
 
 === Sending Statistics to External Systems
@@ -40,44 +62,53 @@ To send Selenoid statistics described in previous section you can use https://gi
 ```
 . Generate configuration file:
 +
-```
+[source,bash]
+----
 # mkdir -p /etc/telegraf
-# docker run --rm telegraf:alpine --input-filter httpjson --output-filter graphite config > /etc/telegraf/telegraf.conf
-```
+# docker run --rm telegraf:alpine   \
+    --input-filter httpjson         \
+    --output-filter graphite config > /etc/telegraf/telegraf.conf
+----
+
 . Edit file like the following (three dots mean some not shown lines):
 +
-```go
-...
+
+[source,go]
+----
 [agent]
-interval = "10s" # <- adjust this if needed
-...
+interval = "10s" <1>
+
 [[outputs.graphite]]
-...
-servers = ["my-graphite-host.example.com:2024"] # <- adjust host and port
-...
-prefix = "one_min" # <- something before hostname, can be blank
-...
+servers = ["my-graphite-host.example.com:2024"] <2>
+prefix = "one_min" <3>
 template = "host.measurement.field"
-...
+
 [[inputs.httpjson]]
-...
 name = "selenoid"
-...
 servers = [
-"http://localhost:4444/status" # <- this is localhost only if Telegraf is run on Selenoid host
+"http://localhost:4444/status" <4>
 ]
-```
+----
+<1> adjust interval if needed
+<2> adjust host and port
+<3> something before hostname, can be blank
+<4> this is localhost only if Telegraf is run on Selenoid host
+
 . Start Telegraf container:
 +
-```
-# docker run --net host -d --name telegraf -v /etc/telegraf:/etc telegraf:alpine --config /etc/telegraf.conf
-```
+[source,bash]
+----
+# docker run --net host -d  \
+    --name telegraf         \
+    -v /etc/telegraf:/etc   \
+    telegraf:alpine --config /etc/telegraf.conf
+----
+
 +
-Metrics will be sent to my-graphite-host.example.com:2024. Metric names will be like the following:
+Metrics will be sent to _my-graphite-host.example.com:2024_. Metric names will be like the following:
 +
 ```
 one_min.selenoid_example_com.httpjson_selenoid.pending
 one_min.selenoid_example_com.httpjson_selenoid.queued
 one_min.selenoid_example_com.httpjson_selenoid.total
-...
 ```

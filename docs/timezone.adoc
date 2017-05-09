@@ -1,6 +1,14 @@
 == Setting Timezone
 
-When used in Docker container Selenoid will have timezone set to UTC. To set custom timezone pass TZ environment variable to Docker:
-```
-$ docker run -d --name selenoid -p 4444:4444 -e TZ=Europe/Moscow -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.1
-```
+When used in Docker container Selenoid will have timezone set to *UTC*.
+To set custom timezone pass `TZ` environment variable to Docker:
+
+[source,bash,subs="attributes+"]
+----
+$ docker run -d --name selenoid                     \
+    -p 4444:4444                                    \
+    -e TZ=Europe/Moscow                             \
+    -v /etc/selenoid:/etc/selenoid:ro               \
+    -v /var/run/docker.sock:/var/run/docker.sock    \
+    aerokube/selenoid:{revnumber}
+----
