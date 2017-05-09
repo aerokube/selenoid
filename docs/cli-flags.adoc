@@ -1,4 +1,4 @@
-== Selenoid Flags
+== Selenoid CLI Flags
 
 The following flags are supported by ```selenoid``` command:
 ```
@@ -20,6 +20,15 @@ For example:
 $ ./selenoid -conf /my/custom/browsers.json -limit 10
 ```
 When using Selenoid inside Docker container these flags are passed like the following:
-```
-# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.1 -conf /my/custom/browsers.json -limit 10
-```
+
+
+[source,bash,subs="attributes+"]
+----
+# docker run -d --name selenoid                     \
+    -p 4444:4444                                    \
+    -v /etc/selenoid:/etc/selenoid:ro               \
+    -v /var/run/docker.sock:/var/run/docker.sock    \
+    aerokube/selenoid:{revnumber}                   \
+    -conf /my/custom/browsers.json -limit 10
+----
+

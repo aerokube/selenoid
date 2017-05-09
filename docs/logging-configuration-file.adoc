@@ -1,21 +1,37 @@
 == Logging Configuration File
 
-By default Docker container logs are saved to host machine hard drive. When using Selenoid for local development that's ok. But in big Selenium cluster you may want to send logs to some centralized storage like https://www.elastic.co/products/logstash[Logstash] or https://www.graylog.org/[Graylog]. Docker provides such functionality by so-called https://docs.docker.com/engine/admin/logging/overview/[logging drivers]. Selenoid logging configuration file allows to specify which logging driver to use globally for all started Docker containers with browsers. Configuration file has the following format:
-```js
+By default Docker container logs are saved to host machine hard drive. When using Selenoid for local development that's ok.
+But in big Selenium cluster you may want to send logs to some centralized storage like https://www.elastic.co/products/logstash[Logstash]
+or https://www.graylog.org/[Graylog].
+Docker provides such functionality by so-called https://docs.docker.com/engine/admin/logging/overview/[logging drivers].
+Selenoid logging configuration file allows to specify which logging driver to use globally for all started Docker
+containers with browsers. Configuration file has the following format:
+
+.config/container-logs.json
+[source,javascript]
+----
 {
-    "Type" : "<driver-type>",
-    "Config" : {
+    "Type" : "<driver-type>",   <1>
+    "Config" : {                <2>
       "key1" : "value1",
       "key2" : "value2"
     }
 }
-```
-Here ```<driver-type>``` - is a supported Docker logging driver type like ```syslog```, ```journald``` or ```awslogs```. ```Config``` is a list of key-value pairs used to configure selected driver. For example these Docker logging parameters...
+----
+
+<1> is a supported Docker logging driver type like `syslog`, `journald` or `awslogs`.
+<2> `Config` is a list of key-value pairs used to configure selected driver.
+
+For example these Docker logging parameters:
+
 ```
 --log-driver=syslog --log-opt syslog-address=tcp://192.168.0.42:123 --log-opt syslog-facility=daemon
 ```
 \... are equivalent to the following Selenoid logging configuration:
-```js
+
+.config/container-logs.json
+[source,javascript]
+----
 {
     "Type" : "syslog",
     "Config" : {
@@ -23,4 +39,4 @@ Here ```<driver-type>``` - is a supported Docker logging driver type like ```sys
       "syslog-facility" : "daemon"
     }
 }
-```
+----
