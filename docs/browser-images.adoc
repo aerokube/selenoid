@@ -6,7 +6,8 @@ We maintain a set of prebuilt Docker container images for different browsers inc
 * https://hub.docker.com/r/selenoid/opera/[Opera]
 * https://hub.docker.com/r/selenoid/phantomjs/[PhantomJS]
 
-All these images are free to use. See image tags for a list of supported versions. Build files are stored in http://github.com/aerokube/selenoid-images[this] repository. Feel free to create issues or request images for new versions.
+All these images are free to use. See image tags for a list of supported versions. Build files are stored in http://github.com/aerokube/selenoid-images[selenoid-images] repository.
+Feel free to create issues or request images for new versions.
 
 === Image information
 ==== Firefox
@@ -87,7 +88,7 @@ All these images are free to use. See image tags for a list of supported version
 | selenoid/chrome:58.0 | 2.29 | 57.0.2987.110 
 |===
 
-*Note:* images for older Chrome versions were not built because we have no Debian packages. If you have such packages - we could create more images.
+NOTE: Images for older Chrome versions were not built because we have no Debian packages. If you have such packages - we could create more images.
 
 ==== Opera
 
@@ -98,11 +99,14 @@ All these images are free to use. See image tags for a list of supported version
 | selenoid/opera:12.16 | 2.37.0 | 12.16.1860 (dialogs and probably async JS don't work)
 |===
 
-Due to bug in Operadriver to work with Opera Blink images you need to pass additional capability:
-```
+[WARNING]
+====
+Due to bug in *Operadriver* to work with *Opera Blink* images you need to pass additional capability:
+[source,javascript]
 {"browserName": "operablink", "operaOptions": {"binary": "/usr/bin/opera"}}
-```
+
 We do not consider these images really stable. Many of base operations like working with proxies may not work.
+====
 
 .Opera Blink Images
 |===
@@ -122,5 +126,5 @@ We do not consider these images really stable. Many of base operations like work
 | selenoid/opera:44.0 | 2.27 | 44.0.2510.857
 |===
 
-*Note:* images for older Opera versions were not built because we have no Debian packages. If you have such packages - we could create more images.
+NOTE: Images for older Opera versions were not built because we have no Debian packages. If you have such packages - we could create more images.
 

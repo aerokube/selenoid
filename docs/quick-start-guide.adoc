@@ -2,19 +2,34 @@
 . Make sure you have https://docs.docker.com/engine/installation/[Docker] installed
 . Download browser images and generate configuration file:
 +
-```
+[source,bash,subs="attributes+"]
+----
 $ mkdir -p /etc/selenoid
-$ docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aerokube/cm:1.0.0 selenoid --last-versions 2 --tmpfs 128 --pull > /etc/selenoid/browsers.json
-```
+$ docker run --rm                                   \
+    -v /var/run/docker.sock:/var/run/docker.sock    \
+    aerokube/cm:1.0.0 selenoid                      \ <1>
+    --last-versions 2                               \
+    --tmpfs 128                                     \
+    --pull > /etc/selenoid/browsers.json              <2>
+----
+<1> Config Manager helps to generate selenoid config from scratch
+<2> Config printed to stdout, so it needs to redirect output to file
+
 . Start Selenoid:
 +
-```
-# docker run -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:1.1.1
-```
+[source,bash,subs="attributes+"]
+----
+# docker run -d --name selenoid                     \
+    -p 4444:4444                                    \
+    -v /etc/selenoid:/etc/selenoid:ro               \
+    -v /var/run/docker.sock:/var/run/docker.sock    \
+    aerokube/selenoid:{revnumber}
+----
+
 . Run your tests against Selenoid like you do with regular Selenium hub:
 +
-```
+----
 http://localhost:4444/wd/hub
-```
+----
 
 NOTE: Selenoid was created to be run in big Selenium clusters and thus has no built-in user interface. This is why trying to open an URL above in browser returns *404* and this is the expected behavior. The good news are - there is a standalone user interface. Refer to <<User Interface>> section for more details.
