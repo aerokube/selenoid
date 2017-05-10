@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "A6wxSCZcKyTwZP9b7ErXPZE3Ijg=",
+			"checksumSHA1": "ooqO8TYkju/OcDsg9jxZq8jjbWI=",
 			"path": "github.com/Microsoft/go-winio",
-			"revision": "13736c32520969a64987228c21c138a4cfdb3720",
-			"revisionTime": "2017-05-03T19:50:31Z"
+			"revision": "f3b1913901892ada21d52d0cffe1d4c7080d36b7",
+			"revisionTime": "2017-04-26T02:53:07Z"
 		},
 		{
 			"checksumSHA1": "m+iiamnbukzE8kFPfBche6D0FmQ=",
