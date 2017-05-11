@@ -1,0 +1,50 @@
+== Contributing & Development
+
+To build Selenoid:
+
+. Install https://golang.org/doc/install[Golang]
+
+. Setup `$GOPATH` https://github.com/golang/go/wiki/GOPATH[properly]
+
+. Install https://github.com/kardianos/govendor[govendor]
+
+    $ go get -u github.com/kardianos/govendor
+
+. Get Selenoid source:
+
+    $ go get -d github.com/aerokube/selenoid
+
+. Checkout dependencies
+
+    $ cd $GOPATH/src/github.com/aerokube/selenoid && govendor sync
+
+. Build source:
+
+    $ go build
+
+. Run Selenoid:
+
+    $ ./selenoid --help
+
+[TIP]
+====
+To build Docker container type:
+
+[source,bash]
+----
+$ GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build
+$ docker build -t selenoid:latest .
+----
+
+====
+
+=== Documentation
+
+Locally can be generated with:
+
+[source,bash]
+----
+$ docker run --rm -v `pwd`/docs/:/documents/      \
+    asciidoctor/docker-asciidoctor                \
+    asciidoctor -D /documents/output/ index.adoc
+----
