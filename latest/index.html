@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-05-10</span>
+<span id="revdate">2017-05-11</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -559,6 +559,11 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_sending_statistics_to_external_systems">3.3.1. Sending Statistics to External Systems</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li><a href="#_contributing_development">4. Contributing &amp; Development</a>
+<ul class="sectlevel2">
+<li><a href="#_documentation">4.1. Documentation</a></li>
 </ul>
 </li>
 <li><a href="#_browser_image_information">Appendix A: Browser Image information</a>
@@ -1310,6 +1315,97 @@ one_min.selenoid_example_com.httpjson_selenoid.total</code></pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_contributing_development"><a class="anchor" href="#_contributing_development"></a>4. Contributing &amp; Development</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To build Selenoid:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Install <a href="https://golang.org/doc/install">Golang</a></p>
+</li>
+<li>
+<p>Setup <code>$GOPATH</code> <a href="https://github.com/golang/go/wiki/GOPATH">properly</a></p>
+</li>
+<li>
+<p>Install <a href="https://github.com/kardianos/govendor">govendor</a></p>
+<div class="literalblock">
+<div class="content">
+<pre>$ go get -u github.com/kardianos/govendor</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Get Selenoid source:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ go get -d github.com/aerokube/selenoid</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Checkout dependencies</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ cd $GOPATH/src/github.com/aerokube/selenoid &amp;&amp; govendor sync</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build source:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ go build</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run Selenoid:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./selenoid --help</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>To build Docker container type:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$ GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build
+$ docker build -t selenoid:latest .</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_documentation"><a class="anchor" href="#_documentation"></a>4.1. Documentation</h3>
+<div class="paragraph">
+<p>Locally can be generated with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$ docker run --rm -v `pwd`/docs/:/documents/      \
+    asciidoctor/docker-asciidoctor                \
+    asciidoctor -D /documents/output/ index.adoc</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_browser_image_information"><a class="anchor" href="#_browser_image_information"></a>Appendix A: Browser Image information</h2>
 <div class="sectionbody">
 <div class="sect2">
@@ -1816,7 +1912,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-05-10 19:54:58 UTC
+Last updated 2017-05-11 08:49:46 UTC
 </div>
 </div>
 </body>
