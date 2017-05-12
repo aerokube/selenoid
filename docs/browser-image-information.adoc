@@ -113,6 +113,7 @@ We do not consider these images really stable. Many of base operations like work
 | selenoid/opera:42.0 | 2.27 | 42.0.2393.94 
 | selenoid/opera:43.0 | 2.27 | 43.0.2442.991 
 | selenoid/opera:44.0 | 2.27 | 44.0.2510.857
+| selenoid/opera:45.0 | 2.27 | 45.0.2552.635
 |===
 
 NOTE: Images for older Opera versions were not built because we have no Debian packages. If you have such packages - we could create more images.

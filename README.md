@@ -36,4 +36,4 @@ Selenoid has [standalone UI](https://github.com/aerokube/selenoid-ui) to show cu
 
 ## Complete Guide & Build Instructions
 
-Complete reference guide (including how to build) can be found at: http://aerokube.com/selenoid/latest/
+Complete reference guide (including building instructions) can be found at: http://aerokube.com/selenoid/latest/
