@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-05-12</span>
+<span id="revdate">2017-05-13</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -779,11 +779,11 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
 </tr>
 <tr>
 <td><i class="conum" data-value="6"></i><b>6</b></td>
-<td>Port to proxy connections to, see below</td>
+<td><em>Containers only.</em> Port to proxy connections to, see below</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="7"></i><b>7</b></td>
-<td><em>Optional.</em> Add in-memory filesystem (<em>tmpfs</em>) to container, see below</td>
+<td><em>Optional. Containers only.</em> Add in-memory filesystem (<em>tmpfs</em>) to container, see below</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
@@ -896,8 +896,7 @@ That means version string in JSON should start with version string from capabili
 <div class="ulist">
 <ul>
 <li>
-<p><strong>port</strong> - You should use <code>port</code> field to specify the real port that Selenium server or driver will listen on.
-For Docker containers this is a port inside container.</p>
+<p><strong>port</strong> (<em>only for containers</em>) - You should use <code>port</code> field to specify the real port inside container that container process (Selenium server, Selenoid or driver) will listen on.</p>
 </li>
 <li>
 <p><strong>tmpfs</strong> (<em>optional</em>) - You may probably know that moving browser cache to in-memory filesystem (<a href="https://en.wikipedia.org/wiki/Tmpfs">Tmpfs</a>)
@@ -1411,7 +1410,7 @@ $ docker build -t selenoid:latest .</code></pre>
 <div class="sect2">
 <h3 id="_firefox"><a class="anchor" href="#_firefox"></a>A.1. Firefox</h3>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 1. Firefox Images</caption>
+<caption class="title">Table 1. Firefox Images with Selenium Server</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -1675,10 +1674,30 @@ $ docker build -t selenoid:latest .</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">3.3.1 + GD 0.15.0</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">52.0.2 (native events, switching windows don&#8217;t work; proxy capability format could change)</p></td>
 </tr>
+</tbody>
+</table>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 2. Firefox Images with Selenoid</caption>
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Image</th>
+<th class="tableblock halign-left valign-top">Selenoid version</th>
+<th class="tableblock halign-left valign-top">Geckodriver version</th>
+<th class="tableblock halign-left valign-top">Firefox version</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/firefox:53.0</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">3.3.1 + GD 0.15.0</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">53.0 (switching windows don&#8217;t work; proxy capability format could change)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.2.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.16.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">53.0 (switching windows may not work)</p></td>
 </tr>
 </tbody>
 </table>
@@ -1686,7 +1705,7 @@ $ docker build -t selenoid:latest .</code></pre>
 <div class="sect2">
 <h3 id="_chrome"><a class="anchor" href="#_chrome"></a>A.2. Chrome</h3>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 2. Chrome Images</caption>
+<caption class="title">Table 3. Chrome Images</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -1773,7 +1792,7 @@ Images for older Chrome versions were not built because we have no Debian packag
 <div class="sect2">
 <h3 id="_opera"><a class="anchor" href="#_opera"></a>A.3. Opera</h3>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 3. Opera Presto Images</caption>
+<caption class="title">Table 4. Opera Presto Images</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -1817,7 +1836,7 @@ Images for older Chrome versions were not built because we have no Debian packag
 </table>
 </div>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 4. Opera Blink Images</caption>
+<caption class="title">Table 5. Opera Blink Images</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -1917,7 +1936,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-05-12 07:15:44 UTC
+Last updated 2017-05-13 08:41:20 UTC
 </div>
 </div>
 </body>
