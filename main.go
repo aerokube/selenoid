@@ -35,6 +35,10 @@ var (
 	queue         *protect.Queue
 	manager       service.Manager
 	cli           *client.Client
+
+	version     bool
+	gitRevision string = "HEAD"
+	buildStamp  string = "unknown"
 )
 
 func init() {
@@ -44,7 +48,13 @@ func init() {
 	flag.StringVar(&logConfPath, "log-conf", "config/container-logs.json", "Container logging configuration file")
 	flag.IntVar(&limit, "limit", 5, "Simultaneous container runs")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
+	flag.BoolVar(&version, "version", false, "Show version and exit")
 	flag.Parse()
+
+	if version {
+		showVersion()
+		os.Exit(0)
+	}
 
 	queue = protect.New(limit)
 	conf = config.NewConfig()
@@ -150,6 +160,11 @@ func handler() http.Handler {
 		}))
 	root.Handle("/vnc/", websocket.Handler(vnc))
 	return root
+}
+
+func showVersion() {
+	fmt.Printf("Git Revision: %s\n", gitRevision)
+	fmt.Printf("UTC Build Time: %s\n", buildStamp)
 }
 
 func main() {

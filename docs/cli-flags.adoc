@@ -14,6 +14,8 @@ The following flags are supported by ```selenoid``` command:
     Container logging configuration file (default "config/container-logs.json")
 -timeout duration
     Session idle timeout in time.Duration format (default 1m0s)
+-version
+    Show version and exit
 ```
 For example:
 ```
