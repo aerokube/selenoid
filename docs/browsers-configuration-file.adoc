@@ -30,8 +30,8 @@ Selenoid uses simple JSON configuration files of the following format:
 <3> A list of available browser versions
 <4> Version name
 <5> Image name or driver binary command
-<6> Port to proxy connections to, see below
-<7> _Optional._ Add in-memory filesystem (_tmpfs_) to container, see below
+<6> _Containers only._ Port to proxy connections to, see below
+<7> _Optional. Containers only._ Add in-memory filesystem (_tmpfs_) to container, see below
 <8> _Optional._ Path relative to / where we request a new session, see below
 
 This file represents a mapping between a list of supported browser versions and Docker container images or driver binaries.
@@ -104,8 +104,7 @@ Selenoid proxies connections to either Selenium server or standalone driver bina
 },
 ----
 
- * *port* - You should use `port` field to specify the real port that Selenium server or driver will listen on.
-For Docker containers this is a port inside container.
+ * *port* (_only for containers_) - You should use `port` field to specify the real port inside container that container process (Selenium server, Selenoid or driver) will listen on.
 
 * *tmpfs* (_optional_) - You may probably know that moving browser cache to in-memory filesystem (https://en.wikipedia.org/wiki/Tmpfs[Tmpfs])
 can dramatically improve its performance.
