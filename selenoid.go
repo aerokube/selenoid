@@ -16,10 +16,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/docker/docker/api/types"
 	"golang.org/x/net/websocket"
 
-	"github.com/aerokube/selenoid/session"
 	"sync"
+
+	"github.com/aerokube/selenoid/session"
 )
 
 var (
@@ -143,7 +145,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		queue.Drop()
 		return
 	}
-	u, vnc, cancel, err := starter.StartWithCancel()
+	u, container, vnc, cancel, err := starter.StartWithCancel()
 	if err != nil {
 		log.Printf("[%d] [SERVICE_STARTUP_FAILED] [%s] [%v]\n", id, quota, err)
 		jsonError(w, err.Error(), http.StatusInternalServerError)
@@ -210,13 +212,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sessions.Put(s.ID, &session.Session{
-		Quota:   quota,
-		Browser: browser.Caps.Name,
-		Version: browser.Caps.Version,
-		URL:     u,
-		VNC:     vnc,
-		Screen:  browser.Caps.ScreenResolution,
-		Cancel:  cancel,
+		Quota:     quota,
+		Browser:   browser.Caps.Name,
+		Version:   browser.Caps.Version,
+		URL:       u,
+		Container: container,
+		VNC:       vnc,
+		Screen:    browser.Caps.ScreenResolution,
+		Cancel:    cancel,
 		Timeout: onTimeout(timeout, func() {
 			request{r}.session(s.ID).Delete()
 		})})
@@ -264,20 +267,48 @@ func vnc(wsconn *websocket.Conn) {
 	defer wsconn.Close()
 	sid := strings.Split(wsconn.Request().URL.Path, "/")[2]
 	sess, ok := sessions.Get(sid)
-	if ok && sess.VNC != "" {
-		log.Printf("[VNC_ENABLED] [%s]\n", sid)
-		conn, err := net.Dial("tcp", sess.VNC)
+	if ok {
+		if sess.VNC != "" {
+			log.Printf("[VNC_ENABLED] [%s]\n", sid)
+			conn, err := net.Dial("tcp", sess.VNC)
+			if err != nil {
+				log.Printf("[VNC_ERROR] [%v]\n", err)
+				return
+			}
+			defer conn.Close()
+			wsconn.PayloadType = websocket.BinaryFrame
+			go io.Copy(wsconn, conn)
+			io.Copy(conn, wsconn)
+			log.Printf("[VNC_CLIENT_DISCONNECTED] [%s]\n", sid)
+		} else {
+			log.Printf("[VNC_NOT_ENABLED] [%s]\n", sid)
+		}
+	} else {
+		log.Printf("[SESSION_NOT_FOUND] [%s]\n", sid)
+	}
+}
+
+func logs(wsconn *websocket.Conn) {
+	defer wsconn.Close()
+	sid := strings.Split(wsconn.Request().URL.Path, "/")[2]
+	sess, ok := sessions.Get(sid)
+	if ok && sess.Container != "" {
+		log.Printf("[CONTAINER_LOGS] [%s]\n", sess.Container)
+		r, err := cli.ContainerLogs(context.Background(), sess.Container, types.ContainerLogsOptions{
+			ShowStdout: true,
+			ShowStderr: true,
+			Follow:     true,
+		})
 		if err != nil {
-			log.Printf("[VNC_ERROR] [%v]\n", err)
+			log.Printf("[CONTAINER_LOGS_ERROR] [%v]\n", err)
 			return
 		}
-		defer conn.Close()
+		defer r.Close()
 		wsconn.PayloadType = websocket.BinaryFrame
-		go io.Copy(wsconn, conn)
-		io.Copy(conn, wsconn)
-		log.Printf("[VNC_CLIENT_DISCONNECTED] [%s]\n", sid)
+		io.Copy(wsconn, r)
+		log.Printf("[WEBSOCCKET_CLIENT_DISCONNECTED] [%s]\n", sid)
 	} else {
-		log.Printf("[VNC_SESSION_NOT_FOUND] [%s]\n", sid)
+		log.Printf("[SESSION_NOT_FOUND] [%s]\n", sid)
 	}
 }
 
