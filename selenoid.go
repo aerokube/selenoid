@@ -275,8 +275,10 @@ func vnc(wsconn *websocket.Conn) {
 		wsconn.PayloadType = websocket.BinaryFrame
 		go io.Copy(wsconn, conn)
 		io.Copy(conn, wsconn)
+		log.Printf("[VNC_CLIENT_DISCONNECTED] [%s]\n", sid)
+	} else {
+		log.Printf("[VNC_SESSION_NOT_FOUND] [%s]\n", sid)
 	}
-	log.Printf("[VNC_CLIENT_DISCONNECTED] [%s]\n", sid)
 }
 
 func onTimeout(t time.Duration, f func()) chan struct{} {
