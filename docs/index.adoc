@@ -25,6 +25,7 @@ include::browsers-configuration-file.adoc[leveloffset=+1]
 include::logging-configuration-file.adoc[leveloffset=+1]
 include::timezone.adoc[leveloffset=+1]
 include::reloading-configuration.adoc[leveloffset=+1]
+include::docker-compose.adoc[leveloffset=+1]
 include::cli-flags.adoc[leveloffset=+1]
 
 == Advanced Features
