@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-05-18</span>
+<span id="revdate">2017-05-20</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -537,6 +537,7 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_browser_name_and_version">2.2.1. Browser Name and Version</a></li>
 <li><a href="#_image">2.2.2. Image</a></li>
 <li><a href="#_port_tmpfs_and_path">2.2.3. Port, Tmpfs and Path</a></li>
+<li><a href="#_syncing_browser_images_from_existing_file">2.2.4. Syncing Browser Images from Existing File</a></li>
 </ul>
 </li>
 <li><a href="#_logging_configuration_file">2.3. Logging Configuration File</a></li>
@@ -600,7 +601,7 @@ It is using Docker to launch browsers. Please refer to <a href="https://github.c
 <p>Make sure you have <a href="https://docs.docker.com/engine/installation/">Docker</a> installed</p>
 </li>
 <li>
-<p>Download browser images and generate configuration file:</p>
+<p>Download browser images and generate configuration file using <a href="https://github.com/aerokube/cm">Configuration Manager</a>:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">$ mkdir -p /etc/selenoid
@@ -913,6 +914,27 @@ Chrome and Opera containers use web driver binary as entrypoint application whic
 We recommend to use our <a href="https://github.com/aerokube/cm">configuration tool</a> to avoid errors with this field.</p>
 </li>
 </ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_syncing_browser_images_from_existing_file"><a class="anchor" href="#_syncing_browser_images_from_existing_file"></a>2.2.4. Syncing Browser Images from Existing File</h4>
+<div class="paragraph">
+<p>In some usage scenarios you may want to store browsers configuration file under version control and initialize Selenoid from this file. For example this is true if you wish to have consistently reproducing infrastructure and using such tools as <a href="https://aws.amazon.com/cloudformation/">Amazon Cloud Formation</a>. In order to pull browser images do the following:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Install <strong><a href="https://stedolan.github.io/jq/download/">jq</a></strong> - a small tool to query data from JSON files.</p>
+</li>
+<li>
+<p>Extract image names from JSON and automatically pull them:</p>
+<div class="literalblock">
+<div class="content">
+<pre># cat /path/to/browsers.json | jq -r '..|.image|strings' | xargs -I{} docker pull {}</pre>
+</div>
+</div>
+</li>
+</ol>
 </div>
 </div>
 </div>
@@ -1959,7 +1981,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-05-18 16:12:40 UTC
+Last updated 2017-05-20 08:18:59 UTC
 </div>
 </div>
 </body>
