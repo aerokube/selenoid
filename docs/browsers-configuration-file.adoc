@@ -116,3 +116,13 @@ Which value to specify in this field depends on container contents.
 For example, most of Firefox containers have http://seleniumhq.org/[Selenium server] inside - thus you need to specify `/wd/hub`.
 Chrome and Opera containers use web driver binary as entrypoint application which is accepting requests at `/`.
 We recommend to use our https://github.com/aerokube/cm[configuration tool] to avoid errors with this field.
+
+=== Syncing Browser Images from Existing File
+In some usage scenarios you may want to store browsers configuration file under version control and initialize Selenoid from this file. For example this is true if you wish to have consistently reproducing infrastructure and using such tools as https://aws.amazon.com/cloudformation/[Amazon Cloud Formation]. In order to pull browser images do the following:
+
+. Install *https://stedolan.github.io/jq/download/[jq]* - a small tool to query data from JSON files.
+
+. Extract image names from JSON and automatically pull them:
+
+    # cat /path/to/browsers.json | jq -r '..|.image|strings' | xargs -I{} docker pull {}
+    
