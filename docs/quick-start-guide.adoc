@@ -1,6 +1,6 @@
 == Quick Start Guide
 . Make sure you have https://docs.docker.com/engine/installation/[Docker] installed
-. Download browser images and generate configuration file:
+. Download browser images and generate configuration file using https://github.com/aerokube/cm[Configuration Manager]:
 +
 [source,bash,subs="attributes+"]
 ----
