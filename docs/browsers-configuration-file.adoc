@@ -124,5 +124,5 @@ In some usage scenarios you may want to store browsers configuration file under 
 
 . Extract image names from JSON and automatically pull them:
 
-    # cat /path/to/browsers.json | jq -r '..|.image|strings' | xargs -I{} docker pull {}
+    # cat /path/to/browsers.json | jq -r '..|.image?|strings' | xargs -I{} docker pull {}
     
