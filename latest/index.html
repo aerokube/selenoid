@@ -930,7 +930,7 @@ We recommend to use our <a href="https://github.com/aerokube/cm">configuration t
 <p>Extract image names from JSON and automatically pull them:</p>
 <div class="literalblock">
 <div class="content">
-<pre># cat /path/to/browsers.json | jq -r '..|.image|strings' | xargs -I{} docker pull {}</pre>
+<pre># cat /path/to/browsers.json | jq -r '..|.image?|strings' | xargs -I{} docker pull {}</pre>
 </div>
 </div>
 </li>
@@ -1981,7 +1981,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-05-22 08:12:20 UTC
+Last updated 2017-05-22 09:04:41 UTC
 </div>
 </div>
 </body>
