@@ -725,6 +725,22 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
 <li>
 <p>Total number of simultaneously running containers (adjusted via <code><code>-limit</code></code> flag) depends on your host machine hardware. Our experience shows that depending on your tests the recommended limit is something like: <code><code>1.5-2.0 x numCores</code></code>, where <code><code>numCores</code></code> is total number of cores on your host machine.</p>
 </li>
+<li>
+<p>We use the same client as <code>docker</code> command does. This is why all environment variables like <code>DOCKER_API_VERSION</code> or <code>DOCKER_CERT_PATH</code> are applicable. See full list of supported variables in <a href="https://docs.docker.com/engine/reference/commandline/cli/#environment-variables">Docker documentation</a>. For example you may encounter the following error when running Selenoid:</p>
+<div class="literalblock">
+<div class="content">
+<pre>[SERVICE_STARTUP_FAILED] [unknown] [create container: Error response from daemon: client is newer than server (client API version: 1.30, server API version: 1.24)]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is because your Docker server version is older than Selenoid client version. To fix this you need to switch Selenoid to use supported API version - <code>1.24</code>. This can be done by setting <code>DOCKER_API_VERSION</code> environment variable:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># docker run -e DOCKER_API_VERSION=1.24 -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:latest</pre>
+</div>
+</div>
+</li>
 </ul>
 </div>
 </div>
@@ -1985,7 +2001,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-05-26 09:53:15 UTC
+Last updated 2017-05-26 17:10:04 UTC
 </div>
 </div>
 </body>
