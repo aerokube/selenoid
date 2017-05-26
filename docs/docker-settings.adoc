@@ -6,3 +6,10 @@
 # docker info | grep Storage
 ```
 * Total number of simultaneously running containers (adjusted via ```-limit``` flag) depends on your host machine hardware. Our experience shows that depending on your tests the recommended limit is something like: ```1.5-2.0 x numCores```, where ```numCores``` is total number of cores on your host machine.
+* We use the same client as `docker` command does. This is why all environment variables like `DOCKER_API_VERSION` or `DOCKER_CERT_PATH` are applicable. See full list of supported variables in https://docs.docker.com/engine/reference/commandline/cli/#environment-variables[Docker documentation]. For example you may encounter the following error when running Selenoid:
+    
+    [SERVICE_STARTUP_FAILED] [unknown] [create container: Error response from daemon: client is newer than server (client API version: 1.30, server API version: 1.24)]
++    
+This is because your Docker server version is older than Selenoid client version. To fix this you need to switch Selenoid to use supported API version - `1.24`. This can be done by setting `DOCKER_API_VERSION` environment variable:
+
+    # docker run -e DOCKER_API_VERSION=1.24 -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:latest
