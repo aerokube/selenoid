@@ -24,17 +24,19 @@ import (
 )
 
 var (
-	disableDocker bool
-	listen        string
-	timeout       time.Duration
-	limit         int
-	sessions      = session.NewMap()
-	confPath      string
-	logConfPath   string
-	conf          *config.Config
-	queue         *protect.Queue
-	manager       service.Manager
-	cli           *client.Client
+	disableDocker            bool
+	listen                   string
+	timeout                  time.Duration
+	newSessionAttemptTimeout time.Duration
+	sessionDeleteTimeout     time.Duration
+	limit                    int
+	sessions                 = session.NewMap()
+	confPath                 string
+	logConfPath              string
+	conf                     *config.Config
+	queue                    *protect.Queue
+	manager                  service.Manager
+	cli                      *client.Client
 
 	version     bool
 	gitRevision string = "HEAD"
@@ -48,6 +50,8 @@ func init() {
 	flag.StringVar(&logConfPath, "log-conf", "config/container-logs.json", "Container logging configuration file")
 	flag.IntVar(&limit, "limit", 5, "Simultaneous container runs")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
+	flag.DurationVar(&newSessionAttemptTimeout, "session-attempt-timeout", 30*time.Second, "New session attempt timeout in time.Duration format")
+	flag.DurationVar(&sessionDeleteTimeout, "session-delete-timeout", 30*time.Second, "Session delete timeout in time.Duration format")
 	flag.BoolVar(&version, "version", false, "Show version and exit")
 	flag.Parse()
 
