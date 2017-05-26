@@ -12,6 +12,10 @@ The following flags are supported by ```selenoid``` command:
     Network address to accept connections (default ":4444")
 -log-conf string
     Container logging configuration file (default "config/container-logs.json")
+-session-attempt-timeout duration
+    New session attempt timeout in time.Duration format (default 30s)
+-session-delete-timeout duration
+    Session delete timeout in time.Duration format (default 30s)    
 -timeout duration
     Session idle timeout in time.Duration format (default 1m0s)
 -version

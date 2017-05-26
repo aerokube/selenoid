@@ -70,7 +70,7 @@ func (s *sess) Delete() {
 		log.Printf("[DELETE_FAILED] [%s] [%v]\n", s.id, err)
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), sessionDeleteTimeout)
 	defer cancel()
 	resp, err := http.DefaultClient.Do(r.WithContext(ctx))
 	if resp != nil {
@@ -155,7 +155,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	i := 1
 	for ; ; i++ {
 		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(body))
-		ctx, done := context.WithTimeout(r.Context(), 10*time.Second)
+		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
 		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%s] [%d]\n", id, quota, u.String(), i)
 		rsp, err := http.DefaultClient.Do(req.WithContext(ctx))
