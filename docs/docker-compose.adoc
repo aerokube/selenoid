@@ -1,6 +1,6 @@
 == Selenoid with Docker Compose
 
-In order to start Selenoid with https://docs.docker.com/compose/[Docker Compose] you need to enable bridge network mode:
+In order to start Selenoid with UI using https://docs.docker.com/compose/[Docker Compose] you need to enable bridge network mode:
 
 ```
 version: '2'
@@ -13,4 +13,13 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     ports:
       - "4444:4444"
+  selenoid-ui:
+    links:
+       - selenoid
+    network_mode: bridge
+    image: aerokube/selenoid-ui
+    ports:
+      - "8080:8080"
+    command: -selenoid-uri http://selenoid:4444      
 ```
+If you only need Selenoid - just remove `selenoid-ui` section.
