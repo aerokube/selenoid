@@ -152,10 +152,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 		queue.Drop()
 		return
 	}
-	r.URL.Host, r.URL.Path = u.Host, path.Clean(u.Path+r.URL.Path)
 	var resp *http.Response
 	i := 1
 	for ; ; i++ {
+		r.URL.Host, r.URL.Path = u.Host, path.Clean(u.Path+r.URL.Path)
 		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(body))
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
@@ -187,10 +187,13 @@ func create(w http.ResponseWriter, r *http.Request) {
 			queue.Drop()
 			cancel()
 			return
-		} else {
-			resp = rsp
-			break
 		}
+		if rsp.StatusCode == http.StatusNotFound && u.Path == "" {
+			u.Path = "/wd/hub"
+			continue
+		}
+		resp = rsp
+		break
 	}
 	defer resp.Body.Close()
 	w.WriteHeader(resp.StatusCode)

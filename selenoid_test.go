@@ -4,15 +4,15 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
-
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
 	"github.com/aerokube/selenoid/config"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"time"
 )
 
 var (
@@ -124,6 +124,29 @@ func TestNewSessionBadHostResponse(t *testing.T) {
 
 func TestSessionCreated(t *testing.T) {
 	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	resp, err = http.Get(With(srv.URL).Path("/status"))
+	AssertThat(t, err, Is{nil})
+	var state config.State
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
+	AssertThat(t, state.Used, EqualTo{1})
+	AssertThat(t, queue.Used(), EqualTo{1})
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
+func TestSessionCreatedWdHub(t *testing.T) {
+	root := http.NewServeMux()
+	root.Handle("/wd/hub/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/wd/hub")
+		Selenium().ServeHTTP(w, r)
+	}))
+	manager = &HTTPTest{Handler: root}
 
 	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	AssertThat(t, err, Is{nil})
