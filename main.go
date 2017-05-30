@@ -163,6 +163,7 @@ func handler() http.Handler {
 			json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
 		}))
 	root.Handle("/vnc/", websocket.Handler(vnc))
+	root.Handle("/logs/", websocket.Handler(logs))
 	return root
 }
 

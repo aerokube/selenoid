@@ -7,15 +7,16 @@ import (
 
 // Session - holds session info
 type Session struct {
-	Quota   string
-	Browser string
-	Version string
-	URL     *url.URL
-	VNC     string
-	Screen  string
-	Cancel  func()
-	Timeout chan struct{}
-	Lock    sync.Mutex
+	Quota     string
+	Browser   string
+	Version   string
+	URL       *url.URL
+	Container string
+	VNC       string
+	Screen    string
+	Cancel    func()
+	Timeout   chan struct{}
+	Lock      sync.Mutex
 }
 
 // Map - session uuid to sessions mapping

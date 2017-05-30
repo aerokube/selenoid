@@ -45,7 +45,7 @@
         }
     },
     "firefox": {
-        "default": "52.0",
+        "default": "53.0",
         "versions": {
             "48.0": {
                 "image": "selenoid/firefox:48.0",
@@ -81,6 +81,14 @@
             },
             "52.0": {
                 "image": "selenoid/firefox:52.0",
+                "port": "4444",
+                "path": "/wd/hub",
+                "tmpfs": {
+                    "/tmp": "size=128m"
+                }
+            },
+            "53.0": {
+                "image": "selenoid/firefox:53.0",
                 "port": "4444",
                 "path": "/wd/hub",
                 "tmpfs": {
