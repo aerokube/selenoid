@@ -726,6 +726,22 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
 <p>Total number of simultaneously running containers (adjusted via <code><code>-limit</code></code> flag) depends on your host machine hardware. Our experience shows that depending on your tests the recommended limit is something like: <code><code>1.5-2.0 x numCores</code></code>, where <code><code>numCores</code></code> is total number of cores on your host machine.</p>
 </li>
 <li>
+<p>You may also want to limit memory and CPU consumption for each started container. To do this use <code><code>-mem</code></code> and <code><code>-cpu</code></code> flags. For example to limit memory type:</p>
+<div class="literalblock">
+<div class="content">
+<pre># ./selenoid -mem 128m</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here values are specified in <a href="https://docs.docker.com/engine/admin/resource_constraints/">Docker format</a>. Similarly to limit CPU comsumption specify total number of CPUs per container as a float:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># ./selenoid -cpu 1.5</pre>
+</div>
+</div>
+</li>
+<li>
 <p>We use the same client as <code>docker</code> command does. This is why all environment variables like <code>DOCKER_API_VERSION</code> or <code>DOCKER_CERT_PATH</code> are applicable. See full list of supported variables in <a href="https://docs.docker.com/engine/reference/commandline/cli/#environment-variables">Docker documentation</a>. For example you may encounter the following error when running Selenoid:</p>
 <div class="literalblock">
 <div class="content">
@@ -1093,6 +1109,8 @@ services:
 <div class="content">
 <pre class="CodeRay highlight"><code>-conf string
     Browsers configuration file (default "config/browsers.json")
+-cpu value
+    Containers cpu limit as float e.g. 0.2 or 1.0
 -disable-docker
     Disable docker support
 -limit int
@@ -1101,6 +1119,8 @@ services:
     Network address to accept connections (default ":4444")
 -log-conf string
     Container logging configuration file (default "config/container-logs.json")
+-mem value
+    Containers memory limit e.g. 128m or 1g
 -session-attempt-timeout duration
     New session attempt timeout in time.Duration format (default 30s)
 -session-delete-timeout duration
@@ -2012,7 +2032,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-06-03 17:34:30 UTC
+Last updated 2017-06-03 19:11:15 UTC
 </div>
 </div>
 </body>
