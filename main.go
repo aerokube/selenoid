@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/docker/go-units"
 	"golang.org/x/net/websocket"
 
 	"fmt"
@@ -22,6 +24,36 @@ import (
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/client"
 )
+
+type memLimit int64
+
+func (m *memLimit) String() string {
+	return units.HumanSize(float64(*m))
+}
+
+func (limit *memLimit) Set(s string) error {
+	v, err := units.RAMInBytes(s)
+	if err != nil {
+		return fmt.Errorf("set memory limit: %v", err)
+	}
+	*limit = memLimit(v)
+	return nil
+}
+
+type cpuLimit int64
+
+func (limit *cpuLimit) String() string {
+	return strconv.FormatFloat(float64(*limit/1000000000), 'f', -1, 64)
+}
+
+func (limit *cpuLimit) Set(s string) error {
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return fmt.Errorf("set cpu limit: %v", err)
+	}
+	*limit = cpuLimit(v * 1000000000)
+	return nil
+}
 
 var (
 	disableDocker            bool
@@ -44,6 +76,8 @@ var (
 )
 
 func init() {
+	var mem memLimit
+	var cpu cpuLimit
 	flag.BoolVar(&disableDocker, "disable-docker", false, "Disable docker support")
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
 	flag.StringVar(&confPath, "conf", "config/browsers.json", "Browsers configuration file")
@@ -53,6 +87,8 @@ func init() {
 	flag.DurationVar(&newSessionAttemptTimeout, "session-attempt-timeout", 30*time.Second, "New session attempt timeout in time.Duration format")
 	flag.DurationVar(&sessionDeleteTimeout, "session-delete-timeout", 30*time.Second, "Session delete timeout in time.Duration format")
 	flag.BoolVar(&version, "version", false, "Show version and exit")
+	flag.Var(&mem, "mem", "Containers memory limit")
+	flag.Var(&cpu, "cpu", "Containers cpu limit")
 	flag.Parse()
 
 	if version {
@@ -95,7 +131,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("new docker client: %v\n", err)
 	}
-	manager = &service.DefaultManager{IP: ip, InDocker: inDocker, Client: cli, Config: conf}
+	manager = &service.DefaultManager{IP: ip, InDocker: inDocker, CPU: int64(cpu), Memory: int64(mem), Client: cli, Config: conf}
 }
 
 func cancelOnSignal() {

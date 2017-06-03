@@ -20,6 +20,8 @@ import (
 type Docker struct {
 	IP               string
 	InDocker         bool
+	CPU              int64
+	Memory           int64
 	Client           *client.Client
 	Service          *config.Browser
 	LogConfig        *container.LogConfig
@@ -71,6 +73,10 @@ func (d *Docker) StartWithCancel() (*url.URL, string, string, func(), error) {
 			Tmpfs:        d.Service.Tmpfs,
 			ShmSize:      268435456,
 			Privileged:   true,
+			Resources: container.Resources{
+				Memory:   d.Memory,
+				NanoCPUs: d.CPU,
+			},
 		},
 		&network.NetworkingConfig{}, "")
 	if err != nil {
