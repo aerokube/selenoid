@@ -6,6 +6,14 @@
 # docker info | grep Storage
 ```
 * Total number of simultaneously running containers (adjusted via ```-limit``` flag) depends on your host machine hardware. Our experience shows that depending on your tests the recommended limit is something like: ```1.5-2.0 x numCores```, where ```numCores``` is total number of cores on your host machine.
+* You may also want to limit memory and CPU consumption for each started container. To do this use ```-mem``` and ```-cpu``` flags. For example to limit memory type:
+
+    # ./selenoid -mem 128m
++
+Here values are specified in https://docs.docker.com/engine/admin/resource_constraints/[Docker format]. Similarly to limit CPU comsumption specify total number of CPUs per container as a float:
+
+    # ./selenoid -cpu 1.5
+    
 * We use the same client as `docker` command does. This is why all environment variables like `DOCKER_API_VERSION` or `DOCKER_CERT_PATH` are applicable. See full list of supported variables in https://docs.docker.com/engine/reference/commandline/cli/#environment-variables[Docker documentation]. For example you may encounter the following error when running Selenoid:
     
     [SERVICE_STARTUP_FAILED] [unknown] [create container: Error response from daemon: client is newer than server (client API version: 1.30, server API version: 1.24)]

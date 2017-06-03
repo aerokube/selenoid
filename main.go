@@ -87,8 +87,8 @@ func init() {
 	flag.DurationVar(&newSessionAttemptTimeout, "session-attempt-timeout", 30*time.Second, "New session attempt timeout in time.Duration format")
 	flag.DurationVar(&sessionDeleteTimeout, "session-delete-timeout", 30*time.Second, "Session delete timeout in time.Duration format")
 	flag.BoolVar(&version, "version", false, "Show version and exit")
-	flag.Var(&mem, "mem", "Containers memory limit")
-	flag.Var(&cpu, "cpu", "Containers cpu limit")
+	flag.Var(&mem, "mem", "Containers memory limit e.g. 128m or 1g")
+	flag.Var(&cpu, "cpu", "Containers cpu limit as float e.g. 0.2 or 1.0")
 	flag.Parse()
 
 	if version {
