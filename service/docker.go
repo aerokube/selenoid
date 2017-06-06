@@ -67,6 +67,7 @@ func (d *Docker) StartWithCancel() (*url.URL, string, string, func(), error) {
 			ExposedPorts: exposedPorts,
 		},
 		&container.HostConfig{
+			Binds:        d.Service.Volumes,
 			AutoRemove:   true,
 			PortBindings: portBindings,
 			LogConfig:    *d.LogConfig,
