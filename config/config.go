@@ -47,10 +47,11 @@ type State struct {
 
 // Browser configuration
 type Browser struct {
-	Image interface{}       `json:"image"`
-	Port  string            `json:"port"`
-	Path  string            `json:"path"`
-	Tmpfs map[string]string `json:"tmpfs,omitempty"`
+	Image   interface{}       `json:"image"`
+	Port    string            `json:"port"`
+	Path    string            `json:"path"`
+	Tmpfs   map[string]string `json:"tmpfs,omitempty"`
+	Volumes []string          `json:"volumes,omitempty"`
 }
 
 // Versions configuration
