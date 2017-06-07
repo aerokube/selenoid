@@ -48,6 +48,7 @@ func (m *DefaultManager) Find(s string, v *string, sr string, vnc bool, requestI
 		return &Docker{m.IP, m.InDocker, m.CPU, m.Memory, m.Client, service, m.Config.ContainerLogs, sr, vnc, requestId}, true
 	case []interface{}:
 		log.Printf("[%d] [USING_DRIVER] [%s-%s]\n", requestId, s, *v)
+		return &Driver{m.InDocker, service, requestId}, true
 	}
 	return nil, false
 }
