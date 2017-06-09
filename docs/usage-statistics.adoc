@@ -59,10 +59,10 @@ A typical session lifecycle looks like the following:
 image:img/lifecycle.png[lifecycle]
 
 . A new session request arrives to Selenoid.
-. Selenoid `-limit` flag specifies how many sessions can be created simultaneously. When requests reach the limit - subsequent requests are placed in queue. `Queued` requests just block and continue to wait.
-. When there is a free slot for request Selenoid decides whether a Docker container of standalone driver process should be created. All requests during startup are marked as `pending`. Before proceeding to next step Selenoid waits for required port to be open. This is done by sending HEAD requests to the port.
+. Selenoid `-limit` flag specifies how many sessions can be created simultaneously. It is shown as `total` in statistics. When requests reach the limit - subsequent requests are placed in queue. `Queued` requests just block and continue to wait.
+. When there is a free slot for request Selenoid decides whether a Docker container or standalone driver process should be created. All requests during startup are marked as `pending`. Before proceeding to next step Selenoid waits for required port to be open. This is done by sending HEAD requests to the port.
 . When a container or driver is started (ping is successful) Selenoid does a new session request just in the same way as standard Selenium client.
-. Depending on what is returned as response on the previous step session is marked as `created` or `failed`.
+. Depending on what is returned as response on the previous step session is marked as `created` or `failed`. Created and running sessions are also included to `used` value.
 . When a session is created Selenoid just proxies the rest of session requests to the same container or driver.
 . New session request can fail because of Selenium errors or issues with container \ driver startup. In that case an error is returned to user. 
 
