@@ -53,6 +53,13 @@ func (s *sess) url() string {
 	return fmt.Sprintf("http://%s/wd/hub/session/%s", s.addr, s.id)
 }
 
+type caps struct {
+	Name             string `json:"browserName"`
+	Version          string `json:"version"`
+	ScreenResolution string `json:"screenResolution"`
+	VNC              bool   `json:"enableVNC"`
+}
+
 func jsonError(w http.ResponseWriter, msg string, code int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
@@ -112,12 +119,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var browser struct {
-		Caps struct {
-			Name             string `json:"browserName"`
-			Version          string `json:"version"`
-			ScreenResolution string `json:"screenResolution"`
-			VNC              bool   `json:"enableVNC"`
-		} `json:"desiredCapabilities"`
+		Caps caps `json:"desiredCapabilities"`
 	}
 	err = json.Unmarshal(body, &browser)
 	if err != nil {
@@ -126,18 +128,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 		queue.Drop()
 		return
 	}
-	if browser.Caps.ScreenResolution != "" {
-		exp := regexp.MustCompile(`^[0-9]+x[0-9]+x(8|16|24)$`)
-		if !exp.MatchString(browser.Caps.ScreenResolution) {
-			log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s] [%s]\n", id, quota, browser.Caps.ScreenResolution)
-			jsonError(w, fmt.Sprintf("Malformed screenResolution capability: %s. Correct format is WxHxD, e.g. 1920x1080x24.",
-				browser.Caps.ScreenResolution), http.StatusBadRequest)
-			queue.Drop()
-			return
-		}
-	} else {
-		browser.Caps.ScreenResolution = "1920x1080x24"
+	resolution, err := getScreenResolution(browser.Caps.ScreenResolution)
+	if err != nil {
+		log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s] [%s]\n", id, quota, browser.Caps.ScreenResolution)
+		jsonError(w, err.Error(), http.StatusBadRequest)
+		queue.Drop()
+		return
 	}
+	browser.Caps.ScreenResolution = resolution
 	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version, browser.Caps.ScreenResolution, browser.Caps.VNC, id)
 	if !ok {
 		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s-%s]\n", id, quota, browser.Caps.Name, browser.Caps.Version)
@@ -228,6 +226,24 @@ func create(w http.ResponseWriter, r *http.Request) {
 		})})
 	queue.Create()
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%s] [%s] [%d] [%v]\n", id, quota, s.ID, u, i, time.Since(sessionStartTime))
+}
+
+func getScreenResolution(input string) (string, error) {
+	if input == "" {
+		return "1920x1080x24", nil
+	}
+	fullFormat := regexp.MustCompile(`^[0-9]+x[0-9]+x(8|16|24)$`)
+	shortFormat := regexp.MustCompile(`^[0-9]+x[0-9]+$`)
+	if fullFormat.MatchString(input) {
+		return input, nil
+	}
+	if shortFormat.MatchString(input) {
+		return fmt.Sprintf("%sx24", input), nil
+	}
+	return "", fmt.Errorf(
+		"Malformed screenResolution capability: %s. Correct format is WxHxD, e.g. 1920x1080x24.",
+		input,
+	)
 }
 
 func proxy(w http.ResponseWriter, r *http.Request) {

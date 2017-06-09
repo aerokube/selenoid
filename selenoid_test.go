@@ -61,10 +61,28 @@ func TestBrowserNotFound(t *testing.T) {
 	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
+func TestGetDefaultScreenResolution(t *testing.T) {
+	res, err := getScreenResolution("")
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, res, EqualTo{"1920x1080x24"})
+}
+
+func TestGetFullScreenResolution(t *testing.T) {
+	res, err := getScreenResolution("1024x768x24")
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, res, EqualTo{"1024x768x24"})
+}
+
+func TestGetShortScreenResolution(t *testing.T) {
+	res, err := getScreenResolution("1024x768")
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, res, EqualTo{"1024x768x24"})
+}
+
 func TestMalformedScreeResolutionCapability(t *testing.T) {
 	manager = &BrowserNotFound{}
 
-	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities":{"screenResolution":"1024x768"}}`)))
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities":{"screenResolution":"bad-resolution"}}`)))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusBadRequest})
 
