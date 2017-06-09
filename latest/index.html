@@ -1332,16 +1332,16 @@ version = 11</code></pre>
 <p>A new session request arrives to Selenoid.</p>
 </li>
 <li>
-<p>Selenoid <code>-limit</code> flag specifies how many sessions can be created simultaneously. When requests reach the limit - subsequent requests are placed in queue. <code>Queued</code> requests just block and continue to wait.</p>
+<p>Selenoid <code>-limit</code> flag specifies how many sessions can be created simultaneously. It is shown as <code>total</code> in statistics. When requests reach the limit - subsequent requests are placed in queue. <code>Queued</code> requests just block and continue to wait.</p>
 </li>
 <li>
-<p>When there is a free slot for request Selenoid decides whether a Docker container of standalone driver process should be created. All requests during startup are marked as <code>pending</code>. Before proceeding to next step Selenoid waits for required port to be open. This is done by sending HEAD requests to the port.</p>
+<p>When there is a free slot for request Selenoid decides whether a Docker container or standalone driver process should be created. All requests during startup are marked as <code>pending</code>. Before proceeding to next step Selenoid waits for required port to be open. This is done by sending HEAD requests to the port.</p>
 </li>
 <li>
 <p>When a container or driver is started (ping is successful) Selenoid does a new session request just in the same way as standard Selenium client.</p>
 </li>
 <li>
-<p>Depending on what is returned as response on the previous step session is marked as <code>created</code> or <code>failed</code>.</p>
+<p>Depending on what is returned as response on the previous step session is marked as <code>created</code> or <code>failed</code>. Created and running sessions are also included to <code>used</code> value.</p>
 </li>
 <li>
 <p>When a session is created Selenoid just proxies the rest of session requests to the same container or driver.</p>
@@ -2154,7 +2154,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-06-09 03:59:32 UTC
+Last updated 2017-06-09 09:53:02 UTC
 </div>
 </div>
 </body>
