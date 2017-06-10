@@ -56,6 +56,7 @@ func (limit *cpuLimit) Set(s string) error {
 }
 
 var (
+	hostname                 string
 	disableDocker            bool
 	listen                   string
 	timeout                  time.Duration
@@ -96,9 +97,14 @@ func init() {
 		os.Exit(0)
 	}
 
+	var err error
+	hostname, err = os.Hostname()
+	if err != nil {
+		log.Fatalf("%s: %v", os.Args[0], err)
+	}
 	queue = protect.New(limit)
 	conf = config.NewConfig()
-	err := conf.Load(confPath, logConfPath)
+	err = conf.Load(confPath, logConfPath)
 	if err != nil {
 		log.Fatalf("%s: %v", os.Args[0], err)
 	}

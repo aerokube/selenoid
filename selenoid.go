@@ -11,20 +11,24 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"path"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types"
 	"golang.org/x/net/websocket"
-
-	"sync"
-
-	"github.com/aerokube/selenoid/session"
 )
 
 var (
+	httpClient *http.Client = &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 	num     uint64
 	numLock sync.Mutex
 )
@@ -81,7 +85,7 @@ func (s *sess) Delete() {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), sessionDeleteTimeout)
 	defer cancel()
-	resp, err := http.DefaultClient.Do(r.WithContext(ctx))
+	resp, err := httpClient.Do(r.WithContext(ctx))
 	if resp != nil {
 		defer resp.Body.Close()
 	}
@@ -158,7 +162,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
 		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%s] [%d]\n", id, quota, u.String(), i)
-		rsp, err := http.DefaultClient.Do(req.WithContext(ctx))
+		rsp, err := httpClient.Do(req.WithContext(ctx))
 		select {
 		case <-ctx.Done():
 			if rsp != nil {
@@ -194,20 +198,37 @@ func create(w http.ResponseWriter, r *http.Request) {
 		break
 	}
 	defer resp.Body.Close()
-	w.WriteHeader(resp.StatusCode)
 	var s struct {
 		Value struct {
 			ID string `json:"sessionId"`
 		}
 		ID string `json:"sessionId"`
 	}
-	tee := io.TeeReader(resp.Body, w)
-	json.NewDecoder(tee).Decode(&s)
-	if s.ID == "" {
-		s.ID = s.Value.ID
+	location := resp.Header.Get("Location")
+	if location != "" {
+		l, err := url.Parse(location)
+		if err == nil {
+			fragments := strings.Split(l.Path, "/")
+			s.ID = fragments[len(fragments)-1]
+			u := &url.URL{
+				Scheme: "http",
+				Host:   hostname,
+				Path:   path.Join("/wd/hub/session", s.ID),
+			}
+			w.Header().Add("Location", u.String())
+			w.WriteHeader(resp.StatusCode)
+		}
+	} else {
+		tee := io.TeeReader(resp.Body, w)
+		w.WriteHeader(resp.StatusCode)
+		json.NewDecoder(tee).Decode(&s)
+		if s.ID == "" {
+			s.ID = s.Value.ID
+		}
 	}
 	if s.ID == "" {
 		log.Printf("[%d] [SESSION_FAILED] [%s] [Bad response from %s - %v]\n", id, quota, u.String(), resp.Status)
+		jsonError(w, "protocol error: could not determine session id", http.StatusBadGateway)
 		queue.Drop()
 		cancel()
 		return
