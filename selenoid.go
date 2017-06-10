@@ -241,7 +241,7 @@ func getScreenResolution(input string) (string, error) {
 		return fmt.Sprintf("%sx24", input), nil
 	}
 	return "", fmt.Errorf(
-		"Malformed screenResolution capability: %s. Correct format is WxHxD, e.g. 1920x1080x24.",
+		"Malformed screenResolution capability: %s. Correct format is WxH (1920x1080) or WxHxD (1920x1080x24).",
 		input,
 	)
 }
