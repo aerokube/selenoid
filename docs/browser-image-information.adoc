@@ -57,6 +57,8 @@
 | selenoid/firefox:52.0 | selenoid/vnc:firefox_52.0 | 3.3.1 + GD 0.15.0 | 52.0.2 (native events, switching windows don't work; proxy capability format could change) 
 |===
 
+WARNING: Firefox images below require Selenium client 3.4.0 or newer.
+
 .Firefox Images with Selenoid
 |===
 | Image | VNC Image | Selenoid version | Geckodriver version | Firefox version
