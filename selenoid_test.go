@@ -181,6 +181,36 @@ func TestSessionCreatedWdHub(t *testing.T) {
 	queue.Release()
 }
 
+func TestSessionCreatedRedirect(t *testing.T) {
+	httpClient := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	root := http.NewServeMux()
+	root.Handle("/wd/hub/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, With(srv.URL).Path("/wd/hub/session/123"), http.StatusFound)
+	}))
+	manager = &HTTPTest{Handler: root}
+
+	resp, err := httpClient.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, resp.StatusCode, Is{http.StatusFound})
+	location := resp.Header.Get("Location")
+	AssertThat(t, resp.StatusCode, Is{Not{""}})
+	fragments := strings.Split(location, "/")
+	sid := fragments[len(fragments)-1]
+
+	resp, err = http.Get(With(srv.URL).Path("/status"))
+	AssertThat(t, err, Is{nil})
+	var state config.State
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
+	AssertThat(t, state.Used, EqualTo{1})
+	AssertThat(t, queue.Used(), EqualTo{1})
+	sessions.Remove(sid)
+	queue.Release()
+}
+
 func TestProxySession(t *testing.T) {
 	manager = &HTTPTest{Handler: Selenium()}
 

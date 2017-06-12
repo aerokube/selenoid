@@ -1,12 +1,11 @@
 package service
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"time"
-
-	"fmt"
-	"net/http"
 
 	"github.com/aerokube/selenoid/config"
 	"github.com/docker/docker/client"
@@ -59,8 +58,10 @@ func wait(u string, t time.Duration) error {
 	loop:
 		for {
 			select {
-			case <-time.After(5 * time.Millisecond):
-				r, err := http.Head(u)
+			case <-time.After(50 * time.Millisecond):
+				req, _ := http.NewRequest(http.MethodHead, u, nil)
+				req.Close = true
+				r, err := http.DefaultClient.Do(req)
 				if err == nil {
 					r.Body.Close()
 					done <- struct{}{}
@@ -72,9 +73,9 @@ func wait(u string, t time.Duration) error {
 	}(done)
 	select {
 	case <-time.After(t):
-		close(done)
 		return fmt.Errorf("%s does not respond in %v", u, t)
 	case <-done:
 	}
+	close(done)
 	return nil
 }
