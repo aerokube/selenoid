@@ -54,6 +54,7 @@ func (m *DefaultManager) Find(s string, v *string, sr string, vnc bool, requestI
 
 func wait(u string, t time.Duration) error {
 	done := make(chan struct{})
+	defer close(done)
 	go func(done chan struct{}) {
 	loop:
 		for {
@@ -76,6 +77,5 @@ func wait(u string, t time.Duration) error {
 		return fmt.Errorf("%s does not respond in %v", u, t)
 	case <-done:
 	}
-	close(done)
 	return nil
 }
