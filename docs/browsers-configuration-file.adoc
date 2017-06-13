@@ -13,7 +13,8 @@ Selenoid uses simple JSON configuration files of the following format:
           "image": "selenoid/firefox:46.0", <5>
           "port": "4444",                   <6>
           "tmpfs": {"/tmp": "size=512m"},   <7>
-          "path" : "/wd/hub"                <8>
+          "path" : "/wd/hub",               <8>
+          "volumes" : ["/to:/from:ro"]      <9>
         },
         "50.0" :{
             // ...
@@ -33,6 +34,7 @@ Selenoid uses simple JSON configuration files of the following format:
 <6> _Containers only._ Port to proxy connections to, see below
 <7> _Optional. Containers only._ Add in-memory filesystem (_tmpfs_) to container, see below
 <8> _Optional._ Path relative to / where we request a new session, see below
+<9> _Optional. Containers only._ Mount path from host machine to created container
 
 This file represents a mapping between a list of supported browser versions and Docker container images or driver binaries.
 
@@ -92,7 +94,7 @@ If you wish to use a standalone binary instead of Docker container, then image f
 ----
 Selenoid proxies connections to either Selenium server or standalone driver binary. Depending on operating system both can be packaged inside Docker container.
 
-=== Port, Tmpfs and Path
+=== Port, Tmpfs, Path and Volumes
 
 [source,javascript]
 ----
@@ -100,22 +102,25 @@ Selenoid proxies connections to either Selenium server or standalone driver bina
     //...
     "port": ""
     "tmpfs": {"/tmp": "size=512m", "/var": "size=128m"},
-    "path" : ""
+    "path" : "",
+    "volumes": ["/to:/from", "/another:/one:ro"]
 },
 ----
 
- * *port* (_only for containers_) - You should use `port` field to specify the real port inside container that container process (Selenium server, Selenoid or driver) will listen on.
+* *port* (_only for containers_) - You should use `port` field to specify the real port inside container that container process (Selenium server, Selenoid or driver) will listen on.
 
 * *tmpfs* (_optional_) - You may probably know that moving browser cache to in-memory filesystem (https://en.wikipedia.org/wiki/Tmpfs[Tmpfs])
 can dramatically improve its performance.
 Selenoid can automatically attach one or more in-memory filesystems as volumes to Docker container being run.
 To achieve this define one or more mount points and their respective sizes in optional `tmpfs` field.
 
-* *path* (_optional_) - The last field - `path` is needed to specify relative path to the URL where a new session is created (default is `/`).
+* *path* (_optional_) - `path` field is needed to specify relative path to the URL where a new session is created (default is `/`).
 Which value to specify in this field depends on container contents.
 For example, most of Firefox containers have http://seleniumhq.org/[Selenium server] inside - thus you need to specify `/wd/hub`.
 Chrome and Opera containers use web driver binary as entrypoint application which is accepting requests at `/`.
 We recommend to use our https://github.com/aerokube/cm[configuration tool] to avoid errors with this field.
+
+* *volumes* (_optional_) - This field allows to mount volumes from host machine to browser container. Should be specified as an array of Docker volume expressions: `/host/dir:/container/dir[:mode]`.
 
 === Syncing Browser Images from Existing File
 In some usage scenarios you may want to store browsers configuration file under version control and initialize Selenoid from this file. For example this is true if you wish to have consistently reproducing infrastructure and using such tools as https://aws.amazon.com/cloudformation/[Amazon Cloud Formation]. In order to pull browser images do the following:
