@@ -536,7 +536,7 @@ table.CodeRay td.code>pre{padding:0}
 <ul class="sectlevel3">
 <li><a href="#_browser_name_and_version">2.2.1. Browser Name and Version</a></li>
 <li><a href="#_image">2.2.2. Image</a></li>
-<li><a href="#_port_tmpfs_and_path">2.2.3. Port, Tmpfs and Path</a></li>
+<li><a href="#_port_tmpfs_path_and_volumes">2.2.3. Port, Tmpfs, Path and Volumes</a></li>
 <li><a href="#_syncing_browser_images_from_existing_file">2.2.4. Syncing Browser Images from Existing File</a></li>
 </ul>
 </li>
@@ -777,7 +777,8 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
           <span class="key"><span class="delimiter">&quot;</span><span class="content">image</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">selenoid/firefox:46.0</span><span class="delimiter">&quot;</span></span>, <i class="conum" data-value="5"></i><b>(5)</b>
           <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">4444</span><span class="delimiter">&quot;</span></span>,                   <i class="conum" data-value="6"></i><b>(6)</b>
           <span class="key"><span class="delimiter">&quot;</span><span class="content">tmpfs</span><span class="delimiter">&quot;</span></span>: {<span class="key"><span class="delimiter">&quot;</span><span class="content">/tmp</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">size=512m</span><span class="delimiter">&quot;</span></span>},   <i class="conum" data-value="7"></i><b>(7)</b>
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">/wd/hub</span><span class="delimiter">&quot;</span></span>                <i class="conum" data-value="8"></i><b>(8)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">/wd/hub</span><span class="delimiter">&quot;</span></span>,               <i class="conum" data-value="8"></i><b>(8)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">/to:/from:ro</span><span class="delimiter">&quot;</span></span>]      <i class="conum" data-value="9"></i><b>(9)</b>
         },
         <span class="key"><span class="delimiter">&quot;</span><span class="content">50.0</span><span class="delimiter">&quot;</span></span> :{
             <span class="comment">// ...</span>
@@ -823,6 +824,10 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
 <tr>
 <td><i class="conum" data-value="8"></i><b>8</b></td>
 <td><em>Optional.</em> Path relative to / where we request a new session, see below</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="9"></i><b>9</b></td>
+<td><em>Optional. Containers only.</em> Mount path from host machine to created container</td>
 </tr>
 </table>
 </div>
@@ -917,14 +922,15 @@ That means version string in JSON should start with version string from capabili
 </div>
 </div>
 <div class="sect3">
-<h4 id="_port_tmpfs_and_path"><a class="anchor" href="#_port_tmpfs_and_path"></a>2.2.3. Port, Tmpfs and Path</h4>
+<h4 id="_port_tmpfs_path_and_volumes"><a class="anchor" href="#_port_tmpfs_path_and_volumes"></a>2.2.3. Port, Tmpfs, Path and Volumes</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="javascript"><span class="string"><span class="delimiter">&quot;</span><span class="content">46.0</span><span class="delimiter">&quot;</span></span>: {
     <span class="comment">//...</span>
     <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>
     <span class="string"><span class="delimiter">&quot;</span><span class="content">tmpfs</span><span class="delimiter">&quot;</span></span>: {<span class="key"><span class="delimiter">&quot;</span><span class="content">/tmp</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">size=512m</span><span class="delimiter">&quot;</span></span>, <span class="key"><span class="delimiter">&quot;</span><span class="content">/var</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">size=128m</span><span class="delimiter">&quot;</span></span>},
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">/to:/from</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">/another:/one:ro</span><span class="delimiter">&quot;</span></span>]
 },</code></pre>
 </div>
 </div>
@@ -940,11 +946,14 @@ Selenoid can automatically attach one or more in-memory filesystems as volumes t
 To achieve this define one or more mount points and their respective sizes in optional <code>tmpfs</code> field.</p>
 </li>
 <li>
-<p><strong>path</strong> (<em>optional</em>) - The last field - <code>path</code> is needed to specify relative path to the URL where a new session is created (default is <code>/</code>).
+<p><strong>path</strong> (<em>optional</em>) - <code>path</code> field is needed to specify relative path to the URL where a new session is created (default is <code>/</code>).
 Which value to specify in this field depends on container contents.
 For example, most of Firefox containers have <a href="http://seleniumhq.org/">Selenium server</a> inside - thus you need to specify <code>/wd/hub</code>.
 Chrome and Opera containers use web driver binary as entrypoint application which is accepting requests at <code>/</code>.
 We recommend to use our <a href="https://github.com/aerokube/cm">configuration tool</a> to avoid errors with this field.</p>
+</li>
+<li>
+<p><strong>volumes</strong> (<em>optional</em>) - This field allows to mount volumes from host machine to browser container. Should be specified as an array of Docker volume expressions: <code>/host/dir:/container/dir[:mode]</code>.</p>
 </li>
 </ul>
 </div>
@@ -2172,7 +2181,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-06-13 05:00:07 UTC
+Last updated 2017-06-13 16:46:42 UTC
 </div>
 </div>
 </body>
