@@ -23,7 +23,7 @@ $ docker run --rm                                   \
     -p 4444:4444                                    \
     -v /etc/selenoid:/etc/selenoid:ro               \
     -v /var/run/docker.sock:/var/run/docker.sock    \
-    aerokube/selenoid:{revnumber}
+    aerokube/selenoid:latest-release
 ----
 
 . Run your tests against Selenoid like you do with regular Selenium hub:

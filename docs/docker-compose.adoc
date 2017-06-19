@@ -7,7 +7,7 @@ version: '2'
 services:
   selenoid:
     network_mode: bridge
-    image: aerokube/selenoid
+    image: aerokube/selenoid:latest-release
     volumes:
       - "$PWD:/etc/selenoid"
       - "/var/run/docker.sock:/var/run/docker.sock"

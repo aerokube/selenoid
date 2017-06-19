@@ -10,5 +10,5 @@ $ docker run -d --name selenoid                     \
     -e TZ=Europe/Moscow                             \
     -v /etc/selenoid:/etc/selenoid:ro               \
     -v /var/run/docker.sock:/var/run/docker.sock    \
-    aerokube/selenoid:{revnumber}
+    aerokube/selenoid:latest-release
 ----

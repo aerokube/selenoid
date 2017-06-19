@@ -23,7 +23,7 @@ $ docker run --rm                                   \
     -p 4444:4444                                    \
     -v `pwd`:/etc/selenoid:ro                       \
     -v /var/run/docker.sock:/var/run/docker.sock    \
-    aerokube/selenoid
+    aerokube/selenoid:latest-release
 ```
 3) Access Selenoid as regular Selenium hub (works only for POST requests):
 ```

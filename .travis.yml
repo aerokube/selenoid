@@ -38,6 +38,11 @@ deploy:
     on:
       tags: true
   - provider: script
+    script: travis/docker-push.sh latest-release
+    skip_cleanup: true
+    on:
+      tags: true      
+  - provider: script
     script: travis/docs.sh latest
     skip_cleanup: true
     on:

@@ -20,4 +20,4 @@ Here values are specified in https://docs.docker.com/engine/admin/resource_const
 +    
 This is because your Docker server version is older than Selenoid client version. To fix this you need to switch Selenoid to use supported API version - `1.24`. This can be done by setting `DOCKER_API_VERSION` environment variable:
 
-    # docker run -e DOCKER_API_VERSION=1.24 -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:latest
+    # docker run -e DOCKER_API_VERSION=1.24 -d --name selenoid -p 4444:4444 -v /etc/selenoid:/etc/selenoid:ro -v /var/run/docker.sock:/var/run/docker.sock aerokube/selenoid:latest-release
