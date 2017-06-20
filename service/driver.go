@@ -47,6 +47,7 @@ func (d *Driver) StartWithCancel() (*url.URL, string, string, func(), error) {
 	log.Printf("[%d] [ALLOCATED_PORT] [%s]\n", requestId, port)
 	cmdLine = append(cmdLine, fmt.Sprintf("--port=%s", port))
 	cmd := exec.Command(cmdLine[0], cmdLine[1:]...)
+	cmd.Env = append(cmd.Env, d.Service.Env...)
 	l.Close()
 	log.Printf("[%d] [STARTING_PROCESS] [%s]\n", requestId, cmdLine)
 	s := time.Now()
