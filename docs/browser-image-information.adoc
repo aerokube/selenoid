@@ -45,7 +45,7 @@
 | selenoid/firefox:40.0 | selenoid/vnc:firefox_40.0 | 2.45.0 | 40.0.3 
 | selenoid/firefox:41.0 | selenoid/vnc:firefox_41.0 | 2.45.0 | 41.0.2 
 | selenoid/firefox:42.0 | selenoid/vnc:firefox_42.0 | 2.47.1 | 42.0 
-| selenoid/firefox:43.0 | selenoid/vnc:firefox_43.0 | 2.47.1 | 43.0.4 
+| selenoid/firefox:43.0 | selenoid/vnc:firefox_43.0 | 2.53.1 | 43.0.4 
 | selenoid/firefox:44.0 | selenoid/vnc:firefox_44.0 | 2.53.1 | 44.0.2 
 | selenoid/firefox:45.0 | selenoid/vnc:firefox_45.0 | 2.53.1 | 45.0.2 
 | selenoid/firefox:46.0 | selenoid/vnc:firefox_46.0 | 2.53.1 | 46.0.1 
