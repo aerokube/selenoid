@@ -59,6 +59,7 @@ func (d *Docker) StartWithCancel() (*url.URL, string, string, func(), error) {
 		fmt.Sprintf("SCREEN_RESOLUTION=%s", d.ScreenResolution),
 		fmt.Sprintf("ENABLE_VNC=%v", d.VNC),
 	}
+	env = append(env, d.Service.Env...)
 	container, err := d.Client.ContainerCreate(ctx,
 		&container.Config{
 			Hostname:     "localhost",
