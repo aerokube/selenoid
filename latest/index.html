@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-06-21</span>
+<span id="revdate">2017-06-23</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -599,43 +599,42 @@ It is using Docker to launch browsers. Please refer to <a href="https://github.c
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Make sure you have <a href="https://docs.docker.com/engine/installation/">Docker</a> installed</p>
-</li>
-<li>
-<p>Download browser images and generate configuration file using <a href="https://github.com/aerokube/cm">Configuration Manager</a>:</p>
+<p>If you work on Mac or Linux and have <a href="https://docs.docker.com/engine/installation/">Docker</a> installed type just one command:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">$ mkdir -p /etc/selenoid
-$ docker run --rm                                   \
-    -v /var/run/docker.sock:/var/run/docker.sock    \
-    aerokube/cm:1.0.0 selenoid                      \ <i class="conum" data-value="1"></i><b>(1)</b>
-    --last-versions 2                               \
-    --tmpfs 128                                     \
-    --pull &gt; /etc/selenoid/browsers.json              <i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+<pre class="CodeRay highlight"><code data-lang="bash"># docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root:${HOME} aerokube/cm:latest-release selenoid start --tmpfs 128</code></pre>
 </div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Config Manager helps to generate selenoid config from scratch</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Config printed to stdout, so it needs to redirect output to file</td>
-</tr>
-</table>
 </div>
 </li>
 <li>
-<p>Start Selenoid:</p>
-<div class="listingblock">
+<p>If you have Windows or have no Docker installed - download and run <a href="https://github.com/aerokube/cm">Configuration Manager</a> manually from <a href="https://github.com/aerokube/cm/releases/latest">releases</a> page.</p>
+<div class="paragraph">
+<p><strong>On Windows</strong> - just download the binary with your browser or if you have <a href="https://en.wikipedia.org/wiki/PowerShell">Powershell</a> type:</p>
+</div>
+<div class="literalblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash"># docker run -d --name selenoid                     \
-    -p 4444:4444                                    \
-    -v /etc/selenoid:/etc/selenoid:ro               \
-    -v /var/run/docker.sock:/var/run/docker.sock    \
-    aerokube/selenoid:latest-release</code></pre>
+<pre>&gt; curl -o cm.exe https://github.com/aerokube/cm/releases/download/1.1.2/cm_windows_amd64
+&gt; ./cm.exe selenoid start</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>On Linux:</strong></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ curl -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_linux_amd64
+$ chmod +x ./cm
+$ ./cm selenoid start</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>On Mac:</strong></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ curl -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_darwin_amd64
+$ chmod +x ./cm
+$ ./cm selenoid start</pre>
 </div>
 </div>
 </li>
@@ -2188,7 +2187,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-06-21 08:18:58 UTC
+Last updated 2017-06-23 13:18:45 UTC
 </div>
 </div>
 </body>
