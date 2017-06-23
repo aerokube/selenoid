@@ -1,30 +1,31 @@
 == Quick Start Guide
-. Make sure you have https://docs.docker.com/engine/installation/[Docker] installed
-. Download browser images and generate configuration file using https://github.com/aerokube/cm[Configuration Manager]:
+. If you work on Mac or Linux and have https://docs.docker.com/engine/installation/[Docker] installed type just one command:
 +
 [source,bash,subs="attributes+"]
 ----
-$ mkdir -p /etc/selenoid
-$ docker run --rm                                   \
-    -v /var/run/docker.sock:/var/run/docker.sock    \
-    aerokube/cm:1.0.0 selenoid                      \ <1>
-    --last-versions 2                               \
-    --tmpfs 128                                     \
-    --pull > /etc/selenoid/browsers.json              <2>
+# docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root:${HOME} aerokube/cm:latest-release selenoid start --tmpfs 128
 ----
-<1> Config Manager helps to generate selenoid config from scratch
-<2> Config printed to stdout, so it needs to redirect output to file
 
-. Start Selenoid:
+. If you have Windows or have no Docker installed - download and run https://github.com/aerokube/cm[Configuration Manager] manually from https://github.com/aerokube/cm/releases/latest[releases] page.
 +
-[source,bash,subs="attributes+"]
-----
-# docker run -d --name selenoid                     \
-    -p 4444:4444                                    \
-    -v /etc/selenoid:/etc/selenoid:ro               \
-    -v /var/run/docker.sock:/var/run/docker.sock    \
-    aerokube/selenoid:latest-release
-----
+**On Windows** - just download the binary with your browser or if you have https://en.wikipedia.org/wiki/PowerShell[Powershell] type:
+
+    > curl -o cm.exe https://github.com/aerokube/cm/releases/download/1.1.2/cm_windows_amd64
+    > ./cm.exe selenoid start
+
++
+**On Linux:**
+
+    $ curl -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_linux_amd64
+    $ chmod +x ./cm
+    $ ./cm selenoid start
+
++
+**On Mac:**
+
+    $ curl -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_darwin_amd64
+    $ chmod +x ./cm
+    $ ./cm selenoid start
 
 . Run your tests against Selenoid like you do with regular Selenium hub:
 +
