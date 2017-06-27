@@ -125,6 +125,7 @@ We do not consider these images really stable. Many of base operations like work
 | selenoid/opera:43.0 | selenoid/vnc:opera_43.0 | 2.27 | 43.0.2442.991 
 | selenoid/opera:44.0 | selenoid/vnc:opera_44.0 | 2.27 | 44.0.2510.857
 | selenoid/opera:45.0 | selenoid/vnc:opera_45.0 | 2.27 | 45.0.2552.635
+| selenoid/opera:46.0 | selenoid/vnc:opera_46.0 | 2.27 | 46.0.2597.26
 |===
 
 NOTE: Images for older Opera versions were not built because we have no Debian packages. If you have such packages - we could create more images.
