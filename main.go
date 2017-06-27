@@ -58,6 +58,7 @@ func (limit *cpuLimit) Set(s string) error {
 var (
 	hostname                 string
 	disableDocker            bool
+	disableQueue             bool
 	listen                   string
 	timeout                  time.Duration
 	newSessionAttemptTimeout time.Duration
@@ -80,6 +81,7 @@ func init() {
 	var mem memLimit
 	var cpu cpuLimit
 	flag.BoolVar(&disableDocker, "disable-docker", false, "Disable docker support")
+	flag.BoolVar(&disableQueue, "disable-queue", false, "Disable queue awaiting")
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
 	flag.StringVar(&confPath, "conf", "config/browsers.json", "Browsers configuration file")
 	flag.StringVar(&logConfPath, "log-conf", "config/container-logs.json", "Container logging configuration file")
@@ -102,7 +104,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("%s: %v", os.Args[0], err)
 	}
-	queue = protect.New(limit)
+	queue = protect.New(limit, disableQueue)
 	conf = config.NewConfig()
 	err = conf.Load(confPath, logConfPath)
 	if err != nil {
@@ -169,7 +171,7 @@ func onSIGHUP(fn func()) {
 
 func mux() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/session", queue.Protect(post(create)))
+	mux.HandleFunc("/session", queue.Check(queue.Protect(post(create))))
 	mux.HandleFunc("/session/", proxy)
 	return mux
 }
