@@ -81,7 +81,7 @@ func init() {
 	var mem memLimit
 	var cpu cpuLimit
 	flag.BoolVar(&disableDocker, "disable-docker", false, "Disable docker support")
-	flag.BoolVar(&disableQueue, "disable-queue", false, "Disable queue awaiting")
+	flag.BoolVar(&disableQueue, "disable-queue", false, "Disable wait queue")
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
 	flag.StringVar(&confPath, "conf", "config/browsers.json", "Browsers configuration file")
 	flag.StringVar(&logConfPath, "log-conf", "config/container-logs.json", "Container logging configuration file")
