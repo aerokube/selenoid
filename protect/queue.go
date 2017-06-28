@@ -10,10 +10,28 @@ import (
 
 // Queue - struct to hold a number of sessions
 type Queue struct {
-	limit   chan struct{}
-	queued  chan struct{}
-	pending chan struct{}
-	used    chan struct{}
+	disabled bool
+	limit    chan struct{}
+	queued   chan struct{}
+	pending  chan struct{}
+	used     chan struct{}
+}
+
+// Check - if queue disabled
+func (q *Queue) Check(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		select {
+		case q.limit <- struct{}{}:
+			<-q.limit
+		default:
+			if q.disabled {
+				log.Println("[QUEUE_IS_FULL]")
+				http.Error(w, "Queue full, see other", http.StatusSeeOther)
+				return
+			}
+		}
+		next.ServeHTTP(w, r)
+	}
 }
 
 // Protect - handler to control limit of sessions
@@ -72,8 +90,9 @@ func (q *Queue) Release() {
 }
 
 // New - create and initialize queue
-func New(size int) *Queue {
+func New(size int, disabled bool) *Queue {
 	return &Queue{
+		disabled,
 		make(chan struct{}, size),
 		make(chan struct{}, math.MaxInt32),
 		make(chan struct{}, math.MaxInt32),
