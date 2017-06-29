@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-06-28</span>
+<span id="revdate">2017-06-29</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -525,8 +525,7 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_getting_started">1. Getting Started</a>
 <ul class="sectlevel2">
 <li><a href="#_quick_start_guide">1.1. Quick Start Guide</a></li>
-<li><a href="#_user_interface">1.2. User Interface</a></li>
-<li><a href="#_browser_images">1.3. Browser Images</a></li>
+<li><a href="#_browser_images">1.2. Browser Images</a></li>
 </ul>
 </li>
 <li><a href="#_configuration">2. Configuration</a>
@@ -599,32 +598,15 @@ It is using Docker to launch browsers. Please refer to <a href="https://github.c
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>If you work on Mac or Linux and have <a href="https://docs.docker.com/engine/installation/">Docker</a> installed type just one command:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash"># docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root:${HOME} aerokube/cm:latest-release selenoid start --tmpfs 128</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>If you have Windows or have no Docker installed - download and run <a href="https://github.com/aerokube/cm">Configuration Manager</a> manually from <a href="https://github.com/aerokube/cm/releases/latest">releases</a> page.</p>
-<div class="paragraph">
-<p><strong>On Windows</strong> - just download the binary with your browser or if you have <a href="https://en.wikipedia.org/wiki/PowerShell">Powershell</a> type:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>&gt; curl -o cm.exe https://github.com/aerokube/cm/releases/download/1.1.2/cm_windows_amd64
-&gt; ./cm.exe selenoid start</pre>
-</div>
-</div>
+<p>Download and run <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> from <a href="https://github.com/aerokube/cm/releases/latest">releases</a> page.</p>
 <div class="paragraph">
 <p><strong>On Linux:</strong></p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>$ curl -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_linux_amd64
+<pre>$ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_linux_amd64
 $ chmod +x ./cm
-$ ./cm selenoid start</pre>
+$ ./cm selenoid start --vnc</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -632,21 +614,19 @@ $ ./cm selenoid start</pre>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>$ curl -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_darwin_amd64
+<pre>$ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_darwin_amd64
 $ chmod +x ./cm
-$ ./cm selenoid start</pre>
+$ ./cm selenoid start --vnc</pre>
 </div>
 </div>
-</li>
-<li>
-<p>Run your tests against Selenoid like you do with regular Selenium hub:</p>
-<div class="listingblock">
+<div class="paragraph">
+<p><strong>On Windows</strong> - just download the binary with your browser or if you have <a href="https://en.wikipedia.org/wiki/PowerShell">Powershell</a> type:</p>
+</div>
+<div class="literalblock">
 <div class="content">
-<pre>http://localhost:4444/wd/hub</pre>
+<pre>&gt; curl -L -o cm.exe https://github.com/aerokube/cm/releases/download/1.1.2/cm_windows_amd64
+&gt; ./cm.exe selenoid start --vnc</pre>
 </div>
-</div>
-</li>
-</ol>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -655,20 +635,59 @@ $ ./cm selenoid start</pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Selenoid was created to be run in big Selenium clusters and thus has no built-in user interface. This is why trying to open an URL above in browser returns <strong>404</strong> and this is the expected behavior. The good news are - there is a standalone user interface. Refer to <a href="#_user_interface">User Interface</a> section for more details.
+<div class="paragraph">
+<p>If you have <a href="https://docs.docker.com/engine/installation/">Docker</a> installed you can also use this one-liner:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash"># docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root:${HOME} aerokube/cm:latest-release selenoid start --vnc --tmpfs 128</code></pre>
+</div>
+</div>
 </td>
 </tr>
 </table>
 </div>
+</li>
+<li>
+<p>Run your tests against Selenoid like you do with regular Selenium hub:</p>
+<div class="literalblock">
+<div class="content">
+<pre>http://localhost:4444/wd/hub</pre>
 </div>
-<div class="sect2">
-<h3 id="_user_interface"><a class="anchor" href="#_user_interface"></a>1.2. User Interface</h3>
+</div>
+</li>
+<li>
+<p>Selenoid was created to be run in big Selenium clusters and thus has no built-in user interface. This is why trying to open an URL above in browser returns <strong>404</strong> and this is the expected behavior. If something does not work, you can easily check that Selenoid is running with <code>curl</code>:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ curl http://localhost:4444/status</pre>
+</div>
+</div>
 <div class="paragraph">
-<p>Selenoid has standalone UI to show current quota, queue and browser usage: <a href="https://github.com/aerokube/selenoid-ui" class="bare">https://github.com/aerokube/selenoid-ui</a>.</p>
+<p>A successful request should return a JSON with browser usage statistics.</p>
+</div>
+</li>
+<li>
+<p>You can additionally use <a href="http://github.com/aerokube/selenoid-ui">Selenoid UI</a> to see browser screen or consumption statistics. The simplest way is to download and run its binary from <a href="https://github.com/aerokube/selenoid-ui/releases">releases</a> page and start it:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./selenoid-ui</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See <a href="http://aerokube.com/selenoid-ui/latest/">UI documentation</a> for more installation options. By default UI is listening on port 8080. To start using it open the following page in your browser:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>http://localhost:8080/</pre>
+</div>
+</div>
+</li>
+</ol>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_browser_images"><a class="anchor" href="#_browser_images"></a>1.3. Browser Images</h3>
+<h3 id="_browser_images"><a class="anchor" href="#_browser_images"></a>1.2. Browser Images</h3>
 <div class="paragraph">
 <p>We maintain a set of prebuilt Docker container images for different browsers including:</p>
 </div>
@@ -1185,7 +1204,7 @@ services:
 </div>
 </li>
 <li>
-<p>Launch <a href="http://github.com/aerokube/selenoid-ui">Selenoid UI</a> to see the screen.</p>
+<p>Launch <a href="http://aerokube.com/selenoid-ui/latest/">Selenoid UI</a> to see the screen.</p>
 </li>
 </ol>
 </div>
@@ -2193,7 +2212,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-06-28 07:47:35 UTC
+Last updated 2017-06-29 05:24:30 UTC
 </div>
 </div>
 </body>
