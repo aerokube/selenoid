@@ -9,7 +9,7 @@ Selenoid supports showing browser screen during test execution. This works with 
 ```
 enableVNC = true
 ```
-. Launch http://github.com/aerokube/selenoid-ui[Selenoid UI] to see the screen.
+. Launch http://aerokube.com/selenoid-ui/latest/[Selenoid UI] to see the screen.
 
 This works by proxying VNC port from started container to ```http://localhost:4444/vnc/<session-id>``` where ```<session-id>``` is Selenium session ID.
 

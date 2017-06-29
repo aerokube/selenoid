@@ -1,3 +1,0 @@
-== User Interface
-
-Selenoid has standalone UI to show current quota, queue and browser usage: https://github.com/aerokube/selenoid-ui.
