@@ -16,7 +16,6 @@ It is using Docker to launch browsers. Please refer to https://github.com/aeroku
 
 == Getting Started
 include::quick-start-guide.adoc[leveloffset=+1]
-include::user-interface.adoc[leveloffset=+1]
 include::browser-images.adoc[leveloffset=+1]
 
 == Configuration

@@ -1,36 +1,49 @@
 == Quick Start Guide
-. If you work on Mac or Linux and have https://docs.docker.com/engine/installation/[Docker] installed type just one command:
-+
-[source,bash,subs="attributes+"]
-----
-# docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root:${HOME} aerokube/cm:latest-release selenoid start --tmpfs 128
-----
-
-. If you have Windows or have no Docker installed - download and run https://github.com/aerokube/cm[Configuration Manager] manually from https://github.com/aerokube/cm/releases/latest[releases] page.
-+
-**On Windows** - just download the binary with your browser or if you have https://en.wikipedia.org/wiki/PowerShell[Powershell] type:
-
-    > curl -o cm.exe https://github.com/aerokube/cm/releases/download/1.1.2/cm_windows_amd64
-    > ./cm.exe selenoid start
-
+. Download and run http://aerokube.com/cm/latest/[Configuration Manager] from https://github.com/aerokube/cm/releases/latest[releases] page.
 +
 **On Linux:**
 
-    $ curl -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_linux_amd64
+    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_linux_amd64
     $ chmod +x ./cm
-    $ ./cm selenoid start
+    $ ./cm selenoid start --vnc
 
 +
 **On Mac:**
 
-    $ curl -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_darwin_amd64
+    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.1.2/cm_darwin_amd64
     $ chmod +x ./cm
-    $ ./cm selenoid start
+    $ ./cm selenoid start --vnc
+
++
+**On Windows** - just download the binary with your browser or if you have https://en.wikipedia.org/wiki/PowerShell[Powershell] type:
+
+    > curl -L -o cm.exe https://github.com/aerokube/cm/releases/download/1.1.2/cm_windows_amd64
+    > ./cm.exe selenoid start --vnc
+
++
+[NOTE]
+====
+If you have https://docs.docker.com/engine/installation/[Docker] installed you can also use this one-liner:
+[source,bash,subs="attributes+"]
+# docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root:${HOME} aerokube/cm:latest-release selenoid start --vnc --tmpfs 128
+====
 
 . Run your tests against Selenoid like you do with regular Selenium hub:
-+
-----
-http://localhost:4444/wd/hub
-----
 
-NOTE: Selenoid was created to be run in big Selenium clusters and thus has no built-in user interface. This is why trying to open an URL above in browser returns *404* and this is the expected behavior. The good news are - there is a standalone user interface. Refer to <<User Interface>> section for more details.
+    http://localhost:4444/wd/hub
+
+. Selenoid was created to be run in big Selenium clusters and thus has no built-in user interface. This is why trying to open an URL above in browser returns *404* and this is the expected behavior. If something does not work, you can easily check that Selenoid is running with `curl`:
+
+    $ curl http://localhost:4444/status
+
++
+A successful request should return a JSON with browser usage statistics. 
+. You can additionally use http://github.com/aerokube/selenoid-ui[Selenoid UI] to see browser screen or consumption statistics. The simplest way is to download and run its binary from https://github.com/aerokube/selenoid-ui/releases[releases] page and start it:
+
+    $ ./selenoid-ui
+
++
+See http://aerokube.com/selenoid-ui/latest/[UI documentation] for more installation options. By default UI is listening on port 8080. To start using it open the following page in your browser:
+
+    http://localhost:8080/
+
