@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-06-29</span>
+<span id="revdate">2017-07-02</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -635,13 +635,28 @@ $ ./cm selenoid start --vnc</pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<div class="paragraph">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
 <p>If you have <a href="https://docs.docker.com/engine/installation/">Docker</a> installed you can also use this one-liner:</p>
-</div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash"># docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root:${HOME} aerokube/cm:latest-release selenoid start --vnc --tmpfs 128</code></pre>
 </div>
+</div>
+</li>
+<li>
+<p>If you are working behind proxy you should set environment variables <code>HTTP_PROXY</code>, <code>HTTPS_PROXY</code> or <code>NO_PROXY</code> described in <a href="https://docs.docker.com/engine/admin/systemd/#runtime-directory-and-storage-driver">Docker documentation</a>:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$ HTTP_PROXY=http://proxy.example.com:80/ ./cm selenoid start</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When running <code>cm</code> in container - pass variable via <code>-e</code> flag of the <code>docker</code> command. These variables work because <code>cm</code> is using the same client as <code>docker</code> command.</p>
+</div>
+</li>
+</ol>
 </div>
 </td>
 </tr>
@@ -2212,7 +2227,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-06-29 05:24:30 UTC
+Last updated 2017-07-02 06:51:08 UTC
 </div>
 </div>
 </body>
