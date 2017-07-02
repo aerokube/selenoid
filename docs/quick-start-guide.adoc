@@ -23,9 +23,15 @@
 +
 [NOTE]
 ====
-If you have https://docs.docker.com/engine/installation/[Docker] installed you can also use this one-liner:
+. If you have https://docs.docker.com/engine/installation/[Docker] installed you can also use this one-liner:
 [source,bash,subs="attributes+"]
 # docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root:${HOME} aerokube/cm:latest-release selenoid start --vnc --tmpfs 128
+
+. If you are working behind proxy you should set environment variables `HTTP_PROXY`, `HTTPS_PROXY` or `NO_PROXY` described in https://docs.docker.com/engine/admin/systemd/#runtime-directory-and-storage-driver[Docker documentation]:
+[source,bash,subs="attributes+"]
+$ HTTP_PROXY=http://proxy.example.com:80/ ./cm selenoid start
++
+When running `cm` in container - pass variable via `-e` flag of the `docker` command. These variables work because `cm` is using the same client as `docker` command.
 ====
 
 . Run your tests against Selenoid like you do with regular Selenium hub:
