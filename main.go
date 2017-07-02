@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"strconv"
 	"strings"
 	"syscall"
@@ -59,6 +60,7 @@ var (
 	hostname                 string
 	disableDocker            bool
 	disableQueue             bool
+	enableFileUpload         bool
 	listen                   string
 	timeout                  time.Duration
 	newSessionAttemptTimeout time.Duration
@@ -82,6 +84,7 @@ func init() {
 	var cpu cpuLimit
 	flag.BoolVar(&disableDocker, "disable-docker", false, "Disable docker support")
 	flag.BoolVar(&disableQueue, "disable-queue", false, "Disable wait queue")
+	flag.BoolVar(&enableFileUpload, "enable-file-upload", false, "File upload support")
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
 	flag.StringVar(&confPath, "conf", "config/browsers.json", "Browsers configuration file")
 	flag.StringVar(&logConfPath, "log-conf", "config/container-logs.json", "Container logging configuration file")
@@ -148,11 +151,17 @@ func cancelOnSignal() {
 	go func() {
 		<-sig
 		sessions.Each(func(k string, s *session.Session) {
+			if enableFileUpload {
+				os.RemoveAll(path.Join(os.TempDir(), k))
+			}
 			s.Cancel()
 		})
-		err := cli.Close()
-		if err != nil {
-			log.Fatalf("close docker client: %v", err)
+		if !disableDocker {
+			err := cli.Close()
+			if err != nil {
+				log.Fatalf("close docker client: %v", err)
+				os.Exit(1)
+			}
 		}
 		os.Exit(0)
 	}()
@@ -188,26 +197,24 @@ func post(next http.HandlerFunc) http.HandlerFunc {
 
 func handler() http.Handler {
 	root := http.NewServeMux()
-	root.Handle("/wd/hub/", http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Add("Content-Type", "application/json")
-			r.URL.Scheme = "http"
-			r.URL.Host = (&request{r}).localaddr()
-			r.URL.Path = strings.TrimPrefix(r.URL.Path, "/wd/hub")
-			mux().ServeHTTP(w, r)
-		}))
-	root.Handle("/error", http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintln(w, `{"value":{"message":"Session not found"},"status":13}`)
-		}))
-	root.Handle("/status", http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
-		}))
+	root.HandleFunc("/wd/hub/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		r.URL.Scheme = "http"
+		r.URL.Host = (&request{r}).localaddr()
+		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/wd/hub")
+		mux().ServeHTTP(w, r)
+	})
+	root.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
+		jsonError(w, "Session not found", http.StatusNotFound)
+	})
+	root.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
+	})
 	root.Handle("/vnc/", websocket.Handler(vnc))
 	root.Handle("/logs/", websocket.Handler(logs))
+	if enableFileUpload {
+		root.HandleFunc("/file", fileUpload)
+	}
 	return root
 }
 
