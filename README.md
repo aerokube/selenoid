@@ -13,7 +13,7 @@ It is using Docker to launch browsers.
 ```
 $ docker run --rm                                   \
     -v /var/run/docker.sock:/var/run/docker.sock    \
-    -v /root:${HOME}                                \
+    -v ${HOME}:/root                                \
     aerokube/cm:latest-release selenoid start       \
     --vnc --tmpfs 128
 ```
