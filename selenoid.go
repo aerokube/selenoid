@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"path"
 	"regexp"
 	"strings"
@@ -157,7 +159,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	var resp *http.Response
 	i := 1
 	for ; ; i++ {
-		r.URL.Host, r.URL.Path = u.Host, path.Clean(u.Path+r.URL.Path)
+		r.URL.Host, r.URL.Path = u.Host, path.Join(u.Path, r.URL.Path)
 		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(body))
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
@@ -228,7 +230,6 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	if s.ID == "" {
 		log.Printf("[%d] [SESSION_FAILED] [%s] [Bad response from %s - %v]\n", id, quota, u.String(), resp.Status)
-		jsonError(w, "protocol error: could not determine session id", http.StatusBadGateway)
 		queue.Drop()
 		cancel()
 		return
@@ -282,9 +283,11 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				if ok {
 					sess.Lock.Lock()
 					defer sess.Lock.Unlock()
-					r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
 					close(sess.Timeout)
 					if r.Method == http.MethodDelete && len(fragments) == 3 {
+						if enableFileUpload {
+							os.RemoveAll(path.Join(os.TempDir(), id))
+						}
 						cancel = sess.Cancel
 						sessions.Remove(id)
 						queue.Release()
@@ -293,7 +296,13 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 						sess.Timeout = onTimeout(timeout, func() {
 							request{r}.session(id).Delete()
 						})
+						if len(fragments) == 4 && fragments[len(fragments)-1] == "file" && enableFileUpload {
+							r.Header.Set("X-Selenoid-File", path.Join(os.TempDir(), id))
+							r.URL.Path = "/file"
+							return
+						}
 					}
+					r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
 					return
 				}
 				r.URL.Path = "/error"
@@ -301,6 +310,58 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 		}).ServeHTTP(w, r)
 	}(w, r)
 	go (<-done)()
+}
+
+func fileUpload(w http.ResponseWriter, r *http.Request) {
+	var jsonRequest struct {
+		File []byte `json:"file"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&jsonRequest)
+	if err != nil {
+		jsonError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	z, err := zip.NewReader(bytes.NewReader(jsonRequest.File), int64(len(jsonRequest.File)))
+	if err != nil {
+		jsonError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if len(z.File) != 1 {
+		jsonError(w, fmt.Sprintf("Expected there to be only 1 file. There were: %s", len(z.File)), http.StatusBadRequest)
+		return
+	}
+	file := z.File[0]
+	src, err := file.Open()
+	if err != nil {
+		jsonError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer src.Close()
+	dir := r.Header.Get("X-Selenoid-File")
+	err = os.Mkdir(dir, 0755)
+	if err != nil {
+		jsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fileName := path.Join(dir, file.Name)
+	dst, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		jsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer dst.Close()
+	_, err = io.Copy(dst, src)
+	if err != nil {
+		jsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	reply := struct {
+		V string `json:"value"`
+	}{
+		V: fileName,
+	}
+	json.NewEncoder(w).Encode(reply)
 }
 
 func vnc(wsconn *websocket.Conn) {

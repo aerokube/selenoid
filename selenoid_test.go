@@ -4,15 +4,18 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	. "github.com/aandryashin/matchers"
-	. "github.com/aandryashin/matchers/httpresp"
 	"github.com/aerokube/selenoid/config"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
+
+	. "github.com/aandryashin/matchers"
+	. "github.com/aandryashin/matchers/httpresp"
 )
 
 var (
@@ -20,6 +23,7 @@ var (
 )
 
 func init() {
+	enableFileUpload = true
 	srv = httptest.NewServer(handler())
 }
 
@@ -371,3 +375,83 @@ func TestProxySessionTimeout(t *testing.T) {
 
 	AssertThat(t, queue.Used(), EqualTo{0})
 }
+
+func TestFileUpload(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	resp, err = http.Post(With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/file", sess["sessionId"])), "", bytes.NewReader([]byte(`{"file":"UEsDBBQACAgIAJiC4koAAAAAAAAAAAAAAAAJAAAAaGVsbG8udHh080jNyclXCM8vyklRBABQSwcIoxwpHA4AAAAMAAAAUEsBAhQAFAAICAgAmILiSqMcKRwOAAAADAAAAAkAAAAAAAAAAAAAAAAAAAAAAGhlbGxvLnR4dFBLBQYAAAAAAQABADcAAABFAAAAAAA="}`)))
+	AssertThat(t, err, Is{nil})
+
+	var jsonResponse map[string]string
+
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&jsonResponse}})
+
+	f, err := os.Open(jsonResponse["value"])
+	AssertThat(t, err, Is{nil})
+
+	content, err := ioutil.ReadAll(f)
+	AssertThat(t, err, Is{nil})
+
+	AssertThat(t, string(content), EqualTo{"Hello World!"})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
+func TestFileUploadBadJson(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	resp, err = http.Post(With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/file", sess["sessionId"])), "", bytes.NewReader([]byte(`malformed json`)))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, resp, Code{http.StatusBadRequest})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
+func TestFileUploadNoFile(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	resp, err = http.Post(With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/file", sess["sessionId"])), "", bytes.NewReader([]byte(`{}`)))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, resp, Code{http.StatusBadRequest})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
+func TestFileUploadTwoFiles(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+		resp, err = http.Post(With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/file", sess["sessionId"])), "", bytes.NewReader([]byte(`{"file":"UEsDBAoAAAAAAKGJ4koAAAAAAAAAAAAAAAAHABwAb25lLnR4dFVUCQADbv9YWZT/WFl1eAsAAQT1AQAABBQAAABQSwMECgAAAAAApIniSgAAAAAAAAAAAAAAAAcAHAB0d28udHh0VVQJAANz/1hZc/9YWXV4CwABBPUBAAAEFAAAAFBLAQIeAwoAAAAAAKGJ4koAAAAAAAAAAAAAAAAHABgAAAAAAAAAAACkgQAAAABvbmUudHh0VVQFAANu/1hZdXgLAAEE9QEAAAQUAAAAUEsBAh4DCgAAAAAApIniSgAAAAAAAAAAAAAAAAcAGAAAAAAAAAAAAKSBQQAAAHR3by50eHRVVAUAA3P/WFl1eAsAAQT1AQAABBQAAABQSwUGAAAAAAIAAgCaAAAAggAAAAAA"}`)))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, resp, Code{http.StatusBadRequest})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
