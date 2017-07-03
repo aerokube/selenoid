@@ -641,7 +641,7 @@ $ ./cm selenoid start --vnc</pre>
 <p>If you have <a href="https://docs.docker.com/engine/installation/">Docker</a> installed you can also use this one-liner:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash"># docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /root:${HOME} aerokube/cm:latest-release selenoid start --vnc --tmpfs 128</code></pre>
+<pre class="CodeRay highlight"><code data-lang="bash"># docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}:/root aerokube/cm:latest-release selenoid start --vnc --tmpfs 128</code></pre>
 </div>
 </div>
 </li>
@@ -2227,7 +2227,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-07-03 09:11:18 UTC
+Last updated 2017-07-03 11:05:14 UTC
 </div>
 </div>
 </body>
