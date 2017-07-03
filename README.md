@@ -9,26 +9,19 @@ Selenoid is a powerful [Go](http://golang.org/) implementation of original [Sele
 It is using Docker to launch browsers.
 
 ## Quick Start Guide
-1) Download browser images and generate configuration file (*CM* will do all the work):
+1) Download browser images, generate configuration file and start Selenoid:
 ```
 $ docker run --rm                                   \
     -v /var/run/docker.sock:/var/run/docker.sock    \
-    aerokube/cm:1.0.0 selenoid                      \
-    --last-versions 2                               \
-    --tmpfs 128 --pull > browsers.json
+    -v /root:${HOME}                                \
+    aerokube/cm:latest-release selenoid start       \
+    --vnc --tmpfs 128
 ```
-2) Start Selenoid:
-```
-# docker run -d --name selenoid                     \
-    -p 4444:4444                                    \
-    -v `pwd`:/etc/selenoid:ro                       \
-    -v /var/run/docker.sock:/var/run/docker.sock    \
-    aerokube/selenoid:latest-release
-```
-3) Access Selenoid as regular Selenium hub (works only for POST requests):
+2) Access Selenoid as regular Selenium hub (works only for POST requests):
 ```
 http://localhost:4444/wd/hub
 ```
+More details can be found in [documentation](http://aerokube.com/selenoid/latest/).
 
 ## Simple UI
 
