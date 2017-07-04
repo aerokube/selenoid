@@ -20,3 +20,9 @@ Selenoid allows you to set custom screen resolution in containers being run. To 
 ```
 screenResolution: 1280x1024x24
 ```
+[NOTE]
+====
+. This capability sets only screen resolution - not browser window size. Most of browsers have some default window size value this is why your screenshot size can be smaller than screen resolution specified in capability. You should manually resize window to desired width and height.
+
+. So far as our containers run headless browsers in Xvfb without installed window manager `maximize` operation does not work. You need to use `setSize` method instead.
+====
