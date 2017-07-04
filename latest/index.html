@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-07-03</span>
+<span id="revdate">2017-07-04</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -1236,6 +1236,27 @@ services:
 <div class="content">
 <pre class="CodeRay highlight"><code>screenResolution: 1280x1024x24</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>This capability sets only screen resolution - not browser window size. Most of browsers have some default window size value this is why your screenshot size can be smaller than screen resolution specified in capability. You should manually resize window to desired width and height.</p>
+</li>
+<li>
+<p>So far as our containers run headless browsers in Xvfb without installed window manager <code>maximize</code> operation does not work. You need to use <code>setSize</code> method instead.</p>
+</li>
+</ol>
+</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -2227,7 +2248,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-07-03 11:05:14 UTC
+Last updated 2017-07-04 17:14:00 UTC
 </div>
 </div>
 </body>
