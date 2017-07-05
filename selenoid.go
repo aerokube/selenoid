@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -286,7 +287,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 					close(sess.Timeout)
 					if r.Method == http.MethodDelete && len(fragments) == 3 {
 						if enableFileUpload {
-							os.RemoveAll(path.Join(os.TempDir(), id))
+							os.RemoveAll(filepath.Join(os.TempDir(), id))
 						}
 						cancel = sess.Cancel
 						sessions.Remove(id)
@@ -297,7 +298,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 							request{r}.session(id).Delete()
 						})
 						if len(fragments) == 4 && fragments[len(fragments)-1] == "file" && enableFileUpload {
-							r.Header.Set("X-Selenoid-File", path.Join(os.TempDir(), id))
+							r.Header.Set("X-Selenoid-File", filepath.Join(os.TempDir(), id))
 							r.URL.Path = "/file"
 							return
 						}
@@ -343,7 +344,7 @@ func fileUpload(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fileName := path.Join(dir, file.Name)
+	fileName := filepath.Join(dir, file.Name)
 	dst, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		jsonError(w, err.Error(), http.StatusInternalServerError)
