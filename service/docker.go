@@ -76,6 +76,7 @@ func (d *Docker) StartWithCancel() (*url.URL, string, string, func(), error) {
 			ShmSize:      268435456,
 			Privileged:   true,
 			Resources: container.Resources{
+				Devices:  d.Service.Devices,
 				Memory:   d.Memory,
 				NanoCPUs: d.CPU,
 			},
