@@ -52,6 +52,7 @@ type Browser struct {
 	Path    string            `json:"path"`
 	Tmpfs   map[string]string `json:"tmpfs,omitempty"`
 	Volumes []string          `json:"volumes,omitempty"`
+	Devices []string          `json:"devices,omitempty"`
 	Env     []string          `json:"env,omitempty"`
 }
 
