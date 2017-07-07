@@ -372,14 +372,19 @@ func vnc(wsconn *websocket.Conn) {
 	if ok {
 		if sess.VNC != "" {
 			log.Printf("[VNC_ENABLED] [%s]\n", sid)
-			conn, err := net.Dial("tcp", sess.VNC)
+			var d net.Dialer
+			conn, err := d.DialContext(wsconn.Request().Context(), "tcp", sess.VNC)
 			if err != nil {
 				log.Printf("[VNC_ERROR] [%v]\n", err)
 				return
 			}
 			defer conn.Close()
 			wsconn.PayloadType = websocket.BinaryFrame
-			go io.Copy(wsconn, conn)
+			go func() {
+				io.Copy(wsconn, conn)
+				wsconn.Close()
+				log.Printf("[VNC_SESSION_CLOSED] [%s]\n", sid)
+			}()
 			io.Copy(conn, wsconn)
 			log.Printf("[VNC_CLIENT_DISCONNECTED] [%s]\n", sid)
 		} else {
@@ -396,7 +401,7 @@ func logs(wsconn *websocket.Conn) {
 	sess, ok := sessions.Get(sid)
 	if ok && sess.Container != "" {
 		log.Printf("[CONTAINER_LOGS] [%s]\n", sess.Container)
-		r, err := cli.ContainerLogs(context.Background(), sess.Container, types.ContainerLogsOptions{
+		r, err := cli.ContainerLogs(wsconn.Request().Context(), sess.Container, types.ContainerLogsOptions{
 			ShowStdout: true,
 			ShowStderr: true,
 			Follow:     true,
