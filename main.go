@@ -65,6 +65,7 @@ var (
 	timeout                  time.Duration
 	newSessionAttemptTimeout time.Duration
 	sessionDeleteTimeout     time.Duration
+	serviceStartupTimeout    time.Duration
 	limit                    int
 	sessions                 = session.NewMap()
 	confPath                 string
@@ -92,6 +93,7 @@ func init() {
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
 	flag.DurationVar(&newSessionAttemptTimeout, "session-attempt-timeout", 30*time.Second, "New session attempt timeout in time.Duration format")
 	flag.DurationVar(&sessionDeleteTimeout, "session-delete-timeout", 30*time.Second, "Session delete timeout in time.Duration format")
+	flag.DurationVar(&serviceStartupTimeout, "service-startup-timeout", 30*time.Second, "Service startup timeout in time.Duration format")
 	flag.BoolVar(&version, "version", false, "Show version and exit")
 	flag.Var(&mem, "mem", "Containers memory limit e.g. 128m or 1g")
 	flag.Var(&cpu, "cpu", "Containers cpu limit as float e.g. 0.2 or 1.0")
@@ -125,8 +127,14 @@ func init() {
 	if err == nil {
 		inDocker = true
 	}
+	environment := service.Environment{
+		InDocker:       inDocker,
+		CPU:            int64(cpu),
+		Memory:         int64(mem),
+		StartupTimeout: serviceStartupTimeout,
+	}
 	if disableDocker {
-		manager = &service.DefaultManager{InDocker: inDocker, Config: conf}
+		manager = &service.DefaultManager{Environment: &environment, Config: conf}
 		return
 	}
 	dockerHost := os.Getenv("DOCKER_HOST")
@@ -138,11 +146,12 @@ func init() {
 		log.Fatal(err)
 	}
 	ip, _, _ := net.SplitHostPort(addr)
+	environment.IP = ip
 	cli, err = client.NewEnvClient()
 	if err != nil {
 		log.Fatalf("new docker client: %v\n", err)
 	}
-	manager = &service.DefaultManager{IP: ip, InDocker: inDocker, CPU: int64(cpu), Memory: int64(mem), Client: cli, Config: conf}
+	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
 }
 
 func cancelOnSignal() {

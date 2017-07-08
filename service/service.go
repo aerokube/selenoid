@@ -11,30 +11,61 @@ import (
 	"github.com/docker/docker/client"
 )
 
+// Caps - user capabilities
+type Caps struct {
+	Name             string `json:"browserName"`
+	Version          string `json:"version"`
+	ScreenResolution string `json:"screenResolution"`
+	VNC              bool   `json:"enableVNC"`
+}
+
+// Environment - all settings that influence browser startup
+type Environment struct {
+	IP             string
+	InDocker       bool
+	CPU            int64
+	Memory         int64
+	StartupTimeout time.Duration
+}
+
+// ServiceBase - stores fields required by all services
+type ServiceBase struct {
+	RequestId uint64
+	Service   *config.Browser
+}
+
+// StartedService - all started service properties
+type StartedService struct {
+	Url         *url.URL
+	ID          string
+	VNCHostPort string
+	Cancel      func()
+}
+
 // Starter - interface to create session with cancellation ability
 type Starter interface {
-	StartWithCancel() (*url.URL, string, string, func(), error)
+	StartWithCancel() (*StartedService, error)
 }
 
 // Manager - interface to choose appropriate starter
 type Manager interface {
-	Find(s string, v *string, sr string, vnc bool, requestId uint64) (Starter, bool)
+	Find(caps Caps, requestId uint64) (Starter, bool)
 }
 
 // DefaultManager - struct for default implementation
 type DefaultManager struct {
-	IP       string
-	InDocker bool
-	CPU      int64
-	Memory   int64
-	Client   *client.Client
-	Config   *config.Config
+	Environment *Environment
+	Client      *client.Client
+	Config      *config.Config
 }
 
 // Find - default implementation Manager interface
-func (m *DefaultManager) Find(s string, v *string, sr string, vnc bool, requestId uint64) (Starter, bool) {
-	log.Printf("[%d] [LOCATING_SERVICE] [%s-%s]\n", requestId, s, *v)
-	service, ok := m.Config.Find(s, v)
+func (m *DefaultManager) Find(caps Caps, requestId uint64) (Starter, bool) {
+	browserName := caps.Name
+	version := caps.Version
+	log.Printf("[%d] [LOCATING_SERVICE] [%s-%s]\n", requestId, browserName, version)
+	service, version, ok := m.Config.Find(browserName, version)
+	serviceBase := ServiceBase{RequestId: requestId, Service: service}
 	if !ok {
 		return nil, false
 	}
@@ -43,11 +74,16 @@ func (m *DefaultManager) Find(s string, v *string, sr string, vnc bool, requestI
 		if m.Client == nil {
 			return nil, false
 		}
-		log.Printf("[%d] [USING_DOCKER] [%s-%s]\n", requestId, s, *v)
-		return &Docker{m.IP, m.InDocker, m.CPU, m.Memory, m.Client, service, m.Config.ContainerLogs, sr, vnc, requestId}, true
+		log.Printf("[%d] [USING_DOCKER] [%s-%s]\n", requestId, browserName, version)
+		return &Docker{
+			ServiceBase: serviceBase,
+			Environment: *m.Environment,
+			Caps:        caps,
+			Client:      m.Client,
+			LogConfig:   m.Config.ContainerLogs}, true
 	case []interface{}:
-		log.Printf("[%d] [USING_DRIVER] [%s-%s]\n", requestId, s, *v)
-		return &Driver{m.InDocker, service, requestId}, true
+		log.Printf("[%d] [USING_DRIVER] [%s-%s]\n", requestId, browserName, version)
+		return &Driver{ServiceBase: serviceBase, Environment: *m.Environment}, true
 	}
 	return nil, false
 }

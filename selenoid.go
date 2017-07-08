@@ -21,6 +21,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types"
 	"golang.org/x/net/websocket"
@@ -58,13 +59,6 @@ func (r request) session(id string) *sess {
 
 func (s *sess) url() string {
 	return fmt.Sprintf("http://%s/wd/hub/session/%s", s.addr, s.id)
-}
-
-type caps struct {
-	Name             string `json:"browserName"`
-	Version          string `json:"version"`
-	ScreenResolution string `json:"screenResolution"`
-	VNC              bool   `json:"enableVNC"`
 }
 
 func jsonError(w http.ResponseWriter, msg string, code int) {
@@ -112,7 +106,7 @@ func serial() uint64 {
 
 func create(w http.ResponseWriter, r *http.Request) {
 	sessionStartTime := time.Now()
-	id := serial()
+	requestId := serial()
 	quota, _, ok := r.BasicAuth()
 	if !ok {
 		quota = "unknown"
@@ -120,43 +114,45 @@ func create(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
-		log.Printf("[%d] [ERROR_READING_REQUEST] [%s] [%v]\n", id, quota, err)
+		log.Printf("[%d] [ERROR_READING_REQUEST] [%s] [%v]\n", requestId, quota, err)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
 	var browser struct {
-		Caps caps `json:"desiredCapabilities"`
+		Caps service.Caps `json:"desiredCapabilities"`
 	}
 	err = json.Unmarshal(body, &browser)
 	if err != nil {
-		log.Printf("[%d] [BAD_JSON_FORMAT] [%s] [%v]\n", id, quota, err)
+		log.Printf("[%d] [BAD_JSON_FORMAT] [%s] [%v]\n", requestId, quota, err)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
 	resolution, err := getScreenResolution(browser.Caps.ScreenResolution)
 	if err != nil {
-		log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s] [%s]\n", id, quota, browser.Caps.ScreenResolution)
+		log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s] [%s]\n", requestId, quota, browser.Caps.ScreenResolution)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
 	browser.Caps.ScreenResolution = resolution
-	starter, ok := manager.Find(browser.Caps.Name, &browser.Caps.Version, browser.Caps.ScreenResolution, browser.Caps.VNC, id)
+	starter, ok := manager.Find(browser.Caps, requestId)
 	if !ok {
-		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s-%s]\n", id, quota, browser.Caps.Name, browser.Caps.Version)
+		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s-%s]\n", requestId, quota, browser.Caps.Name, browser.Caps.Version)
 		jsonError(w, "Requested environment is not available", http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
-	u, container, vnc, cancel, err := starter.StartWithCancel()
+	startedService, err := starter.StartWithCancel()
 	if err != nil {
-		log.Printf("[%d] [SERVICE_STARTUP_FAILED] [%s] [%v]\n", id, quota, err)
+		log.Printf("[%d] [SERVICE_STARTUP_FAILED] [%s] [%v]\n", requestId, quota, err)
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		queue.Drop()
 		return
 	}
+	u := startedService.Url
+	cancel := startedService.Cancel
 	var resp *http.Response
 	i := 1
 	for ; ; i++ {
@@ -164,7 +160,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(body))
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
-		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%s] [%d]\n", id, quota, u.String(), i)
+		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%s] [%d]\n", requestId, quota, u.String(), i)
 		rsp, err := httpClient.Do(req.WithContext(ctx))
 		select {
 		case <-ctx.Done():
@@ -173,10 +169,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 			}
 			switch ctx.Err() {
 			case context.DeadlineExceeded:
-				log.Printf("[%d] [SESSION_ATTEMPT_TIMED_OUT] [%s]\n", id, quota)
+				log.Printf("[%d] [SESSION_ATTEMPT_TIMED_OUT] [%s]\n", requestId, quota)
 				continue
 			case context.Canceled:
-				log.Printf("[%d] [CLIENT_DISCONNECTED] [%s]\n", id, quota)
+				log.Printf("[%d] [CLIENT_DISCONNECTED] [%s]\n", requestId, quota)
 				queue.Drop()
 				cancel()
 				return
@@ -187,7 +183,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			if rsp != nil {
 				rsp.Body.Close()
 			}
-			log.Printf("[%d] [SESSION_FAILED] [%s] - [%s]\n", id, u.String(), err)
+			log.Printf("[%d] [SESSION_FAILED] [%s] - [%s]\n", requestId, u.String(), err)
 			jsonError(w, err.Error(), http.StatusInternalServerError)
 			queue.Drop()
 			cancel()
@@ -230,7 +226,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if s.ID == "" {
-		log.Printf("[%d] [SESSION_FAILED] [%s] [Bad response from %s - %v]\n", id, quota, u.String(), resp.Status)
+		log.Printf("[%d] [SESSION_FAILED] [%s] [Bad response from %s - %v]\n", requestId, quota, u.String(), resp.Status)
 		queue.Drop()
 		cancel()
 		return
@@ -240,15 +236,15 @@ func create(w http.ResponseWriter, r *http.Request) {
 		Browser:   browser.Caps.Name,
 		Version:   browser.Caps.Version,
 		URL:       u,
-		Container: container,
-		VNC:       vnc,
+		Container: startedService.ID,
+		VNC:       startedService.VNCHostPort,
 		Screen:    browser.Caps.ScreenResolution,
 		Cancel:    cancel,
 		Timeout: onTimeout(timeout, func() {
 			request{r}.session(s.ID).Delete()
 		})})
 	queue.Create()
-	log.Printf("[%d] [SESSION_CREATED] [%s] [%s] [%s] [%d] [%v]\n", id, quota, s.ID, u, i, time.Since(sessionStartTime))
+	log.Printf("[%d] [SESSION_CREATED] [%s] [%s] [%s] [%d] [%v]\n", requestId, quota, s.ID, u, i, time.Since(sessionStartTime))
 }
 
 func getScreenResolution(input string) (string, error) {
