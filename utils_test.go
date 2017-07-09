@@ -29,49 +29,53 @@ func HTTPResponse(msg string, status int) http.Handler {
 	})
 }
 
-func (m *HTTPTest) StartWithCancel() (*url.URL, string, string, func(), error) {
+func (m *HTTPTest) StartWithCancel() (*service.StartedService, error) {
 	log.Println("Starting HTTPTest Service...")
 	s := httptest.NewServer(m.Handler)
 	u, err := url.Parse(s.URL)
 	if err != nil {
 		log.Println("Failed to start HTTPTest Service...")
-		return nil, "", "", func() {}, err
+		return nil, err
 	}
 	log.Println("HTTPTest Service started...")
 	if m.Action != nil {
 		m.Action(s)
 	}
-	return u, "", "", func() {
-		log.Println("Stopping HTTPTest Service...")
-		s.Close()
-		log.Println("HTTPTest Service stopped...")
-		if m.Cancel != nil {
-			go func() {
-				m.Cancel <- true
-			}()
-		}
-	}, nil
+	ss := service.StartedService{
+		Url: u,
+		Cancel: func() {
+			log.Println("Stopping HTTPTest Service...")
+			s.Close()
+			log.Println("HTTPTest Service stopped...")
+			if m.Cancel != nil {
+				go func() {
+					m.Cancel <- true
+				}()
+			}
+		},
+	}
+	return &ss, nil
 }
 
-func (m *HTTPTest) Find(s string, v *string, sr string, vnc bool, requestId uint64) (service.Starter, bool) {
+func (m *HTTPTest) Find(caps service.Caps, requestId uint64) (service.Starter, bool) {
 	return m, true
 }
 
 type StartupError struct{}
 
-func (m *StartupError) StartWithCancel() (*url.URL, string, string, func(), error) {
+func (m *StartupError) StartWithCancel() (*service.StartedService, error) {
 	log.Println("Starting StartupError Service...")
 	log.Println("Failed to start StartupError Service...")
-	return nil, "", "", nil, errors.New("Failed to start Service")
+	return nil, errors.New("Failed to start Service")
 }
 
-func (m *StartupError) Find(s string, v *string, sr string, vnc bool, requestId uint64) (service.Starter, bool) {
+func (m *StartupError) Find(caps service.Caps, requestId uint64) (service.Starter, bool) {
 	return m, true
 }
 
 type BrowserNotFound struct{}
 
-func (m *BrowserNotFound) Find(s string, v *string, sr string, vnc bool, requestId uint64) (service.Starter, bool) {
+func (m *BrowserNotFound) Find(caps service.Caps, requestId uint64) (service.Starter, bool) {
 	return nil, false
 }
 

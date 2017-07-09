@@ -108,27 +108,26 @@ func (config *Config) Load(browsers, containerLogs string) error {
 }
 
 // Find - find concrete browser
-func (config *Config) Find(name string, version *string) (*Browser, bool) {
+func (config *Config) Find(name string, version string) (*Browser, string, bool) {
 	config.lock.RLock()
 	defer config.lock.RUnlock()
 	browser, ok := config.Browsers[name]
 	if !ok {
-		return nil, false
+		return nil, "", false
 	}
-	if *version == "" {
+	if version == "" {
 		log.Println("Using default version:", browser.Default)
-		*version = browser.Default
-		if *version == "" {
-			return nil, false
+		version = browser.Default
+		if version == "" {
+			return nil, "", false
 		}
 	}
 	for v, b := range browser.Versions {
-		if strings.HasPrefix(v, *version) {
-			*version = v
-			return b, true
+		if strings.HasPrefix(v, version) {
+			return b, v, true
 		}
 	}
-	return nil, false
+	return nil, version, false
 }
 
 // State - get current state
