@@ -14,7 +14,8 @@ Selenoid uses simple JSON configuration files of the following format:
           "port": "4444",                   <6>
           "tmpfs": {"/tmp": "size=512m"},   <7>
           "path" : "/wd/hub",               <8>
-          "volumes" : ["/to:/from:ro"]      <9>
+          "volumes" : ["/to:/from:ro"],     <9>
+          "env" : ["TZ=Europe/Moscow"],     <10>
         },
         "50.0" :{
             // ...
@@ -35,6 +36,7 @@ Selenoid uses simple JSON configuration files of the following format:
 <7> _Optional. Containers only._ Add in-memory filesystem (_tmpfs_) to container, see below
 <8> _Optional._ Path relative to / where we request a new session, see below
 <9> _Optional. Containers only._ Mount path from host machine to created container
+<9> _Optional._ Environment variables to be passed to browser container or driver process
 
 This file represents a mapping between a list of supported browser versions and Docker container images or driver binaries.
 
