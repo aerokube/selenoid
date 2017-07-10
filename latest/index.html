@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-07-09</span>
+<span id="revdate">2017-07-10</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -811,7 +811,8 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
           <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">4444</span><span class="delimiter">&quot;</span></span>,                   <i class="conum" data-value="6"></i><b>(6)</b>
           <span class="key"><span class="delimiter">&quot;</span><span class="content">tmpfs</span><span class="delimiter">&quot;</span></span>: {<span class="key"><span class="delimiter">&quot;</span><span class="content">/tmp</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">size=512m</span><span class="delimiter">&quot;</span></span>},   <i class="conum" data-value="7"></i><b>(7)</b>
           <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">/wd/hub</span><span class="delimiter">&quot;</span></span>,               <i class="conum" data-value="8"></i><b>(8)</b>
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">/to:/from:ro</span><span class="delimiter">&quot;</span></span>]      <i class="conum" data-value="9"></i><b>(9)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">/to:/from:ro</span><span class="delimiter">&quot;</span></span>],     <i class="conum" data-value="9"></i><b>(9)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">env</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">TZ=Europe/Moscow</span><span class="delimiter">&quot;</span></span>],     <i class="conum" data-value="10"></i><b>(10)</b>
         },
         <span class="key"><span class="delimiter">&quot;</span><span class="content">50.0</span><span class="delimiter">&quot;</span></span> :{
             <span class="comment">// ...</span>
@@ -861,6 +862,10 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
 <tr>
 <td><i class="conum" data-value="9"></i><b>9</b></td>
 <td><em>Optional. Containers only.</em> Mount path from host machine to created container</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="10"></i><b>10</b></td>
+<td><em>Optional.</em> Environment variables to be passed to browser container or driver process</td>
 </tr>
 </table>
 </div>
@@ -2248,7 +2253,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-07-09 09:51:15 UTC
+Last updated 2017-07-10 17:03:05 UTC
 </div>
 </div>
 </body>
