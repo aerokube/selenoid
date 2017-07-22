@@ -11,6 +11,7 @@ import (
 
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types/container"
+	"time"
 )
 
 // Session - session id and vnc flaf
@@ -63,14 +64,15 @@ type Versions struct {
 
 // Config current configuration
 type Config struct {
-	lock          sync.RWMutex
-	Browsers      map[string]Versions
-	ContainerLogs *container.LogConfig
+	lock           sync.RWMutex
+	LastReloadTime time.Time
+	Browsers       map[string]Versions
+	ContainerLogs  *container.LogConfig
 }
 
 // NewConfig creates new config
 func NewConfig() *Config {
-	return &Config{Browsers: make(map[string]Versions), ContainerLogs: new(container.LogConfig)}
+	return &Config{Browsers: make(map[string]Versions), ContainerLogs: new(container.LogConfig), LastReloadTime: time.Now()}
 }
 
 func loadJSON(filename string, v interface{}) error {
@@ -104,6 +106,7 @@ func (config *Config) Load(browsers, containerLogs string) error {
 	config.lock.Lock()
 	defer config.lock.Unlock()
 	config.Browsers, config.ContainerLogs = br, cl
+	config.LastReloadTime = time.Now()
 	return nil
 }
 
