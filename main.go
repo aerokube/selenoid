@@ -75,6 +75,8 @@ var (
 	manager                  service.Manager
 	cli                      *client.Client
 
+	startTime = time.Now()
+
 	version     bool
 	gitRevision string = "HEAD"
 	buildStamp  string = "unknown"
@@ -204,6 +206,13 @@ func post(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func ping(w http.ResponseWriter, _ *http.Request) {
+	json.NewEncoder(w).Encode(struct {
+		Uptime         string `json:"uptime"`
+		LastReloadTime string `json:"lastReloadTime"`
+	}{time.Since(startTime).String(), conf.LastReloadTime.String()})
+}
+
 func handler() http.Handler {
 	root := http.NewServeMux()
 	root.HandleFunc("/wd/hub/", func(w http.ResponseWriter, r *http.Request) {
@@ -219,6 +228,7 @@ func handler() http.Handler {
 	root.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
 	})
+	root.HandleFunc("/ping", ping)
 	root.Handle("/vnc/", websocket.Handler(vnc))
 	root.Handle("/logs/", websocket.Handler(logs))
 	if enableFileUpload {

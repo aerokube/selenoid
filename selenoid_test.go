@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	"encoding/json"
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
 )
@@ -453,4 +454,22 @@ func TestFileUploadTwoFiles(t *testing.T) {
 
 	sessions.Remove(sess["sessionId"])
 	queue.Release()
+}
+
+func TestPing(t *testing.T) {
+	rsp, err := http.Get(With(srv.URL).Path("/ping"))
+
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+	AssertThat(t, rsp.Body, Is{Not{nil}})
+
+	var data map[string]string
+	bt, readErr := ioutil.ReadAll(rsp.Body)
+	AssertThat(t, readErr, Is{nil})
+	jsonErr := json.Unmarshal(bt, &data)
+	AssertThat(t, jsonErr, Is{nil})
+	_, hasUptime := data["uptime"]
+	AssertThat(t, hasUptime, Is{true})
+	_, hasLastReloadTime := data["lastReloadTime"]
+	AssertThat(t, hasLastReloadTime, Is{true})
 }
