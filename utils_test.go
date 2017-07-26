@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/aerokube/selenoid/service"
+	"github.com/aerokube/selenoid/session"
 	"github.com/pborman/uuid"
 )
 
@@ -57,7 +58,7 @@ func (m *HTTPTest) StartWithCancel() (*service.StartedService, error) {
 	return &ss, nil
 }
 
-func (m *HTTPTest) Find(caps service.Caps, requestId uint64) (service.Starter, bool) {
+func (m *HTTPTest) Find(caps session.Caps, requestId uint64) (service.Starter, bool) {
 	return m, true
 }
 
@@ -69,13 +70,13 @@ func (m *StartupError) StartWithCancel() (*service.StartedService, error) {
 	return nil, errors.New("Failed to start Service")
 }
 
-func (m *StartupError) Find(caps service.Caps, requestId uint64) (service.Starter, bool) {
+func (m *StartupError) Find(caps session.Caps, requestId uint64) (service.Starter, bool) {
 	return m, true
 }
 
 type BrowserNotFound struct{}
 
-func (m *BrowserNotFound) Find(caps service.Caps, requestId uint64) (service.Starter, bool) {
+func (m *BrowserNotFound) Find(caps session.Caps, requestId uint64) (service.Starter, bool) {
 	return nil, false
 }
 

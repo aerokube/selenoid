@@ -21,7 +21,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types"
 	"golang.org/x/net/websocket"
@@ -120,7 +119,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var browser struct {
-		Caps service.Caps `json:"desiredCapabilities"`
+		Caps session.Caps `json:"desiredCapabilities"`
 	}
 	err = json.Unmarshal(body, &browser)
 	if err != nil {
@@ -233,12 +232,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	sessions.Put(s.ID, &session.Session{
 		Quota:     quota,
-		Browser:   browser.Caps.Name,
-		Version:   browser.Caps.Version,
+		Caps:      browser.Caps,
 		URL:       u,
 		Container: startedService.ID,
 		VNC:       startedService.VNCHostPort,
-		Screen:    browser.Caps.ScreenResolution,
 		Cancel:    cancel,
 		Timeout: onTimeout(timeout, func() {
 			request{r}.session(s.ID).Delete()

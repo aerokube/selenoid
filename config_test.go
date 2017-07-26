@@ -73,7 +73,7 @@ func TestConfigNonEmptyState(t *testing.T) {
 	conf.Load(confFile, logConfPath)
 
 	sessions := session.NewMap()
-	sessions.Put("0", &session.Session{Browser: "firefox", Version: "49.0", Quota: "unknown"})
+	sessions.Put("0", &session.Session{Caps: session.Caps{Name: "firefox", Version: "49.0"}, Quota: "unknown"})
 	state := conf.State(sessions, 1, 0, 0)
 	AssertThat(t, state.Total, EqualTo{1})
 	AssertThat(t, state.Queued, EqualTo{0})
@@ -89,7 +89,7 @@ func TestConfigEmptyVersions(t *testing.T) {
 	conf.Load(confFile, logConfPath)
 
 	sessions := session.NewMap()
-	sessions.Put("0", &session.Session{Browser: "firefox", Version: "49.0", Quota: "unknown"})
+	sessions.Put("0", &session.Session{Caps: session.Caps{Name: "firefox", Version: "49.0"}, Quota: "unknown"})
 	state := conf.State(sessions, 1, 0, 0)
 	AssertThat(t, state.Total, EqualTo{1})
 	AssertThat(t, state.Queued, EqualTo{0})
@@ -105,7 +105,7 @@ func TestConfigNonEmptyVersions(t *testing.T) {
 	conf.Load(confFile, logConfPath)
 
 	sessions := session.NewMap()
-	sessions.Put("0", &session.Session{Browser: "firefox", Version: "49.0", Quota: "unknown"})
+	sessions.Put("0", &session.Session{Caps: session.Caps{Name: "firefox", Version: "49.0"}, Quota: "unknown"})
 	state := conf.State(sessions, 1, 0, 0)
 	AssertThat(t, state.Total, EqualTo{1})
 	AssertThat(t, state.Queued, EqualTo{0})

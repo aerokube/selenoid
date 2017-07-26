@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -19,7 +20,7 @@ import (
 type Docker struct {
 	ServiceBase
 	Environment
-	Caps
+	session.Caps
 	LogConfig *container.LogConfig
 	Client    *client.Client
 }

@@ -8,16 +8,9 @@ import (
 	"time"
 
 	"github.com/aerokube/selenoid/config"
+	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/client"
 )
-
-// Caps - user capabilities
-type Caps struct {
-	Name             string `json:"browserName"`
-	Version          string `json:"version"`
-	ScreenResolution string `json:"screenResolution"`
-	VNC              bool   `json:"enableVNC"`
-}
 
 // Environment - all settings that influence browser startup
 type Environment struct {
@@ -49,7 +42,7 @@ type Starter interface {
 
 // Manager - interface to choose appropriate starter
 type Manager interface {
-	Find(caps Caps, requestId uint64) (Starter, bool)
+	Find(caps session.Caps, requestId uint64) (Starter, bool)
 }
 
 // DefaultManager - struct for default implementation
@@ -60,7 +53,7 @@ type DefaultManager struct {
 }
 
 // Find - default implementation Manager interface
-func (m *DefaultManager) Find(caps Caps, requestId uint64) (Starter, bool) {
+func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, bool) {
 	browserName := caps.Name
 	version := caps.Version
 	log.Printf("[%d] [LOCATING_SERVICE] [%s-%s]\n", requestId, browserName, version)
