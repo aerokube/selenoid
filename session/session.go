@@ -5,15 +5,22 @@ import (
 	"sync"
 )
 
+// Caps - user capabilities
+type Caps struct {
+	Name             string `json:"browserName"`
+	Version          string `json:"version"`
+	ScreenResolution string `json:"screenResolution"`
+	VNC              bool   `json:"enableVNC"`
+	TestName         string `json:"testName"`
+}
+
 // Session - holds session info
 type Session struct {
 	Quota     string
-	Browser   string
-	Version   string
+	Caps      Caps
 	URL       *url.URL
 	Container string
 	VNC       string
-	Screen    string
 	Cancel    func()
 	Timeout   chan struct{}
 	Lock      sync.Mutex

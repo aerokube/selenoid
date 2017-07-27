@@ -16,10 +16,11 @@ import (
 
 // Session - session id and vnc flaf
 type Session struct {
-	ID        string `json:"id"`
-	Container string `json:"container,omitempty"`
-	VNC       bool   `json:"vnc"`
-	Screen    string `json:"screen"`
+	ID        string       `json:"id"`
+	Container string       `json:"container,omitempty"`
+	VNC       bool         `json:"vnc"`
+	Screen    string       `json:"screen"`
+	Caps      session.Caps `json:"caps"`
 }
 
 // Sessions - used count and individual sessions for quota user
@@ -146,25 +147,33 @@ func (config *Config) State(sessions *session.Map, limit, queued, pending int) *
 	}
 	sessions.Each(func(id string, session *session.Session) {
 		state.Used++
-		_, ok := state.Browsers[session.Browser]
+		browserName := session.Caps.Name
+		version := session.Caps.Version
+		_, ok := state.Browsers[browserName]
 		if !ok {
-			state.Browsers[session.Browser] = make(Version)
+			state.Browsers[browserName] = make(Version)
 		}
-		_, ok = state.Browsers[session.Browser][session.Version]
+		_, ok = state.Browsers[browserName][version]
 		if !ok {
-			state.Browsers[session.Browser][session.Version] = make(Quota)
+			state.Browsers[browserName][version] = make(Quota)
 		}
-		v, ok := state.Browsers[session.Browser][session.Version][session.Quota]
+		v, ok := state.Browsers[browserName][version][session.Quota]
 		if !ok {
 			v = &Sessions{0, []Session{}}
-			state.Browsers[session.Browser][session.Version][session.Quota] = v
+			state.Browsers[browserName][version][session.Quota] = v
 		}
 		v.Count++
 		vnc := false
 		if session.VNC != "" {
 			vnc = true
 		}
-		v.Sessions = append(v.Sessions, Session{ID: id, Container: session.Container, VNC: vnc, Screen: session.Screen})
+		v.Sessions = append(v.Sessions, Session{
+			ID:        id,
+			Container: session.Container,
+			VNC:       vnc,
+			Screen:    session.Caps.ScreenResolution,
+			Caps:      session.Caps,
+		})
 	})
 	return state
 }
