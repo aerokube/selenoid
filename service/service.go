@@ -18,6 +18,7 @@ type Environment struct {
 	InDocker       bool
 	CPU            int64
 	Memory         int64
+	Network        string
 	StartupTimeout time.Duration
 }
 
