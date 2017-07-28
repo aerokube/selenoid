@@ -67,6 +67,7 @@ var (
 	sessionDeleteTimeout     time.Duration
 	serviceStartupTimeout    time.Duration
 	limit                    int
+	containerNetwork         string
 	sessions                 = session.NewMap()
 	confPath                 string
 	logConfPath              string
@@ -99,6 +100,7 @@ func init() {
 	flag.BoolVar(&version, "version", false, "Show version and exit")
 	flag.Var(&mem, "mem", "Containers memory limit e.g. 128m or 1g")
 	flag.Var(&cpu, "cpu", "Containers cpu limit as float e.g. 0.2 or 1.0")
+	flag.StringVar(&containerNetwork, "container-network", "default", "Network to be used for containers")
 	flag.Parse()
 
 	if version {
@@ -133,6 +135,7 @@ func init() {
 		InDocker:       inDocker,
 		CPU:            int64(cpu),
 		Memory:         int64(mem),
+		Network:        containerNetwork,
 		StartupTimeout: serviceStartupTimeout,
 	}
 	if disableDocker {

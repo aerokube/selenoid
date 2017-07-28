@@ -67,6 +67,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			AutoRemove:   true,
 			PortBindings: portBindings,
 			LogConfig:    *d.LogConfig,
+			NetworkMode:  container.NetworkMode(d.Network),
 			Tmpfs:        d.Service.Tmpfs,
 			ShmSize:      268435456,
 			Privileged:   true,
@@ -95,7 +96,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	_, ok := stat.NetworkSettings.Ports[selenium]
 	if !ok {
 		d.removeContainer(ctx, d.Client, container.ID)
-		return nil, fmt.Errorf("no bingings available for %v", selenium)
+		return nil, fmt.Errorf("no bindings available for %v", selenium)
 	}
 	seleniumHostPort, vncHostPort := "", ""
 	if d.IP == "" {
