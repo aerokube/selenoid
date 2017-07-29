@@ -26,3 +26,11 @@ screenResolution: 1280x1024x24
 
 . So far as our containers run headless browsers in Xvfb without installed window manager `maximize` operation does not work. You need to use `setSize` method instead.
 ====
+
+=== Custom Test Name
+
+For debugging purposes it is often useful to give a distinct name to every test case. When working with Selenoid you can set test case name by passing the following capability:
+```
+name: myCoolTestName
+```
+The main application of this capability - is debugging tests in the UI which is showing specified name for every running session.

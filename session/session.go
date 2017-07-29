@@ -11,7 +11,7 @@ type Caps struct {
 	Version          string `json:"version"`
 	ScreenResolution string `json:"screenResolution"`
 	VNC              bool   `json:"enableVNC"`
-	TestName         string `json:"testName"`
+	TestName         string `json:"name"`
 }
 
 // Session - holds session info
