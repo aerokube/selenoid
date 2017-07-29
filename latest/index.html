@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-07-28</span>
+<span id="revdate">2017-07-29</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -552,6 +552,7 @@ table.CodeRay td.code>pre{padding:0}
 <ul class="sectlevel3">
 <li><a href="#_live_browser_screen">3.1.1. Live Browser Screen</a></li>
 <li><a href="#_custom_screen_resolution">3.1.2. Custom Screen Resolution</a></li>
+<li><a href="#_custom_test_name">3.1.3. Custom Test Name</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -1254,6 +1255,20 @@ Use only one of these commands.
 </td>
 </tr>
 </table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_custom_test_name"><a class="anchor" href="#_custom_test_name"></a>3.1.3. Custom Test Name</h4>
+<div class="paragraph">
+<p>For debugging purposes it is often useful to give a distinct name to every test case. When working with Selenoid you can set test case name by passing the following capability:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>name: myCoolTestName</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The main application of this capability - is debugging tests in the UI which is showing specified name for every running session.</p>
 </div>
 </div>
 </div>
@@ -2245,7 +2260,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-07-28 18:46:49 UTC
+Last updated 2017-07-29 15:34:40 UTC
 </div>
 </div>
 </body>
