@@ -8,6 +8,7 @@
 :revnumber: latest
 :icons: font
 :source-highlighter: coderay
+:docinfo: shared
 
 This reference for version: _{revnumber}_
 
