@@ -169,13 +169,18 @@ func create(w http.ResponseWriter, r *http.Request) {
 			switch ctx.Err() {
 			case context.DeadlineExceeded:
 				log.Printf("[%d] [SESSION_ATTEMPT_TIMED_OUT] [%s]\n", requestId, quota)
-				continue
+				if i < retryCount {
+					continue
+				}
+				err := fmt.Errorf("New session attempts retry count exceeded")
+				log.Printf("[%d] [SESSION_FAILED] [%s] - [%s]\n", requestId, u.String(), err)
+				jsonError(w, err.Error(), http.StatusInternalServerError)
 			case context.Canceled:
 				log.Printf("[%d] [CLIENT_DISCONNECTED] [%s]\n", requestId, quota)
-				queue.Drop()
-				cancel()
-				return
 			}
+			queue.Drop()
+			cancel()
+			return
 		default:
 		}
 		if err != nil {
