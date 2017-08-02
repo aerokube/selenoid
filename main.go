@@ -67,6 +67,7 @@ var (
 	sessionDeleteTimeout     time.Duration
 	serviceStartupTimeout    time.Duration
 	limit                    int
+	retryCount               int
 	containerNetwork         string
 	sessions                 = session.NewMap()
 	confPath                 string
@@ -93,6 +94,7 @@ func init() {
 	flag.StringVar(&confPath, "conf", "config/browsers.json", "Browsers configuration file")
 	flag.StringVar(&logConfPath, "log-conf", "config/container-logs.json", "Container logging configuration file")
 	flag.IntVar(&limit, "limit", 5, "Simultaneous container runs")
+	flag.IntVar(&retryCount, "retry-count", 1, "New session attempts retry count")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
 	flag.DurationVar(&newSessionAttemptTimeout, "session-attempt-timeout", 30*time.Second, "New session attempt timeout in time.Duration format")
 	flag.DurationVar(&sessionDeleteTimeout, "session-delete-timeout", 30*time.Second, "Session delete timeout in time.Duration format")

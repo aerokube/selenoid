@@ -186,6 +186,62 @@ func TestSessionCreatedWdHub(t *testing.T) {
 	queue.Release()
 }
 
+func TestSessionFaitedAfterTimeout(t *testing.T) {
+	newSessionAttemptTimeout = 10 * time.Millisecond
+	manager = &HTTPTest{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		<-time.After(100 * time.Millisecond)
+	})}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, resp, AllOf{Code{http.StatusInternalServerError}})
+
+	resp, err = http.Get(With(srv.URL).Path("/status"))
+	AssertThat(t, err, Is{nil})
+	var state config.State
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
+	AssertThat(t, state.Used, EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
+}
+
+func TestClientDisconnected(t *testing.T) {
+	manager = &HTTPTest{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		<-time.After(1000 * time.Millisecond)
+	})}
+
+	req, _ := http.NewRequest(http.MethodPost, With(srv.URL).Path("/wd/hub/session"), bytes.NewReader([]byte("{}")))
+	ctx, cancel := context.WithCancel(req.Context())
+	go http.DefaultClient.Do(req.WithContext(ctx))
+	<-time.After(10 * time.Millisecond)
+	cancel()
+
+	resp, err := http.Get(With(srv.URL).Path("/status"))
+	AssertThat(t, err, Is{nil})
+	var state config.State
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
+	AssertThat(t, state.Used, EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
+}
+
+func TestSessionFaitedAfterTwoTimeout(t *testing.T) {
+	retryCount = 2
+	newSessionAttemptTimeout = 10 * time.Millisecond
+	manager = &HTTPTest{Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		<-time.After(100 * time.Millisecond)
+	})}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, resp, AllOf{Code{http.StatusInternalServerError}})
+
+	resp, err = http.Get(With(srv.URL).Path("/status"))
+	AssertThat(t, err, Is{nil})
+	var state config.State
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
+	AssertThat(t, state.Used, EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{0})
+}
+
 func TestSessionCreatedRedirect(t *testing.T) {
 	httpClient := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
