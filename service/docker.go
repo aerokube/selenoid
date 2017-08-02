@@ -55,6 +55,10 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		fmt.Sprintf("ENABLE_VNC=%v", d.VNC),
 	}
 	env = append(env, d.Service.Env...)
+	shmSize := int64(268435456)
+	if d.Service.ShmSize > 0 {
+		shmSize = d.Service.ShmSize
+	}
 	container, err := d.Client.ContainerCreate(ctx,
 		&container.Config{
 			Hostname:     "localhost",
@@ -69,7 +73,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			LogConfig:    *d.LogConfig,
 			NetworkMode:  container.NetworkMode(d.Network),
 			Tmpfs:        d.Service.Tmpfs,
-			ShmSize:      268435456,
+			ShmSize:      shmSize,
 			Privileged:   true,
 			Resources: container.Resources{
 				Memory:   d.Memory,

@@ -55,6 +55,7 @@ type Browser struct {
 	Tmpfs   map[string]string `json:"tmpfs,omitempty"`
 	Volumes []string          `json:"volumes,omitempty"`
 	Env     []string          `json:"env,omitempty"`
+	ShmSize int64             `json:"shmSize,omitempty"`
 }
 
 // Versions configuration
