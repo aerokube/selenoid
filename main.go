@@ -228,7 +228,7 @@ func handler() http.Handler {
 		mux().ServeHTTP(w, r)
 	})
 	root.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
-		jsonError(w, "Session not found", http.StatusNotFound)
+		jsonError(w, "Session timed out or not found", http.StatusNotFound)
 	})
 	root.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
