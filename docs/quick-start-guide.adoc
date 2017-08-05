@@ -3,21 +3,21 @@
 +
 **On Linux:**
 
-    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.1/cm_linux_amd64
+    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.2/cm_linux_amd64
     $ chmod +x ./cm
     $ ./cm selenoid start --vnc
 
 +
 **On Mac:**
 
-    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.1/cm_darwin_amd64
+    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.2/cm_darwin_amd64
     $ chmod +x ./cm
     $ ./cm selenoid start --vnc
 
 +
 **On Windows** - just download the binary with your browser or if you have https://en.wikipedia.org/wiki/PowerShell[Powershell] type:
 
-    > curl -L -o cm.exe https://github.com/aerokube/cm/releases/download/1.2.1/cm_windows_amd64
+    > curl -L -o cm.exe https://github.com/aerokube/cm/releases/download/1.2.2/cm_windows_amd64
     > ./cm.exe selenoid start --vnc
 
 +
@@ -25,7 +25,7 @@
 ====
 . If you have https://docs.docker.com/engine/installation/[Docker] installed you can also use this one-liner:
 [source,bash,subs="attributes+"]
-# docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}:/root aerokube/cm:latest-release selenoid start --vnc --tmpfs 128
+# docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}:/root -e OVERRIDE_HOME=${HOME} aerokube/cm:latest-release selenoid start --vnc --tmpfs 128
 
 . If you are working behind proxy you should set environment variables `HTTP_PROXY`, `HTTPS_PROXY` or `NO_PROXY` described in https://docs.docker.com/engine/admin/systemd/#runtime-directory-and-storage-driver[Docker documentation]:
 [source,bash,subs="attributes+"]
