@@ -105,9 +105,10 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	seleniumHostPort, vncHostPort := "", ""
 	if d.IP == "" {
 		if d.InDocker {
-			seleniumHostPort = net.JoinHostPort(stat.NetworkSettings.IPAddress, d.Service.Port)
+			containerIP := getContainerIP(d.Network, stat)
+			seleniumHostPort = net.JoinHostPort(containerIP, d.Service.Port)
 			if d.VNC {
-				vncHostPort = net.JoinHostPort(stat.NetworkSettings.IPAddress, "5900")
+				vncHostPort = net.JoinHostPort(containerIP, "5900")
 			}
 		} else {
 			seleniumHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[selenium][0].HostPort)
@@ -137,6 +138,28 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		Cancel:      func() { d.removeContainer(ctx, d.Client, container.ID) },
 	}
 	return &s, nil
+}
+
+func getContainerIP(networkName string, stat types.ContainerJSON) string {
+	ns := stat.NetworkSettings
+	if ns.IPAddress != "" {
+		return stat.NetworkSettings.IPAddress
+	}
+	if len(ns.Networks) > 0 {
+		possibleAddresses := []string{}
+		for name, nt := range ns.Networks {
+			if nt.IPAddress != "" {
+				if name == networkName {
+					return nt.IPAddress
+				}
+				possibleAddresses = append(possibleAddresses, nt.IPAddress)
+			}
+		}
+		if len(possibleAddresses) > 0 {
+			return possibleAddresses[0]
+		}
+	}
+	return ""
 }
 
 func (d *Docker) removeContainer(ctx context.Context, cli *client.Client, id string) {
