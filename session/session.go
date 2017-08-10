@@ -12,6 +12,7 @@ type Caps struct {
 	ScreenResolution string `json:"screenResolution"`
 	VNC              bool   `json:"enableVNC"`
 	TestName         string `json:"name"`
+	TimeZone         string `json:"timeZone"`
 }
 
 // Session - holds session info

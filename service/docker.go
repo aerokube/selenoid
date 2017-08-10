@@ -49,8 +49,17 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	}
 	ctx := context.Background()
 	log.Printf("[%d] [CREATING_CONTAINER] [%s]\n", d.RequestId, d.Service.Image)
+	timeZone := time.Local
+	if d.TimeZone != "" {
+		tz, err := time.LoadLocation(d.TimeZone)
+		if err != nil {
+			log.Printf("[%d] [BAD_TIMEZONE] [%s]\n", d.RequestId, d.TimeZone)
+		} else {
+			timeZone = tz
+		}
+	}
 	env := []string{
-		fmt.Sprintf("TZ=%s", time.Local),
+		fmt.Sprintf("TZ=%s", timeZone),
 		fmt.Sprintf("SCREEN_RESOLUTION=%s", d.ScreenResolution),
 		fmt.Sprintf("ENABLE_VNC=%v", d.VNC),
 	}
