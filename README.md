@@ -14,6 +14,7 @@ It is using Docker to launch browsers.
 $ docker run --rm                                   \
     -v /var/run/docker.sock:/var/run/docker.sock    \
     -v ${HOME}:/root                                \
+    -e OVERRIDE_HOME=${HOME}                        \
     aerokube/cm:latest-release selenoid start       \
     --vnc --tmpfs 128
 ```
