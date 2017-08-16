@@ -16,6 +16,7 @@ Selenoid uses simple JSON configuration files of the following format:
           "path" : "/wd/hub",               <8>
           "volumes" : ["/to:/from:ro"],     <9>
           "env" : ["TZ=Europe/Moscow"],     <10>
+          "shmSize" : 268435456,            <11>
         },
         "50.0" :{
             // ...
@@ -36,7 +37,8 @@ Selenoid uses simple JSON configuration files of the following format:
 <7> _Optional. Containers only._ Add in-memory filesystem (_tmpfs_) to container, see below
 <8> _Optional._ Path relative to / where we request a new session, see below
 <9> _Optional. Containers only._ Mount path from host machine to created container
-<9> _Optional._ Environment variables to be passed to browser container or driver process
+<10> _Optional._ Environment variables to be passed to browser container or driver process
+<11> _Optional._ Shared memory size in bytes to be set for container. Some browsers (e.g. Chrome) may work unstable when having insufficient `shmSize`. Default value is 256 megabytes. 
 
 This file represents a mapping between a list of supported browser versions and Docker container images or driver binaries.
 
@@ -96,7 +98,7 @@ If you wish to use a standalone binary instead of Docker container, then image f
 ----
 Selenoid proxies connections to either Selenium server or standalone driver binary. Depending on operating system both can be packaged inside Docker container.
 
-=== Port, Tmpfs, Path and Volumes
+=== Other Optional Fields
 
 [source,javascript]
 ----
@@ -105,7 +107,9 @@ Selenoid proxies connections to either Selenium server or standalone driver bina
     "port": ""
     "tmpfs": {"/tmp": "size=512m", "/var": "size=128m"},
     "path" : "",
-    "volumes": ["/to:/from", "/another:/one:ro"]
+    "volumes": ["/to:/from", "/another:/one:ro"],
+    "env" : ["TZ=Europe/Moscow", "ONE_MORE_VARIABLE=itsValue"],
+    "shmSize" : 268435456,
 },
 ----
 
@@ -123,6 +127,10 @@ Chrome and Opera containers use web driver binary as entrypoint application whic
 We recommend to use our https://github.com/aerokube/cm[configuration tool] to avoid errors with this field.
 
 * *volumes* (_optional_) - This field allows to mount volumes from host machine to browser container. Should be specified as an array of Docker volume expressions: `/host/dir:/container/dir[:mode]`.
+
+* *env* (_optional_) - This field allows to set any environment variables in running container. Specified as an array of `NAME=value` pairs.
+
+* *shmSize* (_optional_) - Use it to override shared memory size for browser container.
 
 === Syncing Browser Images from Existing File
 In some usage scenarios you may want to store browsers configuration file under version control and initialize Selenoid from this file. For example this is true if you wish to have consistently reproducing infrastructure and using such tools as https://aws.amazon.com/cloudformation/[Amazon Cloud Formation]. In order to pull browser images do the following:

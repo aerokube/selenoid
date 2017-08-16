@@ -4,10 +4,16 @@ The following flags are supported by ```selenoid``` command:
 ```
 -conf string
     Browsers configuration file (default "config/browsers.json")
+-container-network string
+    Network to be used for containers (default "default")
 -cpu value
     Containers cpu limit as float e.g. 0.2 or 1.0
 -disable-docker
     Disable docker support
+-disable-queue
+    Disable wait queue
+-enable-file-upload
+    File upload support
 -limit int
     Simultaneous container runs (default 5)
 -listen string
@@ -16,6 +22,10 @@ The following flags are supported by ```selenoid``` command:
     Container logging configuration file (default "config/container-logs.json")
 -mem value
     Containers memory limit e.g. 128m or 1g
+-retry-count int
+    New session attempts retry count (default 1)
+-service-startup-timeout duration
+    Service startup timeout in time.Duration format (default 30s)
 -session-attempt-timeout duration
     New session attempt timeout in time.Duration format (default 30s)
 -session-delete-timeout duration

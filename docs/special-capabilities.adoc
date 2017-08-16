@@ -34,3 +34,11 @@ For debugging purposes it is often useful to give a distinct name to every test 
 name: myCoolTestName
 ```
 The main application of this capability - is debugging tests in the UI which is showing specified name for every running session.
+
+=== Per-session Time Zone
+
+Some tests require particular time zone to be set in operating system. To achieve this with Selenoid simply set one more capability:
+```
+timeZone: Europe/Moscow
+```
+You can find most of available time zones https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[here]. Without this capability launched browser containers will have the same timezone as Selenoid one.
