@@ -55,7 +55,7 @@ type Browser struct {
 	Tmpfs   map[string]string `json:"tmpfs,omitempty"`
 	Volumes []string          `json:"volumes,omitempty"`
 	Env     []string          `json:"env,omitempty"`
-	Hosts   []string          `json:"env,hosts"`
+	Hosts   []string          `json:"hosts,omitempty"`
 	ShmSize int64             `json:"shmSize,omitempty"`
 }
 
