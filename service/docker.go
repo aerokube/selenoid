@@ -68,6 +68,10 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	if d.Service.ShmSize > 0 {
 		shmSize = d.Service.ShmSize
 	}
+	extraHosts := []string{}
+	if len(d.Service.Hosts) > 0 {
+		extraHosts = append(extraHosts, d.Service.Hosts...)
+	}
 	container, err := d.Client.ContainerCreate(ctx,
 		&container.Config{
 			Hostname:     "localhost",
@@ -88,6 +92,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 				Memory:   d.Memory,
 				NanoCPUs: d.CPU,
 			},
+			ExtraHosts: extraHosts,
 		},
 		&network.NetworkingConfig{}, "")
 	if err != nil {
