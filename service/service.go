@@ -95,12 +95,12 @@ func wait(u string, t time.Duration) error {
 			req, _ := http.NewRequest(http.MethodHead, u, nil)
 			req.Close = true
 			resp, err := http.DefaultClient.Do(req)
+			if resp != nil {
+				resp.Body.Close()
+			}
 			if err != nil {
 				<-time.After(50 * time.Millisecond)
 				continue
-			}
-			if resp != nil {
-				resp.Body.Close()
 			}
 			up <- struct{}{}
 			return
