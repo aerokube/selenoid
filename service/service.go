@@ -86,11 +86,10 @@ func wait(u string, t time.Duration) error {
 	up := make(chan struct{})
 	done := make(chan struct{})
 	go func() {
-	loop:
 		for {
 			select {
 			case <-done:
-				break loop
+				return
 			default:
 			}
 			req, _ := http.NewRequest(http.MethodHead, u, nil)
@@ -104,6 +103,7 @@ func wait(u string, t time.Duration) error {
 				resp.Body.Close()
 			}
 			up <- struct{}{}
+			return
 		}
 	}()
 	select {
