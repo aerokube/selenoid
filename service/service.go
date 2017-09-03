@@ -83,29 +83,34 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 }
 
 func wait(u string, t time.Duration) error {
+	up := make(chan struct{})
 	done := make(chan struct{})
-	defer close(done)
-	go func(done chan struct{}) {
-	loop:
+	go func() {
 		for {
 			select {
-			case <-time.After(50 * time.Millisecond):
-				req, _ := http.NewRequest(http.MethodHead, u, nil)
-				req.Close = true
-				r, err := http.DefaultClient.Do(req)
-				if err == nil {
-					r.Body.Close()
-					done <- struct{}{}
-				}
 			case <-done:
-				break loop
+				return
+			default:
 			}
+			req, _ := http.NewRequest(http.MethodHead, u, nil)
+			req.Close = true
+			resp, err := http.DefaultClient.Do(req)
+			if resp != nil {
+				resp.Body.Close()
+			}
+			if err != nil {
+				<-time.After(50 * time.Millisecond)
+				continue
+			}
+			up <- struct{}{}
+			return
 		}
-	}(done)
+	}()
 	select {
 	case <-time.After(t):
+		close(done)
 		return fmt.Errorf("%s does not respond in %v", u, t)
-	case <-done:
+	case <-up:
 	}
 	return nil
 }
