@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-09-07</span>
+<span id="revdate">2017-09-09</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -805,17 +805,18 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
 <div class="title">browsers.json</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="javascript">{
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">firefox</span><span class="delimiter">&quot;</span></span>: {                            <i class="conum" data-value="1"></i><b>(1)</b>
-      <span class="key"><span class="delimiter">&quot;</span><span class="content">default</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">46.0</span><span class="delimiter">&quot;</span></span>,                    <i class="conum" data-value="2"></i><b>(2)</b>
-      <span class="key"><span class="delimiter">&quot;</span><span class="content">versions</span><span class="delimiter">&quot;</span></span>: {                         <i class="conum" data-value="3"></i><b>(3)</b>
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">46.0</span><span class="delimiter">&quot;</span></span>: {                           <i class="conum" data-value="4"></i><b>(4)</b>
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">image</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">selenoid/firefox:46.0</span><span class="delimiter">&quot;</span></span>, <i class="conum" data-value="5"></i><b>(5)</b>
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">4444</span><span class="delimiter">&quot;</span></span>,                   <i class="conum" data-value="6"></i><b>(6)</b>
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">tmpfs</span><span class="delimiter">&quot;</span></span>: {<span class="key"><span class="delimiter">&quot;</span><span class="content">/tmp</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">size=512m</span><span class="delimiter">&quot;</span></span>},   <i class="conum" data-value="7"></i><b>(7)</b>
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">/wd/hub</span><span class="delimiter">&quot;</span></span>,               <i class="conum" data-value="8"></i><b>(8)</b>
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">/to:/from:ro</span><span class="delimiter">&quot;</span></span>],     <i class="conum" data-value="9"></i><b>(9)</b>
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">env</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">TZ=Europe/Moscow</span><span class="delimiter">&quot;</span></span>],     <i class="conum" data-value="10"></i><b>(10)</b>
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">shmSize</span><span class="delimiter">&quot;</span></span> : <span class="integer">268435456</span>,            <i class="conum" data-value="11"></i><b>(11)</b>
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">firefox</span><span class="delimiter">&quot;</span></span>: {                                     <i class="conum" data-value="1"></i><b>(1)</b>
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">default</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">46.0</span><span class="delimiter">&quot;</span></span>,                             <i class="conum" data-value="2"></i><b>(2)</b>
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">versions</span><span class="delimiter">&quot;</span></span>: {                                  <i class="conum" data-value="3"></i><b>(3)</b>
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">46.0</span><span class="delimiter">&quot;</span></span>: {                                    <i class="conum" data-value="4"></i><b>(4)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">image</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">selenoid/firefox:46.0</span><span class="delimiter">&quot;</span></span>,          <i class="conum" data-value="5"></i><b>(5)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">4444</span><span class="delimiter">&quot;</span></span>,                            <i class="conum" data-value="6"></i><b>(6)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">tmpfs</span><span class="delimiter">&quot;</span></span>: {<span class="key"><span class="delimiter">&quot;</span><span class="content">/tmp</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">size=512m</span><span class="delimiter">&quot;</span></span>},            <i class="conum" data-value="7"></i><b>(7)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">/wd/hub</span><span class="delimiter">&quot;</span></span>,                        <i class="conum" data-value="8"></i><b>(8)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">/to:/from:ro</span><span class="delimiter">&quot;</span></span>],              <i class="conum" data-value="9"></i><b>(9)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">env</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">TZ=Europe/Moscow</span><span class="delimiter">&quot;</span></span>],              <i class="conum" data-value="10"></i><b>(10)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">hosts</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">example.com:192.168.0.1</span><span class="delimiter">&quot;</span></span>],     <i class="conum" data-value="11"></i><b>(11)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">shmSize</span><span class="delimiter">&quot;</span></span> : <span class="integer">268435456</span>,                     <i class="conum" data-value="12"></i><b>(12)</b>
         },
         <span class="key"><span class="delimiter">&quot;</span><span class="content">50.0</span><span class="delimiter">&quot;</span></span> :{
             <span class="comment">// ...</span>
@@ -872,6 +873,10 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
 </tr>
 <tr>
 <td><i class="conum" data-value="11"></i><b>11</b></td>
+<td><em>Optional.</em> Custom <code>/etc/hosts</code> entries to be passed to browser container in <code>hostname:ip</code> format.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="12"></i><b>12</b></td>
 <td><em>Optional.</em> Shared memory size in bytes to be set for container. Some browsers (e.g. Chrome) may work unstable when having insufficient <code>shmSize</code>. Default value is 256 megabytes.</td>
 </tr>
 </table>
@@ -977,6 +982,7 @@ That means version string in JSON should start with version string from capabili
     <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">/to:/from</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">/another:/one:ro</span><span class="delimiter">&quot;</span></span>],
     <span class="key"><span class="delimiter">&quot;</span><span class="content">env</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">TZ=Europe/Moscow</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">ONE_MORE_VARIABLE=itsValue</span><span class="delimiter">&quot;</span></span>],
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">hosts</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">one.example.com:192.168.0.1</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">two.example.com:192.168.0.2</span><span class="delimiter">&quot;</span></span>],
     <span class="key"><span class="delimiter">&quot;</span><span class="content">shmSize</span><span class="delimiter">&quot;</span></span> : <span class="integer">268435456</span>,
 },</code></pre>
 </div>
@@ -1004,6 +1010,9 @@ We recommend to use our <a href="https://github.com/aerokube/cm">configuration t
 </li>
 <li>
 <p><strong>env</strong> (<em>optional</em>) - This field allows to set any environment variables in running container. Specified as an array of <code>NAME=value</code> pairs.</p>
+</li>
+<li>
+<p><strong>hosts</strong> (<em>optional</em>) - This field allows to add custom <code>/etc/hosts</code> entries to running container. Specified as an array of <code>hostname:ip</code> pairs.</p>
 </li>
 <li>
 <p><strong>shmSize</strong> (<em>optional</em>) - Use it to override shared memory size for browser container.</p>
@@ -2323,7 +2332,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-09-07 08:12:25 UTC
+Last updated 2017-09-09 10:09:57 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
