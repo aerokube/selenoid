@@ -3,21 +3,21 @@
 +
 **On Linux:**
 
-    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.3/cm_linux_amd64
+    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.4/cm_linux_amd64
     $ chmod +x ./cm
     $ ./cm selenoid start --vnc
 
 +
 **On Mac:**
 
-    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.3/cm_darwin_amd64
+    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.4/cm_darwin_amd64
     $ chmod +x ./cm
     $ ./cm selenoid start --vnc
 
 +
 **On Windows** - just download the binary with your browser or if you have https://en.wikipedia.org/wiki/PowerShell[Powershell] type:
 
-    > curl -L -o cm.exe https://github.com/aerokube/cm/releases/download/1.2.3/cm_windows_amd64
+    > curl -L -o cm.exe https://github.com/aerokube/cm/releases/download/1.2.4/cm_windows_amd64
     > ./cm.exe selenoid start --vnc
 
 +
