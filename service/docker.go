@@ -74,7 +74,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	}
 	container, err := d.Client.ContainerCreate(ctx,
 		&container.Config{
-			Hostname:     d.Hostname,
+			Hostname:     d.ContainerHostname,
 			Image:        d.Service.Image.(string),
 			Env:          env,
 			ExposedPorts: exposedPorts,

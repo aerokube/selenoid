@@ -13,6 +13,7 @@ type Caps struct {
 	VNC              bool   `json:"enableVNC"`
 	TestName         string `json:"name"`
 	TimeZone         string `json:"timeZone"`
+	ContainerHostname	string `json:"containerHostname"`
 }
 
 // Session - holds session info
