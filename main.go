@@ -69,6 +69,7 @@ var (
 	limit                    int
 	retryCount               int
 	containerNetwork         string
+	containerHostname	 string
 	sessions                 = session.NewMap()
 	confPath                 string
 	logConfPath              string
@@ -103,6 +104,7 @@ func init() {
 	flag.Var(&mem, "mem", "Containers memory limit e.g. 128m or 1g")
 	flag.Var(&cpu, "cpu", "Containers cpu limit as float e.g. 0.2 or 1.0")
 	flag.StringVar(&containerNetwork, "container-network", "default", "Network to be used for containers")
+	flag.StringVar(&containerHostname, "container-hostname", "localhost", "Hostname of container")
 	flag.Parse()
 
 	if version {
@@ -138,6 +140,7 @@ func init() {
 		CPU:            int64(cpu),
 		Memory:         int64(mem),
 		Network:        containerNetwork,
+		Hostname:	containerHostname,
 		StartupTimeout: serviceStartupTimeout,
 	}
 	if disableDocker {
