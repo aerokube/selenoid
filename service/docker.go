@@ -73,29 +73,37 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	if len(d.Service.Hosts) > 0 {
 		extraHosts = append(extraHosts, d.Service.Hosts...)
 	}
+	containerHostname := "localhost"
+	if d.ContainerHostname != "" {
+		containerHostname = d.ContainerHostname
+	}
+	hostConfig := container.HostConfig{
+		Binds:        d.Service.Volumes,
+		AutoRemove:   true,
+		PortBindings: portBindings,
+		LogConfig:    *d.LogConfig,
+		NetworkMode:  container.NetworkMode(d.Network),
+		Tmpfs:        d.Service.Tmpfs,
+		ShmSize:      shmSize,
+		Privileged:   true,
+		Resources: container.Resources{
+			Memory:   d.Memory,
+			NanoCPUs: d.CPU,
+		},
+		ExtraHosts: extraHosts,
+	}
+	links := strings.Split(d.ApplicationContainers, ",")
+	if len(links) > 0 {
+		hostConfig.Links = links
+	}
 	container, err := d.Client.ContainerCreate(ctx,
 		&container.Config{
-			Hostname:     d.ContainerHostname,
+			Hostname:     containerHostname,
 			Image:        d.Service.Image.(string),
 			Env:          env,
 			ExposedPorts: exposedPorts,
 		},
-		&container.HostConfig{
-			Binds:        d.Service.Volumes,
-			AutoRemove:   true,
-			PortBindings: portBindings,
-			LogConfig:    *d.LogConfig,
-			NetworkMode:  container.NetworkMode(d.Network),
-			Tmpfs:        d.Service.Tmpfs,
-			ShmSize:      shmSize,
-			Privileged:   true,
-			Links:        strings.Split(d.ApplicationContainers, ","),
-			Resources: container.Resources{
-				Memory:   d.Memory,
-				NanoCPUs: d.CPU,
-			},
-			ExtraHosts: extraHosts,
-		},
+		&hostConfig,
 		&network.NetworkingConfig{}, "")
 	if err != nil {
 		return nil, fmt.Errorf("create container: %v", err)
