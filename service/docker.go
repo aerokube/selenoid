@@ -14,6 +14,7 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"strings"
 )
 
 // Docker - docker container manager
@@ -88,6 +89,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			Tmpfs:        d.Service.Tmpfs,
 			ShmSize:      shmSize,
 			Privileged:   true,
+			Links:        strings.Split(d.ApplicationContainers, ","),
 			Resources: container.Resources{
 				Memory:   d.Memory,
 				NanoCPUs: d.CPU,

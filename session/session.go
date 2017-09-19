@@ -7,13 +7,14 @@ import (
 
 // Caps - user capabilities
 type Caps struct {
-	Name              string `json:"browserName"`
-	Version           string `json:"version"`
-	ScreenResolution  string `json:"screenResolution"`
-	VNC               bool   `json:"enableVNC"`
-	TestName          string `json:"name"`
-	TimeZone          string `json:"timeZone"`
-	ContainerHostname string `json:"containerHostname"`
+	Name                  string `json:"browserName"`
+	Version               string `json:"version"`
+	ScreenResolution      string `json:"screenResolution"`
+	VNC                   bool   `json:"enableVNC"`
+	TestName              string `json:"name"`
+	TimeZone              string `json:"timeZone"`
+	ContainerHostname     string `json:"containerHostname"`
+	ApplicationContainers string `json:"applicationContainers"`
 }
 
 // Session - holds session info
