@@ -72,6 +72,7 @@ var (
 	sessions                 = session.NewMap()
 	confPath                 string
 	logConfPath              string
+	captureDriverLogs        bool
 	conf                     *config.Config
 	queue                    *protect.Queue
 	manager                  service.Manager
@@ -103,6 +104,7 @@ func init() {
 	flag.Var(&mem, "mem", "Containers memory limit e.g. 128m or 1g")
 	flag.Var(&cpu, "cpu", "Containers cpu limit as float e.g. 0.2 or 1.0")
 	flag.StringVar(&containerNetwork, "container-network", "default", "Network to be used for containers")
+	flag.BoolVar(&captureDriverLogs, "capture-driver-logs", false, "Whether to add driver process logs to Selenoid output")
 	flag.Parse()
 
 	if version {

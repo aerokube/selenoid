@@ -14,13 +14,14 @@ import (
 
 // Environment - all settings that influence browser startup
 type Environment struct {
-	IP             string
-	InDocker       bool
-	CPU            int64
-	Memory         int64
-	Network        string
-	Hostname       string
-	StartupTimeout time.Duration
+	IP                string
+	InDocker          bool
+	CPU               int64
+	Memory            int64
+	Network           string
+	Hostname          string
+	StartupTimeout    time.Duration
+	CaptureDriverLogs bool
 }
 
 // ServiceBase - stores fields required by all services
