@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"errors"
+	"os"
 )
 
 // Driver - driver processes manager
@@ -45,6 +46,10 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 	cmdLine = append(cmdLine, fmt.Sprintf("--port=%s", port))
 	cmd := exec.Command(cmdLine[0], cmdLine[1:]...)
 	cmd.Env = append(cmd.Env, d.Service.Env...)
+	if d.CaptureDriverLogs {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 	l.Close()
 	log.Printf("[%d] [STARTING_PROCESS] [%s]\n", requestId, cmdLine)
 	s := time.Now()
