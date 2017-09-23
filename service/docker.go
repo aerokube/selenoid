@@ -92,8 +92,8 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		},
 		ExtraHosts: extraHosts,
 	}
-	links := strings.Split(d.ApplicationContainers, ",")
-	if len(links) > 0 {
+	if d.ApplicationContainers != "" {
+		links := strings.Split(d.ApplicationContainers, ",")
 		hostConfig.Links = links
 	}
 	container, err := d.Client.ContainerCreate(ctx,
