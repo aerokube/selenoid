@@ -32,6 +32,7 @@ include::cli-flags.adoc[leveloffset=+1]
 include::special-capabilities.adoc[leveloffset=+1]
 include::selenoid-without-docker.adoc[leveloffset=+1]
 include::usage-statistics.adoc[leveloffset=+1]
+include::file-upload.adoc[leveloffset=+1]
 
 include::contributing.adoc[]
 
