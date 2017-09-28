@@ -141,6 +141,7 @@ func init() {
 		Memory:         int64(mem),
 		Network:        containerNetwork,
 		StartupTimeout: serviceStartupTimeout,
+		CaptureDriverLogs: captureDriverLogs,
 	}
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}
