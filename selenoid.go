@@ -337,7 +337,7 @@ func fileUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	defer src.Close()
 	dir := r.Header.Get("X-Selenoid-File")
-	err = os.Mkdir(dir, 0755)
+	err = os.MkdirAll(dir, 0755)
 	if err != nil {
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		return
