@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-09-28</span>
+<span id="revdate">2017-09-29</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -554,6 +554,7 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_custom_screen_resolution">3.1.2. Custom Screen Resolution</a></li>
 <li><a href="#_custom_test_name">3.1.3. Custom Test Name</a></li>
 <li><a href="#_per_session_time_zone">3.1.4. Per-session Time Zone</a></li>
+<li><a href="#_links_to_application_containers">3.1.5. Links to Application Containers</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -1172,7 +1173,9 @@ Use only one of these commands.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>-conf string
+<pre class="CodeRay highlight"><code>-capture-driver-logs
+    Whether to add driver process logs to Selenoid output
+-conf string
     Browsers configuration file (default "config/browsers.json")
 -container-network string
     Network to be used for containers (default "default")
@@ -1319,6 +1322,20 @@ Use only one of these commands.
 <p>You can find most of available time zones <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">here</a>. Without this capability launched browser containers will have the same timezone as Selenoid one.</p>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_links_to_application_containers"><a class="anchor" href="#_links_to_application_containers"></a>3.1.5. Links to Application Containers</h4>
+<div class="paragraph">
+<p>Sometimes you may need to link browser container to application container running on the same host machine. This allows you to use cool URLs like <code><a href="http://my-cool-app/" class="bare">http://my-cool-app/</a></code> in tests. To achieve this simply pass information about one or more desired links via capability:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>applicationContainers: my-app:some-alias,another-app</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Links are specified as a comma-separated list of <code>&lt;name&gt;[:&lt;alias&gt;]</code> pairs.</p>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_using_selenoid_without_docker"><a class="anchor" href="#_using_selenoid_without_docker"></a>3.2. Using Selenoid without Docker</h3>
@@ -1381,6 +1398,9 @@ version = 11</code></pre>
 </li>
 <li>
 <p>To start <a href="https://www.google.com/chrome/">Chrome</a> instead just download <a href="https://sites.google.com/a/chromium.org/chromedriver/">Chromedriver</a> binary and modify <code><code>browsers.json</code></code> accordingly.</p>
+</li>
+<li>
+<p>By default Selenoid does not process launched driver logs. Launch Selenoid with <code>-capture-driver-logs</code> flag to append driver logs for every session to main log.</p>
 </li>
 </ol>
 </div>
@@ -2339,7 +2359,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-09-28 17:19:48 UTC
+Last updated 2017-09-29 09:41:05 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
