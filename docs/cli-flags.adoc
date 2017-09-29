@@ -2,6 +2,8 @@
 
 The following flags are supported by ```selenoid``` command:
 ```
+-capture-driver-logs
+    Whether to add driver process logs to Selenoid output
 -conf string
     Browsers configuration file (default "config/browsers.json")
 -container-network string

@@ -42,3 +42,11 @@ Some tests require particular time zone to be set in operating system. To achiev
 timeZone: Europe/Moscow
 ```
 You can find most of available time zones https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[here]. Without this capability launched browser containers will have the same timezone as Selenoid one.
+
+=== Links to Application Containers
+
+Sometimes you may need to link browser container to application container running on the same host machine. This allows you to use cool URLs like `http://my-cool-app/` in tests. To achieve this simply pass information about one or more desired links via capability:
+```
+applicationContainers: my-app:some-alias,another-app
+```
+Links are specified as a comma-separated list of `<name>[:<alias>]` pairs. 

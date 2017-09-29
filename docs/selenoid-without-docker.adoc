@@ -39,3 +39,4 @@ browserName = internet explorer
 version = 11
 ```
 . To start https://www.google.com/chrome/[Chrome] instead just download https://sites.google.com/a/chromium.org/chromedriver/[Chromedriver] binary and modify ```browsers.json``` accordingly.
+. By default Selenoid does not process launched driver logs. Launch Selenoid with `-capture-driver-logs` flag to append driver logs for every session to main log. 
