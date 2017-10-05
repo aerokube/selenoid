@@ -136,11 +136,11 @@ func init() {
 		inDocker = true
 	}
 	environment := service.Environment{
-		InDocker:       inDocker,
-		CPU:            int64(cpu),
-		Memory:         int64(mem),
-		Network:        containerNetwork,
-		StartupTimeout: serviceStartupTimeout,
+		InDocker:          inDocker,
+		CPU:               int64(cpu),
+		Memory:            int64(mem),
+		Network:           containerNetwork,
+		StartupTimeout:    serviceStartupTimeout,
 		CaptureDriverLogs: captureDriverLogs,
 	}
 	if disableDocker {
@@ -218,7 +218,8 @@ func ping(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode(struct {
 		Uptime         string `json:"uptime"`
 		LastReloadTime string `json:"lastReloadTime"`
-	}{time.Since(startTime).String(), conf.LastReloadTime.String()})
+		NumRequests    uint64 `json:"numRequests"`
+	}{time.Since(startTime).String(), conf.LastReloadTime.String(), getSerial()})
 }
 
 func handler() http.Handler {
