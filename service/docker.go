@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -16,6 +17,8 @@ import (
 	"github.com/docker/go-connections/nat"
 	"strings"
 )
+
+const comma = ","
 
 // Docker - docker container manager
 type Docker struct {
@@ -26,82 +29,48 @@ type Docker struct {
 	Client    *client.Client
 }
 
+type portConfig struct {
+	SeleniumPort nat.Port
+	VNCPort      nat.Port
+	PortBindings nat.PortMap
+	ExposedPorts map[nat.Port]struct{}
+}
+
 // StartWithCancel - Starter interface implementation
 func (d *Docker) StartWithCancel() (*StartedService, error) {
-	selenium, err := nat.NewPort("tcp", d.Service.Port)
+	portConfig, err := getPortConfig(d.Service, d.Caps, d.Environment)
 	if err != nil {
-		return nil, fmt.Errorf("new selenium port: %v", err)
+		return nil, fmt.Errorf("configuring ports: %v", err)
 	}
-	exposedPorts := map[nat.Port]struct{}{selenium: {}}
-	var vnc nat.Port
-	if d.VNC {
-		vnc, err = nat.NewPort("tcp", "5900")
-		if err != nil {
-			return nil, fmt.Errorf("new vnc port: %v", err)
-		}
-		exposedPorts[vnc] = struct{}{}
-	}
-	portBindings := nat.PortMap{}
-	if d.IP != "" || !d.InDocker {
-		portBindings[selenium] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
-		if d.VNC {
-			portBindings[vnc] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
-		}
-	}
+	selenium := portConfig.SeleniumPort
+	vnc := portConfig.VNCPort
 	ctx := context.Background()
 	log.Printf("[%d] [CREATING_CONTAINER] [%s]\n", d.RequestId, d.Service.Image)
-	timeZone := time.Local
-	if d.TimeZone != "" {
-		tz, err := time.LoadLocation(d.TimeZone)
-		if err != nil {
-			log.Printf("[%d] [BAD_TIMEZONE] [%s]\n", d.RequestId, d.TimeZone)
-		} else {
-			timeZone = tz
-		}
-	}
-	env := []string{
-		fmt.Sprintf("TZ=%s", timeZone),
-		fmt.Sprintf("SCREEN_RESOLUTION=%s", d.ScreenResolution),
-		fmt.Sprintf("ENABLE_VNC=%v", d.VNC),
-	}
-	env = append(env, d.Service.Env...)
-	shmSize := int64(268435456)
-	if d.Service.ShmSize > 0 {
-		shmSize = d.Service.ShmSize
-	}
-	extraHosts := []string{}
-	if len(d.Service.Hosts) > 0 {
-		extraHosts = append(extraHosts, d.Service.Hosts...)
-	}
-	containerHostname := "localhost"
-	if d.ContainerHostname != "" {
-		containerHostname = d.ContainerHostname
-	}
 	hostConfig := container.HostConfig{
 		Binds:        d.Service.Volumes,
 		AutoRemove:   true,
-		PortBindings: portBindings,
+		PortBindings: portConfig.PortBindings,
 		LogConfig:    *d.LogConfig,
 		NetworkMode:  container.NetworkMode(d.Network),
 		Tmpfs:        d.Service.Tmpfs,
-		ShmSize:      shmSize,
+		ShmSize:      getShmSize(d.Service),
 		Privileged:   true,
 		Resources: container.Resources{
 			Memory:   d.Memory,
 			NanoCPUs: d.CPU,
 		},
-		ExtraHosts: extraHosts,
+		ExtraHosts: getExtraHosts(d.Service, d.Caps),
 	}
 	if d.ApplicationContainers != "" {
-		links := strings.Split(d.ApplicationContainers, ",")
+		links := strings.Split(d.ApplicationContainers, comma)
 		hostConfig.Links = links
 	}
 	container, err := d.Client.ContainerCreate(ctx,
 		&container.Config{
-			Hostname:     containerHostname,
+			Hostname:     getContainerHostname(d.Caps),
 			Image:        d.Service.Image.(string),
-			Env:          env,
-			ExposedPorts: exposedPorts,
+			Env:          getEnv(d.ServiceBase, d.Caps),
+			ExposedPorts: portConfig.ExposedPorts,
 		},
 		&hostConfig,
 		&network.NetworkingConfig{}, "")
@@ -126,26 +95,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		d.removeContainer(ctx, d.Client, container.ID)
 		return nil, fmt.Errorf("no bindings available for %v", selenium)
 	}
-	seleniumHostPort, vncHostPort := "", ""
-	if d.IP == "" {
-		if d.InDocker {
-			containerIP := getContainerIP(d.Network, stat)
-			seleniumHostPort = net.JoinHostPort(containerIP, d.Service.Port)
-			if d.VNC {
-				vncHostPort = net.JoinHostPort(containerIP, "5900")
-			}
-		} else {
-			seleniumHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[selenium][0].HostPort)
-			if d.VNC {
-				vncHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[vnc][0].HostPort)
-			}
-		}
-	} else {
-		seleniumHostPort = net.JoinHostPort(d.IP, stat.NetworkSettings.Ports[selenium][0].HostPort)
-		if d.VNC {
-			vncHostPort = net.JoinHostPort(d.IP, stat.NetworkSettings.Ports[vnc][0].HostPort)
-		}
-	}
+	seleniumHostPort, vncHostPort := getHostPort(d.Environment, d.Service, d.Caps, stat, selenium, vnc)
 	u := &url.URL{Scheme: "http", Host: seleniumHostPort, Path: d.Service.Path}
 	serviceStartTime := time.Now()
 	err = wait(u.String(), d.StartupTimeout)
@@ -162,6 +112,103 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		Cancel:      func() { d.removeContainer(ctx, d.Client, container.ID) },
 	}
 	return &s, nil
+}
+
+func getPortConfig(service *config.Browser, caps session.Caps, env Environment) (*portConfig, error) {
+	selenium, err := nat.NewPort("tcp", service.Port)
+	if err != nil {
+		return nil, fmt.Errorf("new selenium port: %v", err)
+	}
+	exposedPorts := map[nat.Port]struct{}{selenium: {}}
+	var vnc nat.Port
+	if caps.VNC {
+		vnc, err = nat.NewPort("tcp", "5900")
+		if err != nil {
+			return nil, fmt.Errorf("new vnc port: %v", err)
+		}
+		exposedPorts[vnc] = struct{}{}
+	}
+	portBindings := nat.PortMap{}
+	if env.IP != "" || !env.InDocker {
+		portBindings[selenium] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
+		if caps.VNC {
+			portBindings[vnc] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
+		}
+	}
+	return &portConfig{
+		SeleniumPort: selenium,
+		VNCPort:      vnc,
+		PortBindings: portBindings,
+		ExposedPorts: exposedPorts}, nil
+}
+
+func getTimeZone(service ServiceBase, caps session.Caps) *time.Location {
+	timeZone := time.Local
+	if caps.TimeZone != "" {
+		tz, err := time.LoadLocation(caps.TimeZone)
+		if err != nil {
+			log.Printf("[%d] [BAD_TIMEZONE] [%s]\n", service.RequestId, caps.TimeZone)
+		} else {
+			timeZone = tz
+		}
+	}
+	return timeZone
+}
+
+func getEnv(service ServiceBase, caps session.Caps) []string {
+	env := []string{
+		fmt.Sprintf("TZ=%s", getTimeZone(service, caps)),
+		fmt.Sprintf("SCREEN_RESOLUTION=%s", caps.ScreenResolution),
+		fmt.Sprintf("ENABLE_VNC=%v", caps.VNC),
+	}
+	env = append(env, service.Service.Env...)
+	return env
+}
+
+func getShmSize(service *config.Browser) int64 {
+	if service.ShmSize > 0 {
+		return service.ShmSize
+	}
+	return int64(268435456)
+}
+
+func getContainerHostname(caps session.Caps) string {
+	if caps.ContainerHostname != "" {
+		return caps.ContainerHostname
+	}
+	return "localhost"
+}
+
+func getExtraHosts(service *config.Browser, caps session.Caps) []string {
+	extraHosts := service.Hosts
+	if caps.HostsEntries != "" {
+		extraHosts = append(strings.Split(caps.HostsEntries, comma), extraHosts...)
+	}
+	return extraHosts
+}
+
+func getHostPort(env Environment, service *config.Browser, caps session.Caps, stat types.ContainerJSON, selenium nat.Port, vnc nat.Port) (string, string) {
+	seleniumHostPort, vncHostPort := "", ""
+	if env.IP == "" {
+		if env.InDocker {
+			containerIP := getContainerIP(env.Network, stat)
+			seleniumHostPort = net.JoinHostPort(containerIP, service.Port)
+			if caps.VNC {
+				vncHostPort = net.JoinHostPort(containerIP, "5900")
+			}
+		} else {
+			seleniumHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[selenium][0].HostPort)
+			if caps.VNC {
+				vncHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[vnc][0].HostPort)
+			}
+		}
+	} else {
+		seleniumHostPort = net.JoinHostPort(env.IP, stat.NetworkSettings.Ports[selenium][0].HostPort)
+		if caps.VNC {
+			vncHostPort = net.JoinHostPort(env.IP, stat.NetworkSettings.Ports[vnc][0].HostPort)
+		}
+	}
+	return seleniumHostPort, vncHostPort
 }
 
 func getContainerIP(networkName string, stat types.ContainerJSON) string {
