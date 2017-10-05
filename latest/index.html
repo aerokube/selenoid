@@ -1142,6 +1142,24 @@ Use only one of these commands.
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>To check Selenoid instance health use <code>/ping</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$ curl -s http://example.com:4444/ping</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Result</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript">{<span class="key"><span class="delimiter">&quot;</span><span class="content">uptime</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">2m46.854829503s</span><span class="delimiter">&quot;</span></span>,<span class="key"><span class="delimiter">&quot;</span><span class="content">lastReloadTime</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">2017-05-12 12:33:06.322038542 +0300 MSK</span><span class="delimiter">&quot;</span></span>,<span class="key"><span class="delimiter">&quot;</span><span class="content">numRequests</span><span class="delimiter">&quot;</span></span>:<span class="integer">42</span>}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It returns <code>200 OK</code> when Selenoid operates normally. Additionally server uptime, last quota reload time and overall number of session requests from service startup are returned in JSON format.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.6. Selenoid with Docker Compose</h3>
@@ -2372,7 +2390,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-10-05 08:39:12 UTC
+Last updated 2017-10-05 12:32:51 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
