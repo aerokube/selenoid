@@ -33,7 +33,7 @@ var (
 		},
 	}
 	num     uint64
-	numLock sync.Mutex
+	numLock sync.RWMutex
 )
 
 type request struct {
@@ -101,6 +101,12 @@ func serial() uint64 {
 	id := num
 	num++
 	return id
+}
+
+func getSerial() uint64 {
+	numLock.RLock()
+	defer numLock.RUnlock()
+	return num
 }
 
 func create(w http.ResponseWriter, r *http.Request) {

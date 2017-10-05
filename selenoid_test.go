@@ -448,7 +448,7 @@ func TestFileUpload(t *testing.T) {
 	resp, err = http.Post(With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/file", sess["sessionId"])), "", bytes.NewReader(fileContents))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, resp, Code{http.StatusOK})
-	
+
 	resp, err = http.Post(With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/file", sess["sessionId"])), "", bytes.NewReader(fileContents))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, resp, Code{http.StatusOK})
@@ -527,7 +527,7 @@ func TestPing(t *testing.T) {
 	AssertThat(t, rsp, Code{http.StatusOK})
 	AssertThat(t, rsp.Body, Is{Not{nil}})
 
-	var data map[string]string
+	var data map[string]interface{}
 	bt, readErr := ioutil.ReadAll(rsp.Body)
 	AssertThat(t, readErr, Is{nil})
 	jsonErr := json.Unmarshal(bt, &data)
@@ -536,4 +536,6 @@ func TestPing(t *testing.T) {
 	AssertThat(t, hasUptime, Is{true})
 	_, hasLastReloadTime := data["lastReloadTime"]
 	AssertThat(t, hasLastReloadTime, Is{true})
+	_, hasNumRequests := data["numRequests"]
+	AssertThat(t, hasNumRequests, Is{true})
 }
