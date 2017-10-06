@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-10-05</span>
+<span id="revdate">2017-10-06</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -1041,6 +1041,20 @@ We recommend to use our <a href="https://github.com/aerokube/cm">configuration t
 </div>
 </li>
 </ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Why this is not the part of Selenoid? Well, this is easy to implement, but under heavy load the result can be unpredictable.
+For instance, you&#8217;ve updated file, reloaded Selenoid and it should pull new images. How long you should wait new sessions then?
+What if Docker Registry is inaccessible? So for maintenance reasons it is easier to delegate such simple logic to external script.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -2390,7 +2404,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-10-05 12:32:51 UTC
+Last updated 2017-10-06 14:16:45 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
