@@ -146,3 +146,6 @@ In some usage scenarios you may want to store browsers configuration file under 
 
     # cat /path/to/browsers.json | jq -r '..|.image?|strings' | xargs -I{} docker pull {}
     
+NOTE: Why this is not the part of Selenoid? Well, this is easy to implement, but under heavy load the result can be unpredictable.
+For instance, you've updated file, reloaded Selenoid and it should pull new images. How long you should wait new sessions then?
+What if Docker Registry is inaccessible? So for maintenance reasons it is easier to delegate such simple logic to external script.
