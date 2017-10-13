@@ -517,7 +517,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-10-06</span>
+<span id="revdate">2017-10-13</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -543,7 +543,8 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_setting_timezone">2.4. Setting Timezone</a></li>
 <li><a href="#_reloading_configuration">2.5. Reloading Configuration</a></li>
 <li><a href="#_selenoid_with_docker_compose">2.6. Selenoid with Docker Compose</a></li>
-<li><a href="#_selenoid_cli_flags">2.7. Selenoid CLI Flags</a></li>
+<li><a href="#_selenoid_under_windows">2.7. Selenoid under Windows</a></li>
+<li><a href="#_selenoid_cli_flags">2.8. Selenoid CLI Flags</a></li>
 </ul>
 </li>
 <li><a href="#_advanced_features">3. Advanced Features</a>
@@ -1199,7 +1200,21 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.7. Selenoid CLI Flags</h3>
+<h3 id="_selenoid_under_windows"><a class="anchor" href="#_selenoid_under_windows"></a>2.7. Selenoid under Windows</h3>
+<div class="paragraph">
+<p>While we normally recommend to start Selenoid using <a href="http://aerokube.com/cm/latest">Configuration Manager</a>, it is possible to start it under Windows manually. The main difference from Unix operating systems is how volumes are mounted. In any Windows paths back slashes (<code>\</code>) should be replaced by forward slashes (<code>/</code>) and drive letter should be lower cased. For example for <code>C:\Users\admin</code> we get <code>c:/Users/admin</code>. So assuming that configuration file is located at <code>C:\selenoid</code> a typical startup command can look like:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>&gt; docker run -d --name selenoid -v //var/run/docker.sock:/var/run/docker.sock -p 4444:4444 -v c:/selenoid:/etc/selenoid:ro aerokube/selenoid:latest-release</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The most strange part here is <code>-v //var/run/docker.sock:/var/run/docker.sock</code> but this is how (with two forward slashes) Docker socket should be mounted in Docker for Windows.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.8. Selenoid CLI Flags</h3>
 <div class="paragraph">
 <p>The following flags are supported by <code><code>selenoid</code></code> command:</p>
 </div>
@@ -2404,7 +2419,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-10-06 15:59:45 UTC
+Last updated 2017-10-13 17:02:42 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
