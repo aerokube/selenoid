@@ -50,3 +50,11 @@ Sometimes you may need to link browser container to application container runnin
 applicationContainers: my-app:some-alias,another-app
 ```
 Links are specified as a comma-separated list of `<name>[:<alias>]` pairs. 
+
+=== Hosts Entries
+
+Although you can configure a separate list of `/etc/hosts` entries for every browser image in <<Browsers Configuration File>> sometimes you may need to add more entries for particular test cases. This can be easily achieved by passing a capability:
+```
+hostsEntries: "example.com:192.168.0.1,test.com:192.168.0.2"
+```
+This capability represents a comma-separated list of `<hostname>:<ip-address>` entries to be added to `/etc/hosts`. Entries from capabilities are inserted to `/etc/hosts` before entries from browsers configuration file. Thus entries from capabilities override entries from configuration file if some hosts are equal.
