@@ -90,6 +90,7 @@ WARNING: Firefox images below require Selenium client 3.4.0 or newer.
 | selenoid/chrome:59.0 | selenoid/vnc:chrome_59.0 | 2.30 | 59.0.3071.86 
 | selenoid/chrome:60.0 | selenoid/vnc:chrome_60.0 | 2.31 | 60.0.3112.90
 | selenoid/chrome:61.0 | selenoid/vnc:chrome_61.0 | 2.32 | 61.0.3163.79
+| selenoid/chrome:62.0 | selenoid/vnc:chrome_62.0 | 2.33 | 62.0.3202.62
 |===
 
 NOTE: Images for older Chrome versions were not built because we have no Debian packages. If you have such packages - we could create more images.
