@@ -50,7 +50,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		Binds:        d.Service.Volumes,
 		AutoRemove:   true,
 		PortBindings: portConfig.PortBindings,
-		LogConfig:    *d.LogConfig,
+		LogConfig:    getLogConfig(*d.LogConfig, d.Caps),
 		NetworkMode:  container.NetworkMode(d.Network),
 		Tmpfs:        d.Service.Tmpfs,
 		ShmSize:      getShmSize(d.Service),
@@ -140,6 +140,15 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 		VNCPort:      vnc,
 		PortBindings: portBindings,
 		ExposedPorts: exposedPorts}, nil
+}
+
+func getLogConfig(logConfig container.LogConfig, caps session.Caps) container.LogConfig {
+	const tag = "tag"
+	_, ok := logConfig.Config[tag]
+	if caps.Name != "" && !ok {
+		logConfig.Config[tag] = caps.Name
+	}
+	return logConfig
 }
 
 func getTimeZone(service ServiceBase, caps session.Caps) *time.Location {
