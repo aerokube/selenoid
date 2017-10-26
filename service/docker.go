@@ -143,10 +143,12 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 }
 
 func getLogConfig(logConfig container.LogConfig, caps session.Caps) container.LogConfig {
-	const tag = "tag"
-	_, ok := logConfig.Config[tag]
-	if caps.Name != "" && !ok {
-		logConfig.Config[tag] = caps.Name
+	if logConfig.Config != nil {
+		const tag = "tag"
+		_, ok := logConfig.Config[tag]
+		if caps.Name != "" && !ok {
+			logConfig.Config[tag] = caps.Name
+		}
 	}
 	return logConfig
 }
