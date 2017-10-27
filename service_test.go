@@ -177,6 +177,7 @@ func testEnvironment() *service.Environment {
 		Network:           containerNetwork,
 		StartupTimeout:    serviceStartupTimeout,
 		CaptureDriverLogs: captureDriverLogs,
+		Privileged:        false,
 	}
 }
 

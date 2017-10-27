@@ -13,12 +13,16 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"strings"
 )
 
-const comma = ","
+const (
+	comma    = ","
+	sysAdmin = "SYS_ADMIN"
+)
 
 // Docker - docker container manager
 type Docker struct {
@@ -54,12 +58,15 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		NetworkMode:  container.NetworkMode(d.Network),
 		Tmpfs:        d.Service.Tmpfs,
 		ShmSize:      getShmSize(d.Service),
-		Privileged:   true,
+		Privileged:   d.Privileged,
 		Resources: container.Resources{
 			Memory:   d.Memory,
 			NanoCPUs: d.CPU,
 		},
 		ExtraHosts: getExtraHosts(d.Service, d.Caps),
+	}
+	if !d.Privileged {
+		hostConfig.CapAdd = strslice.StrSlice{sysAdmin}
 	}
 	if d.ApplicationContainers != "" {
 		links := strings.Split(d.ApplicationContainers, comma)

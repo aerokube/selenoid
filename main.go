@@ -73,6 +73,7 @@ var (
 	confPath                 string
 	logConfPath              string
 	captureDriverLogs        bool
+	disablePrivileged        bool
 	conf                     *config.Config
 	queue                    *protect.Queue
 	manager                  service.Manager
@@ -105,6 +106,7 @@ func init() {
 	flag.Var(&cpu, "cpu", "Containers cpu limit as float e.g. 0.2 or 1.0")
 	flag.StringVar(&containerNetwork, "container-network", "default", "Network to be used for containers")
 	flag.BoolVar(&captureDriverLogs, "capture-driver-logs", false, "Whether to add driver process logs to Selenoid output")
+	flag.BoolVar(&disablePrivileged, "disable-privileged", false, "Whether to disable privileged container mode")
 	flag.Parse()
 
 	if version {
@@ -142,6 +144,7 @@ func init() {
 		Network:           containerNetwork,
 		StartupTimeout:    serviceStartupTimeout,
 		CaptureDriverLogs: captureDriverLogs,
+		Privileged:        !disablePrivileged,
 	}
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}
