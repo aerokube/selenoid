@@ -524,7 +524,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-10-24</span>
+<span id="revdate">2017-10-27</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -547,11 +547,17 @@ table.CodeRay td.code>pre{padding:0}
 </ul>
 </li>
 <li><a href="#_logging_configuration_file">2.3. Logging Configuration File</a></li>
-<li><a href="#_setting_timezone">2.4. Setting Timezone</a></li>
-<li><a href="#_reloading_configuration">2.5. Reloading Configuration</a></li>
-<li><a href="#_selenoid_with_docker_compose">2.6. Selenoid with Docker Compose</a></li>
-<li><a href="#_selenoid_under_windows">2.7. Selenoid under Windows</a></li>
-<li><a href="#_selenoid_cli_flags">2.8. Selenoid CLI Flags</a></li>
+<li><a href="#_updating_browsers">2.4. Updating Browsers</a>
+<ul class="sectlevel3">
+<li><a href="#_the_short_way">2.4.1. The Short Way</a></li>
+<li><a href="#_a_bit_longer_way">2.4.2. A Bit Longer Way</a></li>
+</ul>
+</li>
+<li><a href="#_setting_timezone">2.5. Setting Timezone</a></li>
+<li><a href="#_reloading_configuration">2.6. Reloading Configuration</a></li>
+<li><a href="#_selenoid_with_docker_compose">2.7. Selenoid with Docker Compose</a></li>
+<li><a href="#_selenoid_under_windows">2.8. Selenoid under Windows</a></li>
+<li><a href="#_selenoid_cli_flags">2.9. Selenoid CLI Flags</a></li>
 </ul>
 </li>
 <li><a href="#_advanced_features">3. Advanced Features</a>
@@ -810,7 +816,7 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
 <div class="sect2">
 <h3 id="_browsers_configuration_file"><a class="anchor" href="#_browsers_configuration_file"></a>2.2. Browsers Configuration File</h3>
 <div class="paragraph">
-<p>Selenoid uses simple JSON configuration files of the following format:</p>
+<p>Selenoid requires a simple JSON configuration file of the following format:</p>
 </div>
 <div class="listingblock">
 <div class="title">browsers.json</div>
@@ -894,6 +900,25 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
 </div>
 <div class="paragraph">
 <p>This file represents a mapping between a list of supported browser versions and Docker container images or driver binaries.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>To use custom browsers configuration file - use <code>-conf</code> flag:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./selenoid -conf /path/to/browsers.json</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="sect3">
 <h4 id="_browser_name_and_version"><a class="anchor" href="#_browser_name_and_version"></a>2.2.1. Browser Name and Version</h4>
@@ -1059,8 +1084,8 @@ We recommend to use our <a href="https://github.com/aerokube/cm">configuration t
 </td>
 <td class="content">
 Why this is not the part of Selenoid? Well, this is easy to implement, but under heavy load the result can be unpredictable.
-For instance, you&#8217;ve updated file, reloaded Selenoid and it should pull new images. How long you should wait new sessions then?
-What if Docker Registry is inaccessible? So for maintenance reasons it is easier to delegate such simple logic to external script.
+For example after updating the file and reloading Selenoid it should pull new images. How long will you wait for new sessions then?
+What to do if Docker Registry is inaccessible? So for maintenance reasons it is easier to delegate such simple logic to external script.
 </td>
 </tr>
 </table>
@@ -1074,7 +1099,7 @@ What if Docker Registry is inaccessible? So for maintenance reasons it is easier
 But in big Selenium cluster you may want to send logs to some centralized storage like <a href="https://www.elastic.co/products/logstash">Logstash</a>
 or <a href="https://www.graylog.org/">Graylog</a>.
 Docker provides such functionality by so-called <a href="https://docs.docker.com/engine/admin/logging/overview/">logging drivers</a>.
-Selenoid logging configuration file allows to specify which logging driver to use globally for all started Docker
+An optional Selenoid logging configuration file allows to specify which logging driver to use globally for all started Docker
 containers with browsers. Configuration file has the following format:</p>
 </div>
 <div class="listingblock">
@@ -1124,9 +1149,120 @@ containers with browsers. Configuration file has the following format:</p>
 }</code></pre>
 </div>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>To specify custom logging configuration file - use <code>-log-conf</code> flag:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./selenoid -log-conf /path/to/logging.json ...</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
-<h3 id="_setting_timezone"><a class="anchor" href="#_setting_timezone"></a>2.4. Setting Timezone</h3>
+<h3 id="_updating_browsers"><a class="anchor" href="#_updating_browsers"></a>2.4. Updating Browsers</h3>
+<div class="paragraph">
+<p>One of the most frequent Selenoid maintenance tasks is updating browser versions. To modify the list of available browsers you need to:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Update browsers configuration file (aka <code>browsers.json</code>) by adding or deleting desired browser versions</p>
+</li>
+<li>
+<p>When adding new browsers in containers - pull respective container images, e.g.:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ docker pull selenoid/chrome:62.0</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Restart Selenoid or hot reload its configuration.</p>
+</li>
+</ol>
+</div>
+<div class="sect3">
+<h4 id="_the_short_way"><a class="anchor" href="#_the_short_way"></a>2.4.1. The Short Way</h4>
+<div class="paragraph">
+<p>This approach is mainly convenient for <strong>personal usage</strong> because Selenoid is restarted i.e. any running browser sessions are interrupted. Just type one <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./cm selenoid update</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This command will download latest Selenoid release, browser images, generate new <code>browsers.json</code> and restart Selenoid. You may want to add <code>--vnc</code> flag to download images with VNC support:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./cm selenoid update --vnc</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Another useful flag is total number of last browser versions to download (default is <code>2</code>):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./cm selenoid update --last-versions 5</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you wish to pull new images and regenerate configuration without restarting Selenoid then type:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./cm selenoid configure --vnc --last-versions 5</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_a_bit_longer_way"><a class="anchor" href="#_a_bit_longer_way"></a>2.4.2. A Bit Longer Way</h4>
+<div class="paragraph">
+<p>We recommend to use this approach on <strong>production clusters</strong> because Selenoid configuration is reloaded without restart.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Edit <code>browsers.json</code> file and pull new browsers containers manually or using <a href="#_syncing_browser_images_from_existing_file">Syncing Browser Images from Existing File</a>. Alternatively configure Selenoid without restarting it like shown in previous section.</p>
+</li>
+<li>
+<p>Reload Selenoid configuration (see <a href="#_reloading_configuration">Reloading Configuration</a> for more details):</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ docker kill -s HUP selenoid</pre>
+</div>
+</div>
+</li>
+<li>
+<p>To verify that configuration was reloaded you can check Selenoid health:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ curl -s http://example.com:4444/ping
+{"uptime":"&lt;some-value&gt;","lastReloadTime":"2017-05-12 12:33:06.322038542 +0300 MSK","numRequests":&lt;some-number&gt;}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here <code>lastReloadTime</code> field shows when browsers configuration was reloaded for the last time.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_setting_timezone"><a class="anchor" href="#_setting_timezone"></a>2.5. Setting Timezone</h3>
 <div class="paragraph">
 <p>When used in Docker container Selenoid will have timezone set to <strong>UTC</strong>.
 To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
@@ -1143,7 +1279,7 @@ To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_reloading_configuration"><a class="anchor" href="#_reloading_configuration"></a>2.5. Reloading Configuration</h3>
+<h3 id="_reloading_configuration"><a class="anchor" href="#_reloading_configuration"></a>2.6. Reloading Configuration</h3>
 <div class="paragraph">
 <p>To reload configuration without restart send SIGHUP:</p>
 </div>
@@ -1185,7 +1321,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.6. Selenoid with Docker Compose</h3>
+<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.7. Selenoid with Docker Compose</h3>
 <div class="paragraph">
 <p>To avoid network problems between browser drivers inside containers and Selenoid when using <a href="https://docs.docker.com/compose/">Docker Compose</a> for combining with another services (such as UI or ggr) you need to enable <strong>bridge</strong> network mode for all services:</p>
 </div>
@@ -1208,7 +1344,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_under_windows"><a class="anchor" href="#_selenoid_under_windows"></a>2.7. Selenoid under Windows</h3>
+<h3 id="_selenoid_under_windows"><a class="anchor" href="#_selenoid_under_windows"></a>2.8. Selenoid under Windows</h3>
 <div class="paragraph">
 <p>While we normally recommend to start Selenoid using <a href="http://aerokube.com/cm/latest">Configuration Manager</a>, it is possible to start it under Windows manually. The main difference from Unix operating systems is how volumes are mounted. In any Windows paths back slashes (<code>\</code>) should be replaced by forward slashes (<code>/</code>) and drive letter should be lower cased. For example for <code>C:\Users\admin</code> we get <code>c:/Users/admin</code>. So assuming that configuration file is located at <code>C:\selenoid</code> a typical startup command can look like:</p>
 </div>
@@ -1222,7 +1358,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.8. Selenoid CLI Flags</h3>
+<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.9. Selenoid CLI Flags</h3>
 <div class="paragraph">
 <p>The following flags are supported by <code><code>selenoid</code></code> command:</p>
 </div>
@@ -2447,7 +2583,7 @@ Images for older Opera versions were not built because we have no Debian package
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-10-24 06:29:41 UTC
+Last updated 2017-10-27 08:33:28 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
