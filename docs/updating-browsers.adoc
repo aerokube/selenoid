@@ -1,0 +1,46 @@
+== Updating Browsers
+
+One of the most frequent Selenoid maintenance tasks is updating browser versions. To modify the list of available browsers you need to:
+
+. Update browsers configuration file (aka `browsers.json`) by adding or deleting desired browser versions
+. When adding new browsers in containers - pull respective container images, e.g.:
+
+    $ docker pull selenoid/chrome:62.0
+
+. Restart Selenoid or hot reload its configuration. 
+
+
+=== The Short Way
+
+This approach is mainly convenient for **personal usage** because Selenoid is restarted i.e. any running browser sessions are interrupted. Just type one http://aerokube.com/cm/latest/[Configuration Manager] command:
+
+    $ ./cm selenoid update 
+
+This command will download latest Selenoid release, browser images, generate new `browsers.json` and restart Selenoid. You may want to add `--vnc` flag to download images with VNC support:
+
+    $ ./cm selenoid update --vnc
+
+Another useful flag is total number of last browser versions to download (default is `2`):
+
+    $ ./cm selenoid update --last-versions 5
+
+If you wish to pull new images and regenerate configuration without restarting Selenoid then type:
+
+    $ ./cm selenoid configure --vnc --last-versions 5
+
+=== A Bit Longer Way
+
+We recommend to use this approach on **production clusters** because Selenoid configuration is reloaded without restart.
+
+. Edit `browsers.json` file and pull new browsers containers manually or using <<Syncing Browser Images from Existing File>>. Alternatively configure Selenoid without restarting it like shown in previous section.  
+. Reload Selenoid configuration (see <<Reloading Configuration>> for more details):
+
+    $ docker kill -s HUP selenoid
+
+. To verify that configuration was reloaded you can check Selenoid health:
+
+    $ curl -s http://example.com:4444/ping
+    {"uptime":"<some-value>","lastReloadTime":"2017-05-12 12:33:06.322038542 +0300 MSK","numRequests":<some-number>}
+
++
+Here `lastReloadTime` field shows when browsers configuration was reloaded for the last time.
