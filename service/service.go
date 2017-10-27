@@ -22,6 +22,7 @@ type Environment struct {
 	Hostname          string
 	StartupTimeout    time.Duration
 	CaptureDriverLogs bool
+	Privileged        bool
 }
 
 // ServiceBase - stores fields required by all services

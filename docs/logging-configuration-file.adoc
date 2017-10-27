@@ -4,7 +4,7 @@ By default Docker container logs are saved to host machine hard drive. When usin
 But in big Selenium cluster you may want to send logs to some centralized storage like https://www.elastic.co/products/logstash[Logstash]
 or https://www.graylog.org/[Graylog].
 Docker provides such functionality by so-called https://docs.docker.com/engine/admin/logging/overview/[logging drivers].
-Selenoid logging configuration file allows to specify which logging driver to use globally for all started Docker
+An optional Selenoid logging configuration file allows to specify which logging driver to use globally for all started Docker
 containers with browsers. Configuration file has the following format:
 
 .config/container-logs.json
@@ -40,3 +40,10 @@ For example these Docker logging parameters:
     }
 }
 ----
+
+[NOTE]
+====
+To specify custom logging configuration file - use `-log-conf` flag:
+
+    $ ./selenoid -log-conf /path/to/logging.json ... 
+====

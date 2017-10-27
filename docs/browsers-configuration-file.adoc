@@ -1,6 +1,6 @@
 == Browsers Configuration File
 
-Selenoid uses simple JSON configuration files of the following format:
+Selenoid requires a simple JSON configuration file of the following format:
 
 .browsers.json
 [source,javascript]
@@ -43,6 +43,13 @@ Selenoid uses simple JSON configuration files of the following format:
 <12> _Optional._ Shared memory size in bytes to be set for container. Some browsers (e.g. Chrome) may work unstable when having insufficient `shmSize`. Default value is 256 megabytes. 
 
 This file represents a mapping between a list of supported browser versions and Docker container images or driver binaries.
+
+[NOTE]
+====
+To use custom browsers configuration file - use `-conf` flag:
+
+    $ ./selenoid -conf /path/to/browsers.json
+====
 
 === Browser Name and Version
 Browser name and version are just strings that are matched against Selenium desired capabilities:
@@ -147,5 +154,5 @@ In some usage scenarios you may want to store browsers configuration file under 
     # cat /path/to/browsers.json | jq -r '..|.image?|strings' | xargs -I{} docker pull {}
     
 NOTE: Why this is not the part of Selenoid? Well, this is easy to implement, but under heavy load the result can be unpredictable.
-For instance, you've updated file, reloaded Selenoid and it should pull new images. How long you should wait new sessions then?
-What if Docker Registry is inaccessible? So for maintenance reasons it is easier to delegate such simple logic to external script.
+For example after updating the file and reloading Selenoid it should pull new images. How long will you wait for new sessions then?
+What to do if Docker Registry is inaccessible? So for maintenance reasons it is easier to delegate such simple logic to external script.
