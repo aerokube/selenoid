@@ -3,16 +3,22 @@
 
 .Firefox Images with Selenium Server
 |===
-| Image | VNC Image | Selenium version | Firefox version
+| Image | VNC Image | Selenium Version | Firefox Version | Client Version
 
-| selenoid/firefox:3.6 | selenoid/vnc:firefox_3.6 | 2.20.0 | 3.6.16 i386 (dialogs may not work)
+| selenoid/firefox:3.6 | selenoid/vnc:firefox_3.6 | 2.20.0 | 3.6.16 i386 (dialogs may not work) .7+<.^|
+**Java:** 2.53.1 and below
+**Python:** not supported
+**selenium-webdriver.js:** not supported
 | selenoid/firefox:4.0 | selenoid/vnc:firefox_4.0 | 2.20.0 | 4.0.1 i386
 | selenoid/firefox:5.0 | selenoid/vnc:firefox_5.0 | 2.20.0 | 5.0.1 i386
 | selenoid/firefox:6.0 | selenoid/vnc:firefox_6.0 | 2.20.0 | 6.0.2 i386
 | selenoid/firefox:7.0 | selenoid/vnc:firefox_7.0 | 2.20.0 | 7.0.1 i386
 | selenoid/firefox:8.0 | selenoid/vnc:firefox_8.0 | 2.20.0 | 8.0.1 i386
 | selenoid/firefox:9.0 | selenoid/vnc:firefox_9.0 | 2.20.0 | 9.0.1
-| selenoid/firefox:10.0 | selenoid/vnc:firefox_10.0 | 2.32.0 | 10.0.2
+| selenoid/firefox:10.0 | selenoid/vnc:firefox_10.0 | 2.32.0 | 10.0.2 .13+<.^|
+**Java:** any modern version
+**Python:** not supported
+**selenium-webdriver.js:** not supported
 | selenoid/firefox:11.0 | selenoid/vnc:firefox_11.0 | 2.32.0 | 11.0
 | selenoid/firefox:12.0 | selenoid/vnc:firefox_12.0 | 2.32.0 | 12.0
 | selenoid/firefox:13.0 | selenoid/vnc:firefox_13.0 | 2.32.0 | 13.0
@@ -25,7 +31,7 @@
 | selenoid/firefox:20.0 | selenoid/vnc:firefox_20.0 | 2.32.0 | 20.0
 | selenoid/firefox:21.0 | selenoid/vnc:firefox_21.0 | 2.32.0 | 21.0
 | selenoid/firefox:22.0 | selenoid/vnc:firefox_22.0 | 2.32.0 | 22.0
-| selenoid/firefox:23.0 | selenoid/vnc:firefox_23.0 | 2.35.0 | 23.0.1
+| selenoid/firefox:23.0 | selenoid/vnc:firefox_23.0 | 2.35.0 | 23.0.1 .30+<.^| Any modern client version
 | selenoid/firefox:24.0 | selenoid/vnc:firefox_24.0 | 2.39.0 | 24.0
 | selenoid/firefox:25.0 | selenoid/vnc:firefox_25.0 | 2.39.0 | 25.0.1
 | selenoid/firefox:26.0 | selenoid/vnc:firefox_26.0 | 2.39.0 | 26.0
@@ -61,9 +67,11 @@ WARNING: Firefox images below require Selenium client 3.4.0 or newer.
 
 .Firefox Images with Selenoid
 |===
-| Image | VNC Image | Selenoid version | Geckodriver version | Firefox version
+| Image | VNC Image | Selenoid Version | Geckodriver Version | Firefox Version | Client Version
 
-| selenoid/firefox:53.0 | selenoid/vnc:firefox_53.0 | 1.3.6 | 0.16.0 | 53.0 (switching windows may not work) 
+| selenoid/firefox:53.0 | selenoid/vnc:firefox_53.0 | 1.3.6 | 0.16.0 | 53.0 (switching windows may not work) .4+<.^|
+**Java, selenium-webdriver.js**: 3.4.0 and above
+**Python**: 3.5.0 and above
 | selenoid/firefox:54.0 | selenoid/vnc:firefox_54.0 | 1.3.6 | 0.17.0 | 54.0 (switching windows may not work) 
 | selenoid/firefox:55.0 | selenoid/vnc:firefox_55.0 | 1.3.6 | 0.18.0 | 55.0.1 (switching windows may not work) 
 | selenoid/firefox:56.0 | selenoid/vnc:firefox_56.0 | 1.3.7 | 0.19.0 | 56.0 
@@ -93,7 +101,11 @@ WARNING: Firefox images below require Selenium client 3.4.0 or newer.
 | selenoid/chrome:62.0 | selenoid/vnc:chrome_62.0 | 2.33 | 62.0.3202.62
 |===
 
-NOTE: Images for older Chrome versions were not built because we have no Debian packages. If you have such packages - we could create more images.
+[NOTE]
+====
+. These images work with any modern Selenium client version.
+. Images for older Chrome versions were not built because we have no Debian packages. If you have such packages - we could create more images.
+====
 
 === Opera
 
@@ -135,5 +147,9 @@ We do not consider these images really stable. Many of base operations like work
 | selenoid/opera:48.0 | selenoid/vnc:opera_48.0 | 2.30 | 48.0.2685.35
 |===
 
-NOTE: Images for older Opera versions were not built because we have no Debian packages. If you have such packages - we could create more images.
+[NOTE]
+====
+. These images work with any modern Selenium client version.
+. Images for older Opera versions were not built because we have no Debian packages. If you have such packages - we could create more images.
+====
 
