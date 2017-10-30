@@ -524,7 +524,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-10-28</span>
+<span id="revdate">2017-10-30</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -777,6 +777,33 @@ Complete list of browser images can be found in <a href="#_browser_image_informa
 </li>
 <li>
 <p>Total number of simultaneously running containers (adjusted via <code><code>-limit</code></code> flag) depends on your host machine hardware. Our experience shows that depending on your tests the recommended limit is something like: <code><code>1.5-2.0 x numCores</code></code>, where <code><code>numCores</code></code> is total number of cores on your host machine.</p>
+</li>
+<li>
+<p>In some Docker installations you can see random Selenium commands failing because of the timeout. This is mainly caused by low bridged networking (aka <code>docker0</code>) performance. To avoid this we recommend to set <code>docker0</code> network Mac-address to the same value as <code>eth0</code> has:</p>
+<div class="literalblock">
+<div class="content">
+<pre># ifconfig | grep eth0
+eth0      Link encap:Ethernet  HWaddr 00:25:90:eb:fb:3e</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we are setting this Mac-adress for <code>docker0</code> virtual interface:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># ip link set docker0 address 00:25:90:eb:fb:3e</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To make these settings permanent we need to adding the following line to <code>docker0</code> section in <code>/etc/network/interfaces</code>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>iface docker0 inet static
+        # ... the rest of lines
+        post-up ip link set docker0 address 00:25:90:eb:fb:3e</pre>
+</div>
+</div>
 </li>
 <li>
 <p>You may also want to limit memory and CPU consumption for each started container. To do this use <code><code>-mem</code></code> and <code><code>-cpu</code></code> flags. For example to limit memory type:</p>
@@ -2461,7 +2488,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="javascript">{<span class="key"><span class="delimiter">&quot;</span><span class="content">browserName</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">operablink</span><span class="delimiter">&quot;</span></span>, <span class="key"><span class="delimiter">&quot;</span><span class="content">operaOptions</span><span class="delimiter">&quot;</span></span>: {<span class="key"><span class="delimiter">&quot;</span><span class="content">binary</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/usr/bin/opera</span><span class="delimiter">&quot;</span></span>}}</code></pre>
+<pre class="CodeRay highlight"><code data-lang="javascript">{<span class="key"><span class="delimiter">&quot;</span><span class="content">browserName</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">opera</span><span class="delimiter">&quot;</span></span>, <span class="key"><span class="delimiter">&quot;</span><span class="content">operaOptions</span><span class="delimiter">&quot;</span></span>: {<span class="key"><span class="delimiter">&quot;</span><span class="content">binary</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/usr/bin/opera</span><span class="delimiter">&quot;</span></span>}}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2614,7 +2641,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-10-28 17:41:53 UTC
+Last updated 2017-10-30 14:59:54 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
