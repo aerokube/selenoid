@@ -6,6 +6,22 @@
 # docker info | grep Storage
 ```
 * Total number of simultaneously running containers (adjusted via ```-limit``` flag) depends on your host machine hardware. Our experience shows that depending on your tests the recommended limit is something like: ```1.5-2.0 x numCores```, where ```numCores``` is total number of cores on your host machine.
+* In some Docker installations you can see random Selenium commands failing because of the timeout. This is mainly caused by low bridged networking (aka `docker0`) performance. To avoid this we recommend to set `docker0` network Mac-address to the same value as `eth0` has:
+
+    # ifconfig | grep eth0
+    eth0      Link encap:Ethernet  HWaddr 00:25:90:eb:fb:3e
++
+Now we are setting this Mac-adress for `docker0` virtual interface:  
+    
+    # ip link set docker0 address 00:25:90:eb:fb:3e
+
++
+To make these settings permanent we need to adding the following line to `docker0` section in `/etc/network/interfaces`:
+
+    iface docker0 inet static
+            # ... the rest of lines
+            post-up ip link set docker0 address 00:25:90:eb:fb:3e
+    
 * You may also want to limit memory and CPU consumption for each started container. To do this use ```-mem``` and ```-cpu``` flags. For example to limit memory type:
 
     # ./selenoid -mem 128m
