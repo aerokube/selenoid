@@ -120,7 +120,7 @@ WARNING: Firefox images below require Selenium client 3.4.0 or newer.
 ====
 Due to bug in *Operadriver* to work with *Opera Blink* images you need to pass additional capability:
 [source,javascript]
-{"browserName": "operablink", "operaOptions": {"binary": "/usr/bin/opera"}}
+{"browserName": "opera", "operaOptions": {"binary": "/usr/bin/opera"}}
 
 We do not consider these images really stable. Many of base operations like working with proxies may not work.
 ====
