@@ -28,6 +28,7 @@ include::timezone.adoc[leveloffset=+1]
 include::reloading-configuration.adoc[leveloffset=+1]
 include::docker-compose.adoc[leveloffset=+1]
 include::windows.adoc[leveloffset=+1]
+include::log-files.adoc[leveloffset=+1]
 include::cli-flags.adoc[leveloffset=+1]
 
 == Advanced Features

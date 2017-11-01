@@ -1,0 +1,75 @@
+== Log Files
+A typical log file looks like the following:
+```
+2017/11/01 19:12:38 [NEW_REQUEST]
+2017/11/01 19:12:38 [NEW_REQUEST_ACCEPTED]
+2017/11/01 19:12:38 [41301] [LOCATING_SERVICE] [firefox-45.0]
+2017/11/01 19:12:38 [41301] [USING_DOCKER] [firefox-45.0]
+2017/11/01 19:12:38 [41301] [CREATING_CONTAINER] [selenoid/firefox:45.0]
+2017/11/01 19:12:38 [41301] [STARTING_CONTAINER] [selenoid/firefox:45.0] [19760edf330a87531eb2109cfbf1bd4b14c739afa08fe133eb1b9813b2ac6c31]
+2017/11/01 19:12:39 [41301] [CONTAINER_STARTED] [selenoid/firefox:45.0] [19760edf330a87531eb2109cfbf1bd4b14c739afa08fe133eb1b9813b2ac6c31] [896.680954ms]
+2017/11/01 19:12:40 [41301] [SERVICE_STARTED] [selenoid/firefox:45.0] [19760edf330a87531eb2109cfbf1bd4b14c739afa08fe133eb1b9813b2ac6c31] [605.184606ms]
+2017/11/01 19:12:40 [41301] [PROXY_TO] [selenoid/firefox:45.0] [19760edf330a87531eb2109cfbf1bd4b14c739afa08fe133eb1b9813b2ac6c31] [http://172.17.0.3:4444/wd/hub]
+2017/11/01 19:12:40 [41301] [SESSION_ATTEMPTED] [test-quota] [http://172.17.0.3:4444/wd/hub] [1]
+2017/11/01 19:12:42 [41301] [SESSION_CREATED] [test-quota] [345bb886-7026-46d7-82d4-4788c0460110] [http://172.17.0.3:4444/wd/hub] [1] [4.155712239s]
+....
+2017/11/01 19:14:30 [SESSION_DELETED] [345bb886-7026-46d7-82d4-4788c0460110]
+```
+Every line contains:
+
+.Log entry contents
+|===
+| Field | Example | Notes 
+ 
+| Time | 2017/11/01 19:12:42 | - 
+| Request counter | [41301] | So far as session ID is unknown when doing attempts this counter is used to find all session attempts for each new session request. 
+| Status | [SESSION_ATTEMPTED] | See table below for complete list of statuses. 
+| Quota name | [my_quota] | Extracted from basic HTTP auth headers. 
+| Browser | [firefox-45.0] | Name and version. Only present for new session requests.
+| Attempt number | [1] | For SESSION_ATTEMPTED entries means current attempt number. For SESSION_CREATED entries means total number of attempts to create this session. 
+| Session ID | [345bb886-7026-46d7-82d4-4788c0460110] | This value is unique for every browser session 
+| Session start time | [4.155712239s] | - 
+|===
+
+The following statuses are available:
+
+.Log entry statuses
+|===
+| Status | Description 
+ 
+| ALLOCATED_PORT | Successfully allocated port for driver process 
+| ALLOCATING_PORT | Trying to allocate random free port for driver process 
+| BAD_JSON_FORMAT | User request does not contain valid Selenium data 
+| BAD_SCREEN_RESOLUTION | User requested to set wrong custom screen resolution
+| BAD_TIMEZONE | User requested to set wrong custom time zone inside container
+| CLIENT_DISCONNECTED | User disconnected and session was interrupted 
+| CONTAINER_LOGS | User requested container logs
+| CONTAINER_LOGS_ERROR | User requested container logs
+| CONTAINER_LOGS_DISCONNECTED | User logs client disconnected
+| CONTAINER_REMOVED | Docker container was successfully removed 
+| CONTAINER_STARTED | Docker container has successfully started 
+| CREATING_CONTAINER | Docker container with browser is creating 
+| ENVIRONMENT_NOT_AVAILABLE | Browser with desired name and version does not exist
+| FAILED_TO_REMOVE_CONTAINER | Failed to remove Docker container 
+| FAILED_TO_TERMINATE_PROCESS | An error occurred while terminating driver process 
+| PROCESS_STARTED | Driver process successfully started 
+| PROXY_TO | Starting to proxy requests to running container or driver process 
+| REMOVE_CONTAINER | Docker container with browser is being removed
+| SERVICE_STARTED | Successfully started Docker container or driver binary
+| SERVICE_STARTUP_FAILED | Failed to start Docker container or driver binary
+| SESSION_ATTEMPTED | Started Docker container or driver binary and trying to create a new session with it 
+| SESSION_ATTEMPT_TIMED_OUT | An attempt to create a new session timed out
+| SESSION_CREATED | A new session was created and returned to user
+| SESSION_DELETED | Existing session was deleted by user request
+| SESSION_FAILED | An attempt to create a new session failed - user receives an error
+| SESSION_NOT_FOUND | Requested VNC or logs for unknown session.
+| STARTING_CONTAINER | Docker container with browser was created and is starting
+| STARTING_PROCESS | Starting driver process 
+| TERMINATING_PROCESS | Stopping driver process 
+| TERMINATED_PROCESS | Driver process was successfully stopped 
+| VNC_ENABLED | User requested VNC traffic 
+| VNC_ERROR | An error occurred when trying to send VNC traffic 
+| VNC_SESSION_CLOSED | Sending VNC traffic was stopped 
+| VNC_CLIENT_DISCONNECTED | User VNC client disconnected
+| VNC_NOT_ENABLED | User requested VNC traffic but did not specify `enableVNC` capability
+|===
