@@ -524,7 +524,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-10-30</span>
+<span id="revdate">2017-11-01</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -557,7 +557,8 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_reloading_configuration">2.6. Reloading Configuration</a></li>
 <li><a href="#_selenoid_with_docker_compose">2.7. Selenoid with Docker Compose</a></li>
 <li><a href="#_selenoid_under_windows">2.8. Selenoid under Windows</a></li>
-<li><a href="#_selenoid_cli_flags">2.9. Selenoid CLI Flags</a></li>
+<li><a href="#_log_files">2.9. Log Files</a></li>
+<li><a href="#_selenoid_cli_flags">2.10. Selenoid CLI Flags</a></li>
 </ul>
 </li>
 <li><a href="#_advanced_features">3. Advanced Features</a>
@@ -1385,7 +1386,248 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.9. Selenoid CLI Flags</h3>
+<h3 id="_log_files"><a class="anchor" href="#_log_files"></a>2.9. Log Files</h3>
+<div class="paragraph">
+<p>A typical log file looks like the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>2017/11/01 19:12:38 [NEW_REQUEST]
+2017/11/01 19:12:38 [NEW_REQUEST_ACCEPTED]
+2017/11/01 19:12:38 [41301] [LOCATING_SERVICE] [firefox-45.0]
+2017/11/01 19:12:38 [41301] [USING_DOCKER] [firefox-45.0]
+2017/11/01 19:12:38 [41301] [CREATING_CONTAINER] [selenoid/firefox:45.0]
+2017/11/01 19:12:38 [41301] [STARTING_CONTAINER] [selenoid/firefox:45.0] [19760edf330a87531eb2109cfbf1bd4b14c739afa08fe133eb1b9813b2ac6c31]
+2017/11/01 19:12:39 [41301] [CONTAINER_STARTED] [selenoid/firefox:45.0] [19760edf330a87531eb2109cfbf1bd4b14c739afa08fe133eb1b9813b2ac6c31] [896.680954ms]
+2017/11/01 19:12:40 [41301] [SERVICE_STARTED] [selenoid/firefox:45.0] [19760edf330a87531eb2109cfbf1bd4b14c739afa08fe133eb1b9813b2ac6c31] [605.184606ms]
+2017/11/01 19:12:40 [41301] [PROXY_TO] [selenoid/firefox:45.0] [19760edf330a87531eb2109cfbf1bd4b14c739afa08fe133eb1b9813b2ac6c31] [http://172.17.0.3:4444/wd/hub]
+2017/11/01 19:12:40 [41301] [SESSION_ATTEMPTED] [test-quota] [http://172.17.0.3:4444/wd/hub] [1]
+2017/11/01 19:12:42 [41301] [SESSION_CREATED] [test-quota] [345bb886-7026-46d7-82d4-4788c0460110] [http://172.17.0.3:4444/wd/hub] [1] [4.155712239s]
+....
+2017/11/01 19:14:30 [SESSION_DELETED] [345bb886-7026-46d7-82d4-4788c0460110]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Every line contains:</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 1. Log entry contents</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Field</th>
+<th class="tableblock halign-left valign-top">Example</th>
+<th class="tableblock halign-left valign-top">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Time</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2017/11/01 19:12:42</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Request counter</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[41301]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">So far as session ID is unknown when doing attempts this counter is used to find all session attempts for each new session request.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Status</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[SESSION_ATTEMPTED]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">See table below for complete list of statuses.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Quota name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[my_quota]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Extracted from basic HTTP auth headers.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Browser</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[firefox-45.0]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name and version. Only present for new session requests.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Attempt number</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[1]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">For SESSION_ATTEMPTED entries means current attempt number. For SESSION_CREATED entries means total number of attempts to create this session.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Session ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[345bb886-7026-46d7-82d4-4788c0460110]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">This value is unique for every browser session</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Session start time</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[4.155712239s]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The following statuses are available:</p>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<caption class="title">Table 2. Log entry statuses</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Status</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ALLOCATED_PORT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Successfully allocated port for driver process</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ALLOCATING_PORT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Trying to allocate random free port for driver process</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BAD_JSON_FORMAT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User request does not contain valid Selenium data</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BAD_SCREEN_RESOLUTION</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User requested to set wrong custom screen resolution</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">BAD_TIMEZONE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User requested to set wrong custom time zone inside container</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CLIENT_DISCONNECTED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User disconnected and session was interrupted</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CONTAINER_LOGS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User requested container logs</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CONTAINER_LOGS_ERROR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User requested container logs</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CONTAINER_LOGS_DISCONNECTED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User logs client disconnected</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CONTAINER_REMOVED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Docker container was successfully removed</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CONTAINER_STARTED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Docker container has successfully started</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CREATING_CONTAINER</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Docker container with browser is creating</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">ENVIRONMENT_NOT_AVAILABLE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Browser with desired name and version does not exist</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FAILED_TO_REMOVE_CONTAINER</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Failed to remove Docker container</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FAILED_TO_TERMINATE_PROCESS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An error occurred while terminating driver process</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PROCESS_STARTED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Driver process successfully started</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">PROXY_TO</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Starting to proxy requests to running container or driver process</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">REMOVE_CONTAINER</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Docker container with browser is being removed</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SERVICE_STARTED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Successfully started Docker container or driver binary</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SERVICE_STARTUP_FAILED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Failed to start Docker container or driver binary</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SESSION_ATTEMPTED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Started Docker container or driver binary and trying to create a new session with it</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SESSION_ATTEMPT_TIMED_OUT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An attempt to create a new session timed out</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SESSION_CREATED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A new session was created and returned to user</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SESSION_DELETED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Existing session was deleted by user request</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SESSION_FAILED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An attempt to create a new session failed - user receives an error</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SESSION_NOT_FOUND</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Requested VNC or logs for unknown session.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STARTING_CONTAINER</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Docker container with browser was created and is starting</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">STARTING_PROCESS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Starting driver process</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TERMINATING_PROCESS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Stopping driver process</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">TERMINATED_PROCESS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Driver process was successfully stopped</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VNC_ENABLED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User requested VNC traffic</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VNC_ERROR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An error occurred when trying to send VNC traffic</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VNC_SESSION_CLOSED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sending VNC traffic was stopped</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VNC_CLIENT_DISCONNECTED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User VNC client disconnected</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VNC_NOT_ENABLED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User requested VNC traffic but did not specify <code>enableVNC</code> capability</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.10. Selenoid CLI Flags</h3>
 <div class="paragraph">
 <p>The following flags are supported by <code><code>selenoid</code></code> command:</p>
 </div>
@@ -1923,7 +2165,7 @@ $ docker build -t selenoid:latest .</code></pre>
 <div class="sect2">
 <h3 id="_firefox"><a class="anchor" href="#_firefox"></a>A.1. Firefox</h3>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 1. Firefox Images with Selenium Server</caption>
+<caption class="title">Table 3. Firefox Images with Selenium Server</caption>
 <colgroup>
 <col style="width: 20%;">
 <col style="width: 20%;">
@@ -2263,7 +2505,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 </table>
 </div>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 2. Firefox Images with Selenoid</caption>
+<caption class="title">Table 4. Firefox Images with Selenoid</caption>
 <colgroup>
 <col style="width: 16.6666%;">
 <col style="width: 16.6666%;">
@@ -2319,7 +2561,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 <div class="sect2">
 <h3 id="_chrome"><a class="anchor" href="#_chrome"></a>A.2. Chrome</h3>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 3. Chrome Images</caption>
+<caption class="title">Table 5. Chrome Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -2452,7 +2694,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 <div class="sect2">
 <h3 id="_opera"><a class="anchor" href="#_opera"></a>A.3. Opera</h3>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 4. Opera Presto Images</caption>
+<caption class="title">Table 6. Opera Presto Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -2499,7 +2741,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 </table>
 </div>
 <table class="tableblock frame-all grid-all spread">
-<caption class="title">Table 5. Opera Blink Images</caption>
+<caption class="title">Table 7. Opera Blink Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -2641,7 +2883,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-10-30 14:59:54 UTC
+Last updated 2017-11-01 17:46:43 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
