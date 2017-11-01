@@ -417,7 +417,7 @@ func logs(wsconn *websocket.Conn) {
 		defer r.Close()
 		wsconn.PayloadType = websocket.BinaryFrame
 		io.Copy(wsconn, r)
-		log.Printf("[WEBSOCKET_CLIENT_DISCONNECTED] [%s]\n", sid)
+		log.Printf("[CONTAINER_LOGS_DISCONNECTED] [%s]\n", sid)
 	} else {
 		log.Printf("[SESSION_NOT_FOUND] [%s]\n", sid)
 	}
