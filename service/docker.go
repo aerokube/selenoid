@@ -153,8 +153,8 @@ func getLogConfig(logConfig container.LogConfig, caps session.Caps) container.Lo
 	if logConfig.Config != nil {
 		const tag = "tag"
 		_, ok := logConfig.Config[tag]
-		if caps.Name != "" && !ok {
-			logConfig.Config[tag] = caps.Name
+		if caps.TestName != "" && !ok {
+			logConfig.Config[tag] = caps.TestName
 		}
 	}
 	return logConfig
