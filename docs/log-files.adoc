@@ -54,7 +54,7 @@ The following statuses are available:
 | FAILED_TO_TERMINATE_PROCESS | An error occurred while terminating driver process 
 | PROCESS_STARTED | Driver process successfully started 
 | PROXY_TO | Starting to proxy requests to running container or driver process 
-| REMOVE_CONTAINER | Docker container with browser is being removed
+| REMOVING_CONTAINER | Docker container with browser or video recorder is being removed
 | SERVICE_STARTED | Successfully started Docker container or driver binary
 | SERVICE_STARTUP_FAILED | Failed to start Docker container or driver binary
 | SESSION_ATTEMPTED | Started Docker container or driver binary and trying to create a new session with it 

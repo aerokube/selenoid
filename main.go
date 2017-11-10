@@ -24,6 +24,7 @@ import (
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/client"
+	"path/filepath"
 )
 
 type memLimit int64
@@ -74,6 +75,8 @@ var (
 	logConfPath              string
 	captureDriverLogs        bool
 	disablePrivileged        bool
+	videoOutputDir           string
+	videoRecorderImage       string
 	conf                     *config.Config
 	queue                    *protect.Queue
 	manager                  service.Manager
@@ -107,6 +110,8 @@ func init() {
 	flag.StringVar(&containerNetwork, "container-network", "default", "Network to be used for containers")
 	flag.BoolVar(&captureDriverLogs, "capture-driver-logs", false, "Whether to add driver process logs to Selenoid output")
 	flag.BoolVar(&disablePrivileged, "disable-privileged", false, "Whether to disable privileged container mode")
+	flag.StringVar(&videoOutputDir, "video-output-dir", "output", "Directory to save recorded video to")
+	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder", "Image to use as video recorder")
 	flag.Parse()
 
 	if version {
@@ -137,14 +142,24 @@ func init() {
 	if err == nil {
 		inDocker = true
 	}
+	videoOutputDir, err := filepath.Abs(videoOutputDir)
+	if err != nil {
+		log.Fatalf("Invalid video output dir %s: %v", videoOutputDir, err)
+	}
+	err = os.MkdirAll(videoOutputDir, os.FileMode(0644))
+	if err != nil {
+		log.Fatalf("Failed to create video output dir %s: %v", videoOutputDir, err)
+	}
 	environment := service.Environment{
-		InDocker:          inDocker,
-		CPU:               int64(cpu),
-		Memory:            int64(mem),
-		Network:           containerNetwork,
-		StartupTimeout:    serviceStartupTimeout,
-		CaptureDriverLogs: captureDriverLogs,
-		Privileged:        !disablePrivileged,
+		InDocker:            inDocker,
+		CPU:                 int64(cpu),
+		Memory:              int64(mem),
+		Network:             containerNetwork,
+		StartupTimeout:      serviceStartupTimeout,
+		CaptureDriverLogs:   captureDriverLogs,
+		VideoOutputDir:      videoOutputDir,
+		VideoContainerImage: videoRecorderImage,
+		Privileged:          !disablePrivileged,
 	}
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}
@@ -256,6 +271,7 @@ func showVersion() {
 
 func main() {
 	log.Printf("Timezone: %s\n", time.Local)
+	log.Printf("Video Dir: %s\n", videoOutputDir)
 	log.Printf("Listening on %s\n", listen)
 	log.Fatal(http.ListenAndServe(listen, handler()))
 }

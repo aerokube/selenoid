@@ -11,6 +11,9 @@ type Caps struct {
 	Version               string `json:"version"`
 	ScreenResolution      string `json:"screenResolution"`
 	VNC                   bool   `json:"enableVNC"`
+	Video                 bool   `json:"enableVideo"`
+	VideoName             string `json:"videoName"`
+	VideoSize             string `json:"videoSize"`
 	TestName              string `json:"name"`
 	TimeZone              string `json:"timeZone"`
 	ContainerHostname     string `json:"containerHostname"`

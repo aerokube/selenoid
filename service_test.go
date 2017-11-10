@@ -61,6 +61,11 @@ func testMux() http.Handler {
 			w.WriteHeader(http.StatusNoContent)
 		},
 	))
+	mux.HandleFunc("/v1.29/containers/e90e34656806/kill", http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNoContent)
+		},
+	))
 	mux.HandleFunc("/v1.29/containers/e90e34656806", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNoContent)
@@ -172,12 +177,14 @@ func testConfig(env *service.Environment) *config.Config {
 
 func testEnvironment() *service.Environment {
 	return &service.Environment{
-		CPU:               int64(0),
-		Memory:            int64(0),
-		Network:           containerNetwork,
-		StartupTimeout:    serviceStartupTimeout,
-		CaptureDriverLogs: captureDriverLogs,
-		Privileged:        false,
+		CPU:                 int64(0),
+		Memory:              int64(0),
+		Network:             containerNetwork,
+		StartupTimeout:      serviceStartupTimeout,
+		CaptureDriverLogs:   captureDriverLogs,
+		VideoContainerImage: "aerokube/video-recorder",
+		VideoOutputDir:      "/some/dir",
+		Privileged:          false,
 	}
 }
 
@@ -213,6 +220,7 @@ func testDocker(t *testing.T, env *service.Environment, cfg *config.Config) {
 	AssertThat(t, startedService.ID, EqualTo{"e90e34656806"})
 	AssertThat(t, startedService.VNCHostPort, EqualTo{"127.0.0.1:5900"})
 	AssertThat(t, startedService.Cancel, Not{nil})
+	startedService.Cancel()
 }
 
 func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Config) service.Starter {
@@ -224,6 +232,7 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 		Version:               "33.0",
 		ScreenResolution:      "1024x768",
 		VNC:                   true,
+		Video:                 true,
 		HostsEntries:          "example.com:192.168.0.1,test.com:192.168.0.2",
 		ApplicationContainers: "one,two",
 		TimeZone:              "Europe/Moscow",
