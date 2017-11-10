@@ -69,11 +69,11 @@ WARNING: Firefox images below require Selenium client 3.4.0 or newer.
 |===
 | Image | VNC Image | Selenoid Version | Geckodriver Version | Firefox Version | Client Version
 
-| selenoid/firefox:53.0 | selenoid/vnc:firefox_53.0 | 1.3.6 | 0.16.0 | 53.0 (switching windows may not work) .4+<.^|
+| selenoid/firefox:53.0 | selenoid/vnc:firefox_53.0 | 1.3.7 | 0.16.0 | 53.0 (switching windows may not work) .4+<.^|
 **Java, selenium-webdriver.js**: 3.4.0 and above
 **Python**: 3.5.0 and above
-| selenoid/firefox:54.0 | selenoid/vnc:firefox_54.0 | 1.3.6 | 0.17.0 | 54.0 (switching windows may not work) 
-| selenoid/firefox:55.0 | selenoid/vnc:firefox_55.0 | 1.3.6 | 0.18.0 | 55.0.1 (switching windows may not work) 
+| selenoid/firefox:54.0 | selenoid/vnc:firefox_54.0 | 1.3.7 | 0.17.0 | 54.0 (switching windows may not work) 
+| selenoid/firefox:55.0 | selenoid/vnc:firefox_55.0 | 1.3.7 | 0.18.0 | 55.0.1 (switching windows may not work) 
 | selenoid/firefox:56.0 | selenoid/vnc:firefox_56.0 | 1.3.7 | 0.19.0 | 56.0 
 |===
 
