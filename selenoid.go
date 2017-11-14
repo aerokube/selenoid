@@ -142,6 +142,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	browser.Caps.ScreenResolution = resolution
+	videoSize, err := getVideoSize(browser.Caps.VideoSize, resolution)
+	if err != nil {
+		log.Printf("[%d] [BAD_VIDEO_SIZE] [%s] [%s]\n", requestId, quota, browser.Caps.VideoSize)
+		jsonError(w, err.Error(), http.StatusBadRequest)
+		queue.Drop()
+		return
+	}
+	browser.Caps.VideoSize = videoSize
 	starter, ok := manager.Find(browser.Caps, requestId)
 	if !ok {
 		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s-%s]\n", requestId, quota, browser.Caps.Name, browser.Caps.Version)
@@ -255,12 +263,15 @@ func create(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%s] [%s] [%d] [%v]\n", requestId, quota, s.ID, u, i, time.Since(sessionStartTime))
 }
 
+var (
+	fullFormat  = regexp.MustCompile(`^([0-9]+x[0-9]+)x(8|16|24)$`)
+	shortFormat = regexp.MustCompile(`^[0-9]+x[0-9]+$`)
+)
+
 func getScreenResolution(input string) (string, error) {
 	if input == "" {
 		return "1920x1080x24", nil
 	}
-	fullFormat := regexp.MustCompile(`^[0-9]+x[0-9]+x(8|16|24)$`)
-	shortFormat := regexp.MustCompile(`^[0-9]+x[0-9]+$`)
 	if fullFormat.MatchString(input) {
 		return input, nil
 	}
@@ -271,6 +282,23 @@ func getScreenResolution(input string) (string, error) {
 		"Malformed screenResolution capability: %s. Correct format is WxH (1920x1080) or WxHxD (1920x1080x24).",
 		input,
 	)
+}
+
+func shortenScreenResolution(screenResolution string) string {
+	return fullFormat.FindStringSubmatch(screenResolution)[1]
+}
+
+func getVideoSize(videoSize string, screenResolution string) (string, error) {
+	if videoSize != "" {
+		if shortFormat.MatchString(videoSize) {
+			return videoSize, nil
+		}
+		return "", fmt.Errorf(
+			"Malformed videoSize capability: %s. Correct format is WxH (1920x1080).",
+			videoSize,
+		)
+	}
+	return shortenScreenResolution(screenResolution), nil
 }
 
 func proxy(w http.ResponseWriter, r *http.Request) {
