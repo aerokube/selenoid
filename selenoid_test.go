@@ -170,7 +170,7 @@ func TestNewSessionBadHostResponse(t *testing.T) {
 func TestSessionCreated(t *testing.T) {
 	manager = &HTTPTest{Handler: Selenium()}
 
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities": {"enableVideo": true, "enableVNC": true}}`)))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})

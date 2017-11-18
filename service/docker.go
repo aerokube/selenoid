@@ -131,10 +131,10 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		ID:          browserContainerId,
 		VNCHostPort: vncHostPort,
 		Cancel: func() {
-			removeContainer(ctx, cl, requestId, browserContainerId)
 			if videoContainerId != "" {
 				stopVideoContainer(ctx, cl, requestId, videoContainerId)
 			}
+			removeContainer(ctx, cl, requestId, browserContainerId)
 		},
 	}
 	return &s, nil
@@ -273,8 +273,7 @@ func getContainerIP(networkName string, stat types.ContainerJSON) string {
 func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint64, browserContainerId string, environ Environment, caps session.Caps) (string, error) {
 	videoContainerStartTime := time.Now()
 	videoContainerImage := environ.VideoContainerImage
-	videoFileName := getVideoFileName(caps)
-	env := []string{fmt.Sprintf("FILE_NAME=%s", videoFileName)}
+	env := []string{fmt.Sprintf("FILE_NAME=%s", caps.VideoName)}
 	videoSize := caps.VideoSize
 	if videoSize != "" {
 		env = append(env, fmt.Sprintf("VIDEO_SIZE=%s", videoSize))
@@ -317,22 +316,6 @@ func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint6
 		return
 	}
 	log.Printf("[%d] [STOPPED_VIDEO_CONTAINER] [%s]\n", requestId, containerId)
-}
-
-func getVideoFileName(caps session.Caps) string {
-	name := caps.VideoName
-	if name == "" {
-		timeString := time.Now().Format("2006_01_02_15_04_05.000000000")
-		version := "any"
-		if caps.Version != "" {
-			version = caps.Version
-		}
-		name = fmt.Sprintf("%s_%s_%s.mp4", caps.Name, version, timeString)
-		if caps.TestName != "" {
-			name = fmt.Sprintf("%s_%s", caps.TestName, name)
-		}
-	}
-	return name
 }
 
 func removeContainer(ctx context.Context, cli *client.Client, requestId uint64, id string) {

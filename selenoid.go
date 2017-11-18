@@ -21,6 +21,8 @@ import (
 	"sync"
 	"time"
 
+	"crypto/rand"
+	"encoding/hex"
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types"
 	"golang.org/x/net/websocket"
@@ -150,6 +152,11 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	browser.Caps.VideoSize = videoSize
+	needToRenameVideo := false
+	if browser.Caps.Video && browser.Caps.VideoName == "" {
+		needToRenameVideo = true
+		browser.Caps.VideoName = getVideoFileName(videoOutputDir)
+	}
 	starter, ok := manager.Find(browser.Caps, requestId)
 	if !ok {
 		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s-%s]\n", requestId, quota, browser.Caps.Name, browser.Caps.Version)
@@ -261,7 +268,17 @@ func create(w http.ResponseWriter, r *http.Request) {
 		})})
 	queue.Create()
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%s] [%s] [%d] [%v]\n", requestId, quota, s.ID, u, i, time.Since(sessionStartTime))
+	if browser.Caps.Video && needToRenameVideo {
+		oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
+		newVideoName := filepath.Join(videoOutputDir, s.ID+videoFileExtension)
+		err := os.Rename(oldVideoName, newVideoName)
+		if err != nil {
+			log.Printf("[%d] [VIDEO_ERROR] [%s]\n", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldVideoName, newVideoName, err))
+		}
+	}
 }
+
+const videoFileExtension = ".mp4"
 
 var (
 	fullFormat  = regexp.MustCompile(`^([0-9]+x[0-9]+)x(8|16|24)$`)
@@ -299,6 +316,24 @@ func getVideoSize(videoSize string, screenResolution string) (string, error) {
 		)
 	}
 	return shortenScreenResolution(screenResolution), nil
+}
+
+func getVideoFileName(videoOutputDir string) string {
+	filename := ""
+	for {
+		filename = generateRandomFileName()
+		_, err := os.Stat(filepath.Join(videoOutputDir, filename))
+		if err != nil {
+			break
+		}
+	}
+	return filename
+}
+
+func generateRandomFileName() string {
+	randBytes := make([]byte, 16)
+	rand.Read(randBytes)
+	return "selenoid" + hex.EncodeToString(randBytes) + videoFileExtension
 }
 
 func proxy(w http.ResponseWriter, r *http.Request) {
