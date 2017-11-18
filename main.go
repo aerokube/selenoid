@@ -142,7 +142,7 @@ func init() {
 	if err == nil {
 		inDocker = true
 	}
-	videoOutputDir, err := filepath.Abs(videoOutputDir)
+	videoOutputDir, err = filepath.Abs(videoOutputDir)
 	if err != nil {
 		log.Fatalf("Invalid video output dir %s: %v", videoOutputDir, err)
 	}
@@ -258,6 +258,7 @@ func handler() http.Handler {
 	root.HandleFunc("/ping", ping)
 	root.Handle("/vnc/", websocket.Handler(vnc))
 	root.Handle("/logs/", websocket.Handler(logs))
+	root.Handle("/video/", http.StripPrefix("/video/", http.FileServer(http.Dir(videoOutputDir))))
 	if enableFileUpload {
 		root.HandleFunc("/file", fileUpload)
 	}
