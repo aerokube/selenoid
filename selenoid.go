@@ -256,26 +256,29 @@ func create(w http.ResponseWriter, r *http.Request) {
 		cancel()
 		return
 	}
+	cancelAndRenameVideo := func() {
+		cancel()
+		if browser.Caps.Video && needToRenameVideo {
+			oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
+			newVideoName := filepath.Join(videoOutputDir, s.ID+videoFileExtension)
+			err := os.Rename(oldVideoName, newVideoName)
+			if err != nil {
+				log.Printf("[%d] [VIDEO_ERROR] [%s]\n", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldVideoName, newVideoName, err))
+			}
+		}
+	}
 	sessions.Put(s.ID, &session.Session{
 		Quota:     quota,
 		Caps:      browser.Caps,
 		URL:       u,
 		Container: startedService.ID,
 		VNC:       startedService.VNCHostPort,
-		Cancel:    cancel,
+		Cancel:    cancelAndRenameVideo,
 		Timeout: onTimeout(timeout, func() {
 			request{r}.session(s.ID).Delete()
 		})})
 	queue.Create()
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%s] [%s] [%d] [%v]\n", requestId, quota, s.ID, u, i, time.Since(sessionStartTime))
-	if browser.Caps.Video && needToRenameVideo {
-		oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
-		newVideoName := filepath.Join(videoOutputDir, s.ID+videoFileExtension)
-		err := os.Rename(oldVideoName, newVideoName)
-		if err != nil {
-			log.Printf("[%d] [VIDEO_ERROR] [%s]\n", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldVideoName, newVideoName, err))
-		}
-	}
 }
 
 const videoFileExtension = ".mp4"
