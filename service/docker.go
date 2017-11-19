@@ -17,11 +17,13 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"strings"
+	"os"
 )
 
 const (
 	comma    = ","
 	sysAdmin = "SYS_ADMIN"
+	overrideVideoOutputDir = "OVERRIDE_VIDEO_OUTPUT_DIR"
 )
 
 // Docker - docker container manager
@@ -285,7 +287,7 @@ func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint6
 			Env:   env,
 		},
 		&ctr.HostConfig{
-			Binds:       []string{fmt.Sprintf("%s:/data:rw", environ.VideoOutputDir)},
+			Binds:       []string{fmt.Sprintf("%s:/data:rw", getVideoOutputDir(environ))},
 			Links:       []string{fmt.Sprintf("%s:browser", browserContainerId)},
 			AutoRemove:  true,
 			NetworkMode: ctr.NetworkMode(environ.Network),
@@ -306,6 +308,14 @@ func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint6
 	}
 	log.Printf("[%d] [VIDEO_CONTAINER_STARTED] [%s] [%s] [%v]\n", requestId, videoContainerImage, videoContainerId, time.Since(videoContainerStartTime))
 	return videoContainerId, nil
+}
+
+func getVideoOutputDir(env Environment) string {
+	videoOutputDirOverride := os.Getenv(overrideVideoOutputDir)
+	if videoOutputDirOverride != "" {
+		return videoOutputDirOverride
+	}
+	return env.VideoOutputDir
 }
 
 func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint64, containerId string) {
