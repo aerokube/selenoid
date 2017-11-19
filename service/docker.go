@@ -285,7 +285,7 @@ func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint6
 			Env:   env,
 		},
 		&ctr.HostConfig{
-			Binds:       []string{fmt.Sprintf("%s:/data", environ.VideoOutputDir)},
+			Binds:       []string{fmt.Sprintf("%s:/data:rw", environ.VideoOutputDir)},
 			Links:       []string{fmt.Sprintf("%s:browser", browserContainerId)},
 			AutoRemove:  true,
 			NetworkMode: ctr.NetworkMode(environ.Network),
