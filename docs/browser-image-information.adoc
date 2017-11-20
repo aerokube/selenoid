@@ -75,6 +75,7 @@ WARNING: Firefox images below require Selenium client 3.4.0 or newer.
 | selenoid/firefox:54.0 | selenoid/vnc:firefox_54.0 | 1.3.7 | 0.17.0 | 54.0 (switching windows may not work) 
 | selenoid/firefox:55.0 | selenoid/vnc:firefox_55.0 | 1.3.7 | 0.18.0 | 55.0.1 (switching windows may not work) 
 | selenoid/firefox:56.0 | selenoid/vnc:firefox_56.0 | 1.3.7 | 0.19.0 | 56.0 
+| selenoid/firefox:57.0 | selenoid/vnc:firefox_57.0 | 1.3.9 | 0.19.1 | 57.0 
 |===
 
 
