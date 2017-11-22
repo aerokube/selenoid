@@ -7,8 +7,11 @@ Selenoid supports showing browser screen during test execution. This works with 
 . Pass ```enableVNC``` capability in tests:
 +
 ```
-enableVNC = true
+enableVNC: true
 ```
++
+Value should be boolean, not string.
+
 . Launch http://aerokube.com/selenoid-ui/latest/[Selenoid UI] to see the screen.
 
 This works by proxying VNC port from started container to ```http://localhost:4444/vnc/<session-id>``` where ```<session-id>``` is Selenium session ID.
@@ -18,7 +21,7 @@ This works by proxying VNC port from started container to ```http://localhost:44
 Selenoid allows you to set custom screen resolution in containers being run. To do that simply pass ```screenResolution``` capability in your tests in form ```width x height x color-depth```:
 
 ```
-screenResolution: 1280x1024x24
+screenResolution: "1280x1024x24"
 ```
 [NOTE]
 ====
@@ -27,11 +30,48 @@ screenResolution: 1280x1024x24
 . So far as our containers run headless browsers in Xvfb without installed window manager `maximize` operation does not work. You need to use `setSize` method instead.
 ====
 
+=== Video Recording
+
+NOTE: This feature only works when browsers are run in containers.
+
+Selenoid can capture browser screen and save it to https://en.wikipedia.org/wiki/MPEG-4[MPEG-4] video file using https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC[H264] codec. Video recording works by attaching a separate container with https://www.ffmpeg.org/[video capturing software] to running browser container. 
+
+* To enable video recording - just pass an additional capability in tests:
++
+```
+enableVideo: true
+```
++
+Value should be boolean, not string.
+* All video files are saved to the same directory specified by `-video-output-dir` flag.
+* By default files are named `<session-id>.mp4` where `<session-id>` is a unique identifier of Selenium session used to record video. To provide custom video name add one more capability:
++
+```
+videoName: "my-cool-video.mp4"
+```
+It is important to add `mp4` file extension.
+* By default the entire screen picture is being recorded. Specifying `screenResolution` capability changes recorded video size (width and height) accordingly. You can override video size by passing a capability:
++
+```
+videoSize: "1024x768"
+```
++
+If video size is less than actual browser screen size - only part of the screen fitting into specified size will be visible (measured from the left up corner).
+* When setting up Selenoid manually you need to pull video recorder image once:
++
+```
+$ docker pull selenoid/video-recorder
+```
+* When Selenoid is running inside Docker container it is important to pass an additional `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable:
+```
+$ docker run -d --name selenoid -p 4444:4444 -v /var/run/docker.sock:/var/run/docker.sock -v /path/to/config/dir:/etc/selenoid -v /path/to/video/dir:/output -e OVERRIDE_VIDEO_OUTPUT_DIR=/path/to/video/dir aerokube/selenoid:latest-release
+```
+
 === Custom Test Name
 
 For debugging purposes it is often useful to give a distinct name to every test case. When working with Selenoid you can set test case name by passing the following capability:
 ```
-name: myCoolTestName
+name: "myCoolTestName"
 ```
 The main application of this capability - is debugging tests in the UI which is showing specified name for every running session.
 
@@ -39,7 +79,7 @@ The main application of this capability - is debugging tests in the UI which is 
 
 Some tests require particular time zone to be set in operating system. To achieve this with Selenoid simply set one more capability:
 ```
-timeZone: Europe/Moscow
+timeZone: "Europe/Moscow"
 ```
 You can find most of available time zones https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[here]. Without this capability launched browser containers will have the same timezone as Selenoid one.
 
@@ -47,7 +87,7 @@ You can find most of available time zones https://en.wikipedia.org/wiki/List_of_
 
 Sometimes you may need to link browser container to application container running on the same host machine. This allows you to use cool URLs like `http://my-cool-app/` in tests. To achieve this simply pass information about one or more desired links via capability:
 ```
-applicationContainers: my-app:some-alias,another-app
+applicationContainers: "my-app:some-alias,another-app"
 ```
 Links are specified as a comma-separated list of `<name>[:<alias>]` pairs. 
 
