@@ -524,7 +524,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-11-21</span>
+<span id="revdate">2017-11-22</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -567,10 +567,11 @@ table.CodeRay td.code>pre{padding:0}
 <ul class="sectlevel3">
 <li><a href="#_live_browser_screen">3.1.1. Live Browser Screen</a></li>
 <li><a href="#_custom_screen_resolution">3.1.2. Custom Screen Resolution</a></li>
-<li><a href="#_custom_test_name">3.1.3. Custom Test Name</a></li>
-<li><a href="#_per_session_time_zone">3.1.4. Per-session Time Zone</a></li>
-<li><a href="#_links_to_application_containers">3.1.5. Links to Application Containers</a></li>
-<li><a href="#_hosts_entries">3.1.6. Hosts Entries</a></li>
+<li><a href="#_video_recording">3.1.3. Video Recording</a></li>
+<li><a href="#_custom_test_name">3.1.4. Custom Test Name</a></li>
+<li><a href="#_per_session_time_zone">3.1.5. Per-session Time Zone</a></li>
+<li><a href="#_links_to_application_containers">3.1.6. Links to Application Containers</a></li>
+<li><a href="#_hosts_entries">3.1.7. Hosts Entries</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -1709,8 +1710,11 @@ Use only one of these commands.
 <p>Pass <code><code>enableVNC</code></code> capability in tests:</p>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>enableVNC = true</code></pre>
+<pre class="CodeRay highlight"><code>enableVNC: true</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>Value should be boolean, not string.</p>
 </div>
 </li>
 <li>
@@ -1729,7 +1733,7 @@ Use only one of these commands.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>screenResolution: 1280x1024x24</code></pre>
+<pre class="CodeRay highlight"><code>screenResolution: "1280x1024x24"</code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -1755,13 +1759,87 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_custom_test_name"><a class="anchor" href="#_custom_test_name"></a>3.1.3. Custom Test Name</h4>
+<h4 id="_video_recording"><a class="anchor" href="#_video_recording"></a>3.1.3. Video Recording</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This feature only works when browsers are run in containers.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid can capture browser screen and save it to <a href="https://en.wikipedia.org/wiki/MPEG-4">MPEG-4</a> video file using <a href="https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC">H264</a> codec. Video recording works by attaching a separate container with <a href="https://www.ffmpeg.org/">video capturing software</a> to running browser container.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>To enable video recording - just pass an additional capability in tests:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>enableVideo: true</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Value should be boolean, not string.</p>
+</div>
+</li>
+<li>
+<p>All video files are saved to the same directory specified by <code>-video-output-dir</code> flag.</p>
+</li>
+<li>
+<p>By default files are named <code>&lt;session-id&gt;.mp4</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session used to record video. To provide custom video name add one more capability:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>videoName: "my-cool-video.mp4"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is important to add <code>mp4</code> file extension.</p>
+</div>
+</li>
+<li>
+<p>By default the entire screen picture is being recorded. Specifying <code>screenResolution</code> capability changes recorded video size (width and height) accordingly. You can override video size by passing a capability:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>videoSize: "1024x768"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If video size is less than actual browser screen size - only part of the screen fitting into specified size will be visible (measured from the left up corner).</p>
+</div>
+</li>
+<li>
+<p>When setting up Selenoid manually you need to pull video recorder image once:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>$ docker pull selenoid/video-recorder</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>When Selenoid is running inside Docker container it is important to pass an additional <code>OVERRIDE_VIDEO_OUTPUT_DIR</code> environment variable:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>$ docker run -d --name selenoid -p 4444:4444 -v /var/run/docker.sock:/var/run/docker.sock -v /path/to/config/dir:/etc/selenoid -v /path/to/video/dir:/output -e OVERRIDE_VIDEO_OUTPUT_DIR=/path/to/video/dir aerokube/selenoid:latest-release</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_custom_test_name"><a class="anchor" href="#_custom_test_name"></a>3.1.4. Custom Test Name</h4>
 <div class="paragraph">
 <p>For debugging purposes it is often useful to give a distinct name to every test case. When working with Selenoid you can set test case name by passing the following capability:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>name: myCoolTestName</code></pre>
+<pre class="CodeRay highlight"><code>name: "myCoolTestName"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1769,13 +1847,13 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_per_session_time_zone"><a class="anchor" href="#_per_session_time_zone"></a>3.1.4. Per-session Time Zone</h4>
+<h4 id="_per_session_time_zone"><a class="anchor" href="#_per_session_time_zone"></a>3.1.5. Per-session Time Zone</h4>
 <div class="paragraph">
 <p>Some tests require particular time zone to be set in operating system. To achieve this with Selenoid simply set one more capability:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>timeZone: Europe/Moscow</code></pre>
+<pre class="CodeRay highlight"><code>timeZone: "Europe/Moscow"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1783,13 +1861,13 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_links_to_application_containers"><a class="anchor" href="#_links_to_application_containers"></a>3.1.5. Links to Application Containers</h4>
+<h4 id="_links_to_application_containers"><a class="anchor" href="#_links_to_application_containers"></a>3.1.6. Links to Application Containers</h4>
 <div class="paragraph">
 <p>Sometimes you may need to link browser container to application container running on the same host machine. This allows you to use cool URLs like <code><a href="http://my-cool-app/" class="bare">http://my-cool-app/</a></code> in tests. To achieve this simply pass information about one or more desired links via capability:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>applicationContainers: my-app:some-alias,another-app</code></pre>
+<pre class="CodeRay highlight"><code>applicationContainers: "my-app:some-alias,another-app"</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1797,7 +1875,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_hosts_entries"><a class="anchor" href="#_hosts_entries"></a>3.1.6. Hosts Entries</h4>
+<h4 id="_hosts_entries"><a class="anchor" href="#_hosts_entries"></a>3.1.7. Hosts Entries</h4>
 <div class="paragraph">
 <p>Although you can configure a separate list of <code>/etc/hosts</code> entries for every browser image in <a href="#_browsers_configuration_file">Browsers Configuration File</a> sometimes you may need to add more entries for particular test cases. This can be easily achieved by passing a capability:</p>
 </div>
@@ -2896,7 +2974,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-11-21 16:39:16 UTC
+Last updated 2017-11-22 09:22:53 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
