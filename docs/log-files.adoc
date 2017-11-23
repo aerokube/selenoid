@@ -65,8 +65,9 @@ The following statuses are available:
 | SESSION_NOT_FOUND | Requested VNC or logs for unknown session.
 | STARTING_CONTAINER | Docker container with browser was created and is starting
 | STARTING_PROCESS | Starting driver process 
-| TERMINATING_PROCESS | Stopping driver process 
-| TERMINATED_PROCESS | Driver process was successfully stopped 
+| TERMINATING_PROCESS | Stopping single process from driver process tree
+| TERMINATING_PROCESS_TREE | Stopping driver and it's children processes
+| TERMINATED_PROCESS_TREE | Driver process tree was successfully stopped
 | VNC_ENABLED | User requested VNC traffic 
 | VNC_ERROR | An error occurred when trying to send VNC traffic 
 | VNC_SESSION_CLOSED | Sending VNC traffic was stopped 
