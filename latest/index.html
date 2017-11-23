@@ -524,7 +524,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-11-22</span>
+<span id="revdate">2017-11-23</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -1822,14 +1822,30 @@ This feature only works when browsers are run in containers.
 </div>
 </li>
 <li>
-<p>When Selenoid is running inside Docker container it is important to pass an additional <code>OVERRIDE_VIDEO_OUTPUT_DIR</code> environment variable:</p>
-</li>
-</ul>
+<p>You can access recorded video files using the following URL:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>http://selenoid-host.example.com:4444/video/&lt;filename&gt;.mp4</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p>To see all available files use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>http://selenoid-host.example.com:4444/video/</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>When Selenoid is running inside Docker container it is important to pass an additional <code>OVERRIDE_VIDEO_OUTPUT_DIR</code> environment variable:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code>$ docker run -d --name selenoid -p 4444:4444 -v /var/run/docker.sock:/var/run/docker.sock -v /path/to/config/dir:/etc/selenoid -v /path/to/video/dir:/output -e OVERRIDE_VIDEO_OUTPUT_DIR=/path/to/video/dir aerokube/selenoid:latest-release</code></pre>
 </div>
+</div>
+</li>
+</ul>
 </div>
 </div>
 <div class="sect3">
@@ -2974,7 +2990,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-11-22 09:22:53 UTC
+Last updated 2017-11-23 17:11:36 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
