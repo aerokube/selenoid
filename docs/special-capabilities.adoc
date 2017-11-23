@@ -62,7 +62,19 @@ If video size is less than actual browser screen size - only part of the screen 
 ```
 $ docker pull selenoid/video-recorder
 ```
+* You can access recorded video files using the following URL:
++
+```
+http://selenoid-host.example.com:4444/video/<filename>.mp4
+```
++
+To see all available files use:
++
+```
+http://selenoid-host.example.com:4444/video/
+```
 * When Selenoid is running inside Docker container it is important to pass an additional `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable:
++
 ```
 $ docker run -d --name selenoid -p 4444:4444 -v /var/run/docker.sock:/var/run/docker.sock -v /path/to/config/dir:/etc/selenoid -v /path/to/video/dir:/output -e OVERRIDE_VIDEO_OUTPUT_DIR=/path/to/video/dir aerokube/selenoid:latest-release
 ```
