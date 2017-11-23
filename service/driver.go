@@ -10,6 +10,8 @@ import (
 
 	"errors"
 	"os"
+
+	"github.com/shirou/gopsutil/process"
 )
 
 // Driver - driver processes manager
@@ -68,12 +70,23 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 	return &StartedService{Url: u, Cancel: func() { d.stopProcess(cmd) }}, nil
 }
 
-func (d *Driver) stopProcess(cmd *exec.Cmd) {
-	log.Printf("[%d] [TERMINATING_PROCESS] [%d]\n", d.RequestId, cmd.Process.Pid)
-	err := cmd.Process.Kill()
+func killProcessTree(pid int32, requestId uint64) {
+	proc, err := process.NewProcess(pid)
 	if err != nil {
-		log.Printf("[%d] [FAILED_TO_TERMINATE_PROCESS] [%d]: %v\n", d.RequestId, cmd.Process.Pid, err)
+		log.Printf("[%d] [FAILED_TO_TERMINATE_PROCESS] [%d]: %v\n", requestId, pid, err)
 		return
 	}
-	log.Printf("[%d] [TERMINATED_PROCESS] [%d]\n", d.RequestId, cmd.Process.Pid)
+	children, _ := proc.Children()
+	for _, child := range children {
+		killProcessTree(child.Pid, requestId)
+	}
+	log.Printf("[%d] [TERMINATING_PROCESS] [%d]\n", requestId, pid)
+	proc.Kill()
+}
+
+func (d *Driver) stopProcess(cmd *exec.Cmd) {
+	log.Printf("[%d] [TERMINATING_PROCESS_TREE] [%d]\n", d.RequestId, cmd.Process.Pid)
+	killProcessTree(int32(cmd.Process.Pid), d.RequestId)
+	go cmd.Wait()
+	log.Printf("[%d] [TERMINATED_PROCESS_TREE] [%d]\n", d.RequestId, cmd.Process.Pid)
 }
