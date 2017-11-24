@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/url"
 	"os/exec"
+	"syscall"
 	"time"
 
 	"errors"
@@ -70,7 +71,7 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 
 func (d *Driver) stopProcess(cmd *exec.Cmd) {
 	log.Printf("[%d] [TERMINATING_PROCESS] [%d]\n", d.RequestId, cmd.Process.Pid)
-	err := cmd.Process.Kill()
+	err := cmd.Process.Signal(syscall.SIGINT)
 	if err != nil {
 		log.Printf("[%d] [FAILED_TO_TERMINATE_PROCESS] [%d]: %v\n", d.RequestId, cmd.Process.Pid, err)
 		return
