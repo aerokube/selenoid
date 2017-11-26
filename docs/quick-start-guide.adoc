@@ -1,55 +1,127 @@
 == Quick Start Guide
-. Download and run http://aerokube.com/cm/latest/[Configuration Manager] from https://github.com/aerokube/cm/releases/latest[releases] page.
-+
-**On Linux:**
 
-    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.4/cm_linux_amd64
-    $ chmod +x ./cm
-    $ ./cm selenoid start --vnc
+TIP: The fastest way to start is http://aerokube.com/cm/latest/[Configuration Manager], which can be downloaded
+from https://github.com/aerokube/cm/releases/latest[releases] page. This tool will do all preparations automatically.
+Please refer to corresponding http://aerokube.com/cm/latest/[Quick Start with Configuration Manager] section.
+This guide will show how to start Selenoid manually.
 
-+
-**On Mac:**
+WARNING: This Guide assumes you already know how to deal with command line and Docker in case of docker commands.
+Please take a look to CM first in any case.
 
-    $ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.4/cm_darwin_amd64
-    $ chmod +x ./cm
-    $ ./cm selenoid start --vnc
+=== Prepare
 
-+
-**On Windows** - just download the binary with your browser or if you have https://en.wikipedia.org/wiki/PowerShell[Powershell] type:
+- Create `config/browsers.json` configuration file with content:
 
-    > curl -L -o cm.exe https://github.com/aerokube/cm/releases/download/1.2.4/cm_windows_amd64
-    > ./cm.exe selenoid start --vnc
+.config/browsers.json
+[source,javascript]
+----
+{
+    "firefox": {
+        "default": "57.0",
+        "versions": {
+            "57.0": {
+                "image": "selenoid/vnc:firefox_57.0",
+                "port": "4444",
+                "path": "/wd/hub"
+            }
+        }
+    }
+}
+----
 
-+
-[NOTE]
-====
-. If you have https://docs.docker.com/engine/installation/[Docker] installed you can also use this one-liner:
+- Pull browser docker image with `docker pull selenoid/vnc:firefox_57.0`.
+
+=== Run binary
+
+- Download binary for your operating system from https://github.com/aerokube/selenoid/releases/latest[releases] page
+and save it as `selenoid` (or `selenoid.exe` on windows).
+
+NOTE: Add execution permission in case of *nix os-type with `chmod +x selenoid`.
+
+- Then run:
+
+.*nix
+----
+./selenoid
+----
+
+.Windows
+----
+selenoid.exe
+----
+
+It should write to console something like:
+
+----
+2017/11/26 21:23:43 Loading configuration files...
+2017/11/26 21:23:43 Loaded configuration from [config/browsers.json]
+
+...
+
+2017/11/26 21:23:43 Listening on :4444
+----
+
+=== Run selenoid with docker
+
+If you have https://docs.docker.com/engine/installation/[Docker] installed you can omit downloading binary and run it inside of container.
+Prepare config, pull browser image, then run:
+
+.*nix
 [source,bash,subs="attributes+"]
-# docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}:/root -e OVERRIDE_HOME=${HOME} aerokube/cm:latest-release selenoid start --vnc --tmpfs 128
+----
+docker run -d                                   \
+--name selenoid                                 \
+-p 4444:4444                                    \
+-v /var/run/docker.sock:/var/run/docker.sock    \
+-v `pwd`/config/:/etc/selenoid/:ro              \
+aerokube/selenoid:latest-release
+----
 
-. If you are working behind proxy you should set environment variables `HTTP_PROXY`, `HTTPS_PROXY` or `NO_PROXY` described in https://docs.docker.com/engine/admin/systemd/#runtime-directory-and-storage-driver[Docker documentation]:
+.Windows PowerShell
 [source,bash,subs="attributes+"]
-$ HTTP_PROXY=http://proxy.example.com:80/ ./cm selenoid start
-+
-When running `cm` in container - pass variable via `-e` flag of the `docker` command. These variables work because `cm` is using the same client as `docker` command.
-====
+----
+> $current = $PWD -replace "\\", "/" -replace "C", "c"  <1>
+> docker run -d                                         `
+--name selenoid                                         `
+-p 4444:4444                                            `
+-v //var/run/docker.sock:/var/run/docker.sock           `
+-v ${current}/config/:/etc/selenoid/:ro                 `
+aerokube/selenoid:latest-release
+----
+<1> Simple macros to get $PWD with compatible form assumed your directory located on `C:` drive
 
-. Run your tests against Selenoid like you do with regular Selenium hub:
 
-    http://localhost:4444/wd/hub
+=== Use it for tests
 
-. Selenoid was created to be run in big Selenium clusters and thus has no built-in user interface. This is why trying to open an URL above in browser returns *404* and this is the expected behavior. If something does not work, you can easily check that Selenoid is running with `curl`:
+Run your tests against Selenoid like you do with regular Selenium hub:
 
-    $ curl http://localhost:4444/status
+.Tests endpoint
+----
+http://localhost:4444/wd/hub
+----
 
-+
-A successful request should return a JSON with browser usage statistics. 
-. You can additionally use http://github.com/aerokube/selenoid-ui[Selenoid UI] to see browser screen or consumption statistics. The simplest way is to download and run its binary from https://github.com/aerokube/selenoid-ui/releases[releases] page and start it:
+Selenoid was created to be run in big Selenium clusters and thus has no built-in user interface.
+This is why trying to open an URL above in browser returns *404* and this is the expected behavior.
+If something does not work, you can easily check that Selenoid is running with opening *status* url:
 
-    $ ./selenoid-ui
+.Current selenoid status
+----
+http://localhost:4444/status
+----
 
-+
-See http://aerokube.com/selenoid-ui/latest/[UI documentation] for more installation options. By default UI is listening on port 8080. To start using it open the following page in your browser:
+A successful request should return a JSON with browser usage statistics.
+. You can additionally use http://github.com/aerokube/selenoid-ui[Selenoid UI] to see browser screen or consumption statistics.
+The simplest way is to download and run its binary from https://github.com/aerokube/selenoid-ui/releases[releases] page and start it:
 
-    http://localhost:8080/
+----
+./selenoid-ui
+----
+
+See http://aerokube.com/selenoid-ui/latest/[UI documentation] for more installation options.
+By default UI is listening on port 8080. To start using it open the following page in your browser:
+
+.UI default page with separate binary
+----
+http://localhost:8080/
+----
 

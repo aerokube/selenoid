@@ -1,7 +1,8 @@
 == Selenoid CLI Flags
 
-The following flags are supported by ```selenoid``` command:
-```
+The following flags are supported by `selenoid` command:
+
+----
 -capture-driver-logs
     Whether to add driver process logs to Selenoid output
 -conf string
@@ -36,21 +37,23 @@ The following flags are supported by ```selenoid``` command:
     Session idle timeout in time.Duration format (default 1m0s)
 -version
     Show version and exit
-```
+-video-output-dir
+    Directory to save recorded video to (default "video")
+----
+
 For example:
 ```
-$ ./selenoid -conf /my/custom/browsers.json -limit 10
+$ ./selenoid -conf ~/.aerokube/selenoid/browsers.json -limit 10
 ```
 When using Selenoid inside Docker container these flags are passed like the following:
-
 
 [source,bash,subs="attributes+"]
 ----
 # docker run -d --name selenoid                     \
     -p 4444:4444                                    \
-    -v /etc/selenoid:/etc/selenoid:ro               \
+    -v ~/.aerokube/selenoid/:/etc/selenoid/:ro      \
     -v /var/run/docker.sock:/var/run/docker.sock    \
     aerokube/selenoid:latest-release                \
-    -conf /my/custom/browsers.json -limit 10
+    -conf /etc/selenoid/browsers.json -limit 10 -video-output-dir /opt/selenoid/video/
 ----
 

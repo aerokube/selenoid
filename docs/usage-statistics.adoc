@@ -85,7 +85,7 @@ To send Selenoid statistics described in previous section you can use https://gi
     --output-filter graphite config > /etc/telegraf/telegraf.conf
 ----
 
-. Edit file like the following (three dots mean some not shown lines):
+. Edit file like the following:
 +
 
 [source,go]
@@ -127,3 +127,7 @@ one_min.selenoid_example_com.httpjson_selenoid.pending
 one_min.selenoid_example_com.httpjson_selenoid.queued
 one_min.selenoid_example_com.httpjson_selenoid.total
 ```
+
+
+telegraf+influxdb+graphana
+

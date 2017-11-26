@@ -1,112 +1,119 @@
 == Special Capabilities
 
-=== Live Browser Screen
+Selenoid can improve some automation aspects with custom capabilities.
+You can pass it in tests to enable/disable some features.
 
-Selenoid supports showing browser screen during test execution. This works with containers having https://en.wikipedia.org/wiki/Virtual_Network_Computing[VNC] server installed. To see browser screen:
 
-. Pass ```enableVNC``` capability in tests:
-+
-```
+=== Live Browser Screen: enableVNC
+
+Selenoid supports showing browser screen during test execution.
+This works with containers having https://en.wikipedia.org/wiki/Virtual_Network_Computing[VNC] server installed (VNC column of <<Browser Image information>>).
+To see browser screen:
+
+.Type: boolean
+----
 enableVNC: true
-```
-+
-Value should be boolean, not string.
+----
 
-. Launch http://aerokube.com/selenoid-ui/latest/[Selenoid UI] to see the screen.
+Then launch http://aerokube.com/selenoid-ui/latest/[Selenoid UI] to see the screen.
 
-This works by proxying VNC port from started container to ```http://localhost:4444/vnc/<session-id>``` where ```<session-id>``` is Selenium session ID.
+This works by proxying VNC port from started container to ```http://localhost:4444/vnc/<session-id>``` over WebSocket, where ```<session-id>``` is Selenium session ID.
 
-=== Custom Screen Resolution
+=== Custom Screen Resolution: screenResolution
 
-Selenoid allows you to set custom screen resolution in containers being run. To do that simply pass ```screenResolution``` capability in your tests in form ```width x height x color-depth```:
+Selenoid allows you to set custom screen resolution in containers being run:
 
-```
+.Type: string, format: <width>x<height>x<colors-depth>
+----
 screenResolution: "1280x1024x24"
-```
-[NOTE]
+----
+[WARNING]
 ====
-. This capability sets only screen resolution - not browser window size. Most of browsers have some default window size value this is why your screenshot size can be smaller than screen resolution specified in capability. You should manually resize window to desired width and height.
+- This capability sets only screen resolution - not browser window size.
+Most of browsers have some default window size value this is why your screenshot size can be smaller than screen resolution specified in capability.
+You should manually resize window to desired width and height.
 
-. So far as our containers run headless browsers in Xvfb without installed window manager `maximize` operation does not work. You need to use `setSize` method instead.
+- So far as our containers run headless browsers in Xvfb without installed window manager `maximize` operation does not work.
+You need to use `setSize` method instead.
 ====
 
-=== Video Recording
+=== Video Recording: enableVideo, videoName, videoScreenSize
 
-NOTE: This feature only works when browsers are run in containers.
+NOTE: This feature requires some preparation. Please refer <<Video Recording>> section for details.
 
-Selenoid can capture browser screen and save it to https://en.wikipedia.org/wiki/MPEG-4[MPEG-4] video file using https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC[H264] codec. Video recording works by attaching a separate container with https://www.ffmpeg.org/[video capturing software] to running browser container. 
+To enable video recording for session, add:
 
-* To enable video recording - just pass an additional capability in tests:
-+
-```
+.Type: boolean
+----
 enableVideo: true
-```
-+
-Value should be boolean, not string.
-* All video files are saved to the same directory specified by `-video-output-dir` flag.
-* By default files are named `<session-id>.mp4` where `<session-id>` is a unique identifier of Selenium session used to record video. To provide custom video name add one more capability:
-+
-```
+----
+
+* By default files are named `<session-id>.mp4` where `<session-id>` is a unique identifier of Selenium session.
+To provide custom video name specify:
+
+.Type: string
+----
 videoName: "my-cool-video.mp4"
-```
-It is important to add `mp4` file extension.
-* By default the entire screen picture is being recorded. Specifying `screenResolution` capability changes recorded video size (width and height) accordingly. You can override video size by passing a capability:
-+
-```
+----
+
+WARNING: It is important to add `mp4` file extension.
+
+
+* By default the entire screen picture is being recorded.
+Specifying `screenResolution` capability changes recorded video size (width and height) accordingly.
+You can override video screen size by passing a capability. In case of `videoScreenSize`
+resolution is less than actual, screen on video will be trimmed starting from top-left corner:
+
+.Type: string
+----
 videoScreenSize: "1024x768"
-```
-+
-If video size is less than actual browser screen size - only part of the screen fitting into specified size will be visible (measured from the left up corner).
-* When setting up Selenoid manually you need to pull video recorder image once:
-+
-```
-$ docker pull selenoid/video-recorder
-```
-* You can access recorded video files using the following URL:
-+
-```
-http://selenoid-host.example.com:4444/video/<filename>.mp4
-```
-+
-To see all available files use:
-+
-```
-http://selenoid-host.example.com:4444/video/
-```
-* When Selenoid is running inside Docker container it is important to pass an additional `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable:
-+
-```
-$ docker run -d --name selenoid -p 4444:4444 -v /var/run/docker.sock:/var/run/docker.sock -v /path/to/config/dir:/etc/selenoid -v /path/to/video/dir:/output -e OVERRIDE_VIDEO_OUTPUT_DIR=/path/to/video/dir aerokube/selenoid:latest-release
-```
+----
 
-=== Custom Test Name
+=== Custom Test Name: name
 
-For debugging purposes it is often useful to give a distinct name to every test case. When working with Selenoid you can set test case name by passing the following capability:
-```
+For debugging purposes it is often useful to give a distinct name to every test case.
+When working with Selenoid you can set test case name by passing the following capability:
+
+.Type: string
+----
 name: "myCoolTestName"
-```
+----
+
 The main application of this capability - is debugging tests in the UI which is showing specified name for every running session.
 
-=== Per-session Time Zone
+=== Per-session Time Zone: timeZone
 
-Some tests require particular time zone to be set in operating system. To achieve this with Selenoid simply set one more capability:
-```
+Some tests require particular time zone to be set in operating system.
+To achieve this with Selenoid use:
+
+.Type: string
+----
 timeZone: "Europe/Moscow"
-```
-You can find most of available time zones https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[here]. Without this capability launched browser containers will have the same timezone as Selenoid one.
+----
 
-=== Links to Application Containers
+You can find most of available time zones https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[here].
+Without this capability launched browser containers will have the same timezone as Selenoid one.
 
-Sometimes you may need to link browser container to application container running on the same host machine. This allows you to use cool URLs like `http://my-cool-app/` in tests. To achieve this simply pass information about one or more desired links via capability:
-```
-applicationContainers: "my-app:some-alias,another-app"
-```
-Links are specified as a comma-separated list of `<name>[:<alias>]` pairs. 
+=== Links to Application Containers: applicationContainers
 
-=== Hosts Entries
+Sometimes you may need to link browser container to application container running on the same host machine.
+This allows you to use cool URLs like `http://my-cool-app/` in tests.
+To achieve this simply pass information about one or more desired links via capability:
 
-Although you can configure a separate list of `/etc/hosts` entries for every browser image in <<Browsers Configuration File>> sometimes you may need to add more entries for particular test cases. This can be easily achieved by passing a capability:
-```
+.Type: string, format: <container-name>[:alias] (comma-separated)
+----
+applicationContainers: "spring-application-main:my-cool-app,spring-application-gateway"
+----
+
+=== Hosts Entries: hostsEntries
+
+Although you can configure a separate list of `/etc/hosts` entries for every browser image in <<Browsers Configuration File>>
+sometimes you may need to add more entries for particular test cases. This can be easily achieved with:
+
+.Type: string, format: <hostname>:<ip-address> (comma-separated)
+----
 hostsEntries: "example.com:192.168.0.1,test.com:192.168.0.2"
-```
-This capability represents a comma-separated list of `<hostname>:<ip-address>` entries to be added to `/etc/hosts`. Entries from capabilities are inserted to `/etc/hosts` before entries from browsers configuration file. Thus entries from capabilities override entries from configuration file if some hosts are equal.
+----
+
+Entries will be inserted to `/etc/hosts` before entries from browsers configuration file.
+Thus entries from capabilities override entries from configuration file if some hosts are equal.

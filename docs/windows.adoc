@@ -1,9 +1,34 @@
 == Selenoid under Windows
 
-While we normally recommend to start Selenoid using http://aerokube.com/cm/latest[Configuration Manager], it is possible to start it under Windows manually. The main difference from Unix operating systems is how volumes are mounted. In any Windows paths back slashes (`\`) should be replaced by forward slashes (`/`) and drive letter should be lower cased. For example for `C:\Users\admin` we get `c:/Users/admin`. So assuming that configuration file is located at `C:\selenoid` a typical startup command can look like: 
+While we normally recommend to start Selenoid using http://aerokube.com/cm/latest[Configuration Manager] on any platform,
+it is possible to start it under Windows manually.
 
-    > docker run -d --name selenoid -v //var/run/docker.sock:/var/run/docker.sock -p 4444:4444 -v c:/selenoid:/etc/selenoid:ro aerokube/selenoid:latest-release
-    
-The most strange part here is `-v //var/run/docker.sock:/var/run/docker.sock` but this is how (with two forward slashes) Docker socket should be mounted in Docker for Windows.
+The main difference from Unix operating systems is how volumes are mounted.
+In any Windows paths back slashes (`\`) should be replaced by forward slashes (`/`) and drive letter should be lower cased.
+Also start with forward slash and remove colon.
 
+.Mount directory
+====
+With `C:\Users\admin` we get `/c/Users/admin`.
+====
+
+NOTE: Another story with docker.sock, which should be mounted as `-v //var/run/docker.sock:/var/run/docker.sock` (note two forward slashes at the beginning)
+
+So assuming that configuration file is located at `C:\selenoid` a typical startup command can look like:
+
+----
+docker run -d --name selenoid                   `
+-p 4444:4444                                    `
+-v //var/run/docker.sock:/var/run/docker.sock   `
+-v /c/selenoid:/etc/selenoid:ro                 `
+aerokube/selenoid:latest-release
+----
+
+==== PWD Macros
+
+You can use simple macros for `pwd` (assumed you are on `C:`):
+
+----
+> $current = $PWD -replace "\\", "/" -replace "C", "c"
+----
 
