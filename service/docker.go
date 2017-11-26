@@ -16,13 +16,13 @@ import (
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
-	"strings"
 	"os"
+	"strings"
 )
 
 const (
-	comma    = ","
-	sysAdmin = "SYS_ADMIN"
+	comma                  = ","
+	sysAdmin               = "SYS_ADMIN"
 	overrideVideoOutputDir = "OVERRIDE_VIDEO_OUTPUT_DIR"
 )
 
@@ -276,9 +276,9 @@ func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint6
 	videoContainerStartTime := time.Now()
 	videoContainerImage := environ.VideoContainerImage
 	env := []string{fmt.Sprintf("FILE_NAME=%s", caps.VideoName)}
-	videoSize := caps.VideoSize
-	if videoSize != "" {
-		env = append(env, fmt.Sprintf("VIDEO_SIZE=%s", videoSize))
+	videoScreenSize := caps.VideoScreenSize
+	if videoScreenSize != "" {
+		env = append(env, fmt.Sprintf("VIDEO_SIZE=%s", videoScreenSize))
 	}
 	log.Printf("[%d] [CREATING_VIDEO_CONTAINER] [%s]\n", requestId, videoContainerImage)
 	videoContainer, err := cl.ContainerCreate(ctx,

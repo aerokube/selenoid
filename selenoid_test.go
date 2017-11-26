@@ -94,22 +94,22 @@ func TestMalformedScreenResolutionCapability(t *testing.T) {
 	AssertThat(t, queue.Used(), EqualTo{0})
 }
 
-func TestGetVideoSizeFromCapability(t *testing.T) {
-	res, err := getVideoSize("1024x768", "anything")
+func TestGetVideoScreenSizeFromCapability(t *testing.T) {
+	res, err := getVideoScreenSize("1024x768", "anything")
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, res, EqualTo{"1024x768"})
 }
 
-func TestDetermineVideoSizeFromScreenResolution(t *testing.T) {
-	res, err := getVideoSize("", "1024x768x24")
+func TestDetermineVideoScreenSizeFromScreenResolution(t *testing.T) {
+	res, err := getVideoScreenSize("", "1024x768x24")
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, res, EqualTo{"1024x768"})
 }
 
-func TestMalformedVideoSizeCapability(t *testing.T) {
+func TestMalformedVideoScreenSizeCapability(t *testing.T) {
 	manager = &BrowserNotFound{}
 
-	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities":{"videoSize":"bad-size"}}`)))
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities":{"videoScreenSize":"bad-size"}}`)))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusBadRequest})
 

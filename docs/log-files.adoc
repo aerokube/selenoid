@@ -42,6 +42,7 @@ The following statuses are available:
 | BAD_JSON_FORMAT | User request does not contain valid Selenium data 
 | BAD_SCREEN_RESOLUTION | User requested to set wrong custom screen resolution
 | BAD_TIMEZONE | User requested to set wrong custom time zone inside container
+| BAD_VIDEO_SCREEN_SIZE | User requested to capture video with wrong screen size
 | CLIENT_DISCONNECTED | User disconnected and session was interrupted 
 | CONTAINER_LOGS | User requested container logs
 | CONTAINER_LOGS_ERROR | User requested container logs
