@@ -144,14 +144,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	browser.Caps.ScreenResolution = resolution
-	videoSize, err := getVideoSize(browser.Caps.VideoSize, resolution)
+	videoScreenSize, err := getVideoScreenSize(browser.Caps.VideoScreenSize, resolution)
 	if err != nil {
-		log.Printf("[%d] [BAD_VIDEO_SIZE] [%s] [%s]\n", requestId, quota, browser.Caps.VideoSize)
+		log.Printf("[%d] [BAD_VIDEO_SCREEN_SIZE] [%s] [%s]\n", requestId, quota, browser.Caps.VideoScreenSize)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
-	browser.Caps.VideoSize = videoSize
+	browser.Caps.VideoScreenSize = videoScreenSize
 	needToRenameVideo := false
 	if browser.Caps.Video && browser.Caps.VideoName == "" {
 		needToRenameVideo = true
@@ -308,14 +308,14 @@ func shortenScreenResolution(screenResolution string) string {
 	return fullFormat.FindStringSubmatch(screenResolution)[1]
 }
 
-func getVideoSize(videoSize string, screenResolution string) (string, error) {
-	if videoSize != "" {
-		if shortFormat.MatchString(videoSize) {
-			return videoSize, nil
+func getVideoScreenSize(videoScreenSize string, screenResolution string) (string, error) {
+	if videoScreenSize != "" {
+		if shortFormat.MatchString(videoScreenSize) {
+			return videoScreenSize, nil
 		}
 		return "", fmt.Errorf(
-			"Malformed videoSize capability: %s. Correct format is WxH (1920x1080).",
-			videoSize,
+			"Malformed videoScreenSize capability: %s. Correct format is WxH (1920x1080).",
+			videoScreenSize,
 		)
 	}
 	return shortenScreenResolution(screenResolution), nil

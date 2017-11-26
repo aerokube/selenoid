@@ -53,7 +53,7 @@ It is important to add `mp4` file extension.
 * By default the entire screen picture is being recorded. Specifying `screenResolution` capability changes recorded video size (width and height) accordingly. You can override video size by passing a capability:
 +
 ```
-videoSize: "1024x768"
+videoScreenSize: "1024x768"
 ```
 +
 If video size is less than actual browser screen size - only part of the screen fitting into specified size will be visible (measured from the left up corner).
