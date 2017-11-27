@@ -1,5 +1,5 @@
 == Video Recording
-NOTE: This feature only works when browsers are run in containers. VNC type containers should be used from <<Browser Image information>> section.
+NOTE: This feature only works when browsers are run in containers. This can be both vnc or non-vnc containers.
 
 Selenoid can capture browser screen and save it to https://en.wikipedia.org/wiki/MPEG-4[MPEG-4] video file using https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC[H264] codec.
 Video recording works by attaching a separate container with https://www.ffmpeg.org/[video capturing software] to running browser container.
@@ -31,7 +31,7 @@ $ docker run -d
 aerokube/selenoid:latest-release
 ----
 
-TIP: All this stuff is automated by http://aerokube.com/cm/latest/[Configuration Manager] with `--vnc` flag on `selenoid start` command
+TIP: All this stuff is automated by http://aerokube.com/cm/latest/[Configuration Manager] `selenoid start` command
 
 === On Windows
 
