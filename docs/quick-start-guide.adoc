@@ -1,9 +1,19 @@
 == Quick Start Guide
 
-TIP: The fastest way to start is http://aerokube.com/cm/latest/[Configuration Manager], which can be downloaded
+[TIP]
+====
+The fastest way to start is http://aerokube.com/cm/latest/[Configuration Manager], which can be downloaded
 from https://github.com/aerokube/cm/releases/latest[releases] page. This tool will do all preparations automatically.
 Please refer to corresponding http://aerokube.com/cm/latest/[Quick Start with Configuration Manager] section.
+
+So all the content of this page can be simplified to only:
+
+----
+./cm selenoid start
+----
+
 This guide will show how to start Selenoid manually.
+====
 
 WARNING: This Guide assumes you already know how to deal with command line and Docker in case of docker commands.
 Please take a look to CM first in any case.

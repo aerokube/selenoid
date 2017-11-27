@@ -3,7 +3,6 @@ FROM alpine:3.5
 RUN apk add -U tzdata && rm -Rf /var/cache/apk/*
 COPY selenoid /usr/bin
 
-VOLUME "/opt/selenoid/video/"
 EXPOSE 4444
 ENTRYPOINT ["/usr/bin/selenoid"]
 

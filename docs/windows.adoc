@@ -3,6 +3,8 @@
 While we normally recommend to start Selenoid using http://aerokube.com/cm/latest[Configuration Manager] on any platform,
 it is possible to start it under Windows manually.
 
+NOTE: Most of the differences are coupled to Docker, so please refer to Docker documentation on any docker errors first.
+
 The main difference from Unix operating systems is how volumes are mounted.
 In any Windows paths back slashes (`\`) should be replaced by forward slashes (`/`) and drive letter should be lower cased.
 Also start with forward slash and remove colon.
