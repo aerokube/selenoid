@@ -110,7 +110,7 @@ func init() {
 	flag.StringVar(&containerNetwork, "container-network", "default", "Network to be used for containers")
 	flag.BoolVar(&captureDriverLogs, "capture-driver-logs", false, "Whether to add driver process logs to Selenoid output")
 	flag.BoolVar(&disablePrivileged, "disable-privileged", false, "Whether to disable privileged container mode")
-	flag.StringVar(&videoOutputDir, "video-output-dir", "output", "Directory to save recorded video to")
+	flag.StringVar(&videoOutputDir, "video-output-dir", "video", "Directory to save recorded video to")
 	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder", "Image to use as video recorder")
 	flag.Parse()
 
