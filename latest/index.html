@@ -524,15 +524,27 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-11-26</span>
+<span id="revdate">2017-11-27</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#_getting_started">1. Getting Started</a>
 <ul class="sectlevel2">
-<li><a href="#_quick_start_guide">1.1. Quick Start Guide</a></li>
-<li><a href="#_browser_images">1.2. Browser Images</a></li>
+<li><a href="#_quick_start_guide">1.1. Quick Start Guide</a>
+<ul class="sectlevel3">
+<li><a href="#_prepare">1.1.1. Prepare</a></li>
+<li><a href="#_run_binary">1.1.2. Run binary</a></li>
+<li><a href="#_run_selenoid_with_docker">1.1.3. Run selenoid with docker</a></li>
+<li><a href="#_use_it_for_tests">1.1.4. Use it for tests</a></li>
+</ul>
+</li>
+<li><a href="#_selenoid_under_windows">1.2. Selenoid under Windows</a>
+<ul class="sectlevel4">
+<li><a href="#_pwd_macros">PWD Macros</a></li>
+</ul>
+</li>
+<li><a href="#_browser_images">1.3. Browser Images</a></li>
 </ul>
 </li>
 <li><a href="#_configuration">2. Configuration</a>
@@ -554,9 +566,13 @@ table.CodeRay td.code>pre{padding:0}
 </ul>
 </li>
 <li><a href="#_setting_timezone">2.5. Setting Timezone</a></li>
-<li><a href="#_reloading_configuration">2.6. Reloading Configuration</a></li>
-<li><a href="#_selenoid_with_docker_compose">2.7. Selenoid with Docker Compose</a></li>
-<li><a href="#_selenoid_under_windows">2.8. Selenoid under Windows</a></li>
+<li><a href="#_video_recording">2.6. Video Recording</a>
+<ul class="sectlevel3">
+<li><a href="#_on_windows">2.6.1. On Windows</a></li>
+</ul>
+</li>
+<li><a href="#_reloading_configuration">2.7. Reloading Configuration</a></li>
+<li><a href="#_selenoid_with_docker_compose">2.8. Selenoid with Docker Compose</a></li>
 <li><a href="#_log_files">2.9. Log Files</a></li>
 <li><a href="#_selenoid_cli_flags">2.10. Selenoid CLI Flags</a></li>
 </ul>
@@ -565,13 +581,13 @@ table.CodeRay td.code>pre{padding:0}
 <ul class="sectlevel2">
 <li><a href="#_special_capabilities">3.1. Special Capabilities</a>
 <ul class="sectlevel3">
-<li><a href="#_live_browser_screen">3.1.1. Live Browser Screen</a></li>
-<li><a href="#_custom_screen_resolution">3.1.2. Custom Screen Resolution</a></li>
-<li><a href="#_video_recording">3.1.3. Video Recording</a></li>
-<li><a href="#_custom_test_name">3.1.4. Custom Test Name</a></li>
-<li><a href="#_per_session_time_zone">3.1.5. Per-session Time Zone</a></li>
-<li><a href="#_links_to_application_containers">3.1.6. Links to Application Containers</a></li>
-<li><a href="#_hosts_entries">3.1.7. Hosts Entries</a></li>
+<li><a href="#_live_browser_screen_enablevnc">3.1.1. Live Browser Screen: enableVNC</a></li>
+<li><a href="#_custom_screen_resolution_screenresolution">3.1.2. Custom Screen Resolution: screenResolution</a></li>
+<li><a href="#_video_recording_enablevideo_videoname_videoscreensize">3.1.3. Video Recording: enableVideo, videoName, videoScreenSize</a></li>
+<li><a href="#_custom_test_name_name">3.1.4. Custom Test Name: name</a></li>
+<li><a href="#_per_session_time_zone_timezone">3.1.5. Per-session Time Zone: timeZone</a></li>
+<li><a href="#_links_to_application_containers_applicationcontainers">3.1.6. Links to Application Containers: applicationContainers</a></li>
+<li><a href="#_hosts_entries_hostsentries">3.1.7. Hosts Entries: hostsEntries</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -616,37 +632,246 @@ It is using Docker to launch browsers. Please refer to <a href="https://github.c
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_quick_start_guide"><a class="anchor" href="#_quick_start_guide"></a>1.1. Quick Start Guide</h3>
-<div class="olist arabic">
-<ol class="arabic">
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The fastest way to start is <a href="http://aerokube.com/cm/latest/">Configuration Manager</a>, which can be downloaded
+from <a href="https://github.com/aerokube/cm/releases/latest">releases</a> page. This tool will do all preparations automatically.
+Please refer to corresponding <a href="http://aerokube.com/cm/latest/">Quick Start with Configuration Manager</a> section.</p>
+</div>
+<div class="paragraph">
+<p>So all the content of this page can be simplified to only:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>./cm selenoid start</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This guide will show how to start Selenoid manually.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+This Guide assumes you already know how to deal with command line and Docker in case of docker commands.
+Please take a look to CM first in any case.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_prepare"><a class="anchor" href="#_prepare"></a>1.1.1. Prepare</h4>
+<div class="ulist">
+<ul>
 <li>
-<p>Download and run <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> from <a href="https://github.com/aerokube/cm/releases/latest">releases</a> page.</p>
-<div class="paragraph">
-<p><strong>On Linux:</strong></p>
+<p>Create <code>config/browsers.json</code> configuration file with content:</p>
+</li>
+</ul>
 </div>
-<div class="literalblock">
+<div class="listingblock">
+<div class="title">config/browsers.json</div>
 <div class="content">
-<pre>$ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.4/cm_linux_amd64
-$ chmod +x ./cm
-$ ./cm selenoid start --vnc</pre>
+<pre class="CodeRay highlight"><code data-lang="javascript">{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">firefox</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">default</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">57.0</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">versions</span><span class="delimiter">&quot;</span></span>: {
+            <span class="key"><span class="delimiter">&quot;</span><span class="content">57.0</span><span class="delimiter">&quot;</span></span>: {
+                <span class="key"><span class="delimiter">&quot;</span><span class="content">image</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">selenoid/vnc:firefox_57.0</span><span class="delimiter">&quot;</span></span>,
+                <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">4444</span><span class="delimiter">&quot;</span></span>,
+                <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/wd/hub</span><span class="delimiter">&quot;</span></span>
+            }
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Pull browser docker image with <code>docker pull selenoid/vnc:firefox_57.0</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_run_binary"><a class="anchor" href="#_run_binary"></a>1.1.2. Run binary</h4>
+<div class="ulist">
+<ul>
+<li>
+<p>Download binary for your operating system from <a href="https://github.com/aerokube/selenoid/releases/latest">releases</a> page
+and save it as <code>selenoid</code> (or <code>selenoid.exe</code> on windows).</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Add execution permission in case of *nix os-type with <code>chmod +x selenoid</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Then run:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">*nix</div>
+<div class="content">
+<pre>./selenoid</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Windows</div>
+<div class="content">
+<pre>selenoid.exe</pre>
 </div>
 </div>
 <div class="paragraph">
-<p><strong>On Mac:</strong></p>
+<p>It should write to console something like:</p>
 </div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre>$ curl -L -o cm https://github.com/aerokube/cm/releases/download/1.2.4/cm_darwin_amd64
-$ chmod +x ./cm
-$ ./cm selenoid start --vnc</pre>
+<pre>2017/11/26 21:23:43 Loading configuration files...
+2017/11/26 21:23:43 Loaded configuration from [config/browsers.json]
+
+...
+
+2017/11/26 21:23:43 Listening on :4444</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_run_selenoid_with_docker"><a class="anchor" href="#_run_selenoid_with_docker"></a>1.1.3. Run selenoid with docker</h4>
+<div class="paragraph">
+<p>If you have <a href="https://docs.docker.com/engine/installation/">Docker</a> installed you can omit downloading binary and run it inside of container.
+Prepare config, pull browser image, then run:</p>
+</div>
+<div class="listingblock">
+<div class="title">*nix</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">docker run -d                                   \
+--name selenoid                                 \
+-p 4444:4444                                    \
+-v /var/run/docker.sock:/var/run/docker.sock    \
+-v `pwd`/config/:/etc/selenoid/:ro              \
+aerokube/selenoid:latest-release</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Windows PowerShell</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">&gt; $current = $PWD -replace &quot;\\&quot;, &quot;/&quot; -replace &quot;C&quot;, &quot;c&quot;  <i class="conum" data-value="1"></i><b>(1)</b>
+&gt; docker run -d                                         `
+--name selenoid                                         `
+-p 4444:4444                                            `
+-v //var/run/docker.sock:/var/run/docker.sock           `
+-v ${current}/config/:/etc/selenoid/:ro                 `
+aerokube/selenoid:latest-release</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Simple macros to get $PWD with compatible form assumed your directory located on <code>C:</code> drive</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_use_it_for_tests"><a class="anchor" href="#_use_it_for_tests"></a>1.1.4. Use it for tests</h4>
+<div class="paragraph">
+<p>Run your tests against Selenoid like you do with regular Selenium hub:</p>
+</div>
+<div class="listingblock">
+<div class="title">Tests endpoint</div>
+<div class="content">
+<pre>http://localhost:4444/wd/hub</pre>
 </div>
 </div>
 <div class="paragraph">
-<p><strong>On Windows</strong> - just download the binary with your browser or if you have <a href="https://en.wikipedia.org/wiki/PowerShell">Powershell</a> type:</p>
+<p>Selenoid was created to be run in big Selenium clusters and thus has no built-in user interface.
+This is why trying to open an URL above in browser returns <strong>404</strong> and this is the expected behavior.
+If something does not work, you can easily check that Selenoid is running with opening <strong>status</strong> url:</p>
 </div>
-<div class="literalblock">
+<div class="listingblock">
+<div class="title">Current selenoid status</div>
 <div class="content">
-<pre>&gt; curl -L -o cm.exe https://github.com/aerokube/cm/releases/download/1.2.4/cm_windows_amd64
-&gt; ./cm.exe selenoid start --vnc</pre>
+<pre>http://localhost:4444/status</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A successful request should return a JSON with browser usage statistics.
+. You can additionally use <a href="http://github.com/aerokube/selenoid-ui">Selenoid UI</a> to see browser screen or consumption statistics.
+The simplest way is to download and run its binary from <a href="https://github.com/aerokube/selenoid-ui/releases">releases</a> page and start it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>./selenoid-ui</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See <a href="http://aerokube.com/selenoid-ui/latest/">UI documentation</a> for more installation options.
+By default UI is listening on port 8080. To start using it open the following page in your browser:</p>
+</div>
+<div class="listingblock">
+<div class="title">UI default page with separate binary</div>
+<div class="content">
+<pre>http://localhost:8080/</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_selenoid_under_windows"><a class="anchor" href="#_selenoid_under_windows"></a>1.2. Selenoid under Windows</h3>
+<div class="paragraph">
+<p>While we normally recommend to start Selenoid using <a href="http://aerokube.com/cm/latest">Configuration Manager</a> on any platform,
+it is possible to start it under Windows manually.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Most of the differences are coupled to Docker, so please refer to Docker documentation on any docker errors first.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The main difference from Unix operating systems is how volumes are mounted.
+In any Windows paths back slashes (<code>\</code>) should be replaced by forward slashes (<code>/</code>) and drive letter should be lower cased.
+Also start with forward slash and remove colon.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 1. Mount directory</div>
+<div class="content">
+<div class="paragraph">
+<p>With <code>C:\Users\admin</code> we get <code>/c/Users/admin</code>.</p>
+</div>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -656,74 +881,37 @@ $ ./cm selenoid start --vnc</pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>If you have <a href="https://docs.docker.com/engine/installation/">Docker</a> installed you can also use this one-liner:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash"># docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v ${HOME}:/root -e OVERRIDE_HOME=${HOME} aerokube/cm:latest-release selenoid start --vnc --tmpfs 128</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>If you are working behind proxy you should set environment variables <code>HTTP_PROXY</code>, <code>HTTPS_PROXY</code> or <code>NO_PROXY</code> described in <a href="https://docs.docker.com/engine/admin/systemd/#runtime-directory-and-storage-driver">Docker documentation</a>:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">$ HTTP_PROXY=http://proxy.example.com:80/ ./cm selenoid start</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>When running <code>cm</code> in container - pass variable via <code>-e</code> flag of the <code>docker</code> command. These variables work because <code>cm</code> is using the same client as <code>docker</code> command.</p>
-</div>
-</li>
-</ol>
-</div>
+Another story with docker.sock, which should be mounted as <code>-v //var/run/docker.sock:/var/run/docker.sock</code> (note two forward slashes at the beginning)
 </td>
 </tr>
 </table>
 </div>
-</li>
-<li>
-<p>Run your tests against Selenoid like you do with regular Selenium hub:</p>
-<div class="literalblock">
-<div class="content">
-<pre>http://localhost:4444/wd/hub</pre>
-</div>
-</div>
-</li>
-<li>
-<p>Selenoid was created to be run in big Selenium clusters and thus has no built-in user interface. This is why trying to open an URL above in browser returns <strong>404</strong> and this is the expected behavior. If something does not work, you can easily check that Selenoid is running with <code>curl</code>:</p>
-<div class="literalblock">
-<div class="content">
-<pre>$ curl http://localhost:4444/status</pre>
-</div>
-</div>
 <div class="paragraph">
-<p>A successful request should return a JSON with browser usage statistics.</p>
+<p>So assuming that configuration file is located at <code>C:\selenoid</code> a typical startup command can look like:</p>
 </div>
-</li>
-<li>
-<p>You can additionally use <a href="http://github.com/aerokube/selenoid-ui">Selenoid UI</a> to see browser screen or consumption statistics. The simplest way is to download and run its binary from <a href="https://github.com/aerokube/selenoid-ui/releases">releases</a> page and start it:</p>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre>$ ./selenoid-ui</pre>
+<pre>docker run -d --name selenoid                   `
+-p 4444:4444                                    `
+-v //var/run/docker.sock:/var/run/docker.sock   `
+-v /c/selenoid:/etc/selenoid:ro                 `
+aerokube/selenoid:latest-release</pre>
 </div>
 </div>
+<div class="sect4">
+<h5 id="_pwd_macros"><a class="anchor" href="#_pwd_macros"></a>PWD Macros</h5>
 <div class="paragraph">
-<p>See <a href="http://aerokube.com/selenoid-ui/latest/">UI documentation</a> for more installation options. By default UI is listening on port 8080. To start using it open the following page in your browser:</p>
+<p>You can use simple macros for <code>pwd</code> (assumed you are on <code>C:</code>):</p>
 </div>
-<div class="literalblock">
+<div class="listingblock">
 <div class="content">
-<pre>http://localhost:8080/</pre>
+<pre>&gt; $current = $PWD -replace "\\", "/" -replace "C", "c"</pre>
 </div>
 </div>
-</li>
-</ol>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_browser_images"><a class="anchor" href="#_browser_images"></a>1.2. Browser Images</h3>
+<h3 id="_browser_images"><a class="anchor" href="#_browser_images"></a>1.3. Browser Images</h3>
 <div class="paragraph">
 <p>We maintain a set of prebuilt Docker container images for different browsers including:</p>
 </div>
@@ -969,7 +1157,7 @@ eth0      Link encap:Ethernet  HWaddr 00:25:90:eb:fb:3e</pre>
 That means version string in JSON should start with version string from capabilities.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 1. Matching Logic</div>
+<div class="title">Example 2. Matching Logic</div>
 <div class="content">
 <div class="listingblock">
 <div class="title">in browsers.json</div>
@@ -1002,7 +1190,7 @@ That means version string in JSON should start with version string from capabili
 <p>Image must be already pulled. <a href="https://github.com/aerokube/cm">Configuration Manager</a> can help with this task.</p>
 </div>
 <div class="exampleblock">
-<div class="title">Example 2. Valid images</div>
+<div class="title">Example 3. Valid images</div>
 <div class="content">
 <div class="paragraph">
 <p>Pulled from internal docker registry:</p>
@@ -1308,7 +1496,161 @@ To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_reloading_configuration"><a class="anchor" href="#_reloading_configuration"></a>2.6. Reloading Configuration</h3>
+<h3 id="_video_recording"><a class="anchor" href="#_video_recording"></a>2.6. Video Recording</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This feature only works when browsers are run in containers. This can be both vnc or non-vnc containers.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid can capture browser screen and save it to <a href="https://en.wikipedia.org/wiki/MPEG-4">MPEG-4</a> video file using <a href="https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC">H264</a> codec.
+Video recording works by attaching a separate container with <a href="https://www.ffmpeg.org/">video capturing software</a> to running browser container.</p>
+</div>
+<div class="paragraph">
+<p>To setup this feature you should:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Pull video recorder image once: <code>docker pull selenoid/video-recorder</code></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p><strong>Without docker</strong> videos will be stored in <code>video</code> directory, relative to binary.</p>
+</div>
+<div class="paragraph">
+<p><strong>With docker</strong>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Mount host directory for video to <code>/opt/selenoid/video/</code> (this is default value for <code>video-output-dir</code> selenoid arg in docker)</p>
+</li>
+<li>
+<p>Pass an additional <code>OVERRIDE_VIDEO_OUTPUT_DIR</code> environment variable with absolute path to video directory on host machine.
+This is required because of video recorder, created by selenoid should know about host mount point, but not selenoid&#8217;s one.
+(Selenoid and video recorder connected via host)</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This environment variable thing can be changed in future if we will find a way to link to selenoid volume directly.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content">
+<pre>$ docker run -d
+--name selenoid                                 \
+-p 4444:4444                                    \
+-v /var/run/docker.sock:/var/run/docker.sock    \
+-v `pwd`/config/:/etc/selenoid/:ro              \
+-v `pwd`/video/:/opt/selenoid/video/            \
+-e OVERRIDE_VIDEO_OUTPUT_DIR=`pwd`/video/       \
+aerokube/selenoid:latest-release</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+All this stuff is automated by <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> <code>selenoid start</code> command
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_on_windows"><a class="anchor" href="#_on_windows"></a>2.6.1. On Windows</h4>
+<div class="paragraph">
+<p>With absolute path your command will look like:</p>
+</div>
+<div class="listingblock">
+<div class="title">Windows PowerShell</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">&gt; docker volume create selenoid-videos
+&gt; $current = $PWD -replace &quot;\\&quot;, &quot;/&quot; -replace &quot;C&quot;, &quot;c&quot;    <i class="conum" data-value="1"></i><b>(1)</b>
+&gt; docker run -d                                         `
+--name selenoid                                         `
+-p 4444:4444                                            `
+-v //var/run/docker.sock:/var/run/docker.sock           `
+-v ${current}/config/:/etc/selenoid/:ro                 `
+-v /c/selenoid/video/:/opt/selenoid/video/              ` <i class="conum" data-value="2"></i><b>(2)</b>
+-e OVERRIDE_VIDEO_OUTPUT_DIR=/c/selenoid/video/         ` <i class="conum" data-value="3"></i><b>(3)</b>
+aerokube/selenoid:latest-release</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Simple macros to get $PWD with compatible form assumed your directory located on <code>C:</code> drive</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Should be absolute path in compatible form</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Should be same as in (2)</td>
+</tr>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_video_files_access_with_selenoid"><a class="anchor" href="#_video_files_access_with_selenoid"></a>Video files access with Selenoid</h5>
+<div class="paragraph">
+<p>You can access recorded video files using the following URL:</p>
+</div>
+<div class="listingblock">
+<div class="title">Direct link to file</div>
+<div class="content">
+<pre>http://selenoid-host.example.com:4444/video/&lt;filename&gt;.mp4</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Direct link will work only after session finish as of selenoid renames random filename to <code>&lt;session-id&gt;.mp4</code> (by default) at the session close.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To see all available files use:</p>
+</div>
+<div class="listingblock">
+<div class="title">All video files list</div>
+<div class="content">
+<pre>http://selenoid-host.example.com:4444/video/</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reloading_configuration"><a class="anchor" href="#_reloading_configuration"></a>2.7. Reloading Configuration</h3>
 <div class="paragraph">
 <p>To reload configuration without restart send SIGHUP:</p>
 </div>
@@ -1342,7 +1684,11 @@ Use only one of these commands.
 <div class="listingblock">
 <div class="title">Result</div>
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="javascript">{<span class="key"><span class="delimiter">&quot;</span><span class="content">uptime</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">2m46.854829503s</span><span class="delimiter">&quot;</span></span>,<span class="key"><span class="delimiter">&quot;</span><span class="content">lastReloadTime</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">2017-05-12 12:33:06.322038542 +0300 MSK</span><span class="delimiter">&quot;</span></span>,<span class="key"><span class="delimiter">&quot;</span><span class="content">numRequests</span><span class="delimiter">&quot;</span></span>:<span class="integer">42</span>}</code></pre>
+<pre class="CodeRay highlight"><code data-lang="javascript">{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">uptime</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2m46.854829503s</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">lastReloadTime</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2017-05-12 12:33:06.322038542 +0300 MSK</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">numRequests</span><span class="delimiter">&quot;</span></span>: <span class="integer">42</span>
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1350,7 +1696,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.7. Selenoid with Docker Compose</h3>
+<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.8. Selenoid with Docker Compose</h3>
 <div class="paragraph">
 <p>To avoid network problems between browser drivers inside containers and Selenoid when using <a href="https://docs.docker.com/compose/">Docker Compose</a> for combining with another services (such as UI or ggr) you need to enable <strong>bridge</strong> network mode for all services:</p>
 </div>
@@ -1370,20 +1716,6 @@ Use only one of these commands.
 </div>
 <div class="paragraph">
 <p>Complete example with Selenoid UI can be found in <a href="http://aerokube.com/selenoid-ui/latest/#_with_docker_compose">Selenoid UI Documentation</a></p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_selenoid_under_windows"><a class="anchor" href="#_selenoid_under_windows"></a>2.8. Selenoid under Windows</h3>
-<div class="paragraph">
-<p>While we normally recommend to start Selenoid using <a href="http://aerokube.com/cm/latest">Configuration Manager</a>, it is possible to start it under Windows manually. The main difference from Unix operating systems is how volumes are mounted. In any Windows paths back slashes (<code>\</code>) should be replaced by forward slashes (<code>/</code>) and drive letter should be lower cased. For example for <code>C:\Users\admin</code> we get <code>c:/Users/admin</code>. So assuming that configuration file is located at <code>C:\selenoid</code> a typical startup command can look like:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>&gt; docker run -d --name selenoid -v //var/run/docker.sock:/var/run/docker.sock -p 4444:4444 -v c:/selenoid:/etc/selenoid:ro aerokube/selenoid:latest-release</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The most strange part here is <code>-v //var/run/docker.sock:/var/run/docker.sock</code> but this is how (with two forward slashes) Docker socket should be mounted in Docker for Windows.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1634,11 +1966,11 @@ Use only one of these commands.
 <div class="sect2">
 <h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.10. Selenoid CLI Flags</h3>
 <div class="paragraph">
-<p>The following flags are supported by <code><code>selenoid</code></code> command:</p>
+<p>The following flags are supported by <code>selenoid</code> command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>-capture-driver-logs
+<pre>-capture-driver-logs
     Whether to add driver process logs to Selenoid output
 -conf string
     Browsers configuration file (default "config/browsers.json")
@@ -1671,7 +2003,9 @@ Use only one of these commands.
 -timeout duration
     Session idle timeout in time.Duration format (default 1m0s)
 -version
-    Show version and exit</code></pre>
+    Show version and exit
+-video-output-dir
+    Directory to save recorded video to (default "video")</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1679,7 +2013,7 @@ Use only one of these commands.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>$ ./selenoid -conf /my/custom/browsers.json -limit 10</code></pre>
+<pre class="CodeRay highlight"><code>$ ./selenoid -conf ~/.aerokube/selenoid/browsers.json -limit 10</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1689,10 +2023,10 @@ Use only one of these commands.
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash"># docker run -d --name selenoid                     \
     -p 4444:4444                                    \
-    -v /etc/selenoid:/etc/selenoid:ro               \
+    -v ~/.aerokube/selenoid/:/etc/selenoid/:ro      \
     -v /var/run/docker.sock:/var/run/docker.sock    \
     aerokube/selenoid:latest-release                \
-    -conf /my/custom/browsers.json -limit 10</code></pre>
+    -conf /etc/selenoid/browsers.json -limit 10 -video-output-dir /opt/selenoid/video/</code></pre>
 </div>
 </div>
 </div>
@@ -1703,59 +2037,60 @@ Use only one of these commands.
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_special_capabilities"><a class="anchor" href="#_special_capabilities"></a>3.1. Special Capabilities</h3>
+<div class="paragraph">
+<p>Selenoid can improve some automation aspects with custom capabilities.
+You can pass it in tests to enable/disable some features.</p>
+</div>
 <div class="sect3">
-<h4 id="_live_browser_screen"><a class="anchor" href="#_live_browser_screen"></a>3.1.1. Live Browser Screen</h4>
+<h4 id="_live_browser_screen_enablevnc"><a class="anchor" href="#_live_browser_screen_enablevnc"></a>3.1.1. Live Browser Screen: enableVNC</h4>
 <div class="paragraph">
-<p>Selenoid supports showing browser screen during test execution. This works with containers having <a href="https://en.wikipedia.org/wiki/Virtual_Network_Computing">VNC</a> server installed. To see browser screen:</p>
+<p>Selenoid supports showing browser screen during test execution.
+This works with containers having <a href="https://en.wikipedia.org/wiki/Virtual_Network_Computing">VNC</a> server installed (VNC column of <a href="#_browser_image_information">Browser Image information</a>).
+To see browser screen:</p>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Pass <code><code>enableVNC</code></code> capability in tests:</p>
 <div class="listingblock">
+<div class="title">Type: boolean</div>
 <div class="content">
-<pre class="CodeRay highlight"><code>enableVNC: true</code></pre>
+<pre>enableVNC: true</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Value should be boolean, not string.</p>
-</div>
-</li>
-<li>
-<p>Launch <a href="http://aerokube.com/selenoid-ui/latest/">Selenoid UI</a> to see the screen.</p>
-</li>
-</ol>
+<p>Then launch <a href="http://aerokube.com/selenoid-ui/latest/">Selenoid UI</a> to see the screen.</p>
 </div>
 <div class="paragraph">
-<p>This works by proxying VNC port from started container to <code><code><a href="http://localhost:4444/vnc/&lt;session-id&gt" class="bare">http://localhost:4444/vnc/&lt;session-id&gt</a>;</code></code> where <code><code>&lt;session-id&gt;</code></code> is Selenium session ID.</p>
+<p>This works by proxying VNC port from started container to <code><code><a href="http://localhost:4444/vnc/&lt;session-id&gt" class="bare">http://localhost:4444/vnc/&lt;session-id&gt</a>;</code></code> over WebSocket, where <code><code>&lt;session-id&gt;</code></code> is Selenium session ID.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_custom_screen_resolution"><a class="anchor" href="#_custom_screen_resolution"></a>3.1.2. Custom Screen Resolution</h4>
+<h4 id="_custom_screen_resolution_screenresolution"><a class="anchor" href="#_custom_screen_resolution_screenresolution"></a>3.1.2. Custom Screen Resolution: screenResolution</h4>
 <div class="paragraph">
-<p>Selenoid allows you to set custom screen resolution in containers being run. To do that simply pass <code><code>screenResolution</code></code> capability in your tests in form <code><code>width x height x color-depth</code></code>:</p>
+<p>Selenoid allows you to set custom screen resolution in containers being run:</p>
 </div>
 <div class="listingblock">
+<div class="title">Type: string, format: &lt;width&gt;x&lt;height&gt;x&lt;colors-depth&gt;</div>
 <div class="content">
-<pre class="CodeRay highlight"><code>screenResolution: "1280x1024x24"</code></pre>
+<pre>screenResolution: "1280x1024x24"</pre>
 </div>
 </div>
-<div class="admonitionblock note">
+<div class="admonitionblock warning">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-<div class="olist arabic">
-<ol class="arabic">
+<div class="ulist">
+<ul>
 <li>
-<p>This capability sets only screen resolution - not browser window size. Most of browsers have some default window size value this is why your screenshot size can be smaller than screen resolution specified in capability. You should manually resize window to desired width and height.</p>
+<p>This capability sets only screen resolution - not browser window size.
+Most of browsers have some default window size value this is why your screenshot size can be smaller than screen resolution specified in capability.
+You should manually resize window to desired width and height.</p>
 </li>
 <li>
-<p>So far as our containers run headless browsers in Xvfb without installed window manager <code>maximize</code> operation does not work. You need to use <code>setSize</code> method instead.</p>
+<p>So far as our containers run headless browsers in Xvfb without installed window manager <code>maximize</code> operation does not work.
+You need to use <code>setSize</code> method instead.</p>
 </li>
-</ol>
+</ul>
 </div>
 </td>
 </tr>
@@ -1763,7 +2098,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_video_recording"><a class="anchor" href="#_video_recording"></a>3.1.3. Video Recording</h4>
+<h4 id="_video_recording_enablevideo_videoname_videoscreensize"><a class="anchor" href="#_video_recording_enablevideo_videoname_videoscreensize"></a>3.1.3. Video Recording: enableVideo, videoName, videoScreenSize</h4>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -1771,95 +2106,73 @@ Use only one of these commands.
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-This feature only works when browsers are run in containers.
+This feature requires some preparation. Please refer <a href="#_video_recording">Video Recording</a> section for details.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Selenoid can capture browser screen and save it to <a href="https://en.wikipedia.org/wiki/MPEG-4">MPEG-4</a> video file using <a href="https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC">H264</a> codec. Video recording works by attaching a separate container with <a href="https://www.ffmpeg.org/">video capturing software</a> to running browser container.</p>
+<p>To enable video recording for session, add:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: boolean</div>
+<div class="content">
+<pre>enableVideo: true</pre>
+</div>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>To enable video recording - just pass an additional capability in tests:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>enableVideo: true</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Value should be boolean, not string.</p>
-</div>
-</li>
-<li>
-<p>All video files are saved to the same directory specified by <code>-video-output-dir</code> flag.</p>
-</li>
-<li>
-<p>By default files are named <code>&lt;session-id&gt;.mp4</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session used to record video. To provide custom video name add one more capability:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>videoName: "my-cool-video.mp4"</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>It is important to add <code>mp4</code> file extension.</p>
-</div>
-</li>
-<li>
-<p>By default the entire screen picture is being recorded. Specifying <code>screenResolution</code> capability changes recorded video size (width and height) accordingly. You can override video size by passing a capability:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>videoScreenSize: "1024x768"</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>If video size is less than actual browser screen size - only part of the screen fitting into specified size will be visible (measured from the left up corner).</p>
-</div>
-</li>
-<li>
-<p>When setting up Selenoid manually you need to pull video recorder image once:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>$ docker pull selenoid/video-recorder</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>You can access recorded video files using the following URL:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>http://selenoid-host.example.com:4444/video/&lt;filename&gt;.mp4</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>To see all available files use:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>http://selenoid-host.example.com:4444/video/</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>When Selenoid is running inside Docker container it is important to pass an additional <code>OVERRIDE_VIDEO_OUTPUT_DIR</code> environment variable:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>$ docker run -d --name selenoid -p 4444:4444 -v /var/run/docker.sock:/var/run/docker.sock -v /path/to/config/dir:/etc/selenoid -v /path/to/video/dir:/output -e OVERRIDE_VIDEO_OUTPUT_DIR=/path/to/video/dir aerokube/selenoid:latest-release</code></pre>
-</div>
-</div>
+<p>By default files are named <code>&lt;session-id&gt;.mp4</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
+To provide custom video name specify:</p>
 </li>
 </ul>
 </div>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>videoName: "my-cool-video.mp4"</pre>
 </div>
-<div class="sect3">
-<h4 id="_custom_test_name"><a class="anchor" href="#_custom_test_name"></a>3.1.4. Custom Test Name</h4>
-<div class="paragraph">
-<p>For debugging purposes it is often useful to give a distinct name to every test case. When working with Selenoid you can set test case name by passing the following capability:</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+It is important to add <code>mp4</code> file extension.
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>By default the entire screen picture is being recorded.
+Specifying <code>screenResolution</code> capability changes recorded video size (width and height) accordingly.
+You can override video screen size by passing a capability. In case of <code>videoScreenSize</code>
+resolution is less than actual, screen on video will be trimmed starting from top-left corner:</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
+<div class="title">Type: string</div>
 <div class="content">
-<pre class="CodeRay highlight"><code>name: "myCoolTestName"</code></pre>
+<pre>videoScreenSize: "1024x768"</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_custom_test_name_name"><a class="anchor" href="#_custom_test_name_name"></a>3.1.4. Custom Test Name: name</h4>
+<div class="paragraph">
+<p>For debugging purposes it is often useful to give a distinct name to every test case.
+When working with Selenoid you can set test case name by passing the following capability:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>name: "myCoolTestName"</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1867,45 +2180,51 @@ This feature only works when browsers are run in containers.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_per_session_time_zone"><a class="anchor" href="#_per_session_time_zone"></a>3.1.5. Per-session Time Zone</h4>
+<h4 id="_per_session_time_zone_timezone"><a class="anchor" href="#_per_session_time_zone_timezone"></a>3.1.5. Per-session Time Zone: timeZone</h4>
 <div class="paragraph">
-<p>Some tests require particular time zone to be set in operating system. To achieve this with Selenoid simply set one more capability:</p>
+<p>Some tests require particular time zone to be set in operating system.
+To achieve this with Selenoid use:</p>
 </div>
 <div class="listingblock">
+<div class="title">Type: string</div>
 <div class="content">
-<pre class="CodeRay highlight"><code>timeZone: "Europe/Moscow"</code></pre>
+<pre>timeZone: "Europe/Moscow"</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You can find most of available time zones <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">here</a>. Without this capability launched browser containers will have the same timezone as Selenoid one.</p>
+<p>You can find most of available time zones <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">here</a>.
+Without this capability launched browser containers will have the same timezone as Selenoid one.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_links_to_application_containers"><a class="anchor" href="#_links_to_application_containers"></a>3.1.6. Links to Application Containers</h4>
+<h4 id="_links_to_application_containers_applicationcontainers"><a class="anchor" href="#_links_to_application_containers_applicationcontainers"></a>3.1.6. Links to Application Containers: applicationContainers</h4>
 <div class="paragraph">
-<p>Sometimes you may need to link browser container to application container running on the same host machine. This allows you to use cool URLs like <code><a href="http://my-cool-app/" class="bare">http://my-cool-app/</a></code> in tests. To achieve this simply pass information about one or more desired links via capability:</p>
+<p>Sometimes you may need to link browser container to application container running on the same host machine.
+This allows you to use cool URLs like <code><a href="http://my-cool-app/" class="bare">http://my-cool-app/</a></code> in tests.
+To achieve this simply pass information about one or more desired links via capability:</p>
 </div>
 <div class="listingblock">
+<div class="title">Type: string, format: &lt;container-name&gt;[:alias] (comma-separated)</div>
 <div class="content">
-<pre class="CodeRay highlight"><code>applicationContainers: "my-app:some-alias,another-app"</code></pre>
+<pre>applicationContainers: "spring-application-main:my-cool-app,spring-application-gateway"</pre>
 </div>
-</div>
-<div class="paragraph">
-<p>Links are specified as a comma-separated list of <code>&lt;name&gt;[:&lt;alias&gt;]</code> pairs.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_hosts_entries"><a class="anchor" href="#_hosts_entries"></a>3.1.7. Hosts Entries</h4>
+<h4 id="_hosts_entries_hostsentries"><a class="anchor" href="#_hosts_entries_hostsentries"></a>3.1.7. Hosts Entries: hostsEntries</h4>
 <div class="paragraph">
-<p>Although you can configure a separate list of <code>/etc/hosts</code> entries for every browser image in <a href="#_browsers_configuration_file">Browsers Configuration File</a> sometimes you may need to add more entries for particular test cases. This can be easily achieved by passing a capability:</p>
+<p>Although you can configure a separate list of <code>/etc/hosts</code> entries for every browser image in <a href="#_browsers_configuration_file">Browsers Configuration File</a>
+sometimes you may need to add more entries for particular test cases. This can be easily achieved with:</p>
 </div>
 <div class="listingblock">
+<div class="title">Type: string, format: &lt;hostname&gt;:&lt;ip-address&gt; (comma-separated)</div>
 <div class="content">
-<pre class="CodeRay highlight"><code>hostsEntries: "example.com:192.168.0.1,test.com:192.168.0.2"</code></pre>
+<pre>hostsEntries: "example.com:192.168.0.1,test.com:192.168.0.2"</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This capability represents a comma-separated list of <code>&lt;hostname&gt;:&lt;ip-address&gt;</code> entries to be added to <code>/etc/hosts</code>. Entries from capabilities are inserted to <code>/etc/hosts</code> before entries from browsers configuration file. Thus entries from capabilities override entries from configuration file if some hosts are equal.</p>
+<p>Entries will be inserted to <code>/etc/hosts</code> before entries from browsers configuration file.
+Thus entries from capabilities override entries from configuration file if some hosts are equal.</p>
 </div>
 </div>
 </div>
@@ -2094,7 +2413,7 @@ version = 11</code></pre>
 </div>
 </li>
 <li>
-<p>Edit file like the following (three dots mean some not shown lines):</p>
+<p>Edit file like the following:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="go">[agent]
@@ -2155,6 +2474,9 @@ one_min.selenoid_example_com.httpjson_selenoid.total</code></pre>
 </div>
 </li>
 </ol>
+</div>
+<div class="paragraph">
+<p>telegraf+influxdb+graphana</p>
 </div>
 </div>
 </div>
@@ -2994,7 +3316,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-11-26 10:30:08 UTC
+Last updated 2017-11-27 11:16:23 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
