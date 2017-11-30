@@ -37,7 +37,7 @@ You should manually resize window to desired width and height.
 You need to use `setSize` method instead.
 ====
 
-=== Video Recording: enableVideo, videoName, videoScreenSize
+=== Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate
 
 NOTE: This feature requires some preparation. Please refer <<Video Recording>> section for details.
 
@@ -67,6 +67,13 @@ resolution is less than actual, screen on video will be trimmed starting from to
 .Type: string
 ----
 videoScreenSize: "1024x768"
+----
+
+* Default video frame rate is `12` frames per second. Specifying `videoFrameRate` capability changes this value:
+
+.Type: int
+----
+videoFrameRate: 24
 ----
 
 === Custom Test Name: name
