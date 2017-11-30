@@ -6,20 +6,18 @@ Video recording works by attaching a separate container with https://www.ffmpeg.
 
 To setup this feature you should:
 
-. Pull video recorder image once: `docker pull selenoid/video-recorder`
+. Pull video recorder image once:
++
+```
+$ docker pull selenoid/video-recorder
+```
 
-*Without docker* videos will be stored in `video` directory, relative to binary.
+. When running Selenoid **in Docker container**:
+.. Mount from host a directory (e.g. `~/.aerokube/selenoid/video`) to store video files to `/opt/selenoid/video`.
+.. Pass an additional `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable with absolute path to video directory on host machine. This is required because video recorder container, automatically created by Selenoid should save video to host machine video storage directory.
+. When running Selenoid **as a binary** - videos will be stored in `video` directory inside current working directory. 
 
-*With docker*:
-
-. Mount host directory for video to `/opt/selenoid/video/` (this is default value for `video-output-dir` selenoid arg in docker)
-. Pass an additional `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable with absolute path to video directory on host machine.
-  This is required because of video recorder, created by selenoid should know about host mount point, but not selenoid's one.
-  (Selenoid and video recorder connected via host)
-
-NOTE: This environment variable thing can be changed in future if we will find a way to link to selenoid volume directly.
-
-.Example
+.Example Docker Command
 ----
 $ docker run -d
 --name selenoid                                 \
@@ -31,7 +29,7 @@ $ docker run -d
 aerokube/selenoid:latest-release
 ----
 
-TIP: All this stuff is automated by http://aerokube.com/cm/latest/[Configuration Manager] `selenoid start` command
+TIP: All these actions are automatically done when starting Selenoid via http://aerokube.com/cm/latest/[Configuration Manager] `selenoid start` command.
 
 === On Windows
 
@@ -56,20 +54,20 @@ aerokube/selenoid:latest-release
 <3> Should be same as in (2)
 
 
-==== Video files access with Selenoid
+=== Downloading Video Files from Selenoid
 
 You can access recorded video files using the following URL:
 
-.Direct link to file
+.Direct Link to File
 ----
 http://selenoid-host.example.com:4444/video/<filename>.mp4
 ----
 
-NOTE: Direct link will work only after session finish as of selenoid renames random filename to `<session-id>.mp4` (by default) at the session close.
+NOTE: Direct link will works only after session has finished because Selenoid renames temporary filename to `<session-id>.mp4` (by default) at the session close.
 
 To see all available files use:
 
-.All video files list
+.Listing All Video Files
 ----
 http://selenoid-host.example.com:4444/video/
 ----

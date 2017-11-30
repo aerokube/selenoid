@@ -3,7 +3,7 @@
 While we normally recommend to start Selenoid using http://aerokube.com/cm/latest[Configuration Manager] on any platform,
 it is possible to start it under Windows manually.
 
-NOTE: Most of the differences are coupled to Docker, so please refer to Docker documentation on any docker errors first.
+NOTE: Most of the differences are related to Docker, so please refer to Docker documentation on any errors first.
 
 The main difference from Unix operating systems is how volumes are mounted.
 In any Windows paths back slashes (`\`) should be replaced by forward slashes (`/`) and drive letter should be lower cased.
@@ -11,26 +11,27 @@ Also start with forward slash and remove colon.
 
 .Mount directory
 ====
-With `C:\Users\admin` we get `/c/Users/admin`.
+`C:\Users\admin` becomes `/c/Users/admin`
 ====
 
-NOTE: Another story with docker.sock, which should be mounted as `-v //var/run/docker.sock:/var/run/docker.sock` (note two forward slashes at the beginning)
+NOTE: Another story with `docker.sock`, which should be mounted as `-v //var/run/docker.sock:/var/run/docker.sock` (note two forward slashes at the beginning)
 
-So assuming that configuration file is located at `C:\selenoid` a typical startup command can look like:
+So assuming that configuration file is located at `C:\Users\admin\selenoid` a typical startup command can look like:
 
 ----
 docker run -d --name selenoid                   `
 -p 4444:4444                                    `
 -v //var/run/docker.sock:/var/run/docker.sock   `
--v /c/selenoid:/etc/selenoid:ro                 `
+-v /c/Users/admin/selenoid:/etc/selenoid:ro                 `
 aerokube/selenoid:latest-release
 ----
 
-==== PWD Macros
-
-You can use simple macros for `pwd` (assumed you are on `C:`):
+[TIP]
+====
+You can use simple Powershell macros to automatically get correct `$PWD` value (assumed you are on `C:`):
 
 ----
 > $current = $PWD -replace "\\", "/" -replace "C", "c"
 ----
+====
 

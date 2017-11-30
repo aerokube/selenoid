@@ -12,6 +12,10 @@ services:
     volumes:
       - "$PWD:/etc/selenoid"
       - "/var/run/docker.sock:/var/run/docker.sock"
+      - "$PWD:/opt/selenoid/video"
+    environment:
+      - OVERRIDE_VIDEO_OUTPUT_DIR=$PWD
+    command: ["-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video"]        
     ports:
       - "4444:4444"     
 ----
