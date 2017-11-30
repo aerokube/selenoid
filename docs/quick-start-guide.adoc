@@ -12,7 +12,7 @@ from https://github.com/aerokube/cm/releases/latest[releases] page and run one c
 Running this command will configure and start Selenoid automatically. Please refer to corresponding http://aerokube.com/cm/latest/[Quick Start with Configuration Manager] section for more details.
 ====
 
-This guide shows how to start Selenoid manually. when in doubt take a look at Configuration Manager first.
+This guide shows how to start Selenoid manually. When in doubt take a look at Configuration Manager first.
 
 WARNING: This guide assumes you already know how to deal with command line and know basic Docker commands.
 
@@ -46,23 +46,23 @@ WARNING: This guide assumes you already know how to deal with command line and k
 
 . Download binary for your operating system from https://github.com/aerokube/selenoid/releases/latest[releases] page
 and save it as `selenoid` (or `selenoid.exe` on windows).
-
++
 NOTE: Add execution permission in case of *nix os-type with `chmod +x selenoid`.
 
 . Then run:
-
++
 .*nix
 ----
 ./selenoid
 ----
-
++
 .Windows
 ----
 selenoid.exe
 ----
 
-It should write to console something like:
-
+. It should write to console something like:
++
 ----
 2017/11/26 21:23:43 Loading configuration files...
 2017/11/26 21:23:43 Loaded configuration from [config/browsers.json]
