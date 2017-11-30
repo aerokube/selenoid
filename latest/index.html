@@ -652,7 +652,7 @@ from <a href="https://github.com/aerokube/cm/releases/latest">releases</a> page 
 </table>
 </div>
 <div class="paragraph">
-<p>This guide shows how to start Selenoid manually. when in doubt take a look at Configuration Manager first.</p>
+<p>This guide shows how to start Selenoid manually. When in doubt take a look at Configuration Manager first.</p>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -708,9 +708,6 @@ This guide assumes you already know how to deal with command line and know basic
 <li>
 <p>Download binary for your operating system from <a href="https://github.com/aerokube/selenoid/releases/latest">releases</a> page
 and save it as <code>selenoid</code> (or <code>selenoid.exe</code> on windows).</p>
-</li>
-</ol>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -723,13 +720,9 @@ Add execution permission in case of *nix os-type with <code>chmod +x selenoid</c
 </tr>
 </table>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
+</li>
 <li>
 <p>Then run:</p>
-</li>
-</ol>
-</div>
 <div class="listingblock">
 <div class="title">*nix</div>
 <div class="content">
@@ -742,9 +735,9 @@ Add execution permission in case of *nix os-type with <code>chmod +x selenoid</c
 <pre>selenoid.exe</pre>
 </div>
 </div>
-<div class="paragraph">
+</li>
+<li>
 <p>It should write to console something like:</p>
-</div>
 <div class="listingblock">
 <div class="content">
 <pre>2017/11/26 21:23:43 Loading configuration files...
@@ -754,6 +747,9 @@ Add execution permission in case of *nix os-type with <code>chmod +x selenoid</c
 
 2017/11/26 21:23:43 Listening on :4444</pre>
 </div>
+</div>
+</li>
+</ol>
 </div>
 </div>
 <div class="sect4">
@@ -1554,9 +1550,6 @@ Video recording works by attaching a separate container with <a href="https://ww
 </li>
 <li>
 <p>When running Selenoid <strong>as a binary</strong> - videos will be stored in <code>video</code> directory inside current working directory.</p>
-</li>
-</ol>
-</div>
 <div class="listingblock">
 <div class="title">Example Docker Command</div>
 <div class="content">
@@ -1569,6 +1562,9 @@ Video recording works by attaching a separate container with <a href="https://ww
 -e OVERRIDE_VIDEO_OUTPUT_DIR=`pwd`/video/       \
 aerokube/selenoid:latest-release</pre>
 </div>
+</div>
+</li>
+</ol>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -2133,9 +2129,6 @@ This feature requires some preparation. Please refer <a href="#_video_recording"
 <li>
 <p>By default files are named <code>&lt;session-id&gt;.mp4</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
 To provide custom video name specify:</p>
-</li>
-</ul>
-</div>
 <div class="listingblock">
 <div class="title">Type: string</div>
 <div class="content">
@@ -2154,34 +2147,29 @@ It is important to add <code>mp4</code> file extension.
 </tr>
 </table>
 </div>
-<div class="ulist">
-<ul>
+</li>
 <li>
 <p>By default the entire screen picture is being recorded.
 Specifying <code>screenResolution</code> capability changes recorded video size (width and height) accordingly.
 You can override video screen size by passing a capability. In case of <code>videoScreenSize</code>
 resolution is less than actual, screen on video will be trimmed starting from top-left corner:</p>
-</li>
-</ul>
-</div>
 <div class="listingblock">
 <div class="title">Type: string</div>
 <div class="content">
 <pre>videoScreenSize: "1024x768"</pre>
 </div>
 </div>
-<div class="ulist">
-<ul>
+</li>
 <li>
 <p>Default video frame rate is <code>12</code> frames per second. Specifying <code>videoFrameRate</code> capability changes this value:</p>
-</li>
-</ul>
-</div>
 <div class="listingblock">
 <div class="title">Type: int</div>
 <div class="content">
 <pre>videoFrameRate: 24</pre>
 </div>
+</div>
+</li>
+</ul>
 </div>
 </div>
 <div class="sect3">
@@ -3337,7 +3325,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-11-30 09:53:05 UTC
+Last updated 2017-11-30 16:19:43 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
