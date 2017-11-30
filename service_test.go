@@ -233,6 +233,8 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 		ScreenResolution:      "1024x768",
 		VNC:                   true,
 		Video:                 true,
+		VideoScreenSize:       "1024x768",
+		VideoFrameRate:        25,
 		HostsEntries:          "example.com:192.168.0.1,test.com:192.168.0.2",
 		ApplicationContainers: "one,two",
 		TimeZone:              "Europe/Moscow",

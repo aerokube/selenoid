@@ -280,6 +280,10 @@ func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint6
 	if videoScreenSize != "" {
 		env = append(env, fmt.Sprintf("VIDEO_SIZE=%s", videoScreenSize))
 	}
+	videoFrameRate := caps.VideoFrameRate
+	if videoFrameRate > 0 {
+		env = append(env, fmt.Sprintf("FRAME_RATE=%d", videoFrameRate))
+	}
 	log.Printf("[%d] [CREATING_VIDEO_CONTAINER] [%s]\n", requestId, videoContainerImage)
 	videoContainer, err := cl.ContainerCreate(ctx,
 		&ctr.Config{
