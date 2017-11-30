@@ -50,27 +50,26 @@ enableVideo: true
 
 * By default files are named `<session-id>.mp4` where `<session-id>` is a unique identifier of Selenium session.
 To provide custom video name specify:
-
++
 .Type: string
 ----
 videoName: "my-cool-video.mp4"
 ----
-
++
 WARNING: It is important to add `mp4` file extension.
-
 
 * By default the entire screen picture is being recorded.
 Specifying `screenResolution` capability changes recorded video size (width and height) accordingly.
 You can override video screen size by passing a capability. In case of `videoScreenSize`
 resolution is less than actual, screen on video will be trimmed starting from top-left corner:
-
++
 .Type: string
 ----
 videoScreenSize: "1024x768"
 ----
 
 * Default video frame rate is `12` frames per second. Specifying `videoFrameRate` capability changes this value:
-
++
 .Type: int
 ----
 videoFrameRate: 24
