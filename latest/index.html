@@ -579,7 +579,7 @@ table.CodeRay td.code>pre{padding:0}
 <ul class="sectlevel3">
 <li><a href="#_live_browser_screen_enablevnc">3.1.1. Live Browser Screen: enableVNC</a></li>
 <li><a href="#_custom_screen_resolution_screenresolution">3.1.2. Custom Screen Resolution: screenResolution</a></li>
-<li><a href="#_video_recording_enablevideo_videoname_videoscreensize">3.1.3. Video Recording: enableVideo, videoName, videoScreenSize</a></li>
+<li><a href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate">3.1.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate</a></li>
 <li><a href="#_custom_test_name_name">3.1.4. Custom Test Name: name</a></li>
 <li><a href="#_per_session_time_zone_timezone">3.1.5. Per-session Time Zone: timeZone</a></li>
 <li><a href="#_links_to_application_containers_applicationcontainers">3.1.6. Links to Application Containers: applicationContainers</a></li>
@@ -2106,7 +2106,7 @@ You need to use <code>setSize</code> method instead.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_video_recording_enablevideo_videoname_videoscreensize"><a class="anchor" href="#_video_recording_enablevideo_videoname_videoscreensize"></a>3.1.3. Video Recording: enableVideo, videoName, videoScreenSize</h4>
+<h4 id="_video_recording_enablevideo_videoname_videoscreensize_videoframerate"><a class="anchor" href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate"></a>3.1.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate</h4>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -2168,6 +2168,19 @@ resolution is less than actual, screen on video will be trimmed starting from to
 <div class="title">Type: string</div>
 <div class="content">
 <pre>videoScreenSize: "1024x768"</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Default video frame rate is <code>12</code> frames per second. Specifying <code>videoFrameRate</code> capability changes this value:</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="title">Type: int</div>
+<div class="content">
+<pre>videoFrameRate: 24</pre>
 </div>
 </div>
 </div>
@@ -3324,7 +3337,7 @@ Firefox images below require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-11-30 05:48:55 UTC
+Last updated 2017-11-30 09:53:05 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
