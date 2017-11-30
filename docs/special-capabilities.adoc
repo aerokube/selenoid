@@ -17,7 +17,7 @@ enableVNC: true
 
 Then launch http://aerokube.com/selenoid-ui/latest/[Selenoid UI] to see the screen.
 
-This works by proxying VNC port from started container to ```http://localhost:4444/vnc/<session-id>``` over WebSocket, where ```<session-id>``` is Selenium session ID.
+This works by proxying VNC port from started container to `http://localhost:4444/vnc/<session-id>` to WebSocket, where `<session-id>` is Selenium session ID.
 
 === Custom Screen Resolution: screenResolution
 
