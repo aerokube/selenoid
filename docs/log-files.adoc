@@ -50,6 +50,7 @@ The following statuses are available:
 | CONTAINER_REMOVED | Docker container was successfully removed 
 | CONTAINER_STARTED | Docker container has successfully started 
 | CREATING_CONTAINER | Docker container with browser is creating 
+| DELETED_VIDEO_FILE | Video file was deleted by user 
 | ENVIRONMENT_NOT_AVAILABLE | Browser with desired name and version does not exist
 | FAILED_TO_REMOVE_CONTAINER | Failed to remove Docker container 
 | FAILED_TO_TERMINATE_PROCESS | An error occurred while terminating driver process 
