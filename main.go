@@ -240,6 +240,33 @@ func ping(w http.ResponseWriter, _ *http.Request) {
 	}{time.Since(startTime).String(), conf.LastReloadTime.String(), getSerial()})
 }
 
+const videoPath = "/video/"
+
+func video(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodDelete {
+		deleteFileIfExists(w, r)
+		return
+	}
+	fileServer := http.StripPrefix(videoPath, http.FileServer(http.Dir(videoOutputDir)))
+	fileServer.ServeHTTP(w, r)
+}
+
+func deleteFileIfExists(w http.ResponseWriter, r *http.Request) {
+	fileName := strings.TrimPrefix(r.URL.Path, videoPath)
+	filePath := filepath.Join(videoOutputDir, fileName)
+	_, err := os.Stat(filePath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Unknown file %s", filePath), http.StatusNotFound)
+		return
+	}
+	err = os.Remove(filePath)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to delete file %s: %v", filePath, err), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("[%d] [DELETED_VIDEO_FILE] [%s]\n", serial(), fileName)
+}
+
 func handler() http.Handler {
 	root := http.NewServeMux()
 	root.HandleFunc("/wd/hub/", func(w http.ResponseWriter, r *http.Request) {
@@ -258,7 +285,7 @@ func handler() http.Handler {
 	root.HandleFunc("/ping", ping)
 	root.Handle("/vnc/", websocket.Handler(vnc))
 	root.Handle("/logs/", websocket.Handler(logs))
-	root.Handle("/video/", http.StripPrefix("/video/", http.FileServer(http.Dir(videoOutputDir))))
+	root.HandleFunc(videoPath, video)
 	if enableFileUpload {
 		root.HandleFunc("/file", fileUpload)
 	}

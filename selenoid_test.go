@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
+	"path/filepath"
 )
 
 var (
@@ -25,6 +26,7 @@ var (
 
 func init() {
 	enableFileUpload = true
+	videoOutputDir, _ = ioutil.TempDir("", "selenoid-test")
 	srv = httptest.NewServer(handler())
 }
 
@@ -560,4 +562,24 @@ func TestPing(t *testing.T) {
 	AssertThat(t, hasLastReloadTime, Is{true})
 	_, hasNumRequests := data["numRequests"]
 	AssertThat(t, hasNumRequests, Is{true})
+}
+
+func TestServeAndDeleteFile(t *testing.T) {
+	fileName := "testfile"
+	filePath := filepath.Join(videoOutputDir, fileName)
+	ioutil.WriteFile(filePath, []byte("test-data"), 0644)
+
+	rsp, err := http.Get(With(srv.URL).Path("/video/testfile"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
+	deleteReq, _ := http.NewRequest(http.MethodDelete, With(srv.URL).Path("/video/testfile"), nil)
+	rsp, err = http.DefaultClient.Do(deleteReq)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
+	//Deleting already deleted file
+	rsp, err = http.DefaultClient.Do(deleteReq)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusNotFound})
 }
