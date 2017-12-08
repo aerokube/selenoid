@@ -13,11 +13,11 @@ script:
   - gox -os "linux darwin windows" -arch "amd64" -osarch="windows/386" -output "dist/{{.Dir}}_{{.OS}}_{{.Arch}}" -ldflags "-X main.buildStamp=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.gitRevision=`git describe --tags || git rev-parse HEAD`"
 
 before_install:
-  - go get -u github.com/kardianos/govendor
+  - go get -u github.com/golang/dep/cmd/dep
 
 install: 
   - go get -u github.com/mitchellh/gox # cross compile
-  - govendor sync
+  - dep ensure
 
 deploy:
   - provider: releases

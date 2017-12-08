@@ -6,17 +6,17 @@ To build Selenoid:
 
 . Setup `$GOPATH` https://github.com/golang/go/wiki/GOPATH[properly]
 
-. Install https://github.com/kardianos/govendor[govendor]
-
-    $ go get -u github.com/kardianos/govendor
-
 . Get Selenoid source:
 
     $ go get -d github.com/aerokube/selenoid
 
+. Go to project directory:
+
+    $ cd $GOPATH/src/github.com/aerokube/selenoid 
+    
 . Checkout dependencies
 
-    $ cd $GOPATH/src/github.com/aerokube/selenoid && govendor sync
+    $ go get -u github.com/golang/dep/cmd/dep && dep ensure
 
 . Build source:
 
