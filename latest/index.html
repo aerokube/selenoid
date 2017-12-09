@@ -524,7 +524,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2017-12-08</span>
+<span id="revdate">2017-12-09</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -565,6 +565,7 @@ table.CodeRay td.code>pre{padding:0}
 <ul class="sectlevel3">
 <li><a href="#_on_windows">2.6.1. On Windows</a></li>
 <li><a href="#_downloading_video_files_from_selenoid">2.6.2. Downloading Video Files from Selenoid</a></li>
+<li><a href="#_deleting_video_files">2.6.3. Deleting Video Files</a></li>
 </ul>
 </li>
 <li><a href="#_reloading_configuration">2.7. Reloading Configuration</a></li>
@@ -1646,6 +1647,35 @@ Direct link will works only after session has finished because Selenoid renames 
 <div class="content">
 <pre>http://selenoid-host.example.com:4444/video/</pre>
 </div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_deleting_video_files"><a class="anchor" href="#_deleting_video_files"></a>2.6.3. Deleting Video Files</h4>
+<div class="paragraph">
+<p>Selenoid intentionally has no built-in logic to automatically remove old video files. To limit storage space consumption you have two alternatives:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Schedule scripts automatically removing files older than desired date and time. An example command under Unix operating systems can look like:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ find /path/to/video/dir -mindepth 1 -maxdepth 1 -mmin +120 -name '*.mp4' | xargs rm -rf</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice <code>-mmin +120</code> argument meaning to only process files older than 2 hours (120 minutes).</p>
+</div>
+</li>
+<li>
+<p>Send video removal requests (e.g. from passed test cases). Just use <code>DELETE</code> HTTP method and Selenoid video URL:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ curl -X DELETE http://selenoid-host.example.com:4444/video/&lt;filename&gt;.mp4</pre>
+</div>
+</div>
+</li>
+</ol>
 </div>
 </div>
 </div>
@@ -3340,7 +3370,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2017-12-08 17:19:43 UTC
+Last updated 2017-12-09 11:16:17 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
