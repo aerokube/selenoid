@@ -152,9 +152,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	browser.Caps.VideoScreenSize = videoScreenSize
-	needToRenameVideo := false
-	if browser.Caps.Video && browser.Caps.VideoName == "" {
-		needToRenameVideo = true
+	finalVideoName := browser.Caps.VideoName
+	if browser.Caps.Video {
 		browser.Caps.VideoName = getVideoFileName(videoOutputDir)
 	}
 	starter, ok := manager.Find(browser.Caps, requestId)
@@ -258,9 +257,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	cancelAndRenameVideo := func() {
 		cancel()
-		if browser.Caps.Video && needToRenameVideo {
+		if browser.Caps.Video {
 			oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
-			newVideoName := filepath.Join(videoOutputDir, s.ID+videoFileExtension)
+			if finalVideoName == "" {
+				finalVideoName = s.ID + videoFileExtension
+			}
+			newVideoName := filepath.Join(videoOutputDir, finalVideoName)
 			err := os.Rename(oldVideoName, newVideoName)
 			if err != nil {
 				log.Printf("[%d] [VIDEO_ERROR] [%s]\n", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldVideoName, newVideoName, err))
