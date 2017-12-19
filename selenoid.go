@@ -400,7 +400,7 @@ func fileUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if len(z.File) != 1 {
-		jsonError(w, fmt.Sprintf("Expected there to be only 1 file. There were: %s", len(z.File)), http.StatusBadRequest)
+		jsonError(w, fmt.Sprintf("Expected there to be only 1 file. There were: %d", len(z.File)), http.StatusBadRequest)
 		return
 	}
 	file := z.File[0]

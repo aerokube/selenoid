@@ -29,8 +29,8 @@ import (
 
 type memLimit int64
 
-func (m *memLimit) String() string {
-	return units.HumanSize(float64(*m))
+func (limit *memLimit) String() string {
+	return units.HumanSize(float64(*limit))
 }
 
 func (limit *memLimit) Set(s string) error {
