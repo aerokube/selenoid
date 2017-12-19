@@ -119,6 +119,8 @@ func init() {
 		os.Exit(0)
 	}
 
+	log.SetOutput(os.Stdout)
+
 	var err error
 	hostname, err = os.Hostname()
 	if err != nil {
