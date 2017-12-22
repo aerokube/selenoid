@@ -129,8 +129,11 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	log.Printf("[%d] [SERVICE_STARTED] [%s] [%s] [%v]\n", requestId, image, browserContainerId, time.Since(serviceStartTime))
 	log.Printf("[%d] [PROXY_TO] [%s] [%s] [%s]\n", requestId, image, browserContainerId, u.String())
 	s := StartedService{
-		Url:         u,
-		ID:          browserContainerId,
+		Url: u,
+		Container: &session.Container{
+			ID:        browserContainerId,
+			IPAddress: getContainerIP(d.Environment.Network, stat),
+		},
 		VNCHostPort: vncHostPort,
 		Cancel: func() {
 			if videoContainerId != "" {

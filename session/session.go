@@ -22,12 +22,18 @@ type Caps struct {
 	HostsEntries          string `json:"hostsEntries"`
 }
 
+// Container - container information
+type Container struct {
+	ID        string `json:"id"`
+	IPAddress string `json:"ip"`
+}
+
 // Session - holds session info
 type Session struct {
 	Quota     string
 	Caps      Caps
 	URL       *url.URL
-	Container string
+	Container *Container
 	VNC       string
 	Cancel    func()
 	Timeout   chan struct{}

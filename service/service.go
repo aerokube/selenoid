@@ -36,7 +36,7 @@ type ServiceBase struct {
 // StartedService - all started service properties
 type StartedService struct {
 	Url         *url.URL
-	ID          string
+	Container   *session.Container
 	VNCHostPort string
 	Cancel      func()
 }
