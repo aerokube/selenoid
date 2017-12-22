@@ -273,7 +273,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		Quota:     quota,
 		Caps:      browser.Caps,
 		URL:       u,
-		Container: startedService.ID,
+		Container: startedService.Container,
 		VNC:       startedService.VNCHostPort,
 		Cancel:    cancelAndRenameVideo,
 		Timeout: onTimeout(timeout, func() {
@@ -471,9 +471,9 @@ func logs(wsconn *websocket.Conn) {
 	defer wsconn.Close()
 	sid := strings.Split(wsconn.Request().URL.Path, "/")[2]
 	sess, ok := sessions.Get(sid)
-	if ok && sess.Container != "" {
+	if ok && sess.Container != nil {
 		log.Printf("[CONTAINER_LOGS] [%s]\n", sess.Container)
-		r, err := cli.ContainerLogs(wsconn.Request().Context(), sess.Container, types.ContainerLogsOptions{
+		r, err := cli.ContainerLogs(wsconn.Request().Context(), sess.Container.ID, types.ContainerLogsOptions{
 			ShowStdout: true,
 			ShowStderr: true,
 			Follow:     true,

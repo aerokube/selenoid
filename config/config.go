@@ -14,13 +14,13 @@ import (
 	"time"
 )
 
-// Session - session id and vnc flaf
+// Session - session id and vnc flag
 type Session struct {
-	ID        string       `json:"id"`
-	Container string       `json:"container,omitempty"`
-	VNC       bool         `json:"vnc"`
-	Screen    string       `json:"screen"`
-	Caps      session.Caps `json:"caps"`
+	ID        string             `json:"id"`
+	Container *session.Container `json:"container,omitempty"`
+	VNC       bool               `json:"vnc"`
+	Screen    string             `json:"screen"`
+	Caps      session.Caps       `json:"caps"`
 }
 
 // Sessions - used count and individual sessions for quota user
