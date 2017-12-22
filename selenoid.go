@@ -356,7 +356,11 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				if ok {
 					sess.Lock.Lock()
 					defer sess.Lock.Unlock()
-					close(sess.Timeout)
+					select {
+					case <-sess.Timeout:
+					default:
+						close(sess.Timeout)
+					}
 					if r.Method == http.MethodDelete && len(fragments) == 3 {
 						if enableFileUpload {
 							os.RemoveAll(filepath.Join(os.TempDir(), id))
