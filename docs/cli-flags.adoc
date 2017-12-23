@@ -13,6 +13,8 @@ The following flags are supported by `selenoid` command:
     Containers cpu limit as float e.g. 0.2 or 1.0
 -disable-docker
     Disable docker support
+-disable-privileged
+    Whether to disable privileged container mode
 -disable-queue
     Disable wait queue
 -enable-file-upload
@@ -37,8 +39,10 @@ The following flags are supported by `selenoid` command:
     Session idle timeout in time.Duration format (default 1m0s)
 -version
     Show version and exit
--video-output-dir
+-video-output-dir string
     Directory to save recorded video to (default "video")
+-video-recorder-image string
+    Image to use as video recorder (default "selenoid/video-recorder")
 ----
 
 For example:
