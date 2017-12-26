@@ -16,11 +16,12 @@ import (
 
 // Session - session id and vnc flag
 type Session struct {
-	ID        string             `json:"id"`
-	Container *session.Container `json:"container,omitempty"`
-	VNC       bool               `json:"vnc"`
-	Screen    string             `json:"screen"`
-	Caps      session.Caps       `json:"caps"`
+	ID            string             `json:"id"`
+	Container     string             `json:"container,omitempty"`
+	ContainerInfo *session.Container `json:"containerInfo,omitempty"`
+	VNC           bool               `json:"vnc"`
+	Screen        string             `json:"screen"`
+	Caps          session.Caps       `json:"caps"`
 }
 
 // Sessions - used count and individual sessions for quota user
@@ -169,13 +170,18 @@ func (config *Config) State(sessions *session.Map, limit, queued, pending int) *
 		if session.VNC != "" {
 			vnc = true
 		}
-		v.Sessions = append(v.Sessions, Session{
-			ID:        id,
-			Container: session.Container,
-			VNC:       vnc,
-			Screen:    session.Caps.ScreenResolution,
-			Caps:      session.Caps,
-		})
+		ctr := session.Container
+		sess := Session{
+			ID:            id,
+			ContainerInfo: ctr,
+			VNC:           vnc,
+			Screen:        session.Caps.ScreenResolution,
+			Caps:          session.Caps,
+		}
+		if ctr != nil {
+			sess.Container = ctr.ID
+		}
+		v.Sessions = append(v.Sessions, sess)
 	})
 	return state
 }
