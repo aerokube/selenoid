@@ -33,10 +33,22 @@ WARNING: This guide assumes you already know how to deal with command line and k
                 "path": "/wd/hub"
             }
         }
+    },
+    "chrome": {
+        "default": "63.0",
+        "versions": {
+            "63.0": {
+                "image": "selenoid/vnc:chrome_63.0",
+                "port": "4444",
+                "path": "/"
+            }
+        }
     }
 }
 ----
-
++
+NOTE: For chrome "path" is "/" instead of "/wd/hub"
++
 . Pull browser Docker image:
 +
 `$ docker pull selenoid/vnc:firefox_57.0`.
