@@ -36,7 +36,9 @@ WARNING: This guide assumes you already know how to deal with command line and k
     }
 }
 ----
-
++
+NOTE: For Chrome images "path" is "/" instead of "/wd/hub"
++
 . Pull browser Docker image:
 +
 `$ docker pull selenoid/vnc:firefox_57.0`.
