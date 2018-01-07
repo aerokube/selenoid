@@ -136,6 +136,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		queue.Drop()
 		return
 	}
+	browser.Caps.ProcessExtensionCapabilities()
 	resolution, err := getScreenResolution(browser.Caps.ScreenResolution)
 	if err != nil {
 		log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s] [%s]\n", requestId, quota, browser.Caps.ScreenResolution)
