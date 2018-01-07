@@ -13,9 +13,11 @@ import (
 
 	"time"
 
+	. "github.com/aandryashin/matchers"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
 	"github.com/pborman/uuid"
+	"testing"
 )
 
 type HTTPTest struct {
@@ -122,4 +124,27 @@ func Selenium() http.Handler {
 		lock.Unlock()
 	})
 	return mux
+}
+
+func TestProcessExtensionCapabilities(t *testing.T) {
+	capsJson := `{
+		"browserName": "firefox", "version": "57.0",
+		"selenoid:options": {
+			"name": "ExampleTestName",
+			"enableVNC": true,
+			"enableVideo": "true",
+			"videoFrameRate": 24
+		}
+	}`
+	var caps session.Caps
+	err := json.Unmarshal([]byte(capsJson), &caps)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, caps.Name, EqualTo{"firefox"})
+	AssertThat(t, caps.Version, EqualTo{"57.0"})
+	AssertThat(t, caps.TestName, EqualTo{""})
+	caps.ProcessExtensionCapabilities()
+	AssertThat(t, caps.TestName, EqualTo{"ExampleTestName"})
+	AssertThat(t, caps.VNC, EqualTo{true})    //Correct type
+	AssertThat(t, caps.Video, EqualTo{false}) //Wrong type in JSON
+	AssertThat(t, caps.VideoFrameRate, EqualTo{uint16(24)})
 }

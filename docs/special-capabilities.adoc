@@ -123,3 +123,19 @@ hostsEntries: "example.com:192.168.0.1,test.com:192.168.0.2"
 
 Entries will be inserted to `/etc/hosts` before entries from browsers configuration file.
 Thus entries from capabilities override entries from configuration file if some hosts are equal.
+
+=== Specifying Capabilities via Protocol Extensions
+
+Some Selenium clients allow passing only a limited number of capabilities specified in https://w3c.github.io/webdriver/webdriver-spec.html[WebDriver specification]. For such cases Selenoid supports reading capabilities using https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions[WebDriver protocol extensions] feature. The following two examples deliver the same result. Usually capabilities are passed like this:
+
+.Passing Capabilities as Usually
+----
+{"browserName": "firefox", "value": "57.0", "screenResolution": "1280x1024x24"}
+----
+
+Selenoid is using `selenoid:options` key to read protocol extension capabilities:
+
+.Passing Capabilities using Protocol Extensions
+----
+{"browserName": "firefox", "value": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}
+----

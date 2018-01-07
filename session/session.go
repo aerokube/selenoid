@@ -2,24 +2,47 @@ package session
 
 import (
 	"net/url"
+	"reflect"
 	"sync"
 )
 
 // Caps - user capabilities
 type Caps struct {
-	Name                  string `json:"browserName"`
-	Version               string `json:"version"`
-	ScreenResolution      string `json:"screenResolution"`
-	VNC                   bool   `json:"enableVNC"`
-	Video                 bool   `json:"enableVideo"`
-	VideoName             string `json:"videoName"`
-	VideoScreenSize       string `json:"videoScreenSize"`
-	VideoFrameRate        uint16 `json:"videoFrameRate"`
-	TestName              string `json:"name"`
-	TimeZone              string `json:"timeZone"`
-	ContainerHostname     string `json:"containerHostname"`
-	ApplicationContainers string `json:"applicationContainers"`
-	HostsEntries          string `json:"hostsEntries"`
+	Name                  string                 `json:"browserName"`
+	Version               string                 `json:"version"`
+	ScreenResolution      string                 `json:"screenResolution"`
+	VNC                   bool                   `json:"enableVNC"`
+	Video                 bool                   `json:"enableVideo"`
+	VideoName             string                 `json:"videoName"`
+	VideoScreenSize       string                 `json:"videoScreenSize"`
+	VideoFrameRate        uint16                 `json:"videoFrameRate"`
+	TestName              string                 `json:"name"`
+	TimeZone              string                 `json:"timeZone"`
+	ContainerHostname     string                 `json:"containerHostname"`
+	ApplicationContainers string                 `json:"applicationContainers"`
+	HostsEntries          string                 `json:"hostsEntries"`
+	ExtensionCapabilities map[string]interface{} `json:"selenoid:options"`
+}
+
+func (c *Caps) ProcessExtensionCapabilities() {
+	if len(c.ExtensionCapabilities) > 0 {
+		s := reflect.ValueOf(c).Elem()
+
+		tagToFieldMap := make(map[string]reflect.StructField)
+
+		for i := 0; i < s.NumField(); i++ {
+			field := s.Type().Field(i)
+			tag := field.Tag.Get("json")
+			tagToFieldMap[tag] = field
+		}
+
+		for k, v := range c.ExtensionCapabilities {
+			value := reflect.ValueOf(v)
+			if field, ok := tagToFieldMap[k]; ok && value.Type().ConvertibleTo(field.Type) {
+				s.FieldByName(field.Name).Set(value.Convert(field.Type))
+			}
+		}
+	}
 }
 
 // Container - container information
