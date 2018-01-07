@@ -524,7 +524,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-01-06</span>
+<span id="revdate">2018-01-07</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -585,6 +585,7 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_per_session_time_zone_timezone">3.1.5. Per-session Time Zone: timeZone</a></li>
 <li><a href="#_links_to_application_containers_applicationcontainers">3.1.6. Links to Application Containers: applicationContainers</a></li>
 <li><a href="#_hosts_entries_hostsentries">3.1.7. Hosts Entries: hostsEntries</a></li>
+<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.8. Specifying Capabilities via Protocol Extensions</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -2286,6 +2287,27 @@ sometimes you may need to add more entries for particular test cases. This can b
 Thus entries from capabilities override entries from configuration file if some hosts are equal.</p>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.8. Specifying Capabilities via Protocol Extensions</h4>
+<div class="paragraph">
+<p>Some Selenium clients allow passing only a limited number of capabilities specified in <a href="https://w3c.github.io/webdriver/webdriver-spec.html">WebDriver specification</a>. For such cases Selenoid supports reading capabilities using <a href="https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions">WebDriver protocol extensions</a> feature. The following two examples deliver the same result. Usually capabilities are passed like this:</p>
+</div>
+<div class="listingblock">
+<div class="title">Passing Capabilities as Usually</div>
+<div class="content">
+<pre>{"browserName": "firefox", "value": "57.0", "screenResolution": "1280x1024x24"}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Selenoid is using <code>selenoid:options</code> key to read protocol extension capabilities:</p>
+</div>
+<div class="listingblock">
+<div class="title">Passing Capabilities using Protocol Extensions</div>
+<div class="content">
+<pre>{"browserName": "firefox", "value": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}</pre>
+</div>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_using_selenoid_without_docker"><a class="anchor" href="#_using_selenoid_without_docker"></a>3.2. Using Selenoid without Docker</h3>
@@ -3392,7 +3414,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-01-06 10:31:51 UTC
+Last updated 2018-01-07 17:44:05 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
