@@ -237,7 +237,8 @@ func ping(w http.ResponseWriter, _ *http.Request) {
 		Uptime         string `json:"uptime"`
 		LastReloadTime string `json:"lastReloadTime"`
 		NumRequests    uint64 `json:"numRequests"`
-	}{time.Since(startTime).String(), conf.LastReloadTime.String(), getSerial()})
+		Version        string `json:"version"`
+	}{time.Since(startTime).String(), conf.LastReloadTime.String(), getSerial(), gitRevision})
 }
 
 const videoPath = "/video/"
