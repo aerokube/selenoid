@@ -27,6 +27,7 @@ var (
 func init() {
 	enableFileUpload = true
 	videoOutputDir, _ = ioutil.TempDir("", "selenoid-test")
+	gitRevision = "test-revision"
 	srv = httptest.NewServer(handler())
 }
 
@@ -562,6 +563,9 @@ func TestPing(t *testing.T) {
 	AssertThat(t, hasLastReloadTime, Is{true})
 	_, hasNumRequests := data["numRequests"]
 	AssertThat(t, hasNumRequests, Is{true})
+	version, hasVersion := data["version"]
+	AssertThat(t, hasVersion, Is{true})
+	AssertThat(t, version, EqualTo{"test-revision"})
 }
 
 func TestServeAndDeleteFile(t *testing.T) {
