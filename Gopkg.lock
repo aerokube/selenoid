@@ -4,13 +4,8 @@
 [[projects]]
   name = "github.com/Microsoft/go-winio"
   packages = ["."]
-  revision = "f3b1913901892ada21d52d0cffe1d4c7080d36b7"
-  version = "v0.3.9"
-
-[[projects]]
-  name = "github.com/Sirupsen/logrus"
-  packages = ["."]
-  revision = "5b60b3d3ee017ed00bcd0225fcca7acab767844b"
+  revision = "b7c3cf0d1286c7b62b140ed960a00b154c1b6fcc"
+  version = "v0.4.6"
 
 [[projects]]
   branch = "master"
@@ -21,17 +16,18 @@
 [[projects]]
   name = "github.com/docker/distribution"
   packages = ["digestset","reference"]
-  revision = "ce936a85915a55418ea62dc32a0a1274f2740104"
+  revision = "277ed486c948042cab91ad367c379524f3b25e18"
 
 [[projects]]
   name = "github.com/docker/docker"
-  packages = ["api","api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/image","api/types/mount","api/types/network","api/types/registry","api/types/strslice","api/types/swarm","api/types/time","api/types/versions","api/types/volume","client","pkg/ioutils","pkg/longpath","pkg/system","pkg/tlsconfig"]
-  revision = "7ca86796c94c7ae0c62680ac664f97ab5f35ebec"
+  packages = ["api","api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/image","api/types/mount","api/types/network","api/types/registry","api/types/strslice","api/types/swarm","api/types/swarm/runtime","api/types/time","api/types/versions","api/types/volume","client"]
+  revision = "92309e34e42aec3a0e041403bdd3c4fc0dc20269"
 
 [[projects]]
   name = "github.com/docker/go-connections"
   packages = ["nat","sockets","tlsconfig"]
-  revision = "e15c02316c12de00874640cd76311849de2aeed5"
+  revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
+  version = "v0.3.0"
 
 [[projects]]
   name = "github.com/docker/go-units"
@@ -40,40 +36,50 @@
   version = "v0.3.2"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/docker/libtrust"
-  packages = ["."]
-  revision = "aabc10ec26b754e797f9028f4589c5b7bd90dc20"
+  name = "github.com/gogo/protobuf"
+  packages = ["proto"]
+  revision = "342cbe0a04158f6dcb03ca0079991a51a4248c02"
+  version = "v0.5"
 
 [[projects]]
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
-  revision = "aa2ec055abd10d26d539eb630a92241b781ce4bc"
-  version = "v1.0.0-rc0"
+  revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
+  version = "v1.0.0-rc1"
+
+[[projects]]
+  name = "github.com/opencontainers/image-spec"
+  packages = ["specs-go","specs-go/v1"]
+  revision = "d60099175f88c47cd379c4738d158884749ed235"
+  version = "v1.0.1"
 
 [[projects]]
   name = "github.com/pborman/uuid"
   packages = ["."]
-  revision = "1b00554d822231195d1babd97ff4a781231955c9"
+  revision = "e790cca94e6cc75c7064b1332e63811d4aae1a53"
+  version = "v1.1"
 
 [[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "c605e284fe17294bda444b34710735b29d1a9d90"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
+  branch = "master"
   name = "golang.org/x/net"
   packages = ["context","context/ctxhttp","proxy","websocket"]
-  revision = "feeb485667d1fdabe727840fe00adc22431bc86e"
+  revision = "5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec"
 
 [[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix","windows"]
-  revision = "9ccfe848b9db8435a24c424abbc07a921adf1df5"
+  packages = ["windows"]
+  revision = "810d7000345868fc619eb81f46307107118f4ae1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9e272825174ad2baae1001d72800484e2cf91454ad7efdd214ea517034500fce"
+  inputs-digest = "de7116c491df8566e62ca53bea50792b7f133ab933d79982467f465cf8742b57"
   solver-name = "gps-cdcl"
   solver-version = 1
