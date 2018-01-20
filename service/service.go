@@ -27,6 +27,10 @@ type Environment struct {
 	Privileged          bool
 }
 
+const (
+	DefaultContainerNetwork = "default"
+)
+
 // ServiceBase - stores fields required by all services
 type ServiceBase struct {
 	RequestId uint64

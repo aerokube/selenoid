@@ -114,7 +114,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	u := &url.URL{Scheme: "http", Host: seleniumHostPort, Path: d.Service.Path}
 
 	if d.Video {
-		videoContainerId, err = startVideoContainer(ctx, cl, requestId, browserContainerId, d.Environment, d.Caps)
+		videoContainerId, err = startVideoContainer(ctx, cl, requestId, stat, d.Environment, d.Caps)
 		if err != nil {
 			return nil, fmt.Errorf("start video container: %v", err)
 		}
@@ -275,7 +275,7 @@ func getContainerIP(networkName string, stat types.ContainerJSON) string {
 	return ""
 }
 
-func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint64, browserContainerId string, environ Environment, caps session.Caps) (string, error) {
+func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint64, browserContainer types.ContainerJSON, environ Environment, caps session.Caps) (string, error) {
 	videoContainerStartTime := time.Now()
 	videoContainerImage := environ.VideoContainerImage
 	env := []string{fmt.Sprintf("FILE_NAME=%s", caps.VideoName)}
@@ -287,21 +287,28 @@ func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint6
 	if videoFrameRate > 0 {
 		env = append(env, fmt.Sprintf("FRAME_RATE=%d", videoFrameRate))
 	}
+	hostConfig := &ctr.HostConfig{
+		Binds:       []string{fmt.Sprintf("%s:/data:rw", getVideoOutputDir(environ))},
+		AutoRemove:  true,
+		NetworkMode: ctr.NetworkMode(environ.Network),
+	}
+	browserContainerName := getContainerIP(environ.Network, browserContainer)
+	if environ.Network == DefaultContainerNetwork {
+		const defaultBrowserContainerName = "browser"
+		hostConfig.Links = []string{fmt.Sprintf("%s:%s", browserContainer.ID, defaultBrowserContainerName)}
+		browserContainerName = defaultBrowserContainerName
+	}
+	env = append(env, fmt.Sprintf("BROWSER_CONTAINER_NAME=%s", browserContainerName))
 	log.Printf("[%d] [CREATING_VIDEO_CONTAINER] [%s]\n", requestId, videoContainerImage)
 	videoContainer, err := cl.ContainerCreate(ctx,
 		&ctr.Config{
 			Image: videoContainerImage,
 			Env:   env,
 		},
-		&ctr.HostConfig{
-			Binds:       []string{fmt.Sprintf("%s:/data:rw", getVideoOutputDir(environ))},
-			Links:       []string{fmt.Sprintf("%s:browser", browserContainerId)},
-			AutoRemove:  true,
-			NetworkMode: ctr.NetworkMode(environ.Network),
-		},
+		hostConfig,
 		&network.NetworkingConfig{}, "")
 	if err != nil {
-		removeContainer(ctx, cl, requestId, browserContainerId)
+		removeContainer(ctx, cl, requestId, browserContainer.ID)
 		return "", fmt.Errorf("create video container: %v", err)
 	}
 
@@ -309,7 +316,7 @@ func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint6
 	log.Printf("[%d] [STARTING_VIDEO_CONTAINER] [%s] [%s]\n", requestId, videoContainerImage, videoContainerId)
 	err = cl.ContainerStart(ctx, videoContainerId, types.ContainerStartOptions{})
 	if err != nil {
-		removeContainer(ctx, cl, requestId, browserContainerId)
+		removeContainer(ctx, cl, requestId, browserContainer.ID)
 		removeContainer(ctx, cl, requestId, videoContainerId)
 		return "", fmt.Errorf("start video container: %v", err)
 	}
