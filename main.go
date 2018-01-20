@@ -107,7 +107,7 @@ func init() {
 	flag.BoolVar(&version, "version", false, "Show version and exit")
 	flag.Var(&mem, "mem", "Containers memory limit e.g. 128m or 1g")
 	flag.Var(&cpu, "cpu", "Containers cpu limit as float e.g. 0.2 or 1.0")
-	flag.StringVar(&containerNetwork, "container-network", "default", "Network to be used for containers")
+	flag.StringVar(&containerNetwork, "container-network", service.DefaultContainerNetwork, "Network to be used for containers")
 	flag.BoolVar(&captureDriverLogs, "capture-driver-logs", false, "Whether to add driver process logs to Selenoid output")
 	flag.BoolVar(&disablePrivileged, "disable-privileged", false, "Whether to disable privileged container mode")
 	flag.StringVar(&videoOutputDir, "video-output-dir", "video", "Directory to save recorded video to")
