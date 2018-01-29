@@ -142,14 +142,18 @@ func init() {
 	if err == nil {
 		inDocker = true
 	}
-	videoOutputDir, err = filepath.Abs(videoOutputDir)
-	if err != nil {
-		log.Fatalf("Invalid video output dir %s: %v", videoOutputDir, err)
+
+	if !disableDocker {
+		videoOutputDir, err = filepath.Abs(videoOutputDir)
+		if err != nil {
+			log.Fatalf("Invalid video output dir %s: %v", videoOutputDir, err)
+		}
+		err = os.MkdirAll(videoOutputDir, os.FileMode(0644))
+		if err != nil {
+			log.Fatalf("Failed to create video output dir %s: %v", videoOutputDir, err)
+		}
 	}
-	err = os.MkdirAll(videoOutputDir, os.FileMode(0644))
-	if err != nil {
-		log.Fatalf("Failed to create video output dir %s: %v", videoOutputDir, err)
-	}
+
 	environment := service.Environment{
 		InDocker:            inDocker,
 		CPU:                 int64(cpu),
