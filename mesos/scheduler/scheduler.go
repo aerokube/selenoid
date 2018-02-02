@@ -1,28 +1,35 @@
 package scheduler
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"log"
-	"fmt"
 	"bufio"
-	"encoding/json"
-	"container/list"
 )
 
 const schedulerUrl = "http://localhost:5050/api/v1/scheduler"
 
-type frameworkId struct {
+type id struct {
+	Value string
+}
+
+type framework_id struct {
 	Value string
 }
 
 type subscribed struct {
-	Framework_id               frameworkId
+	Framework_id               framework_id
 	Heartbeat_interval_seconds int64
 }
 
-type offers struct{
-	Offers list.List
+type offer struct {
+	Id id
+}
+
+type offers struct {
+	Offers []offer
 }
 
 type Message struct {
@@ -33,16 +40,16 @@ type Message struct {
 
 func Run() {
 
-	resp, err := http.Post(schedulerUrl, "application/json", strings.NewReader("{\n"+
-		"   \"type\"       : \"SUBSCRIBE\","+
-		"   \"subscribe\"  : {"+
-		"      \"framework_info\"  : {"+
-		"        \"user\" :  \"foo\","+
-		"        \"name\" :  \"My Best Framework\","+
-		"        \"roles\": [\"test\"]"+
-		"      }"+
-		"  }"+
-		"}"))
+	resp, err := http.Post(schedulerUrl, "application/json", strings.NewReader(`{
+   "type"       : "SUBSCRIBE",
+   "subscribe"  : {
+      "framework_info"  : {
+        "user" :  "foo",
+        "name" :  "My Best Framework",
+        "roles": ["test"]
+      }
+  }
+}`))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,7 +78,14 @@ func Run() {
 			} else if m.Type == "HEARTBEAT" {
 				fmt.Println("Мезос жил, мезос жив, мезос будет жить!!!")
 			} else if m.Type == "OFFERS" {
-				Decline(streamId, frameworkId)
+				var ids []id
+				offers := m.Offers.Offers
+				for _, n := range offers {
+					ids = append(ids, n.Id)
+					fmt.Println(ids)
+				}
+				b, _ := json.Marshal(ids)
+				Decline(streamId, frameworkId, strings.Replace(string(b), "V", "v", 1))
 			}
 		}
 	}

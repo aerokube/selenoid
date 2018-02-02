@@ -7,24 +7,25 @@ import (
 	"bytes"
 )
 
-const frameworkIdHolder  = "__FRAMEWORK_ID__"
+const (
+	frameworkIdHolder  = "__FRAMEWORK_ID__"
+	offerIdsHolder = "__OFFER_IDS__"
+)
 
-func Decline(mesosStreamId string, frameworkId string)  {
 
-	body := "{\n"+
-		"  \"framework_id\"    : {\"value\" : \"__FRAMEWORK_ID__\"},\n"+
-		"  \"type\"            : \"DECLINE\",\n"+
-		"  \"decline\"         : {\n"+
-		"    \"offer_ids\" : [\n"+
-		"                   {\"value\" : \"12220-3440-12532-O12\"},\n"+
-		"                   {\"value\" : \"12220-3440-12532-O13\"}\n"+
-		"                  ],\n"+
-		"    \"filters\"   : {\"refuse_seconds\" : 5.0}\n"+
-		"  }\n"+
-		"}"
-	strings.Replace(body, frameworkIdHolder, frameworkId, 1)
-	fmt.Println(frameworkId + "frameworkId")
-	req, err := http.NewRequest("POST", schedulerUrl, strings.NewReader(body))
+func Decline(mesosStreamId string, frameworkId string, offers string)  {
+
+	template := `{
+  "framework_id"    : {"value" : "__FRAMEWORK_ID__"},
+  "type"            : "DECLINE",
+  "decline"         : {
+    "offer_ids" : __OFFER_IDS__,
+    "filters"   : {"refuse_seconds" : 5.0}
+  }
+}`
+	body := strings.Replace(template, frameworkIdHolder, frameworkId, 1)
+	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
+	req, err := http.NewRequest("POST", schedulerUrl, strings.NewReader(bodyWithOffers))
 
 	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
 	req.Header.Set("Content-Type", "application/json")
