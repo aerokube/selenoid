@@ -9,33 +9,32 @@ import (
 	"bufio"
 )
 
+var isAccepted bool
+
 const schedulerUrl = "http://localhost:5050/api/v1/scheduler"
 
 type id struct {
-	Value string
-}
-
-type framework_id struct {
-	Value string
-}
-
-type subscribed struct {
-	Framework_id               framework_id
-	Heartbeat_interval_seconds int64
-}
-
-type offer struct {
-	Id id
-}
-
-type offers struct {
-	Offers []offer
+	Value string `json:"value"`
 }
 
 type Message struct {
-	Offers     offers
-	Subscribed subscribed
-	Type       string
+	Offers struct {
+		Offers []struct {
+			Id      id
+			AgentId id `json:"agent_id"`
+		}
+	}
+	Subscribed struct {
+		FrameworkId              id    `json:"framework_id"`
+		HeartbeatIntervalSeconds int64 `json:"heartbeat_interval_seconds"`
+	}
+	Update struct {
+		Status struct {
+			Uuid    string
+			AgentId id `json:"agent_id"`
+		}
+	}
+	Type string
 }
 
 func Run() {
@@ -73,7 +72,7 @@ func Run() {
 			jsonMessage := line[0:index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
 			if m.Type == "SUBSCRIBED" {
-				frameworkId = m.Subscribed.Framework_id.Value
+				frameworkId = m.Subscribed.FrameworkId.Value
 				fmt.Println("Ура, мы подписались! Id = " + frameworkId)
 			} else if m.Type == "HEARTBEAT" {
 				fmt.Println("Мезос жил, мезос жив, мезос будет жить!!!")
@@ -85,7 +84,18 @@ func Run() {
 					fmt.Println(ids)
 				}
 				b, _ := json.Marshal(ids)
-				Decline(streamId, frameworkId, strings.Replace(string(b), "V", "v", 1))
+				if isAccepted == false {
+					Accept(streamId, frameworkId, m.Offers.Offers[0].AgentId.Value, string(b))
+					isAccepted = true
+					fmt.Println(isAccepted)
+				} else {
+					Decline(streamId, frameworkId, string(b))
+				}
+			} else if m.Type == "FAILURE" {
+				fmt.Println("Все плохо")
+			} else if m.Type == "UPDATE" {
+				uuid := m.Update.Status.Uuid
+				Aknowledge(streamId, frameworkId, m.Update.Status.AgentId.Value, uuid)
 			}
 		}
 	}
