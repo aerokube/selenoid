@@ -8,14 +8,13 @@ import (
 )
 
 const (
-	frameworkIdHolder  = "__FRAMEWORK_ID__"
-	offerIdsHolder = "__OFFER_IDS__"
-	agentIdHolder = "__AGENT_ID__"
-	uuidHolder = "__UUID__"
+	frameworkIdHolder = "__FRAMEWORK_ID__"
+	offerIdsHolder    = "__OFFER_IDS__"
+	agentIdHolder     = "__AGENT_ID__"
+	uuidHolder        = "__UUID__"
 )
 
-
-func Decline(mesosStreamId string, frameworkId string, offers string)  {
+func Decline(mesosStreamId string, frameworkId string, offers string) {
 
 	template := `{
   "framework_id"    : {"value" : "__FRAMEWORK_ID__"},
@@ -44,7 +43,7 @@ func Decline(mesosStreamId string, frameworkId string, offers string)  {
 	fmt.Println(resp.Status)
 }
 
-func Accept(mesosStreamId string, frameworkId string, agent_id string, offers string)  {
+func Accept(mesosStreamId string, frameworkId string, agent_id string, offers string) {
 
 	template := `{
   "framework_id"   : {"value" : "__FRAMEWORK_ID__"},
@@ -66,7 +65,16 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
 										  "container": {
                                					 "type": "DOCKER",
 												 "docker": {
-                                  					"image": "docker.moscow.alfaintra.net/selenoid/chrome"
+                                  					"image": "docker.moscow.alfaintra.net/selenoid/chrome",
+													"network": "BRIDGE",
+													"portMappings": [
+														{
+														  "containerPort": 4444,
+														  "hostPort": 0,
+														  "protocol": "tcp",
+														  "name": "http"
+														}
+													]
                                					 }
                               				},
                                           "resources"   : [
@@ -113,7 +121,19 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
 	fmt.Println(resp.Status)
 }
 
-func Aknowledge(mesosStreamId string, frameworkId string, agent_id string, uuid string)  {
+type acknowledge struct {
+	AgentId id     `json:"agent_id"`
+	TaskId  id     `json:"task_id"`
+	Uuid    string `json:"uuid"`
+}
+
+type AcknowledgeResponse struct {
+	FrameworkId id          `json:"framework_id"`
+	Type        string      `json:"type"`
+	Acknowledge acknowledge `json:"acknowledge"`
+}
+
+func Aknowledge(mesosStreamId string, frameworkId string, agent_id string, uuid string) {
 	template := ` {
                   "framework_id": {
                     "value": "__FRAMEWORK_ID__"
