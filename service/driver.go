@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"errors"
+	"github.com/aerokube/selenoid/util"
 	"os"
 )
 
@@ -35,14 +36,14 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 	if len(cmdLine) == 0 {
 		return nil, errors.New("configuration error: image is empty")
 	}
-	log.Printf("[%d] [ALLOCATING_PORT]\n", requestId)
+	log.Printf("[%d] [ALLOCATING_PORT]", requestId)
 	l, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		return nil, fmt.Errorf("cannot bind to port: %v", err)
 	}
 	u := &url.URL{Scheme: "http", Host: l.Addr().String()}
 	_, port, _ := net.SplitHostPort(l.Addr().String())
-	log.Printf("[%d] [ALLOCATED_PORT] [%s]\n", requestId, port)
+	log.Printf("[%d] [ALLOCATED_PORT] [%s]", requestId, port)
 	cmdLine = append(cmdLine, fmt.Sprintf("--port=%s", port))
 	cmd := exec.Command(cmdLine[0], cmdLine[1:]...)
 	cmd.Env = append(cmd.Env, d.Service.Env...)
@@ -51,7 +52,7 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 		cmd.Stderr = os.Stderr
 	}
 	l.Close()
-	log.Printf("[%d] [STARTING_PROCESS] [%s]\n", requestId, cmdLine)
+	log.Printf("[%d] [STARTING_PROCESS] [%s]", requestId, cmdLine)
 	s := time.Now()
 	err = cmd.Start()
 	if err != nil {
@@ -63,17 +64,17 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 		d.stopProcess(cmd)
 		return nil, err
 	}
-	log.Printf("[%d] [PROCESS_STARTED] [%d] [%v]\n", requestId, cmd.Process.Pid, time.Since(s))
-	log.Printf("[%d] [PROXYING_REQUESTS] [%s]\n", requestId, u.String())
+	log.Printf("[%d] [PROCESS_STARTED] [%d] [%v]", requestId, cmd.Process.Pid, util.SecondsSince(s))
+	log.Printf("[%d] [PROXY_TO] [%s]", requestId, u.String())
 	return &StartedService{Url: u, Cancel: func() { d.stopProcess(cmd) }}, nil
 }
 
 func (d *Driver) stopProcess(cmd *exec.Cmd) {
-	log.Printf("[%d] [TERMINATING_PROCESS] [%d]\n", d.RequestId, cmd.Process.Pid)
+	log.Printf("[%d] [TERMINATING_PROCESS] [%d]", d.RequestId, cmd.Process.Pid)
 	err := stopProc(cmd)
 	if err != nil {
-		log.Printf("[%d] [FAILED_TO_TERMINATE_PROCESS] [%d]: %v\n", d.RequestId, cmd.Process.Pid, err)
+		log.Printf("[%d] [FAILED_TO_TERMINATE_PROCESS] [%d] [%v]", d.RequestId, cmd.Process.Pid, err)
 		return
 	}
-	log.Printf("[%d] [TERMINATED_PROCESS] [%d]\n", d.RequestId, cmd.Process.Pid)
+	log.Printf("[%d] [TERMINATED_PROCESS] [%d]", d.RequestId, cmd.Process.Pid)
 }

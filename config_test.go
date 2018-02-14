@@ -41,7 +41,6 @@ func TestConfigError(t *testing.T) {
 	os.Remove(confFile)
 	conf := config.NewConfig()
 	err := conf.Load(confFile, logConfPath)
-	log.Println(err)
 	AssertThat(t, err.Error(), EqualTo{fmt.Sprintf("browsers config: read error: open %s: no such file or directory", confFile)})
 }
 
