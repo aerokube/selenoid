@@ -1772,8 +1772,8 @@ Use only one of these commands.
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>2017/11/01 19:12:38 [NEW_REQUEST]
-2017/11/01 19:12:38 [NEW_REQUEST_ACCEPTED]
+<pre class="CodeRay highlight"><code>2017/11/01 19:12:38 [-] [NEW_REQUEST]
+2017/11/01 19:12:38 [-] [NEW_REQUEST_ACCEPTED]
 2017/11/01 19:12:38 [41301] [LOCATING_SERVICE] [firefox-45.0]
 2017/11/01 19:12:38 [41301] [USING_DOCKER] [firefox-45.0]
 2017/11/01 19:12:38 [41301] [CREATING_CONTAINER] [selenoid/firefox:45.0]
@@ -1821,11 +1821,6 @@ Use only one of these commands.
 <td class="tableblock halign-left valign-top"><p class="tableblock">See table below for complete list of statuses.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Quota name</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[my_quota]</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Extracted from basic HTTP auth headers.</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Browser</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">[firefox-45.0]</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Name and version. Only present for new session requests.</p></td>
@@ -1842,7 +1837,7 @@ Use only one of these commands.
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Session start time</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[4.155712239s]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[4.15s]</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">-</p></td>
 </tr>
 </tbody>
@@ -1916,6 +1911,10 @@ Use only one of these commands.
 <td class="tableblock halign-left valign-top"><p class="tableblock">Docker container with browser is creating</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DEFAULT_VERSION</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Selenoid is using default browser version</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">DELETED_VIDEO_FILE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Video file was deleted by user</p></td>
 </tr>
@@ -1930,6 +1929,10 @@ Use only one of these commands.
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">FAILED_TO_TERMINATE_PROCESS</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">An error occurred while terminating driver process</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">INIT</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Server is starting</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">PROCESS_STARTED</p></td>
@@ -1982,6 +1985,10 @@ Use only one of these commands.
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">STARTING_PROCESS</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Starting driver process</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SHUTTING_DOWN</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Server is stopping</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">TERMINATING_PROCESS</p></td>
@@ -3433,7 +3440,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-02-14 03:29:01 UTC
+Last updated 2018-02-14 06:42:24 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
