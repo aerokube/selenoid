@@ -21,6 +21,7 @@ type Caps struct {
 	ContainerHostname     string                 `json:"containerHostname"`
 	ApplicationContainers string                 `json:"applicationContainers"`
 	HostsEntries          string                 `json:"hostsEntries"`
+	Labels                string                 `json:"labels"`
 	ExtensionCapabilities map[string]interface{} `json:"selenoid:options"`
 }
 

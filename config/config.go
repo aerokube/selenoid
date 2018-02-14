@@ -58,6 +58,7 @@ type Browser struct {
 	Env     []string          `json:"env,omitempty"`
 	Hosts   []string          `json:"hosts,omitempty"`
 	ShmSize int64             `json:"shmSize,omitempty"`
+	Labels  map[string]string `json:"labels,omitempty"`
 }
 
 // Versions configuration

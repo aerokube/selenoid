@@ -124,6 +124,17 @@ hostsEntries: "example.com:192.168.0.1,test.com:192.168.0.2"
 Entries will be inserted to `/etc/hosts` before entries from browsers configuration file.
 Thus entries from capabilities override entries from configuration file if some hosts are equal.
 
+=== Container Labels: labels
+
+In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs. 
+
+.Type: string, format: <key>:<value> (comma-separated)
+----
+labels: "environment:testing,build-number:14353"
+----
+
+Labels from this capability override labels from browsers configuration file. When `name` capability is specified - it is automatically added as a label to container.
+
 === Specifying Capabilities via Protocol Extensions
 
 Some Selenium clients allow passing only a limited number of capabilities specified in https://w3c.github.io/webdriver/webdriver-spec.html[WebDriver specification]. For such cases Selenoid supports reading capabilities using https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions[WebDriver protocol extensions] feature. The following two examples deliver the same result. Usually capabilities are passed like this:
