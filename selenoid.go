@@ -24,12 +24,13 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/selenoid/util"
 	"github.com/docker/docker/api/types"
 	"golang.org/x/net/websocket"
 )
 
 var (
-	httpClient *http.Client = &http.Client{
+	httpClient = &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
@@ -74,11 +75,11 @@ func jsonError(w http.ResponseWriter, msg string, code int) {
 		})
 }
 
-func (s *sess) Delete() {
-	log.Printf("[SESSION_TIMED_OUT] [%s]\n", s.id)
+func (s *sess) Delete(requestId uint64) {
+	log.Printf("[%d] [SESSION_TIMED_OUT] [%s]", requestId, s.id)
 	r, err := http.NewRequest(http.MethodDelete, s.url(), nil)
 	if err != nil {
-		log.Printf("[DELETE_FAILED] [%s] [%v]\n", s.id, err)
+		log.Printf("[%d] [DELETE_FAILED] [%s] [%v]", requestId, s.id, err)
 		return
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), sessionDeleteTimeout)
@@ -91,9 +92,9 @@ func (s *sess) Delete() {
 		return
 	}
 	if err != nil {
-		log.Printf("[DELETE_FAILED] [%s] [%v]\n", s.id, err)
+		log.Printf("[%d] [DELETE_FAILED] [%s] [%v]", requestId, s.id, err)
 	} else {
-		log.Printf("[DELETE_FAILED] [%s] [%s]\n", s.id, resp.Status)
+		log.Printf("[%d] [DELETE_FAILED] [%s] [%s]", requestId, s.id, resp.Status)
 	}
 }
 
@@ -114,14 +115,11 @@ func getSerial() uint64 {
 func create(w http.ResponseWriter, r *http.Request) {
 	sessionStartTime := time.Now()
 	requestId := serial()
-	quota, _, ok := r.BasicAuth()
-	if !ok {
-		quota = "unknown"
-	}
+	user, remote := util.RequestInfo(r)
 	body, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
-		log.Printf("[%d] [ERROR_READING_REQUEST] [%s] [%v]\n", requestId, quota, err)
+		log.Printf("[%d] [ERROR_READING_REQUEST] [%v]", requestId, err)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
@@ -131,7 +129,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	err = json.Unmarshal(body, &browser)
 	if err != nil {
-		log.Printf("[%d] [BAD_JSON_FORMAT] [%s] [%v]\n", requestId, quota, err)
+		log.Printf("[%d] [BAD_JSON_FORMAT] [%v]", requestId, err)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
@@ -139,7 +137,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	browser.Caps.ProcessExtensionCapabilities()
 	resolution, err := getScreenResolution(browser.Caps.ScreenResolution)
 	if err != nil {
-		log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s] [%s]\n", requestId, quota, browser.Caps.ScreenResolution)
+		log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s]", requestId, browser.Caps.ScreenResolution)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
@@ -147,7 +145,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	browser.Caps.ScreenResolution = resolution
 	videoScreenSize, err := getVideoScreenSize(browser.Caps.VideoScreenSize, resolution)
 	if err != nil {
-		log.Printf("[%d] [BAD_VIDEO_SCREEN_SIZE] [%s] [%s]\n", requestId, quota, browser.Caps.VideoScreenSize)
+		log.Printf("[%d] [BAD_VIDEO_SCREEN_SIZE] [%s]", requestId, browser.Caps.VideoScreenSize)
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
@@ -159,14 +157,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	starter, ok := manager.Find(browser.Caps, requestId)
 	if !ok {
-		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s-%s]\n", requestId, quota, browser.Caps.Name, browser.Caps.Version)
+		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s]", requestId, browser.Caps.Name, browser.Caps.Version)
 		jsonError(w, "Requested environment is not available", http.StatusBadRequest)
 		queue.Drop()
 		return
 	}
 	startedService, err := starter.StartWithCancel()
 	if err != nil {
-		log.Printf("[%d] [SERVICE_STARTUP_FAILED] [%s] [%v]\n", requestId, quota, err)
+		log.Printf("[%d] [SERVICE_STARTUP_FAILED] [%v]", requestId, err)
 		jsonError(w, err.Error(), http.StatusInternalServerError)
 		queue.Drop()
 		return
@@ -180,7 +178,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(body))
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
-		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%s] [%d]\n", requestId, quota, u.String(), i)
+		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%d]", requestId, u.String(), i)
 		rsp, err := httpClient.Do(req.WithContext(ctx))
 		select {
 		case <-ctx.Done():
@@ -189,15 +187,15 @@ func create(w http.ResponseWriter, r *http.Request) {
 			}
 			switch ctx.Err() {
 			case context.DeadlineExceeded:
-				log.Printf("[%d] [SESSION_ATTEMPT_TIMED_OUT] [%s]\n", requestId, quota)
+				log.Printf("[%d] [SESSION_ATTEMPT_TIMED_OUT] [%s]", requestId, newSessionAttemptTimeout)
 				if i < retryCount {
 					continue
 				}
 				err := fmt.Errorf("New session attempts retry count exceeded")
-				log.Printf("[%d] [SESSION_FAILED] [%s] - [%s]\n", requestId, u.String(), err)
+				log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), err)
 				jsonError(w, err.Error(), http.StatusInternalServerError)
 			case context.Canceled:
-				log.Printf("[%d] [CLIENT_DISCONNECTED] [%s]\n", requestId, quota)
+				log.Printf("[%d] [CLIENT_DISCONNECTED] [%s] [%s] [%.2fs]", requestId, user, remote, util.SecondsSince(sessionStartTime))
 			}
 			queue.Drop()
 			cancel()
@@ -208,7 +206,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			if rsp != nil {
 				rsp.Body.Close()
 			}
-			log.Printf("[%d] [SESSION_FAILED] [%s] - [%s]\n", requestId, u.String(), err)
+			log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), err)
 			jsonError(w, err.Error(), http.StatusInternalServerError)
 			queue.Drop()
 			cancel()
@@ -251,7 +249,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if s.ID == "" {
-		log.Printf("[%d] [SESSION_FAILED] [%s] [Bad response from %s - %v]\n", requestId, quota, u.String(), resp.Status)
+		log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), resp.Status)
 		queue.Drop()
 		cancel()
 		return
@@ -266,22 +264,22 @@ func create(w http.ResponseWriter, r *http.Request) {
 			newVideoName := filepath.Join(videoOutputDir, finalVideoName)
 			err := os.Rename(oldVideoName, newVideoName)
 			if err != nil {
-				log.Printf("[%d] [VIDEO_ERROR] [%s]\n", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldVideoName, newVideoName, err))
+				log.Printf("[%d] [VIDEO_ERROR] [%s]", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldVideoName, newVideoName, err))
 			}
 		}
 	}
 	sessions.Put(s.ID, &session.Session{
-		Quota:     quota,
+		Quota:     user,
 		Caps:      browser.Caps,
 		URL:       u,
 		Container: startedService.Container,
 		VNC:       startedService.VNCHostPort,
 		Cancel:    cancelAndRenameVideo,
 		Timeout: onTimeout(timeout, func() {
-			request{r}.session(s.ID).Delete()
+			request{r}.session(s.ID).Delete(requestId)
 		})})
 	queue.Create()
-	log.Printf("[%d] [SESSION_CREATED] [%s] [%s] [%s] [%d] [%v]\n", requestId, quota, s.ID, u, i, time.Since(sessionStartTime))
+	log.Printf("[%d] [SESSION_CREATED] [%s] [%d] [%.2fs]", requestId, s.ID, i, util.SecondsSince(sessionStartTime))
 }
 
 const videoFileExtension = ".mp4"
@@ -351,6 +349,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 		}()
 		(&httputil.ReverseProxy{
 			Director: func(r *http.Request) {
+				requestId := serial()
 				fragments := strings.Split(r.URL.Path, "/")
 				id := fragments[2]
 				sess, ok := sessions.Get(id)
@@ -369,10 +368,10 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 						cancel = sess.Cancel
 						sessions.Remove(id)
 						queue.Release()
-						log.Printf("[SESSION_DELETED] [%s]\n", id)
+						log.Printf("[%d] [SESSION_DELETED] [%s]", requestId, id)
 					} else {
 						sess.Timeout = onTimeout(timeout, func() {
-							request{r}.session(id).Delete()
+							request{r}.session(id).Delete(requestId)
 						})
 						if len(fragments) == 4 && fragments[len(fragments)-1] == "file" && enableFileUpload {
 							r.Header.Set("X-Selenoid-File", filepath.Join(os.TempDir(), id))
@@ -444,15 +443,16 @@ func fileUpload(w http.ResponseWriter, r *http.Request) {
 
 func vnc(wsconn *websocket.Conn) {
 	defer wsconn.Close()
+	requestId := serial()
 	sid := strings.Split(wsconn.Request().URL.Path, "/")[2]
 	sess, ok := sessions.Get(sid)
 	if ok {
 		if sess.VNC != "" {
-			log.Printf("[VNC_ENABLED] [%s]\n", sid)
+			log.Printf("[%d] [VNC_ENABLED] [%s]", requestId, sid)
 			var d net.Dialer
 			conn, err := d.DialContext(wsconn.Request().Context(), "tcp", sess.VNC)
 			if err != nil {
-				log.Printf("[VNC_ERROR] [%v]\n", err)
+				log.Printf("[%d] [VNC_ERROR] [%v]", requestId, err)
 				return
 			}
 			defer conn.Close()
@@ -460,39 +460,40 @@ func vnc(wsconn *websocket.Conn) {
 			go func() {
 				io.Copy(wsconn, conn)
 				wsconn.Close()
-				log.Printf("[VNC_SESSION_CLOSED] [%s]\n", sid)
+				log.Printf("[%d] [VNC_SESSION_CLOSED] [%s]", requestId, sid)
 			}()
 			io.Copy(conn, wsconn)
-			log.Printf("[VNC_CLIENT_DISCONNECTED] [%s]\n", sid)
+			log.Printf("[%d] [VNC_CLIENT_DISCONNECTED] [%s]", requestId, sid)
 		} else {
-			log.Printf("[VNC_NOT_ENABLED] [%s]\n", sid)
+			log.Printf("[%d] [VNC_NOT_ENABLED] [%s]", requestId, sid)
 		}
 	} else {
-		log.Printf("[SESSION_NOT_FOUND] [%s]\n", sid)
+		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
 	}
 }
 
 func logs(wsconn *websocket.Conn) {
 	defer wsconn.Close()
+	requestId := serial()
 	sid := strings.Split(wsconn.Request().URL.Path, "/")[2]
 	sess, ok := sessions.Get(sid)
 	if ok && sess.Container != nil {
-		log.Printf("[CONTAINER_LOGS] [%s]\n", sess.Container)
+		log.Printf("[%d] [CONTAINER_LOGS] [%s]", requestId, sess.Container)
 		r, err := cli.ContainerLogs(wsconn.Request().Context(), sess.Container.ID, types.ContainerLogsOptions{
 			ShowStdout: true,
 			ShowStderr: true,
 			Follow:     true,
 		})
 		if err != nil {
-			log.Printf("[CONTAINER_LOGS_ERROR] [%v]\n", err)
+			log.Printf("[%d] [CONTAINER_LOGS_ERROR] [%v]", requestId, err)
 			return
 		}
 		defer r.Close()
 		wsconn.PayloadType = websocket.BinaryFrame
 		io.Copy(wsconn, r)
-		log.Printf("[CONTAINER_LOGS_DISCONNECTED] [%s]\n", sid)
+		log.Printf("[%d] [CONTAINER_LOGS_DISCONNECTED] [%s]", requestId, sid)
 	} else {
-		log.Printf("[SESSION_NOT_FOUND] [%s]\n", sid)
+		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
 	}
 }
 

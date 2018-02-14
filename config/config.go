@@ -92,20 +92,20 @@ func loadJSON(filename string, v interface{}) error {
 
 // Load loads config from file
 func (config *Config) Load(browsers, containerLogs string) error {
-	log.Println("Loading configuration files...")
+	log.Println("[-] [INIT] [Loading configuration files...]")
 	br := make(map[string]Versions)
 	err := loadJSON(browsers, &br)
 	if err != nil {
 		return fmt.Errorf("browsers config: %v", err)
 	}
-	log.Printf("Loaded configuration from [%s]\n", browsers)
+	log.Printf("[-] [INIT] [Loaded configuration from \"%s\"]", browsers)
 	var cl *container.LogConfig
 	err = loadJSON(containerLogs, &cl)
 	if err != nil {
-		log.Printf("Using default containers log configuration because of: %v\n", err)
+		log.Printf("[-] [INIT] [Using default containers log configuration because of: %v]", err)
 		cl = &container.LogConfig{}
 	} else {
-		log.Printf("Loaded configuration from [%s]\n", containerLogs)
+		log.Printf("[-] [INIT] [Loaded configuration from \"%s\"]", containerLogs)
 	}
 	config.lock.Lock()
 	defer config.lock.Unlock()
@@ -123,7 +123,7 @@ func (config *Config) Find(name string, version string) (*Browser, string, bool)
 		return nil, "", false
 	}
 	if version == "" {
-		log.Println("Using default version:", browser.Default)
+		log.Printf("[-] [DEFAULT_VERSION] [Using default version: %s]", browser.Default)
 		version = browser.Default
 		if version == "" {
 			return nil, "", false

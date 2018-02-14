@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aerokube/selenoid/util"
 	"math"
 )
 
@@ -25,8 +26,9 @@ func (q *Queue) Check(next http.HandlerFunc) http.HandlerFunc {
 			<-q.limit
 		default:
 			if q.disabled {
-				log.Println("[QUEUE_IS_FULL]")
-				http.Error(w, "Queue full, see other", http.StatusSeeOther)
+				user, remote := util.RequestInfo(r)
+				log.Printf("[-] [QUEUE_IS_FULL] [%s] [%s]", user, remote)
+				http.Error(w, "Queue is full, see other", http.StatusSeeOther)
 				return
 			}
 		}
@@ -37,7 +39,8 @@ func (q *Queue) Check(next http.HandlerFunc) http.HandlerFunc {
 // Protect - handler to control limit of sessions
 func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println("[NEW_REQUEST]")
+		user, remote := util.RequestInfo(r)
+		log.Printf("[-] [NEW_REQUEST] [%s] [%s]", user, remote)
 		cn := w.(http.CloseNotifier)
 		s := time.Now()
 		go func() {
@@ -46,13 +49,13 @@ func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
 		select {
 		case <-cn.CloseNotify():
 			<-q.queued
-			log.Printf("connection from %s closed by client after %s waiting in queue\n", r.RemoteAddr, time.Since(s))
+			log.Printf("[-] [CLIENT_DISCONNECTED] [%s] [%s] [%s]", user, remote, time.Since(s))
 			return
 		case q.limit <- struct{}{}:
 			q.pending <- struct{}{}
 		}
 		<-q.queued
-		log.Println("[NEW_REQUEST_ACCEPTED]")
+		log.Printf("[-] [NEW_REQUEST_ACCEPTED] [%s] [%s]", user, remote)
 		next.ServeHTTP(w, r)
 	}
 }
