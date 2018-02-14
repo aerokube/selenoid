@@ -23,6 +23,7 @@ import (
 
 const (
 	comma                  = ","
+	colon                  = ":"
 	sysAdmin               = "SYS_ADMIN"
 	overrideVideoOutputDir = "OVERRIDE_VIDEO_OUTPUT_DIR"
 )
@@ -85,6 +86,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			Image:        image.(string),
 			Env:          env,
 			ExposedPorts: portConfig.ExposedPorts,
+			Labels:       getLabels(d.Service, d.Caps),
 		},
 		&hostConfig,
 		&network.NetworkingConfig{}, "")
@@ -174,12 +176,20 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 		ExposedPorts: exposedPorts}, nil
 }
 
+const (
+	tag    = "tag"
+	labels = "labels"
+)
+
 func getLogConfig(logConfig ctr.LogConfig, caps session.Caps) ctr.LogConfig {
 	if logConfig.Config != nil {
-		const tag = "tag"
 		_, ok := logConfig.Config[tag]
 		if caps.TestName != "" && !ok {
 			logConfig.Config[tag] = caps.TestName
+		}
+		_, ok = logConfig.Config[labels]
+		if caps.Labels != "" && !ok {
+			logConfig.Config[labels] = caps.Labels
 		}
 	}
 	return logConfig
@@ -228,6 +238,29 @@ func getExtraHosts(service *config.Browser, caps session.Caps) []string {
 		extraHosts = append(strings.Split(caps.HostsEntries, comma), extraHosts...)
 	}
 	return extraHosts
+}
+
+func getLabels(service *config.Browser, caps session.Caps) map[string]string {
+	labels := make(map[string]string)
+	if caps.TestName != "" {
+		labels["name"] = caps.TestName
+	}
+	for k, v := range service.Labels {
+		labels[k] = v
+	}
+	if caps.Labels != "" {
+		for _, lbl := range strings.Split(caps.Labels, comma) {
+			kv := strings.SplitN(lbl, colon, 2)
+			if len(kv) == 2 {
+				key := kv[0]
+				value := kv[1]
+				labels[key] = value
+			} else {
+				labels[lbl] = ""
+			}
+		}
+	}
+	return labels
 }
 
 func getHostPort(env Environment, service *config.Browser, caps session.Caps, stat types.ContainerJSON, selenium nat.Port, vnc nat.Port) (string, string) {
