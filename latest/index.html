@@ -585,7 +585,8 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_per_session_time_zone_timezone">3.1.5. Per-session Time Zone: timeZone</a></li>
 <li><a href="#_links_to_application_containers_applicationcontainers">3.1.6. Links to Application Containers: applicationContainers</a></li>
 <li><a href="#_hosts_entries_hostsentries">3.1.7. Hosts Entries: hostsEntries</a></li>
-<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.8. Specifying Capabilities via Protocol Extensions</a></li>
+<li><a href="#_container_labels_labels">3.1.8. Container Labels: labels</a></li>
+<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.9. Specifying Capabilities via Protocol Extensions</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -1070,7 +1071,7 @@ eth0      Link encap:Ethernet  HWaddr 00:25:90:eb:fb:3e</pre>
           <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">4444</span><span class="delimiter">&quot;</span></span>,                            <i class="conum" data-value="6"></i><b>(6)</b>
           <span class="key"><span class="delimiter">&quot;</span><span class="content">tmpfs</span><span class="delimiter">&quot;</span></span>: {<span class="key"><span class="delimiter">&quot;</span><span class="content">/tmp</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">size=512m</span><span class="delimiter">&quot;</span></span>},            <i class="conum" data-value="7"></i><b>(7)</b>
           <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">/wd/hub</span><span class="delimiter">&quot;</span></span>,                        <i class="conum" data-value="8"></i><b>(8)</b>
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">/to:/from:ro</span><span class="delimiter">&quot;</span></span>],              <i class="conum" data-value="9"></i><b>(9)</b>
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">/from:/to:ro</span><span class="delimiter">&quot;</span></span>],              <i class="conum" data-value="9"></i><b>(9)</b>
           <span class="key"><span class="delimiter">&quot;</span><span class="content">env</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">TZ=Europe/Moscow</span><span class="delimiter">&quot;</span></span>],              <i class="conum" data-value="10"></i><b>(10)</b>
           <span class="key"><span class="delimiter">&quot;</span><span class="content">hosts</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">example.com:192.168.0.1</span><span class="delimiter">&quot;</span></span>],     <i class="conum" data-value="11"></i><b>(11)</b>
           <span class="key"><span class="delimiter">&quot;</span><span class="content">shmSize</span><span class="delimiter">&quot;</span></span> : <span class="integer">268435456</span>,                     <i class="conum" data-value="12"></i><b>(12)</b>
@@ -1256,9 +1257,10 @@ That means version string in JSON should start with version string from capabili
     <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>
     <span class="string"><span class="delimiter">&quot;</span><span class="content">tmpfs</span><span class="delimiter">&quot;</span></span>: {<span class="key"><span class="delimiter">&quot;</span><span class="content">/tmp</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">size=512m</span><span class="delimiter">&quot;</span></span>, <span class="key"><span class="delimiter">&quot;</span><span class="content">/var</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">size=128m</span><span class="delimiter">&quot;</span></span>},
     <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">/to:/from</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">/another:/one:ro</span><span class="delimiter">&quot;</span></span>],
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">volumes</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">/from:/to</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">/another:/one:ro</span><span class="delimiter">&quot;</span></span>],
     <span class="key"><span class="delimiter">&quot;</span><span class="content">env</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">TZ=Europe/Moscow</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">ONE_MORE_VARIABLE=itsValue</span><span class="delimiter">&quot;</span></span>],
     <span class="key"><span class="delimiter">&quot;</span><span class="content">hosts</span><span class="delimiter">&quot;</span></span> : [<span class="string"><span class="delimiter">&quot;</span><span class="content">one.example.com:192.168.0.1</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">two.example.com:192.168.0.2</span><span class="delimiter">&quot;</span></span>],
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">labels</span><span class="delimiter">&quot;</span></span> : {<span class="key"><span class="delimiter">&quot;</span><span class="content">component</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">frontend</span><span class="delimiter">&quot;</span></span>, <span class="key"><span class="delimiter">&quot;</span><span class="content">project</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">my-project</span><span class="delimiter">&quot;</span></span>},
     <span class="key"><span class="delimiter">&quot;</span><span class="content">shmSize</span><span class="delimiter">&quot;</span></span> : <span class="integer">268435456</span>,
 },</code></pre>
 </div>
@@ -1289,6 +1291,9 @@ We recommend to use our <a href="https://github.com/aerokube/cm">configuration t
 </li>
 <li>
 <p><strong>hosts</strong> (<em>optional</em>) - This field allows to add custom <code>/etc/hosts</code> entries to running container. Specified as an array of <code>hostname:ip</code> pairs.</p>
+</li>
+<li>
+<p><strong>labels</strong> (<em>optional</em>) - This field allows to add custom labels to running container. Specified as an object of <code>"key": "value"</code> pairs.</p>
 </li>
 <li>
 <p><strong>shmSize</strong> (<em>optional</em>) - Use it to override shared memory size for browser container.</p>
@@ -2295,7 +2300,22 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.8. Specifying Capabilities via Protocol Extensions</h4>
+<h4 id="_container_labels_labels"><a class="anchor" href="#_container_labels_labels"></a>3.1.8. Container Labels: labels</h4>
+<div class="paragraph">
+<p>In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs.</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string, format: &lt;key&gt;:&lt;value&gt; (comma-separated)</div>
+<div class="content">
+<pre>labels: "environment:testing,build-number:14353"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Labels from this capability override labels from browsers configuration file. When <code>name</code> capability is specified - it is automatically added as a label to container.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.9. Specifying Capabilities via Protocol Extensions</h4>
 <div class="paragraph">
 <p>Some Selenium clients allow passing only a limited number of capabilities specified in <a href="https://w3c.github.io/webdriver/webdriver-spec.html">WebDriver specification</a>. For such cases Selenoid supports reading capabilities using <a href="https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions">WebDriver protocol extensions</a> feature. The following two examples deliver the same result. Usually capabilities are passed like this:</p>
 </div>
@@ -3440,7 +3460,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-02-14 06:42:24 UTC
+Last updated 2018-02-14 18:31:46 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
