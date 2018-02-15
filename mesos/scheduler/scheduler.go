@@ -11,7 +11,13 @@ import (
 
 var isAccepted bool
 
-const schedulerUrl = "http://localhost:5050/api/v1/scheduler"
+var scheduler *Scheduler
+
+const schedulerUrlTemplate = "[MASTER]/api/v1/scheduler"
+
+type Scheduler struct {
+	url string
+}
 
 type id struct {
 	Value string `json:"value"`
@@ -37,7 +43,9 @@ type Message struct {
 	Type string
 }
 
-func Run() {
+func Run(URL string) {
+	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
+	scheduler = &Scheduler{schedulerUrl}
 
 	resp, err := http.Post(schedulerUrl, "application/json", strings.NewReader(`{
    "type"       : "SUBSCRIBE",

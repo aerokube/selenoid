@@ -25,6 +25,7 @@ import (
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/client"
 	"path/filepath"
+	"github.com/JasperJhons/selenoid/mesos/scheduler"
 )
 
 type memLimit int64
@@ -66,21 +67,22 @@ var (
 	timeout                  time.Duration
 	newSessionAttemptTimeout time.Duration
 	sessionDeleteTimeout     time.Duration
-	serviceStartupTimeout    time.Duration
-	limit                    int
-	retryCount               int
-	containerNetwork         string
-	sessions                 = session.NewMap()
-	confPath                 string
-	logConfPath              string
-	captureDriverLogs        bool
-	disablePrivileged        bool
-	videoOutputDir           string
-	videoRecorderImage       string
-	conf                     *config.Config
-	queue                    *protect.Queue
-	manager                  service.Manager
-	cli                      *client.Client
+	serviceStartupTimeout time.Duration
+	limit                 int
+	retryCount            int
+	containerNetwork      string
+	sessions                               = session.NewMap()
+	confPath              string
+	logConfPath           string
+	captureDriverLogs     bool
+	disablePrivileged     bool
+	videoOutputDir        string
+	videoRecorderImage    string
+	conf                  *config.Config
+	queue                 *protect.Queue
+	manager               service.Manager
+	cli                   *client.Client
+	mesosMasterURL        string
 
 	startTime = time.Now()
 
@@ -112,6 +114,7 @@ func init() {
 	flag.BoolVar(&disablePrivileged, "disable-privileged", false, "Whether to disable privileged container mode")
 	flag.StringVar(&videoOutputDir, "video-output-dir", "video", "Directory to save recorded video to")
 	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder", "Image to use as video recorder")
+	flag.StringVar(&mesosMasterURL, "mesos", "", "URL to mesos master")
 	flag.Parse()
 
 	if version {
@@ -180,6 +183,12 @@ func init() {
 		log.Fatalf("new docker client: %v\n", err)
 	}
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
+
+	if mesosMasterURL != "" {
+		log.Printf("[TRY TO REGISTER ON MESOS MASTER] [%s]", mesosMasterURL)
+		scheduler.Run(mesosMasterURL)
+	}
+
 }
 
 func cancelOnSignal() {
