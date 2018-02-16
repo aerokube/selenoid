@@ -186,7 +186,7 @@ func init() {
 
 	if mesosMasterURL != "" {
 		log.Printf("[TRY TO REGISTER ON MESOS MASTER] [%s]", mesosMasterURL)
-		scheduler.Run(mesosMasterURL)
+		go scheduler.Run(mesosMasterURL)
 	}
 
 }
