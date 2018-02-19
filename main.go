@@ -67,22 +67,22 @@ var (
 	timeout                  time.Duration
 	newSessionAttemptTimeout time.Duration
 	sessionDeleteTimeout     time.Duration
-	serviceStartupTimeout time.Duration
-	limit                 int
-	retryCount            int
-	containerNetwork      string
-	sessions                               = session.NewMap()
-	confPath              string
-	logConfPath           string
-	captureDriverLogs     bool
-	disablePrivileged     bool
-	videoOutputDir        string
-	videoRecorderImage    string
-	conf                  *config.Config
-	queue                 *protect.Queue
-	manager               service.Manager
-	cli                   *client.Client
-	mesosMasterURL        string
+	serviceStartupTimeout    time.Duration
+	limit                    int
+	retryCount               int
+	containerNetwork         string
+	sessions                 = session.NewMap()
+	confPath                 string
+	logConfPath              string
+	captureDriverLogs        bool
+	disablePrivileged        bool
+	videoOutputDir           string
+	videoRecorderImage       string
+	conf                     *config.Config
+	queue                    *protect.Queue
+	manager                  service.Manager
+	cli                      *client.Client
+	mesosMasterURL           string
 
 	startTime = time.Now()
 
