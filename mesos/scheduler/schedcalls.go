@@ -26,7 +26,7 @@ func Decline(mesosStreamId string, frameworkId string, offers string) {
 }`
 	body := strings.Replace(template, frameworkIdHolder, frameworkId, 1)
 	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
-	req, err := http.NewRequest("POST", schedulerUrl, strings.NewReader(bodyWithOffers))
+	req, err := http.NewRequest("POST", scheduler.url, strings.NewReader(bodyWithOffers))
 
 	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
 	req.Header.Set("Content-Type", "application/json")
@@ -104,7 +104,7 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
 	body := strings.Replace(template, frameworkIdHolder, frameworkId, 1)
 	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
 	bodyWithAgent := strings.Replace(bodyWithOffers, agentIdHolder, agent_id, 1)
-	req, err := http.NewRequest("POST", schedulerUrl, strings.NewReader(bodyWithAgent))
+	req, err := http.NewRequest("POST", scheduler.url, strings.NewReader(bodyWithAgent))
 
 	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
 	req.Header.Set("Content-Type", "application/json")
@@ -152,7 +152,7 @@ func Aknowledge(mesosStreamId string, frameworkId string, agent_id string, uuid 
     body := strings.Replace(template, frameworkIdHolder, frameworkId, 1);
     bodyWithAgent := strings.Replace(body, agentIdHolder, agent_id, 1);
     bodyWithUuid := strings.Replace(bodyWithAgent, uuidHolder, uuid, 1);
-	req, err := http.NewRequest("POST", schedulerUrl, strings.NewReader(bodyWithUuid))
+	req, err := http.NewRequest("POST", scheduler.url, strings.NewReader(bodyWithUuid))
 
 	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
 	req.Header.Set("Content-Type", "application/json")
