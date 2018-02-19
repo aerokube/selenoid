@@ -113,7 +113,7 @@ Selenoid proxies connections to either Selenium server or standalone driver bina
 ----
 "46.0": {
     //...
-    "port": ""
+    "port": "",
     "tmpfs": {"/tmp": "size=512m", "/var": "size=128m"},
     "path" : "",
     "volumes": ["/from:/to", "/another:/one:ro"],
