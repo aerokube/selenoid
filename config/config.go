@@ -99,14 +99,14 @@ func (config *Config) Load(browsers, containerLogs string) error {
 	if err != nil {
 		return fmt.Errorf("browsers config: %v", err)
 	}
-	log.Printf("[-] [INIT] [Loaded configuration from \"%s\"]", browsers)
+	log.Printf("[-] [INIT] [Loaded configuration from %s]", browsers)
 	var cl *container.LogConfig
 	err = loadJSON(containerLogs, &cl)
 	if err != nil {
 		log.Printf("[-] [INIT] [Using default containers log configuration because of: %v]", err)
 		cl = &container.LogConfig{}
 	} else {
-		log.Printf("[-] [INIT] [Loaded configuration from \"%s\"]", containerLogs)
+		log.Printf("[-] [INIT] [Loaded log configuration from %s]", containerLogs)
 	}
 	config.lock.Lock()
 	defer config.lock.Unlock()
