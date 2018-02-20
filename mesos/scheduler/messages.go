@@ -31,16 +31,17 @@ type Resources []struct {
 
 //Структура для хранения таски запуска
 type Launch struct {
-	TaskInfos []struct {
-		Name    string `json:"name"`
-		TaskID  ID     `json:"task_id"`
-		AgentID ID     `json:"agent_id"`
-		Command struct {
-			Shell bool `json:"shell"`
-		} `json:"command"`
-		Container Container `json:"container"`
-		Resources Resources `json:"resources"`
-	} `json:"task_infos"`
+	TaskInfos []TaskInfo `json:"task_infos"`
+}
+type TaskInfo struct {
+	Name    string `json:"name"`
+	TaskID  ID     `json:"task_id"`
+	AgentID ID     `json:"agent_id"`
+	Command struct {
+		Shell bool `json:"shell"`
+	} `json:"command"`
+	Container Container `json:"container"`
+	Resources Resources `json:"resources"`
 }
 
 type SubscribeMessage struct {
@@ -58,7 +59,7 @@ type DeclineMessage struct {
 	FrameworkID ID     `json:"framework_id"`
 	Type        string `json:"type"`
 	Decline struct {
-		OfferIds string `json:"offer_ids"`
+		OfferIds []ID `json:"offer_ids"`
 		Filters struct {
 			RefuseSeconds float64 `json:"refuse_seconds"`
 		} `json:"filters"`
@@ -69,16 +70,18 @@ type AcceptMessage struct {
 	FrameworkID ID     `json:"framework_id"`
 	Type        string `json:"type"`
 	Accept struct {
-		OfferIds string `json:"offer_ids"`
+		OfferIds []ID `json:"offer_ids"`
 		//тут может быть одна или много тасок, надо подумать как их сюда передать
-		Operations []struct {
-			Type   string `json:"type"`
-			Launch Launch `json:"launch"`
-		} `json:"operations"`
+		Operations []Operation `json:"operations"`
 		Filters struct {
 			RefuseSeconds float64 `json:"refuse_seconds"`
 		} `json:"filters"`
 	} `json:"accept"`
+}
+
+type Operation struct {
+	Type   string `json:"type"`
+	Launch Launch `json:"launch"`
 }
 
 type AcknowledgeMessage struct {
@@ -89,4 +92,29 @@ type AcknowledgeMessage struct {
 		TaskID  ID     `json:"task_id"`
 		UUID    string `json:"uuid"`
 	} `json:"acknowledge"`
+}
+
+func GetSubscribedMessage(user string, name string, roles []string) (SubscribeMessage) {
+	var message = SubscribeMessage{Type: "SUBSCRIBE"}
+	message.Subscribe.FrameworkInfo.User = user
+	message.Subscribe.FrameworkInfo.Name = name
+	message.Subscribe.FrameworkInfo.Roles = roles
+	return message
+}
+
+func GetAcknowledgeMessage(frameworkId ID, agentId ID, UUID string) (AcknowledgeMessage) {
+	var message = AcknowledgeMessage{FrameworkID: frameworkId,
+		Type: "ACKNOWLEDGE"}
+	message.Acknowledge.AgentID = agentId
+	message.Acknowledge.TaskID = ID{"12220-3440-12532-my-task"}
+	message.Acknowledge.UUID = UUID
+	return message
+}
+
+func GetDeclineMessage(frameworkId ID, offerId []ID) (DeclineMessage) {
+	var message = DeclineMessage{FrameworkID: frameworkId,
+		Type: "DECLINE"}
+	message.Decline.OfferIds = offerId
+	message.Decline.Filters.RefuseSeconds = 5.0
+	return message
 }

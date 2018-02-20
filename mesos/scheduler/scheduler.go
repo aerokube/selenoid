@@ -7,11 +7,12 @@ import (
 	"strings"
 	"log"
 	"bufio"
+	"bytes"
 )
 
 var isAccepted bool
-
 var scheduler *Scheduler
+var frameworkId ID
 
 const schedulerUrlTemplate = "[MASTER]/api/v1/scheduler"
 
@@ -19,25 +20,21 @@ type Scheduler struct {
 	url string
 }
 
-type id struct {
-	Value string `json:"value"`
-}
-
 type Message struct {
 	Offers struct {
 		Offers []struct {
-			Id      id
-			AgentId id `json:"agent_id"`
+			Id      ID
+			AgentId ID `json:"agent_id"`
 		}
 	}
 	Subscribed struct {
-		FrameworkId              id    `json:"framework_id"`
+		FrameworkId              ID    `json:"framework_id"`
 		HeartbeatIntervalSeconds int64 `json:"heartbeat_interval_seconds"`
 	}
 	Update struct {
 		Status struct {
 			Uuid    string
-			AgentId id `json:"agent_id"`
+			AgentId ID `json:"agent_id"`
 		}
 	}
 	Type string
@@ -47,16 +44,9 @@ func Run(URL string) {
 	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
 	scheduler = &Scheduler{schedulerUrl}
 
-	resp, err := http.Post(schedulerUrl, "application/json", strings.NewReader(`{
-   "type"       : "SUBSCRIBE",
-   "subscribe"  : {
-      "framework_info"  : {
-        "user" :  "foo",
-        "name" :  "My Best Framework",
-        "roles": ["test"]
-      }
-  }
-}`))
+	body, _ := json.Marshal(GetSubscribedMessage("foo", "My first framework", []string{"test"}))
+
+	resp, err := http.Post(schedulerUrl, "application/json", bytes.NewReader(body))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +59,6 @@ func Run(URL string) {
 	scanner := bufio.NewScanner(resp.Body)
 	scanner.Split(bufio.ScanLines)
 
-	var frameworkId string
 	for scanner.Scan() {
 		var line = scanner.Text()
 		var m Message
@@ -80,30 +69,30 @@ func Run(URL string) {
 			jsonMessage := line[0:index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
 			if m.Type == "SUBSCRIBED" {
-				frameworkId = m.Subscribed.FrameworkId.Value
-				fmt.Println("Ура, мы подписались! Id = " + frameworkId)
+				frameworkId = ID{m.Subscribed.FrameworkId.Value}
+				fmt.Println("Ура, мы подписались! Id = " + frameworkId.Value)
 			} else if m.Type == "HEARTBEAT" {
 				fmt.Println("Мезос жил, мезос жив, мезос будет жить!!!")
 			} else if m.Type == "OFFERS" {
-				var ids []id
+				var offersIds []ID
 				offers := m.Offers.Offers
 				for _, n := range offers {
-					ids = append(ids, n.Id)
-					fmt.Println(ids)
+					offersIds = append(offersIds, n.Id)
+					fmt.Println(offersIds)
 				}
-				b, _ := json.Marshal(ids)
+				b, _ := json.Marshal(offersIds)
 				if isAccepted == false {
-					Accept(streamId, frameworkId, m.Offers.Offers[0].AgentId.Value, string(b))
+					Accept(streamId, frameworkId.Value, m.Offers.Offers[0].AgentId.Value, string(b))
 					isAccepted = true
 					fmt.Println(isAccepted)
 				} else {
-					Decline(streamId, frameworkId, string(b))
+					Decline(streamId, frameworkId, offersIds)
 				}
 			} else if m.Type == "FAILURE" {
 				fmt.Println("Все плохо")
 			} else if m.Type == "UPDATE" {
 				uuid := m.Update.Status.Uuid
-				Aknowledge(streamId, frameworkId, m.Update.Status.AgentId.Value, uuid)
+				Acknowledge(streamId, frameworkId, ID{m.Update.Status.AgentId.Value}, uuid)
 			}
 		}
 	}

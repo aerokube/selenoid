@@ -5,28 +5,19 @@ import (
 	"net/http"
 	"strings"
 	"bytes"
+	"encoding/json"
 )
 
 const (
 	frameworkIdHolder = "__FRAMEWORK_ID__"
 	offerIdsHolder    = "__OFFER_IDS__"
 	agentIdHolder     = "__AGENT_ID__"
-	uuidHolder        = "__UUID__"
 )
 
-func Decline(mesosStreamId string, frameworkId string, offers string) {
+func Decline(mesosStreamId string, frameworkId ID, offersIDs []ID) {
 
-	template := `{
-  "framework_id"    : {"value" : "__FRAMEWORK_ID__"},
-  "type"            : "DECLINE",
-  "decline"         : {
-    "offer_ids" : __OFFER_IDS__,
-    "filters"   : {"refuse_seconds" : 5.0}
-  }
-}`
-	body := strings.Replace(template, frameworkIdHolder, frameworkId, 1)
-	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
-	req, err := http.NewRequest("POST", scheduler.url, strings.NewReader(bodyWithOffers))
+	body, _ := json.Marshal(GetDeclineMessage(frameworkId, offersIDs))
+	req, err := http.NewRequest("POST", scheduler.url, bytes.NewReader(body))
 
 	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
 	req.Header.Set("Content-Type", "application/json")
@@ -122,37 +113,21 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
 }
 
 type acknowledge struct {
-	AgentId id     `json:"agent_id"`
-	TaskId  id     `json:"task_id"`
+	AgentId ID     `json:"agent_id"`
+	TaskId  ID     `json:"task_id"`
 	Uuid    string `json:"uuid"`
 }
 
 type AcknowledgeResponse struct {
-	FrameworkId id          `json:"framework_id"`
+	FrameworkId ID          `json:"framework_id"`
 	Type        string      `json:"type"`
 	Acknowledge acknowledge `json:"acknowledge"`
 }
 
-func Aknowledge(mesosStreamId string, frameworkId string, agent_id string, uuid string) {
-	template := ` {
-                  "framework_id": {
-                    "value": "__FRAMEWORK_ID__"
-                  },
-                  "type": "ACKNOWLEDGE",
-                  "acknowledge": {
-                    "agent_id": {
-                      "value": "__AGENT_ID__"
-                    },
-                    "task_id": {
-                      "value": "12220-3440-12532-my-task"
-                    },
-                    "uuid": "__UUID__"
-                  }
-                }`
-    body := strings.Replace(template, frameworkIdHolder, frameworkId, 1);
-    bodyWithAgent := strings.Replace(body, agentIdHolder, agent_id, 1);
-    bodyWithUuid := strings.Replace(bodyWithAgent, uuidHolder, uuid, 1);
-	req, err := http.NewRequest("POST", scheduler.url, strings.NewReader(bodyWithUuid))
+func Acknowledge(mesosStreamId string, frameworkId ID, agent_id ID, uuid string) {
+
+	body, _ := json.Marshal(GetAcknowledgeMessage(frameworkId, agent_id, uuid))
+	req, err := http.NewRequest("POST", scheduler.url, bytes.NewReader(body))
 
 	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
 	req.Header.Set("Content-Type", "application/json")
