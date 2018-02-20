@@ -26,7 +26,7 @@ func Decline(mesosStreamId string, frameworkId string, offers string) {
 }`
 	body := strings.Replace(template, frameworkIdHolder, frameworkId, 1)
 	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
-	req, err := http.NewRequest("POST", scheduler.url, strings.NewReader(bodyWithOffers))
+	req, err := http.NewRequest("POST", CurrentScheduler.Url, strings.NewReader(bodyWithOffers))
 
 	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
 	req.Header.Set("Content-Type", "application/json")
@@ -65,12 +65,13 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
 										  "container": {
                                					 "type": "DOCKER",
 												 "docker": {
-                                  					"image": "docker.moscow.alfaintra.net/selenoid/chrome",
+                                  					"image": "selenoid/chrome",
 													"network": "BRIDGE",
-													"portMappings": [
+													"privileged": true,
+													"port_mappings": [
 														{
-														  "containerPort": 4444,
-														  "hostPort": 0,
+														  "container_port": 4444,
+														  "host_port": 31005,
 														  "protocol": "tcp",
 														  "name": "http"
 														}
@@ -78,6 +79,15 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
                                					 }
                               				},
                                           "resources"   : [
+														   {
+											"name":"ports",
+											"ranges": {
+												"range": [
+												{"begin":31005,"end":31005}
+												]},
+											"role":"*",
+											"type":"RANGES"
+										  },
                                                            {
                                   			"name": "cpus",
                                   			"type": "SCALAR",
@@ -104,7 +114,7 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
 	body := strings.Replace(template, frameworkIdHolder, frameworkId, 1)
 	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
 	bodyWithAgent := strings.Replace(bodyWithOffers, agentIdHolder, agent_id, 1)
-	req, err := http.NewRequest("POST", scheduler.url, strings.NewReader(bodyWithAgent))
+	req, err := http.NewRequest("POST", CurrentScheduler.Url, strings.NewReader(bodyWithAgent))
 
 	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
 	req.Header.Set("Content-Type", "application/json")
@@ -133,7 +143,7 @@ type AcknowledgeResponse struct {
 	Acknowledge acknowledge `json:"acknowledge"`
 }
 
-func Aknowledge(mesosStreamId string, frameworkId string, agent_id string, uuid string) {
+func Acknowledge(mesosStreamId string, frameworkId string, agent_id string, uuid string) {
 	template := ` {
                   "framework_id": {
                     "value": "__FRAMEWORK_ID__"
@@ -152,7 +162,7 @@ func Aknowledge(mesosStreamId string, frameworkId string, agent_id string, uuid 
     body := strings.Replace(template, frameworkIdHolder, frameworkId, 1);
     bodyWithAgent := strings.Replace(body, agentIdHolder, agent_id, 1);
     bodyWithUuid := strings.Replace(bodyWithAgent, uuidHolder, uuid, 1);
-	req, err := http.NewRequest("POST", scheduler.url, strings.NewReader(bodyWithUuid))
+	req, err := http.NewRequest("POST", CurrentScheduler.Url, strings.NewReader(bodyWithUuid))
 
 	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
 	req.Header.Set("Content-Type", "application/json")

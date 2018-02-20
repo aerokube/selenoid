@@ -25,7 +25,7 @@ import (
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/client"
 	"path/filepath"
-	"github.com/JasperJhons/selenoid/mesos/scheduler"
+	"github.com/aerokube/selenoid/mesos/scheduler"
 )
 
 type memLimit int64
@@ -163,6 +163,7 @@ func init() {
 		VideoOutputDir:      videoOutputDir,
 		VideoContainerImage: videoRecorderImage,
 		Privileged:          !disablePrivileged,
+		MesosMasterUrl:      mesosMasterURL,
 	}
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}
@@ -186,7 +187,7 @@ func init() {
 
 	if mesosMasterURL != "" {
 		log.Printf("[TRY TO REGISTER ON MESOS MASTER] [%s]", mesosMasterURL)
-		scheduler.Run(mesosMasterURL)
+		go scheduler.Run(mesosMasterURL)
 	}
 
 }

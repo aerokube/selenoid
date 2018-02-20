@@ -7,16 +7,25 @@ import (
 	"strings"
 	"log"
 	"bufio"
+	"encoding/base64"
 )
 
 var isAccepted bool
 
-var scheduler *Scheduler
+var CurrentScheduler *Scheduler
+
+var ContainerId string
 
 const schedulerUrlTemplate = "[MASTER]/api/v1/scheduler"
 
+type ContainerData struct {
+	Id string
+}
+
 type Scheduler struct {
-	url string
+	Url         string
+	StreamId    string
+	FrameworkId string
 }
 
 type id struct {
@@ -37,7 +46,9 @@ type Message struct {
 	Update struct {
 		Status struct {
 			Uuid    string
-			AgentId id `json:"agent_id"`
+			AgentId id     `json:"agent_id"`
+			Data    string `json:"data"`
+			State   string `json:"state"`
 		}
 	}
 	Type string
@@ -45,7 +56,6 @@ type Message struct {
 
 func Run(URL string) {
 	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
-	scheduler = &Scheduler{schedulerUrl}
 
 	resp, err := http.Post(schedulerUrl, "application/json", strings.NewReader(`{
    "type"       : "SUBSCRIBE",
@@ -82,6 +92,7 @@ func Run(URL string) {
 			if m.Type == "SUBSCRIBED" {
 				frameworkId = m.Subscribed.FrameworkId.Value
 				fmt.Println("Ура, мы подписались! Id = " + frameworkId)
+				CurrentScheduler = &Scheduler{schedulerUrl, streamId, frameworkId}
 			} else if m.Type == "HEARTBEAT" {
 				fmt.Println("Мезос жил, мезос жив, мезос будет жить!!!")
 			} else if m.Type == "OFFERS" {
@@ -103,7 +114,15 @@ func Run(URL string) {
 				fmt.Println("Все плохо")
 			} else if m.Type == "UPDATE" {
 				uuid := m.Update.Status.Uuid
-				Aknowledge(streamId, frameworkId, m.Update.Status.AgentId.Value, uuid)
+				Acknowledge(streamId, frameworkId, m.Update.Status.AgentId.Value, uuid)
+				if m.Update.Status.State == "TASK_RUNNING" {
+					n, _ := base64.StdEncoding.DecodeString(m.Update.Status.Data)
+					fmt.Println(string(n))
+					var data []ContainerData
+					json.Unmarshal(n, &data)
+					ContainerId = data[0].Id
+					fmt.Println(ContainerId + "Id container")
+				}
 			}
 		}
 	}
