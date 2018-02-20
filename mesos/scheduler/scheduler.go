@@ -10,16 +10,19 @@ import (
 	"encoding/base64"
 )
 
-var isAccepted bool
+var IsNeedAccepted bool
 
-var CurrentScheduler *Scheduler
+var Sched *Scheduler
 
-var ContainerId string
+var MesosContainer *DockerInfo
 
 const schedulerUrlTemplate = "[MASTER]/api/v1/scheduler"
 
-type ContainerData struct {
+type DockerInfo struct {
 	Id string
+	NetworkSettings struct {
+		IPAddress string
+	}
 }
 
 type Scheduler struct {
@@ -92,7 +95,7 @@ func Run(URL string) {
 			if m.Type == "SUBSCRIBED" {
 				frameworkId = m.Subscribed.FrameworkId.Value
 				fmt.Println("Ура, мы подписались! Id = " + frameworkId)
-				CurrentScheduler = &Scheduler{schedulerUrl, streamId, frameworkId}
+				Sched = &Scheduler{schedulerUrl, streamId, frameworkId}
 			} else if m.Type == "HEARTBEAT" {
 				fmt.Println("Мезос жил, мезос жив, мезос будет жить!!!")
 			} else if m.Type == "OFFERS" {
@@ -103,25 +106,24 @@ func Run(URL string) {
 					fmt.Println(ids)
 				}
 				b, _ := json.Marshal(ids)
-				if isAccepted == false {
-					Accept(streamId, frameworkId, m.Offers.Offers[0].AgentId.Value, string(b))
-					isAccepted = true
-					fmt.Println(isAccepted)
+				if IsNeedAccepted == true {
+					Sched.Accept(m.Offers.Offers[0].AgentId.Value, string(b))
+					IsNeedAccepted = false
+					fmt.Println(IsNeedAccepted)
 				} else {
-					Decline(streamId, frameworkId, string(b))
+					Sched.Decline(string(b))
 				}
 			} else if m.Type == "FAILURE" {
 				fmt.Println("Все плохо")
 			} else if m.Type == "UPDATE" {
 				uuid := m.Update.Status.Uuid
-				Acknowledge(streamId, frameworkId, m.Update.Status.AgentId.Value, uuid)
+				Sched.Acknowledge(m.Update.Status.AgentId.Value, uuid)
 				if m.Update.Status.State == "TASK_RUNNING" {
 					n, _ := base64.StdEncoding.DecodeString(m.Update.Status.Data)
 					fmt.Println(string(n))
-					var data []ContainerData
+					var data []DockerInfo
 					json.Unmarshal(n, &data)
-					ContainerId = data[0].Id
-					fmt.Println(ContainerId + "Id container")
+					MesosContainer = &data[0]
 				}
 			}
 		}

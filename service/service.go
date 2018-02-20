@@ -74,6 +74,7 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 		return nil, false
 	}
 	if m.Environment.MesosMasterUrl != "" {
+		log.Printf("[%d] [USING_MESOS] [%s-%s]\n", requestId, browserName, version)
 		return &Mesos{
 			ServiceBase: serviceBase,
 			Environment: *m.Environment,
