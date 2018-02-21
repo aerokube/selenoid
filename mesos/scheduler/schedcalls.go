@@ -14,33 +14,18 @@ const (
 	frameworkIdHolder = "__FRAMEWORK_ID__"
 	offerIdsHolder    = "__OFFER_IDS__"
 	agentIdHolder     = "__AGENT_ID__"
-	uuidHolder        = "__UUID__"
 )
 
-func (s *Scheduler) Decline(offers string) {
-func Decline(mesosStreamId string, frameworkId ID, offersIDs []ID) {
-
-	template := `{
-  "framework_id"    : {"value" : "__FRAMEWORK_ID__"},
-  "type"            : "DECLINE",
-  "decline"         : {
-    "offer_ids" : __OFFER_IDS__,
-    "filters"   : {"refuse_seconds" : 5.0}
-  }
-}`
-	body := strings.Replace(template, frameworkIdHolder, s.FrameworkId, 1)
-	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
-	body, _ := json.Marshal(GetDeclineMessage(frameworkId, offersIDs))
-	req, err := http.NewRequest("POST", scheduler.url, bytes.NewReader(body))
-
-	_, err := s.sendToStream(bodyWithOffers)
+func (s *Scheduler) Decline(offers []ID) {
+	body, _ := json.Marshal(GetDeclineMessage(s.FrameworkId, offers))
+	_, err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func (s *Scheduler) Accept(agentId string, offers string) {
-
+	//TO DO: запуск тестов со сгенерированным taskId
 	taskId := "selenoid-" + uuid.New()
 	fmt.Println("TASK ID: " + taskId)
 
@@ -110,11 +95,11 @@ func (s *Scheduler) Accept(agentId string, offers string) {
      "filters"     : {"refuse_seconds" : 5.0}
   }
 }`
-	body := strings.Replace(template, frameworkIdHolder, s.FrameworkId, 1)
+	body := strings.Replace(template, frameworkIdHolder, s.FrameworkId.Value, 1)
 	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
 	bodyWithAgent := strings.Replace(bodyWithOffers, agentIdHolder, agentId, 1)
 
-	resp, err := s.sendToStream(bodyWithAgent)
+	resp, err := s.sendToStream([]byte(bodyWithAgent))
 	if err != nil {
 		panic(err)
 	}
@@ -125,72 +110,17 @@ func (s *Scheduler) Accept(agentId string, offers string) {
 	fmt.Println(resp.Status)
 }
 
-type acknowledge struct {
-	AgentId ID     `json:"agent_id"`
-	TaskId  ID     `json:"task_id"`
-	Uuid    string `json:"uuid"`
-}
-
-type AcknowledgeResponse struct {
-	FrameworkId ID          `json:"framework_id"`
-	Type        string      `json:"type"`
-	Acknowledge acknowledge `json:"acknowledge"`
-}
-
-func (s *Scheduler) Acknowledge(agent_id string, uuid string) {
-	template := ` {
-                  "framework_id": {
-                    "value": "__FRAMEWORK_ID__"
-                  },
-                  "type": "ACKNOWLEDGE",
-                  "acknowledge": {
-                    "agent_id": {
-                      "value": "__AGENT_ID__"
-                    },
-                    "task_id": {
-                      "value": "12220-3440-12532-my-task"
-                    },
-                    "uuid": "__UUID__"
-                  }
-                }`
-	body := strings.Replace(template, frameworkIdHolder, s.FrameworkId, 1);
-	bodyWithAgent := strings.Replace(body, agentIdHolder, agent_id, 1);
-	bodyWithUuid := strings.Replace(bodyWithAgent, uuidHolder, uuid, 1);
-	resp, err := s.sendToStream(bodyWithUuid)
-func Acknowledge(mesosStreamId string, frameworkId ID, agent_id ID, uuid string) {
-
-	body, _ := json.Marshal(GetAcknowledgeMessage(frameworkId, agent_id, uuid))
-	req, err := http.NewRequest("POST", scheduler.url, bytes.NewReader(body))
-
-	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
+func (s *Scheduler) Acknowledge(agentId ID, uuid string) {
+	body, _ := json.Marshal(GetAcknowledgeMessage(s.FrameworkId, agentId, uuid))
+	_, err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
 	}
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	fmt.Println(buf.String())
-	fmt.Println(resp.Status)
 }
 
 func (s *Scheduler) Kill() {
 	log.Printf("[%d] [REMOVING_CONTAINER] [%s]\n")
-	template := ` {
-
-  "framework_id": {
-    "value": "__FRAMEWORK_ID__"
-  },
-
-  "type" : "KILL",
-  "kill" : {
-    "task_id" : {"value" : "12220-3440-12532-my-task"}
-  }
-}`
-	body := strings.Replace(template, frameworkIdHolder, s.FrameworkId, 1);
+	body, _ := json.Marshal(GetKillMessage(s.FrameworkId))
 	resp, err := s.sendToStream(body)
 	if err != nil {
 		log.Printf("[FAILED_TO_REMOVE_CONTAINER] [%v]\n", err)
@@ -204,15 +134,13 @@ func (s *Scheduler) Kill() {
 	fmt.Println(resp.Status)
 }
 
-func (s *Scheduler) sendToStream(body string) (*http.Response, error) {
-	req, err := http.NewRequest("POST", s.Url, strings.NewReader(body))
+func (s *Scheduler) sendToStream(body []byte) (*http.Response, error) {
+	req, err := http.NewRequest("POST", s.Url, bytes.NewReader(body))
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	req.Header.Set("Mesos-Stream-Id", s.StreamId)
 	req.Header.Set("Content-Type", "application/json")
-
 	client := &http.Client{}
 	return client.Do(req)
 }

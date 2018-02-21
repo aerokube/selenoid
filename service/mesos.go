@@ -23,7 +23,8 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 	scheduler.IsNeedAccepted = true
 	time.Sleep(20 * time.Second)
 	fmt.Println("Создаем контейнер мезос")
-	u := &url.URL{Scheme: "http", Host: "127.0.0.1:31005", Path: m.Service.Path}
+	hostPort := scheduler.MesosContainer.NetworkSettings.Ports.ContainerPort[0].HostPort
+	u := &url.URL{Scheme: "http", Host: "127.0.0.1:" + hostPort, Path: m.Service.Path}
 	s := StartedService{
 		Url: u,
 		Container: &session.Container{
