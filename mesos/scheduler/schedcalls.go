@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"bytes"
+	"encoding/json"
 	"log"
 	"github.com/pborman/uuid"
 )
@@ -17,6 +18,7 @@ const (
 )
 
 func (s *Scheduler) Decline(offers string) {
+func Decline(mesosStreamId string, frameworkId ID, offersIDs []ID) {
 
 	template := `{
   "framework_id"    : {"value" : "__FRAMEWORK_ID__"},
@@ -28,6 +30,8 @@ func (s *Scheduler) Decline(offers string) {
 }`
 	body := strings.Replace(template, frameworkIdHolder, s.FrameworkId, 1)
 	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
+	body, _ := json.Marshal(GetDeclineMessage(frameworkId, offersIDs))
+	req, err := http.NewRequest("POST", scheduler.url, bytes.NewReader(body))
 
 	_, err := s.sendToStream(bodyWithOffers)
 	if err != nil {
@@ -122,13 +126,13 @@ func (s *Scheduler) Accept(agentId string, offers string) {
 }
 
 type acknowledge struct {
-	AgentId id     `json:"agent_id"`
-	TaskId  id     `json:"task_id"`
+	AgentId ID     `json:"agent_id"`
+	TaskId  ID     `json:"task_id"`
 	Uuid    string `json:"uuid"`
 }
 
 type AcknowledgeResponse struct {
-	FrameworkId id          `json:"framework_id"`
+	FrameworkId ID          `json:"framework_id"`
 	Type        string      `json:"type"`
 	Acknowledge acknowledge `json:"acknowledge"`
 }
@@ -153,6 +157,16 @@ func (s *Scheduler) Acknowledge(agent_id string, uuid string) {
 	bodyWithAgent := strings.Replace(body, agentIdHolder, agent_id, 1);
 	bodyWithUuid := strings.Replace(bodyWithAgent, uuidHolder, uuid, 1);
 	resp, err := s.sendToStream(bodyWithUuid)
+func Acknowledge(mesosStreamId string, frameworkId ID, agent_id ID, uuid string) {
+
+	body, _ := json.Marshal(GetAcknowledgeMessage(frameworkId, agent_id, uuid))
+	req, err := http.NewRequest("POST", scheduler.url, bytes.NewReader(body))
+
+	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		panic(err)
 	}
@@ -166,7 +180,7 @@ func (s *Scheduler) Acknowledge(agent_id string, uuid string) {
 func (s *Scheduler) Kill() {
 	log.Printf("[%d] [REMOVING_CONTAINER] [%s]\n")
 	template := ` {
- 
+
   "framework_id": {
     "value": "__FRAMEWORK_ID__"
   },

@@ -8,6 +8,7 @@ import (
 	"log"
 	"bufio"
 	"encoding/base64"
+	"bytes"
 )
 
 var IsNeedAccepted bool
@@ -38,17 +39,18 @@ type id struct {
 type Message struct {
 	Offers struct {
 		Offers []struct {
-			Id      id
-			AgentId id `json:"agent_id"`
+			Id      ID
+			AgentId ID `json:"agent_id"`
 		}
 	}
 	Subscribed struct {
-		FrameworkId              id    `json:"framework_id"`
+		FrameworkId              ID    `json:"framework_id"`
 		HeartbeatIntervalSeconds int64 `json:"heartbeat_interval_seconds"`
 	}
 	Update struct {
 		Status struct {
 			Uuid    string
+			AgentId ID `json:"agent_id"`
 			AgentId id     `json:"agent_id"`
 			Data    string `json:"data"`
 			State   string `json:"state"`
@@ -59,17 +61,11 @@ type Message struct {
 
 func Run(URL string) {
 	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
+	scheduler = &Scheduler{schedulerUrl}
 
-	resp, err := http.Post(schedulerUrl, "application/json", strings.NewReader(`{
-   "type"       : "SUBSCRIBE",
-   "subscribe"  : {
-      "framework_info"  : {
-        "user" :  "foo",
-        "name" :  "My Best Framework",
-        "roles": ["test"]
-      }
-  }
-}`))
+	body, _ := json.Marshal(GetSubscribedMessage("foo", "My first framework", []string{"test"}))
+
+	resp, err := http.Post(schedulerUrl, "application/json", bytes.NewReader(body))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,14 +92,16 @@ func Run(URL string) {
 				frameworkId = m.Subscribed.FrameworkId.Value
 				fmt.Println("Ура, мы подписались! Id = " + frameworkId)
 				Sched = &Scheduler{schedulerUrl, streamId, frameworkId}
+				frameworkId = ID{m.Subscribed.FrameworkId.Value}
+				fmt.Println("Ура, мы подписались! Id = " + frameworkId.Value)
 			} else if m.Type == "HEARTBEAT" {
 				fmt.Println("Мезос жил, мезос жив, мезос будет жить!!!")
 			} else if m.Type == "OFFERS" {
-				var ids []id
+				var offersIds []ID
 				offers := m.Offers.Offers
 				for _, n := range offers {
-					ids = append(ids, n.Id)
-					fmt.Println(ids)
+					offersIds = append(offersIds, n.Id)
+					fmt.Println(offersIds)
 				}
 				b, _ := json.Marshal(ids)
 				if IsNeedAccepted == true {
