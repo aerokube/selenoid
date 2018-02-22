@@ -524,7 +524,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-02-20</span>
+<span id="revdate">2018-02-22</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -561,54 +561,7 @@ table.CodeRay td.code>pre{padding:0}
 </ul>
 </li>
 <li><a href="#_setting_timezone">2.5. Setting Timezone</a></li>
-<li><a href="#_video_recording">2.6. Video Recording</a>
-<ul class="sectlevel3">
-<li><a href="#_on_windows">2.6.1. On Windows</a></li>
-<li><a href="#_downloading_video_files_from_selenoid">2.6.2. Downloading Video Files from Selenoid</a></li>
-<li><a href="#_deleting_video_files">2.6.3. Deleting Video Files</a></li>
-</ul>
-</li>
-<li><a href="#_reloading_configuration">2.7. Reloading Configuration</a></li>
-<li><a href="#_selenoid_with_docker_compose">2.8. Selenoid with Docker Compose</a></li>
-<li><a href="#_log_files">2.9. Log Files</a></li>
-<li><a href="#_selenoid_cli_flags">2.10. Selenoid CLI Flags</a></li>
-</ul>
-</li>
-<li><a href="#_advanced_features">3. Advanced Features</a>
-<ul class="sectlevel2">
-<li><a href="#_special_capabilities">3.1. Special Capabilities</a>
-<ul class="sectlevel3">
-<li><a href="#_live_browser_screen_enablevnc">3.1.1. Live Browser Screen: enableVNC</a></li>
-<li><a href="#_custom_screen_resolution_screenresolution">3.1.2. Custom Screen Resolution: screenResolution</a></li>
-<li><a href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate">3.1.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate</a></li>
-<li><a href="#_custom_test_name_name">3.1.4. Custom Test Name: name</a></li>
-<li><a href="#_per_session_time_zone_timezone">3.1.5. Per-session Time Zone: timeZone</a></li>
-<li><a href="#_links_to_application_containers_applicationcontainers">3.1.6. Links to Application Containers: applicationContainers</a></li>
-<li><a href="#_hosts_entries_hostsentries">3.1.7. Hosts Entries: hostsEntries</a></li>
-<li><a href="#_container_labels_labels">3.1.8. Container Labels: labels</a></li>
-<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.9. Specifying Capabilities via Protocol Extensions</a></li>
-</ul>
-</li>
-<li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
-<li><a href="#_usage_statistics">3.3. Usage Statistics</a>
-<ul class="sectlevel3">
-<li><a href="#_what_statistics_mean">3.3.1. What Statistics Mean</a></li>
-<li><a href="#_sending_statistics_to_external_systems">3.3.2. Sending Statistics to External Systems</a></li>
-</ul>
-</li>
-<li><a href="#_file_upload">3.4. File Upload</a></li>
-</ul>
-</li>
-<li><a href="#_contributing_development">4. Contributing &amp; Development</a>
-<ul class="sectlevel2">
-<li><a href="#_documentation">4.1. Documentation</a></li>
-</ul>
-</li>
-<li><a href="#_browser_image_information">Appendix A: Browser Image information</a>
-<ul class="sectlevel2">
-<li><a href="#_firefox">A.1. Firefox</a></li>
-<li><a href="#_chrome">A.2. Chrome</a></li>
-<li><a href="#_opera">A.3. Opera</a></li>
+<li><a href="#_video_recording">2.6. Video Recording</a></li>
 </ul>
 </li>
 </ul>
@@ -618,7 +571,7 @@ table.CodeRay td.code>pre{padding:0}
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This reference for version: <em>latest</em></p>
+<p>This reference covers version: <em>latest</em></p>
 </div>
 <div class="paragraph">
 <p>Selenoid is a powerful <a href="http://golang.org/">Go</a> implementation of original <a href="http://github.com/SeleniumHQ/selenium">Selenium</a> hub code.
@@ -969,7 +922,7 @@ Feel free to create issues or request images for new versions.</p>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Complete list of browser images can be found in <a href="#_browser_image_information">Browser Image information</a></p>
+<p>Complete list of browser images can be found in <a href="#Browser Image information">[Browser Image information]</a></p>
 </li>
 <li>
 <p>These images support all UTF-8 locales. This can be important if you want to save files using national alphabet symbols. You can enable your preferred locale in browsers configuration file by setting respective environment variables:</p>
@@ -1508,7 +1461,7 @@ containers with browsers. Configuration file has the following format:</p>
 <p>Edit <code>browsers.json</code> file and pull new browsers containers manually or using <a href="#_syncing_browser_images_from_existing_file">Syncing Browser Images from Existing File</a>. Alternatively configure Selenoid without restarting it like shown in previous section.</p>
 </li>
 <li>
-<p>Reload Selenoid configuration (see <a href="#_reloading_configuration">Reloading Configuration</a> for more details):</p>
+<p>Reload Selenoid configuration (see <a href="#Reloading Configuration">[Reloading Configuration]</a> for more details):</p>
 <div class="literalblock">
 <div class="content">
 <pre>$ docker kill -s HUP selenoid</pre>
@@ -1557,17 +1510,25 @@ To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-This feature only works when browsers are run in containers. This can be both vnc or non-vnc containers.
-</td>
-</tr>
-</table>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>This feature only works when browsers are run in containers.</p>
+</li>
+<li>
+<p>Video can be recorded with both vnc or non-vnc browser images.</p>
+</li>
+<li>
+<p>An additional <code>enableVideo</code> capability should be added to tests. See <a href="#Special Capabilities">[Special Capabilities]</a> section for more details.</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
 <p>Selenoid can capture browser screen and save it to <a href="https://en.wikipedia.org/wiki/MPEG-4">MPEG-4</a> video file using <a href="https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC">H264</a> codec.
 Video recording works by attaching a separate container with <a href="https://www.ffmpeg.org/">video capturing software</a> to running browser container.</p>
 </div>
 <div class="paragraph">
-<p>To setup this feature you should:</p>
+<p>To use this feature you should:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -1607,9 +1568,6 @@ Video recording works by attaching a separate container with <a href="https://ww
 aerokube/selenoid:latest-release</pre>
 </div>
 </div>
-</li>
-</ol>
-</div>
 <div class="admonitionblock tip">
 <table>
 <tr>
@@ -1622,8 +1580,12 @@ All these actions are automatically done when starting Selenoid via <a href="htt
 </tr>
 </table>
 </div>
-<div class="sect3">
-<h4 id="_on_windows"><a class="anchor" href="#_on_windows"></a>2.6.1. On Windows</h4>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>=== On Windows</p>
+</div>
 <div class="paragraph">
 <p>With absolute path your command will look like:</p>
 </div>
@@ -1658,9 +1620,9 @@ aerokube/selenoid:latest-release</code></pre>
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>=== Downloading Video Files from Selenoid</p>
 </div>
-<div class="sect3">
-<h4 id="_downloading_video_files_from_selenoid"><a class="anchor" href="#_downloading_video_files_from_selenoid"></a>2.6.2. Downloading Video Files from Selenoid</h4>
 <div class="paragraph">
 <p>You can access recorded video files using the following URL:</p>
 </div>
@@ -1691,9 +1653,9 @@ Direct link will works only after session has finished because Selenoid renames 
 <pre>http://selenoid-host.example.com:4444/video/</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>=== Deleting Video Files</p>
 </div>
-<div class="sect3">
-<h4 id="_deleting_video_files"><a class="anchor" href="#_deleting_video_files"></a>2.6.3. Deleting Video Files</h4>
 <div class="paragraph">
 <p>Selenoid intentionally has no built-in logic to automatically remove old video files. To limit storage space consumption you have two alternatives:</p>
 </div>
@@ -1720,10 +1682,9 @@ Direct link will works only after session has finished because Selenoid renames 
 </li>
 </ol>
 </div>
+<div class="paragraph">
+<p>== Reloading Configuration</p>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_reloading_configuration"><a class="anchor" href="#_reloading_configuration"></a>2.7. Reloading Configuration</h3>
 <div class="paragraph">
 <p>To reload configuration without restart send SIGHUP:</p>
 </div>
@@ -1767,9 +1728,9 @@ Use only one of these commands.
 <div class="paragraph">
 <p>It returns <code>200 OK</code> when Selenoid operates normally. Additionally server uptime, last quota reload time and overall number of session requests from service startup are returned in JSON format.</p>
 </div>
+<div class="paragraph">
+<p>== Selenoid with Docker Compose</p>
 </div>
-<div class="sect2">
-<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.8. Selenoid with Docker Compose</h3>
 <div class="paragraph">
 <p>To avoid network problems between browser drivers inside containers and Selenoid when using <a href="https://docs.docker.com/compose/">Docker Compose</a> for combining with another services (such as UI or ggr) you need to enable <strong>bridge</strong> network mode for all services:</p>
 </div>
@@ -1794,11 +1755,9 @@ Use only one of these commands.
 <div class="paragraph">
 <p>Complete example with Selenoid UI can be found in <a href="http://aerokube.com/selenoid-ui/latest/#_with_docker_compose">Selenoid UI Documentation</a></p>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_log_files"><a class="anchor" href="#_log_files"></a>2.9. Log Files</h3>
 <div class="paragraph">
-<p>A typical log file looks like the following:</p>
+<p>== Log Files
+A typical log file looks like the following:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2050,9 +2009,9 @@ Use only one of these commands.
 </tr>
 </tbody>
 </table>
+<div class="paragraph">
+<p>== Selenoid CLI Flags</p>
 </div>
-<div class="sect2">
-<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.10. Selenoid CLI Flags</h3>
 <div class="paragraph">
 <p>The following flags are supported by <code>selenoid</code> command:</p>
 </div>
@@ -2121,23 +2080,23 @@ Use only one of these commands.
     -conf /etc/selenoid/browsers.json -limit 10 -video-output-dir /opt/selenoid/video/</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>== Advanced Features
+:leveloffset: +1</p>
 </div>
+<div class="paragraph">
+<p>== Special Capabilities</p>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_advanced_features"><a class="anchor" href="#_advanced_features"></a>3. Advanced Features</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_special_capabilities"><a class="anchor" href="#_special_capabilities"></a>3.1. Special Capabilities</h3>
 <div class="paragraph">
 <p>Selenoid can improve some automation aspects with custom capabilities.
 You can pass it in tests to enable/disable some features.</p>
 </div>
-<div class="sect3">
-<h4 id="_live_browser_screen_enablevnc"><a class="anchor" href="#_live_browser_screen_enablevnc"></a>3.1.1. Live Browser Screen: enableVNC</h4>
+<div class="paragraph">
+<p>=== Live Browser Screen: enableVNC</p>
+</div>
 <div class="paragraph">
 <p>Selenoid supports showing browser screen during test execution.
-This works with containers having <a href="https://en.wikipedia.org/wiki/Virtual_Network_Computing">VNC</a> server installed (VNC column of <a href="#_browser_image_information">Browser Image information</a>).
+This works with containers having <a href="https://en.wikipedia.org/wiki/Virtual_Network_Computing">VNC</a> server installed (VNC column of <a href="#Browser Image information">[Browser Image information]</a>).
 To see browser screen:</p>
 </div>
 <div class="listingblock">
@@ -2152,9 +2111,9 @@ To see browser screen:</p>
 <div class="paragraph">
 <p>This works by proxying VNC port from started container to <code><a href="http://localhost:4444/vnc/&lt;session-id&gt" class="bare">http://localhost:4444/vnc/&lt;session-id&gt</a>;</code> to WebSocket, where <code>&lt;session-id&gt;</code> is Selenium session ID.</p>
 </div>
+<div class="paragraph">
+<p>=== Custom Screen Resolution: screenResolution</p>
 </div>
-<div class="sect3">
-<h4 id="_custom_screen_resolution_screenresolution"><a class="anchor" href="#_custom_screen_resolution_screenresolution"></a>3.1.2. Custom Screen Resolution: screenResolution</h4>
 <div class="paragraph">
 <p>Selenoid allows you to set custom screen resolution in containers being run:</p>
 </div>
@@ -2164,13 +2123,10 @@ To see browser screen:</p>
 <pre>screenResolution: "1280x1024x24"</pre>
 </div>
 </div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
 </td>
-<td class="content">
+</tr>
+</table>
+</div>
 <div class="ulist">
 <ul>
 <li>
@@ -2184,13 +2140,11 @@ You need to use <code>setSize</code> method instead.</p>
 </li>
 </ul>
 </div>
-</td>
-</tr>
-</table>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>=== Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate</p>
 </div>
-</div>
-<div class="sect3">
-<h4 id="_video_recording_enablevideo_videoname_videoscreensize_videoframerate"><a class="anchor" href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate"></a>3.1.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate</h4>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -2198,7 +2152,7 @@ You need to use <code>setSize</code> method instead.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-This feature requires some preparation. Please refer <a href="#_video_recording">Video Recording</a> section for details.
+This feature requires some preparation. Please refer to <a href="#_video_recording">Video Recording</a> section for details.
 </td>
 </tr>
 </table>
@@ -2259,9 +2213,9 @@ resolution is less than actual, screen on video will be trimmed starting from to
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p>=== Custom Test Name: name</p>
 </div>
-<div class="sect3">
-<h4 id="_custom_test_name_name"><a class="anchor" href="#_custom_test_name_name"></a>3.1.4. Custom Test Name: name</h4>
 <div class="paragraph">
 <p>For debugging purposes it is often useful to give a distinct name to every test case.
 When working with Selenoid you can set test case name by passing the following capability:</p>
@@ -2275,9 +2229,9 @@ When working with Selenoid you can set test case name by passing the following c
 <div class="paragraph">
 <p>The main application of this capability - is debugging tests in the UI which is showing specified name for every running session.</p>
 </div>
+<div class="paragraph">
+<p>=== Per-session Time Zone: timeZone</p>
 </div>
-<div class="sect3">
-<h4 id="_per_session_time_zone_timezone"><a class="anchor" href="#_per_session_time_zone_timezone"></a>3.1.5. Per-session Time Zone: timeZone</h4>
 <div class="paragraph">
 <p>Some tests require particular time zone to be set in operating system.
 To achieve this with Selenoid use:</p>
@@ -2292,9 +2246,9 @@ To achieve this with Selenoid use:</p>
 <p>You can find most of available time zones <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">here</a>.
 Without this capability launched browser containers will have the same timezone as Selenoid one.</p>
 </div>
+<div class="paragraph">
+<p>=== Links to Application Containers: applicationContainers</p>
 </div>
-<div class="sect3">
-<h4 id="_links_to_application_containers_applicationcontainers"><a class="anchor" href="#_links_to_application_containers_applicationcontainers"></a>3.1.6. Links to Application Containers: applicationContainers</h4>
 <div class="paragraph">
 <p>Sometimes you may need to link browser container to application container running on the same host machine.
 This allows you to use cool URLs like <code><a href="http://my-cool-app/" class="bare">http://my-cool-app/</a></code> in tests.
@@ -2306,9 +2260,9 @@ To achieve this simply pass information about one or more desired links via capa
 <pre>applicationContainers: "spring-application-main:my-cool-app,spring-application-gateway"</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>=== Hosts Entries: hostsEntries</p>
 </div>
-<div class="sect3">
-<h4 id="_hosts_entries_hostsentries"><a class="anchor" href="#_hosts_entries_hostsentries"></a>3.1.7. Hosts Entries: hostsEntries</h4>
 <div class="paragraph">
 <p>Although you can configure a separate list of <code>/etc/hosts</code> entries for every browser image in <a href="#_browsers_configuration_file">Browsers Configuration File</a>
 sometimes you may need to add more entries for particular test cases. This can be easily achieved with:</p>
@@ -2323,9 +2277,9 @@ sometimes you may need to add more entries for particular test cases. This can b
 <p>Entries will be inserted to <code>/etc/hosts</code> before entries from browsers configuration file.
 Thus entries from capabilities override entries from configuration file if some hosts are equal.</p>
 </div>
+<div class="paragraph">
+<p>=== Container Labels: labels</p>
 </div>
-<div class="sect3">
-<h4 id="_container_labels_labels"><a class="anchor" href="#_container_labels_labels"></a>3.1.8. Container Labels: labels</h4>
 <div class="paragraph">
 <p>In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs.</p>
 </div>
@@ -2338,9 +2292,9 @@ Thus entries from capabilities override entries from configuration file if some 
 <div class="paragraph">
 <p>Labels from this capability override labels from browsers configuration file. When <code>name</code> capability is specified - it is automatically added as a label to container.</p>
 </div>
+<div class="paragraph">
+<p>=== Specifying Capabilities via Protocol Extensions</p>
 </div>
-<div class="sect3">
-<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.9. Specifying Capabilities via Protocol Extensions</h4>
 <div class="paragraph">
 <p>Some Selenium clients allow passing only a limited number of capabilities specified in <a href="https://w3c.github.io/webdriver/webdriver-spec.html">WebDriver specification</a>. For such cases Selenoid supports reading capabilities using <a href="https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions">WebDriver protocol extensions</a> feature. The following two examples deliver the same result. Usually capabilities are passed like this:</p>
 </div>
@@ -2359,10 +2313,9 @@ Thus entries from capabilities override entries from configuration file if some 
 <pre>{"browserName": "firefox", "value": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>== Using Selenoid without Docker</p>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_using_selenoid_without_docker"><a class="anchor" href="#_using_selenoid_without_docker"></a>3.2. Using Selenoid without Docker</h3>
 <div class="paragraph">
 <p>Selenoid is using containers to start browsers. However cases exist when running browser in container is not possible. For example on Windows you have Internet Explorer which can not be run inside container. Selenoid can be used as a lightweight Selenium server replacement to run IE, Firefox or Chrome on Windows. For example to use Selenoid with IE:</p>
 </div>
@@ -2428,9 +2381,9 @@ version = 11</code></pre>
 </li>
 </ol>
 </div>
+<div class="paragraph">
+<p>== Usage Statistics</p>
 </div>
-<div class="sect2">
-<h3 id="_usage_statistics"><a class="anchor" href="#_usage_statistics"></a>3.3. Usage Statistics</h3>
 <div class="paragraph">
 <p>Selenoid calculates usage statistics that can be accessed with HTTP request:</p>
 </div>
@@ -2484,10 +2437,9 @@ version = 11</code></pre>
 <div class="paragraph">
 <p>Users are extracted from basic HTTP authentication headers.</p>
 </div>
-<div class="sect3">
-<h4 id="_what_statistics_mean"><a class="anchor" href="#_what_statistics_mean"></a>3.3.1. What Statistics Mean</h4>
 <div class="paragraph">
-<p>A typical session lifecycle looks like the following:</p>
+<p>=== What Statistics Mean
+A typical session lifecycle looks like the following:</p>
 </div>
 <div class="paragraph">
 <div class="title">Typical Session Lifecycle</div>
@@ -2518,9 +2470,9 @@ version = 11</code></pre>
 </li>
 </ol>
 </div>
+<div class="paragraph">
+<p>=== Sending Statistics to External Systems</p>
 </div>
-<div class="sect3">
-<h4 id="_sending_statistics_to_external_systems"><a class="anchor" href="#_sending_statistics_to_external_systems"></a>3.3.2. Sending Statistics to External Systems</h4>
 <div class="paragraph">
 <p>To send Selenoid statistics described in previous section you can use <a href="https://github.com/influxdata/telegraf">Telegraf</a>. For example to send status to <a href="https://github.com/graphite-project">Graphite</a>:</p>
 </div>
@@ -2611,19 +2563,15 @@ one_min.selenoid_example_com.httpjson_selenoid.total</code></pre>
 <div class="paragraph">
 <p>telegraf+influxdb+graphana</p>
 </div>
+<div class="paragraph">
+<p>== File Upload</p>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_file_upload"><a class="anchor" href="#_file_upload"></a>3.4. File Upload</h3>
 <div class="paragraph">
 <p>Some tests require to upload files. This feature is supported in WebDriver protocol by sending zipped file contents to <code>/file</code> handle. However not all driver binaries support this feature. For example this is not implemented in <a href="http://github.com/mozilla/geckodriver">Geckodriver</a> or <a href="https://github.com/SeleniumHQ/selenium/tree/master/cpp/iedriver">IEDriver</a>. When proxying requests <strong>directly</strong> to these drivers (i.e. when not using Docker) you need to start Selenoid with <code>-enable-file-upload</code> flag. In that case Selenoid will provide required API to tests. Firefox container images already include this parameter where needed.</p>
 </div>
+<div class="paragraph">
+<p>== Contributing &amp; Development</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_contributing_development"><a class="anchor" href="#_contributing_development"></a>4. Contributing &amp; Development</h2>
-<div class="sectionbody">
 <div class="paragraph">
 <p>To build Selenoid:</p>
 </div>
@@ -2677,13 +2625,8 @@ one_min.selenoid_example_com.httpjson_selenoid.total</code></pre>
 </li>
 </ol>
 </div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
+</div>
+</div>
 <div class="paragraph">
 <p>To build Docker container type:</p>
 </div>
@@ -2693,12 +2636,11 @@ one_min.selenoid_example_com.httpjson_selenoid.total</code></pre>
 $ docker build -t selenoid:latest .</code></pre>
 </div>
 </div>
-</td>
-</tr>
-</table>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>=== Documentation</p>
 </div>
-<div class="sect2">
-<h3 id="_documentation"><a class="anchor" href="#_documentation"></a>4.1. Documentation</h3>
 <div class="paragraph">
 <p>Locally can be generated with:</p>
 </div>
@@ -2709,14 +2651,10 @@ $ docker build -t selenoid:latest .</code></pre>
     asciidoctor -D /documents/output/ index.adoc</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>== Browser Image information
+=== Firefox</p>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_browser_image_information"><a class="anchor" href="#_browser_image_information"></a>Appendix A: Browser Image information</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_firefox"><a class="anchor" href="#_firefox"></a>A.1. Firefox</h3>
 <table class="tableblock frame-all grid-all spread">
 <caption class="title">Table 3. Firefox Images with Selenium Server</caption>
 <colgroup>
@@ -3129,9 +3067,9 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </tr>
 </tbody>
 </table>
+<div class="paragraph">
+<p>=== Chrome</p>
 </div>
-<div class="sect2">
-<h3 id="_chrome"><a class="anchor" href="#_chrome"></a>A.2. Chrome</h3>
 <table class="tableblock frame-all grid-all spread">
 <caption class="title">Table 5. Chrome Images</caption>
 <colgroup>
@@ -3253,13 +3191,8 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </tr>
 </tbody>
 </table>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
+</div>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3270,13 +3203,11 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </li>
 </ol>
 </div>
-</td>
-</tr>
-</table>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>=== Opera</p>
 </div>
-</div>
-<div class="sect2">
-<h3 id="_opera"><a class="anchor" href="#_opera"></a>A.3. Opera</h3>
 <table class="tableblock frame-all grid-all spread">
 <caption class="title">Table 6. Opera Presto Images</caption>
 <colgroup>
@@ -3302,13 +3233,8 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </tr>
 </tbody>
 </table>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
+</div>
+</div>
 <div class="paragraph">
 <p>Due to bug in <strong>Operadriver</strong> to work with <strong>Opera Blink</strong> images you need to pass additional capability:</p>
 </div>
@@ -3320,10 +3246,8 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div class="paragraph">
 <p>We do not consider these images really stable. Many of base operations like working with proxies may not work.</p>
 </div>
-</td>
-</tr>
-</table>
-</div>
+<div class="exampleblock">
+<div class="content">
 <table class="tableblock frame-all grid-all spread">
 <caption class="title">Table 7. Opera Blink Images</caption>
 <colgroup>
@@ -3457,13 +3381,8 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </tr>
 </tbody>
 </table>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
+</div>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -3474,9 +3393,10 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </li>
 </ol>
 </div>
-</td>
-</tr>
-</table>
+<div class="exampleblock">
+<div class="content">
+
+</div>
 </div>
 </div>
 </div>
@@ -3485,7 +3405,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-02-20 17:02:23 UTC
+Last updated 2018-02-22 17:15:30 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
