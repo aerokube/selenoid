@@ -10,7 +10,7 @@
 :source-highlighter: coderay
 :docinfo: shared
 
-This reference for version: _{revnumber}_
+This reference covers version: _{revnumber}_
 
 Selenoid is a powerful http://golang.org/[Go] implementation of original http://github.com/SeleniumHQ/selenium[Selenium] hub code.
 It is using Docker to launch browsers. Please refer to https://github.com/aerokube/selenoid[GitHub repository] if you need sources.

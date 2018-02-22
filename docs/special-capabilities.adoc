@@ -39,7 +39,7 @@ You need to use `setSize` method instead.
 
 === Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate
 
-NOTE: This feature requires some preparation. Please refer <<Video Recording>> section for details.
+NOTE: This feature requires some preparation. Please refer to <<Video Recording>> section for details.
 
 To enable video recording for session, add:
 
