@@ -25,6 +25,7 @@ type Environment struct {
 	VideoOutputDir      string
 	VideoContainerImage string
 	Privileged          bool
+	MesosMasterUrl      string
 }
 
 const (
@@ -72,6 +73,16 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 	if !ok {
 		return nil, false
 	}
+	if m.Environment.MesosMasterUrl != "" {
+		log.Printf("[%d] [USING_MESOS] [%s-%s]\n", requestId, browserName, version)
+		return &Mesos{
+			ServiceBase: serviceBase,
+			Environment: *m.Environment,
+			Caps:        caps,
+			Client:      m.Client,
+			LogConfig:   m.Config.ContainerLogs,
+		}, true
+	} else {
 	switch service.Image.(type) {
 	case string:
 		if m.Client == nil {
@@ -87,6 +98,7 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 	case []interface{}:
 		log.Printf("[%d] [USING_DRIVER] [%s-%s]\n", requestId, browserName, version)
 		return &Driver{ServiceBase: serviceBase, Environment: *m.Environment}, true
+	}
 	}
 	return nil, false
 }

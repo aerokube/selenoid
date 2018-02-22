@@ -6,6 +6,8 @@ import (
 	"strings"
 	"bytes"
 	"encoding/json"
+	"log"
+	"github.com/pborman/uuid"
 )
 
 const (
@@ -14,27 +16,18 @@ const (
 	agentIdHolder     = "__AGENT_ID__"
 )
 
-func Decline(mesosStreamId string, frameworkId ID, offersIDs []ID) {
-
-	body, _ := json.Marshal(GetDeclineMessage(frameworkId, offersIDs))
-	req, err := http.NewRequest("POST", scheduler.url, bytes.NewReader(body))
-
-	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
+func (s *Scheduler) Decline(offers []ID) {
+	body, _ := json.Marshal(GetDeclineMessage(s.FrameworkId, offers))
+	_, err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
 	}
-
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
-	fmt.Println(buf.String())
-	fmt.Println(resp.Status)
 }
 
-func Accept(mesosStreamId string, frameworkId string, agent_id string, offers string) {
+func (s *Scheduler) Accept(agentId string, offers string) {
+	//TO DO: запуск тестов со сгенерированным taskId
+	taskId := "selenoid-" + uuid.New()
+	fmt.Println("TASK ID: " + taskId)
 
 	template := `{
   "framework_id"   : {"value" : "__FRAMEWORK_ID__"},
@@ -56,12 +49,13 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
 										  "container": {
                                					 "type": "DOCKER",
 												 "docker": {
-                                  					"image": "docker.moscow.alfaintra.net/selenoid/chrome",
+                                  					"image": "selenoid/chrome",
 													"network": "BRIDGE",
-													"portMappings": [
+													"privileged": true,
+													"port_mappings": [
 														{
-														  "containerPort": 4444,
-														  "hostPort": 0,
+														  "container_port": 4444,
+														  "host_port": 31005,
 														  "protocol": "tcp",
 														  "name": "http"
 														}
@@ -69,6 +63,15 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
                                					 }
                               				},
                                           "resources"   : [
+														   {
+											"name":"ports",
+											"ranges": {
+												"range": [
+												{"begin":31005,"end":31005}
+												]},
+											"role":"*",
+											"type":"RANGES"
+										  },
                                                            {
                                   			"name": "cpus",
                                   			"type": "SCALAR",
@@ -92,16 +95,11 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
      "filters"     : {"refuse_seconds" : 5.0}
   }
 }`
-	body := strings.Replace(template, frameworkIdHolder, frameworkId, 1)
+	body := strings.Replace(template, frameworkIdHolder, s.FrameworkId.Value, 1)
 	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
-	bodyWithAgent := strings.Replace(bodyWithOffers, agentIdHolder, agent_id, 1)
-	req, err := http.NewRequest("POST", scheduler.url, strings.NewReader(bodyWithAgent))
+	bodyWithAgent := strings.Replace(bodyWithOffers, agentIdHolder, agentId, 1)
 
-	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := s.sendToStream([]byte(bodyWithAgent))
 	if err != nil {
 		panic(err)
 	}
@@ -112,34 +110,37 @@ func Accept(mesosStreamId string, frameworkId string, agent_id string, offers st
 	fmt.Println(resp.Status)
 }
 
-type acknowledge struct {
-	AgentId ID     `json:"agent_id"`
-	TaskId  ID     `json:"task_id"`
-	Uuid    string `json:"uuid"`
-}
-
-type AcknowledgeResponse struct {
-	FrameworkId ID          `json:"framework_id"`
-	Type        string      `json:"type"`
-	Acknowledge acknowledge `json:"acknowledge"`
-}
-
-func Acknowledge(mesosStreamId string, frameworkId ID, agent_id ID, uuid string) {
-
-	body, _ := json.Marshal(GetAcknowledgeMessage(frameworkId, agent_id, uuid))
-	req, err := http.NewRequest("POST", scheduler.url, bytes.NewReader(body))
-
-	req.Header.Set("Mesos-Stream-Id", mesosStreamId)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
+func (s *Scheduler) Acknowledge(agentId ID, uuid string) {
+	body, _ := json.Marshal(GetAcknowledgeMessage(s.FrameworkId, agentId, uuid))
+	_, err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (s *Scheduler) Kill() {
+	log.Printf("[%d] [REMOVING_CONTAINER] [%s]\n")
+	body, _ := json.Marshal(GetKillMessage(s.FrameworkId))
+	resp, err := s.sendToStream(body)
+	if err != nil {
+		log.Printf("[FAILED_TO_REMOVE_CONTAINER] [%v]\n", err)
+		return
+	}
+	log.Printf("[%d] [CONTAINER_REMOVED] [%s]\n")
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	fmt.Println(buf.String())
 	fmt.Println(resp.Status)
+}
+
+func (s *Scheduler) sendToStream(body []byte) (*http.Response, error) {
+	req, err := http.NewRequest("POST", s.Url, bytes.NewReader(body))
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Set("Mesos-Stream-Id", s.StreamId)
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	return client.Do(req)
 }

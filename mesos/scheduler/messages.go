@@ -20,6 +20,7 @@ type Container struct {
 	} `json:"docker"`
 }
 
+
 //Резервируемые ресурсы
 type Resources []struct {
 	Name string `json:"name"`
@@ -94,6 +95,14 @@ type AcknowledgeMessage struct {
 	} `json:"acknowledge"`
 }
 
+type KillMessage struct {
+	FrameworkID ID     `json:"framework_id"`
+	Type        string `json:"type"`
+	Kill struct {
+		TaskID ID `json:"task_id"`
+	} `json:"kill"`
+}
+
 func GetSubscribedMessage(user string, name string, roles []string) (SubscribeMessage) {
 	var message = SubscribeMessage{Type: "SUBSCRIBE"}
 	message.Subscribe.FrameworkInfo.User = user
@@ -116,5 +125,13 @@ func GetDeclineMessage(frameworkId ID, offerId []ID) (DeclineMessage) {
 		Type: "DECLINE"}
 	message.Decline.OfferIds = offerId
 	message.Decline.Filters.RefuseSeconds = 5.0
+	return message
+}
+
+func GetKillMessage(frameworkId ID) (KillMessage) {
+	var message = KillMessage{
+		FrameworkID: frameworkId,
+		Type:        "KILL"}
+	message.Kill.TaskID = ID{"12220-3440-12532-my-task"}
 	return message
 }
