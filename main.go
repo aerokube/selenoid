@@ -237,6 +237,7 @@ func post(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func ping(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(struct {
 		Uptime         string `json:"uptime"`
 		LastReloadTime string `json:"lastReloadTime"`
@@ -285,6 +286,7 @@ func handler() http.Handler {
 		jsonError(w, "Session timed out or not found", http.StatusNotFound)
 	})
 	root.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
 	})
 	root.HandleFunc("/ping", ping)
