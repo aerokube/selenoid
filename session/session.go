@@ -10,6 +10,7 @@ import (
 type Caps struct {
 	Name                  string                 `json:"browserName"`
 	Version               string                 `json:"version"`
+	W3CVersion            string                 `json:"browserVersion"`
 	ScreenResolution      string                 `json:"screenResolution"`
 	VNC                   bool                   `json:"enableVNC"`
 	Video                 bool                   `json:"enableVideo"`
@@ -26,6 +27,9 @@ type Caps struct {
 }
 
 func (c *Caps) ProcessExtensionCapabilities() {
+	if c.W3CVersion != "" {
+		c.Version = c.W3CVersion
+	}
 	if len(c.ExtensionCapabilities) > 0 {
 		s := reflect.ValueOf(c).Elem()
 
