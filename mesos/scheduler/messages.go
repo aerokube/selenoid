@@ -1,5 +1,10 @@
 package scheduler
 
+import (
+	//"fmt"
+	//"encoding/json"
+)
+
 //Универсальная структура для хранения  ID
 type ID struct {
 	Value string `json:"value"`
@@ -24,12 +29,17 @@ type PortMappings struct {
 }
 
 //Резервируемые ресурсы
-type Resources struct {
+type ResourcesPort struct {
 	Name string `json:"name"`
 	Ranges struct {
 		Range []Range `json:"range"`
 	} `json:"ranges"`
 	Role string `json:"role"`
+	Type string `json:"type"`
+}
+
+type Resources struct {
+	Name string `json:"name"`
 	Type string `json:"type"`
 	Scalar struct {
 		Value float64 `json:"value"`
@@ -54,6 +64,7 @@ type TaskInfo struct {
 	} `json:"command"`
 	Container Container `json:"container"`
 	Resources []Resources `json:"resources"`
+	ResourcesPort []ResourcesPort `json:"resources"`
 }
 
 type SubscribeMessage struct {
@@ -82,9 +93,9 @@ type AcceptMessage struct {
 	FrameworkID ID     `json:"framework_id"`
 	Type        string `json:"type"`
 	Accept struct {
-		OfferIds string `json:"offer_ids"`
+		OfferIds []ID `json:"offer_ids"`
 		//тут может быть одна или много тасок, надо подумать как их сюда передать
-		Operations []Operation `json:"operations"`
+		Operations []Operation //`json:"operations"`
 		Filters struct {
 			RefuseSeconds float64 `json:"refuse_seconds"`
 		} `json:"filters"`
@@ -92,7 +103,6 @@ type AcceptMessage struct {
 }
 
 type Operation struct {
-	Type   string `json:"type"`
 	Launch Launch `json:"launch"`
 }
 
@@ -114,7 +124,7 @@ type KillMessage struct {
 	} `json:"kill"`
 }
 
-func GetAcceptMessage(frameworkId ID, offers string, agentId ID) (AcceptMessage) {
+func GetAcceptMessage(frameworkId ID, offers []ID, agentId ID) (AcceptMessage) {
 
 	var portMappings = PortMappings{ContainerPort: 4444}
 	portMappings.Name = "http"
@@ -132,7 +142,7 @@ func GetAcceptMessage(frameworkId ID, offers string, agentId ID) (AcceptMessage)
 	rangePort.Begin = 31005
 	rangePort.End = 31005
 
-	var resourcesPorts = Resources{Type: "RANGES"}
+	var resourcesPorts = ResourcesPort{Type: "RANGES"}
 	resourcesPorts.Name = "ports"
 	resourcesPorts.Ranges.Range = append(resourcesPorts.Ranges.Range, rangePort)
 	resourcesPorts.Role = "*"
@@ -151,7 +161,8 @@ func GetAcceptMessage(frameworkId ID, offers string, agentId ID) (AcceptMessage)
 	taskInfo.AgentID = agentId
 	taskInfo.Command.Shell = false
 	taskInfo.Container = container
-	taskInfo.Resources = append(taskInfo.Resources, resourcesPorts, resourcesCpu, resourcesMem)
+	taskInfo.Resources = append(taskInfo.Resources, resourcesCpu, resourcesMem)
+	taskInfo.ResourcesPort = append(taskInfo.ResourcesPort, resourcesPorts)
 
 	var launch = Launch{}
 	launch.TaskInfos = append(launch.TaskInfos, taskInfo)

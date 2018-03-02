@@ -23,14 +23,24 @@ func (s *Scheduler) Decline(offers []ID) {
 	}
 }
 
-func (s *Scheduler) Accept(agentId ID, offers string) {
+func (s *Scheduler) Accept(agentId ID, offers []ID) {
 	//TO DO: запуск тестов со сгенерированным taskId
 	taskId := "selenoid-" + uuid.New()
 	fmt.Println("TASK ID: " + taskId)
 
+	fmt.Println("offers: ")
+	for range offers {
+		fmt.Println(offers)
+	}
+
+	fmt.Println("agentID: " + agentId.Value)
+
+
 	body, _ := json.Marshal(GetAcceptMessage(s.FrameworkId, offers, agentId))
 
-	resp , err := s.sendToStream([]byte (body))
+	fmt.Println(string(body))
+
+	resp , err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
 	}
