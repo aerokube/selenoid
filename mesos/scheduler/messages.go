@@ -9,25 +9,36 @@ type ID struct {
 type Container struct {
 	Type string `json:"type"`
 	Docker struct {
-		Image   string `json:"image"`
-		Network string `json:"network"`
-		PortMappings []struct {
-			ContainerPort int    `json:"containerPort"`
-			HostPort      int    `json:"hostPort"`
-			Protocol      string `json:"protocol"`
-			Name          string `json:"name"`
-		} `json:"portMappings"`
+		Image        string         `json:"image"`
+		Network      string         `json:"network"`
+		Privileged   bool			`json:"privileged"`
+		PortMappings []PortMappings `json:"portMappings"`
 	} `json:"docker"`
 }
 
+type PortMappings struct {
+	ContainerPort int    `json:"containerPort"`
+	HostPort      int    `json:"hostPort"`
+	Protocol      string `json:"protocol"`
+	Name          string `json:"name"`
+}
 
 //Резервируемые ресурсы
-type Resources []struct {
+type Resources struct {
 	Name string `json:"name"`
+	Ranges struct {
+		Range []Range `json:"range"`
+	} `json:"ranges"`
+	Role string `json:"role"`
 	Type string `json:"type"`
 	Scalar struct {
 		Value float64 `json:"value"`
 	} `json:"scalar"`
+}
+
+type Range struct {
+	Begin int `json:"begin"`
+	End   int `json:"end"`
 }
 
 //Структура для хранения таски запуска
@@ -42,7 +53,7 @@ type TaskInfo struct {
 		Shell bool `json:"shell"`
 	} `json:"command"`
 	Container Container `json:"container"`
-	Resources Resources `json:"resources"`
+	Resources []Resources `json:"resources"`
 }
 
 type SubscribeMessage struct {
@@ -71,7 +82,7 @@ type AcceptMessage struct {
 	FrameworkID ID     `json:"framework_id"`
 	Type        string `json:"type"`
 	Accept struct {
-		OfferIds []ID `json:"offer_ids"`
+		OfferIds string `json:"offer_ids"`
 		//тут может быть одна или много тасок, надо подумать как их сюда передать
 		Operations []Operation `json:"operations"`
 		Filters struct {
@@ -101,6 +112,60 @@ type KillMessage struct {
 	Kill struct {
 		TaskID ID `json:"task_id"`
 	} `json:"kill"`
+}
+
+func GetAcceptMessage(frameworkId ID, offers string, agentId ID) (AcceptMessage) {
+
+	var portMappings = PortMappings{ContainerPort: 4444}
+	portMappings.Name = "http"
+	portMappings.ContainerPort = 4444
+	portMappings.HostPort = 31005
+	portMappings.Protocol = "tcp"
+
+	var container = Container{Type: "DOCKER"}
+	container.Docker.Image = "selenoid/chrome"
+	container.Docker.Network = "BRIDGE"
+	container.Docker.Privileged = true
+	container.Docker.PortMappings = append(container.Docker.PortMappings, portMappings)
+
+	var rangePort = Range{}
+	rangePort.Begin = 31005
+	rangePort.End = 31005
+
+	var resourcesPorts = Resources{Type: "RANGES"}
+	resourcesPorts.Name = "ports"
+	resourcesPorts.Ranges.Range = append(resourcesPorts.Ranges.Range, rangePort)
+	resourcesPorts.Role = "*"
+
+	var resourcesCpu = Resources{Type: "SCALAR"}
+	resourcesCpu.Name = "cpus"
+	resourcesCpu.Scalar.Value = 1.0
+
+	var resourcesMem = Resources{Type: "SCALAR"}
+	resourcesMem.Name = "mem"
+	resourcesMem.Scalar.Value = 128.0
+
+	var taskInfo = TaskInfo{}
+	taskInfo.Name = "My Task"
+	taskInfo.TaskID.Value = "12220-3440-12532-my-task"
+	taskInfo.AgentID = agentId
+	taskInfo.Command.Shell = false
+	taskInfo.Container = container
+	taskInfo.Resources = append(taskInfo.Resources, resourcesPorts, resourcesCpu, resourcesMem)
+
+	var launch = Launch{}
+	launch.TaskInfos = append(launch.TaskInfos, taskInfo)
+
+	var operations = Operation{}
+	operations.Launch = launch
+
+	var message = AcceptMessage{FrameworkID: frameworkId,
+		Type: "ACCEPT"}
+	message.Accept.OfferIds = offers
+	message.Accept.Operations = append(message.Accept.Operations, operations)
+	message.Accept.Filters.RefuseSeconds = float64(5.0)
+
+	return message
 }
 
 func GetSubscribedMessage(user string, name string, roles []string) (SubscribeMessage) {

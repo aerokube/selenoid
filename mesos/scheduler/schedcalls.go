@@ -3,7 +3,6 @@ package scheduler
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"bytes"
 	"encoding/json"
 	"log"
@@ -24,82 +23,14 @@ func (s *Scheduler) Decline(offers []ID) {
 	}
 }
 
-func (s *Scheduler) Accept(agentId string, offers string) {
+func (s *Scheduler) Accept(agentId ID, offers string) {
 	//TO DO: запуск тестов со сгенерированным taskId
 	taskId := "selenoid-" + uuid.New()
 	fmt.Println("TASK ID: " + taskId)
 
-	template := `{
-  "framework_id"   : {"value" : "__FRAMEWORK_ID__"},
-  "type"           : "ACCEPT",
-  "accept"         : {
-    "offer_ids"    : __OFFER_IDS__,
-     "operations"  : [
-                      {
-                       "type"         : "LAUNCH",
-                       "launch"       : {
-                         "task_infos" : [
-                                         {
-                                          "name"        : "My Task",
-                                          "task_id"     : {"value" : "12220-3440-12532-my-task"},
-                                          "agent_id"    : {"value" : "__AGENT_ID__"},
-                                          "command": {
-                                				"shell": false
-                             				 },
-										  "container": {
-                               					 "type": "DOCKER",
-												 "docker": {
-                                  					"image": "selenoid/chrome",
-													"network": "BRIDGE",
-													"privileged": true,
-													"port_mappings": [
-														{
-														  "container_port": 4444,
-														  "host_port": 31005,
-														  "protocol": "tcp",
-														  "name": "http"
-														}
-													]
-                               					 }
-                              				},
-                                          "resources"   : [
-														   {
-											"name":"ports",
-											"ranges": {
-												"range": [
-												{"begin":31005,"end":31005}
-												]},
-											"role":"*",
-											"type":"RANGES"
-										  },
-                                                           {
-                                  			"name": "cpus",
-                                  			"type": "SCALAR",
-                                  			"scalar": {
-                                    			"value": 1.0
-                                  			}
-										  },
-                                		  {
-                                  			"name": "mem",
-                                  			"type": "SCALAR",
-                                  			"scalar": {
-                                    			"value": 128.0
-                                  			}
-                               			  }
-                                                          ]
-                                         }
-                                        ]
-                       }
-                      }
-                     ],
-     "filters"     : {"refuse_seconds" : 5.0}
-  }
-}`
-	body := strings.Replace(template, frameworkIdHolder, s.FrameworkId.Value, 1)
-	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
-	bodyWithAgent := strings.Replace(bodyWithOffers, agentIdHolder, agentId, 1)
+	body, _ := json.Marshal(GetAcceptMessage(s.FrameworkId, offers, agentId))
 
-	resp, err := s.sendToStream([]byte(bodyWithAgent))
+	resp , err := s.sendToStream([]byte (body))
 	if err != nil {
 		panic(err)
 	}

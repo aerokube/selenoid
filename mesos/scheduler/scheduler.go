@@ -102,7 +102,7 @@ func Run(URL string) {
 				}
 				b, _ := json.Marshal(offersIds)
 				if IsNeedAccepted == true {
-					Sched.Accept(m.Offers.Offers[0].AgentId.Value, string(b))
+					Sched.Accept(m.Offers.Offers[0].AgentId, string(b))
 					IsNeedAccepted = false
 					fmt.Println(IsNeedAccepted)
 				} else {
