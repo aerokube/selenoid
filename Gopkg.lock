@@ -20,7 +20,7 @@
 
 [[projects]]
   name = "github.com/docker/docker"
-  packages = ["api","api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/image","api/types/mount","api/types/network","api/types/registry","api/types/strslice","api/types/swarm","api/types/swarm/runtime","api/types/time","api/types/versions","api/types/volume","client"]
+  packages = ["api","api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/image","api/types/mount","api/types/network","api/types/registry","api/types/strslice","api/types/swarm","api/types/swarm/runtime","api/types/time","api/types/versions","api/types/volume","client","pkg/stdcopy"]
   revision = "92309e34e42aec3a0e041403bdd3c4fc0dc20269"
 
 [[projects]]
@@ -80,6 +80,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "de7116c491df8566e62ca53bea50792b7f133ab933d79982467f465cf8742b57"
+  inputs-digest = "cc8b40851dab9a1120eeff286003a1dfd43413c829e2c3262b3b19f5e3bc539b"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -27,6 +27,7 @@ import (
 	"github.com/aerokube/selenoid/util"
 	"github.com/docker/docker/api/types"
 	"golang.org/x/net/websocket"
+	"github.com/docker/docker/pkg/stdcopy"
 )
 
 var (
@@ -490,7 +491,7 @@ func logs(wsconn *websocket.Conn) {
 		}
 		defer r.Close()
 		wsconn.PayloadType = websocket.BinaryFrame
-		io.Copy(wsconn, r)
+		stdcopy.StdCopy(wsconn, wsconn, r)
 		log.Printf("[%d] [CONTAINER_LOGS_DISCONNECTED] [%s]", requestId, sid)
 	} else {
 		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
