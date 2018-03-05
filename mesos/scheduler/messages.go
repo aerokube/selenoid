@@ -157,7 +157,6 @@ func GetAcceptMessage(frameworkId ID, offers []ID, agentId ID) (AcceptMessage) {
 	taskInfo.Command.Shell = false
 	taskInfo.Container = container
 	taskInfo.Resources = append(taskInfo.Resources, resourcesPorts, resourcesCpu, resourcesMem)
-	//taskInfo.Resources = "__RESOURCE__"
 
 	var launch = Launch{}
 	launch.TaskInfos = append(launch.TaskInfos, taskInfo)

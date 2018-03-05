@@ -27,52 +27,15 @@ func (s *Scheduler) Accept(agentId ID, offers []ID) {
 	//TO DO: запуск тестов со сгенерированным taskId
 	taskId := "selenoid-" + uuid.New()
 	fmt.Println("TASK ID: " + taskId)
-
 	fmt.Println("offers: ")
 	for range offers {
 		fmt.Println(offers)
 	}
-
 	fmt.Println("agentID: " + agentId.Value)
-
 
 	body, _ := json.Marshal(GetAcceptMessage(s.FrameworkId, offers, agentId))
 
-//	bodyWithResources := strings.Replace(string(body), "\"__RESOURCE__\"", `[
-//   {
-//      "name":"ports",
-//      "ranges":{
-//         "range":[
-//            {
-//               "begin":31005,
-//               "end":31005
-//            }
-//         ]
-//      },
-//      "role":"*",
-//      "type":"RANGES"
-//   },
-//   {
-//      "name":"cpus",
-//      "type":"SCALAR",
-//      "scalar":{
-//         "value":1.0
-//      }
-//   },
-//   {
-//      "name":"mem",
-//      "type":"SCALAR",
-//      "scalar":{
-//         "value":128.0
-//      }
-//   }
-//]`, 1)
-//
-//	fmt.Println(bodyWithResources)
-
 	fmt.Println(string(body))
-
-	//resp , err := s.sendToStream([]byte(bodyWithResources))
 
 	resp , err := s.sendToStream(body)
 	if err != nil {
