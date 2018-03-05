@@ -1,10 +1,5 @@
 package scheduler
 
-import (
-	//"fmt"
-	//"encoding/json"
-)
-
 //Универсальная структура для хранения  ID
 type ID struct {
 	Value string `json:"value"`
@@ -16,34 +11,33 @@ type Container struct {
 	Docker struct {
 		Image        string         `json:"image"`
 		Network      string         `json:"network"`
-		Privileged   bool			`json:"privileged"`
-		PortMappings []PortMappings `json:"portMappings"`
+		Privileged   bool           `json:"privileged"`
+		PortMappings []PortMappings `json:"port_mappings"`
 	} `json:"docker"`
 }
 
 type PortMappings struct {
-	ContainerPort int    `json:"containerPort"`
-	HostPort      int    `json:"hostPort"`
+	ContainerPort int    `json:"container_port"`
+	HostPort      int    `json:"host_port"`
 	Protocol      string `json:"protocol"`
 	Name          string `json:"name"`
 }
 
 //Резервируемые ресурсы
-type ResourcesPort struct {
-	Name string `json:"name"`
-	Ranges struct {
-		Range []Range `json:"range"`
-	} `json:"ranges"`
-	Role string `json:"role"`
-	Type string `json:"type"`
+type Resource struct {
+	Name   string  `json:"name"`
+	Ranges *Ranges  `json:"ranges,omitempty"`
+	Role   string  `json:"role,omitempty"`
+	Type   string  `json:"type"`
+	Scalar *Scalar `json:"scalar,omitempty"`
 }
 
-type Resources struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-	Scalar struct {
-		Value float64 `json:"value"`
-	} `json:"scalar"`
+type Scalar struct {
+	Value float64 `json:"value,numbers"`
+}
+
+type Ranges struct {
+	Range [] Range `json:"range"`
 }
 
 type Range struct {
@@ -62,9 +56,8 @@ type TaskInfo struct {
 	Command struct {
 		Shell bool `json:"shell"`
 	} `json:"command"`
-	Container Container `json:"container"`
-	Resources []Resources `json:"resources"`
-	ResourcesPort []ResourcesPort `json:"resources"`
+	Container Container  `json:"container"`
+	Resources []Resource `json:"resources"`
 }
 
 type SubscribeMessage struct {
@@ -94,8 +87,7 @@ type AcceptMessage struct {
 	Type        string `json:"type"`
 	Accept struct {
 		OfferIds []ID `json:"offer_ids"`
-		//тут может быть одна или много тасок, надо подумать как их сюда передать
-		Operations []Operation //`json:"operations"`
+		Operations []Operation `json:"operations"`
 		Filters struct {
 			RefuseSeconds float64 `json:"refuse_seconds"`
 		} `json:"filters"`
@@ -103,6 +95,7 @@ type AcceptMessage struct {
 }
 
 type Operation struct {
+	Type   string `json:"type"`
 	Launch Launch `json:"launch"`
 }
 
@@ -140,20 +133,22 @@ func GetAcceptMessage(frameworkId ID, offers []ID, agentId ID) (AcceptMessage) {
 
 	var rangePort = Range{}
 	rangePort.Begin = 31005
-	rangePort.End = 31005
+	rangePort.End = 31006
 
-	var resourcesPorts = ResourcesPort{Type: "RANGES"}
+	var ranges = Ranges{[]Range{rangePort}}
+
+	var resourcesPorts = Resource{Type: "RANGES"}
 	resourcesPorts.Name = "ports"
-	resourcesPorts.Ranges.Range = append(resourcesPorts.Ranges.Range, rangePort)
+	resourcesPorts.Ranges = &ranges
 	resourcesPorts.Role = "*"
 
-	var resourcesCpu = Resources{Type: "SCALAR"}
+	var resourcesCpu = Resource{Type: "SCALAR"}
 	resourcesCpu.Name = "cpus"
-	resourcesCpu.Scalar.Value = 1.0
+	resourcesCpu.Scalar = &Scalar{1.0}
 
-	var resourcesMem = Resources{Type: "SCALAR"}
+	var resourcesMem = Resource{Type: "SCALAR"}
 	resourcesMem.Name = "mem"
-	resourcesMem.Scalar.Value = 128.0
+	resourcesMem.Scalar = &Scalar{128.0}
 
 	var taskInfo = TaskInfo{}
 	taskInfo.Name = "My Task"
@@ -161,13 +156,14 @@ func GetAcceptMessage(frameworkId ID, offers []ID, agentId ID) (AcceptMessage) {
 	taskInfo.AgentID = agentId
 	taskInfo.Command.Shell = false
 	taskInfo.Container = container
-	taskInfo.Resources = append(taskInfo.Resources, resourcesCpu, resourcesMem)
-	taskInfo.ResourcesPort = append(taskInfo.ResourcesPort, resourcesPorts)
+	taskInfo.Resources = append(taskInfo.Resources, resourcesPorts, resourcesCpu, resourcesMem)
+	//taskInfo.Resources = "__RESOURCE__"
 
 	var launch = Launch{}
 	launch.TaskInfos = append(launch.TaskInfos, taskInfo)
 
 	var operations = Operation{}
+	operations.Type = "LAUNCH"
 	operations.Launch = launch
 
 	var message = AcceptMessage{FrameworkID: frameworkId,
