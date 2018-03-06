@@ -96,9 +96,9 @@ type Filters struct {
 }
 
 type Accept struct {
-	OfferIds   []ID        `json:"offer_ids"`
-	Operations []Operation `json:"operations"`
-	Filters    Filters     `json:"filters"`
+	OfferIds   []ID         `json:"offer_ids"`
+	Operations *[]Operation `json:"operations"`
+	Filters    Filters      `json:"filters"`
 }
 
 type AcceptMessage struct {
@@ -108,8 +108,8 @@ type AcceptMessage struct {
 }
 
 type Operation struct {
-	Type   string `json:"type"`
-	Launch Launch `json:"launch"`
+	Type   string  `json:"type"`
+	Launch *Launch `json:"launch"`
 }
 
 type AcknowledgeMessage struct {
@@ -179,7 +179,7 @@ func NewResourcesContainer(name string, value float64) Resource {
 	}
 }
 
-func NewLaunchTaskInfo(agentId ID) (Launch) {
+func NewLaunchTaskInfo(agentId ID) *Launch {
 	var taskInfo = TaskInfo{
 		Name:      "My Task",
 		TaskID:    ID{"12220-3440-12532-my-task"},
@@ -193,13 +193,14 @@ func NewLaunchTaskInfo(agentId ID) (Launch) {
 		},
 	}
 
-	return Launch{TaskInfos: []TaskInfo{taskInfo}}
+	return &Launch{TaskInfos: []TaskInfo{taskInfo}}
 }
 
-func NewOperations(agentId ID) (Operation) {
-	return Operation{
+func NewOperations(agentId ID) *[]Operation {
+	return &[]Operation{{
 		Type:   "LAUNCH",
 		Launch: NewLaunchTaskInfo(agentId),
+	},
 	}
 }
 
@@ -209,7 +210,7 @@ func GetAcceptMessage(frameworkId ID, offers []ID, agentId ID) (AcceptMessage) {
 		Type:        "ACCEPT",
 		Accept: Accept{
 			offers,
-			[]Operation{NewOperations(agentId)},
+			NewOperations(agentId),
 			Filters{RefuseSeconds: 5.0},
 		},
 	}
