@@ -9,7 +9,7 @@ type Docker struct {
 	Image        string         `json:"image"`
 	Network      string         `json:"network"`
 	Privileged   bool           `json:"privileged"`
-	PortMappings []PortMappings `json:"port_mappings"`
+	PortMappings *[]PortMappings `json:"port_mappings"`
 }
 
 //Структура для хранения данных о контейнере
@@ -134,13 +134,13 @@ type KillMessage struct {
 	Kill        Kill   `json:"kill"`
 }
 
-func GetPortMappings() ([]PortMappings) {
+func GetPortMappings() *[]PortMappings {
 	var portMappings = PortMappings{ContainerPort: 4444}
 	portMappings.Name = "http"
 	portMappings.ContainerPort = 4444
 	portMappings.HostPort = 31005
 	portMappings.Protocol = "tcp"
-	return []PortMappings{portMappings}
+	return &[]PortMappings{portMappings}
 }
 
 func NewContainer() *Container {
