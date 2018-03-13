@@ -6,13 +6,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"log"
-	"github.com/pborman/uuid"
-)
-
-const (
-	frameworkIdHolder = "__FRAMEWORK_ID__"
-	offerIdsHolder    = "__OFFER_IDS__"
-	agentIdHolder     = "__AGENT_ID__"
 )
 
 func (s *Scheduler) Decline(offers []ID) {
@@ -23,17 +16,8 @@ func (s *Scheduler) Decline(offers []ID) {
 	}
 }
 
-func (s *Scheduler) Accept(agentId ID, offers []ID) {
-	//TO DO: запуск тестов со сгенерированным taskId
-	taskId := "selenoid-" + uuid.New()
-	fmt.Println("TASK ID: " + taskId)
-	fmt.Println("offers: ")
-	for range offers {
-		fmt.Println(offers)
-	}
-	fmt.Println("agentID: " + agentId.Value)
-
-	body, _ := json.Marshal(GetAcceptMessage(s.FrameworkId, offers, agentId))
+func (s *Scheduler) Accept(offer Offer, taskId string) {
+	body, _ := json.Marshal(GetAcceptMessage(s.FrameworkId, offer, taskId))
 
 	fmt.Println(string(body))
 
@@ -48,17 +32,17 @@ func (s *Scheduler) Accept(agentId ID, offers []ID) {
 	fmt.Println(resp.Status)
 }
 
-func (s *Scheduler) Acknowledge(agentId ID, uuid string) {
-	body, _ := json.Marshal(GetAcknowledgeMessage(s.FrameworkId, agentId, uuid))
+func (s *Scheduler) Acknowledge(agentId ID, uuid string, taskId ID) {
+	body, _ := json.Marshal(GetAcknowledgeMessage(s.FrameworkId, agentId, uuid, taskId))
 	_, err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (s *Scheduler) Kill() {
+func (s *Scheduler) Kill(taskId string) {
 	log.Printf("[%d] [REMOVING_CONTAINER] [%s]\n")
-	body, _ := json.Marshal(GetKillMessage(s.FrameworkId))
+	body, _ := json.Marshal(GetKillMessage(s.FrameworkId, taskId))
 	resp, err := s.sendToStream(body)
 	if err != nil {
 		log.Printf("[FAILED_TO_REMOVE_CONTAINER] [%v]\n", err)
