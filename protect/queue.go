@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/aerokube/selenoid/util"
+	"github.com/aerokube/util"
 	"math"
 )
 

@@ -10,7 +10,7 @@ import (
 
 	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/session"
-	"github.com/aerokube/selenoid/util"
+	"github.com/aerokube/util"
 	"github.com/docker/docker/api/types"
 	ctr "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"

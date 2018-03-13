@@ -14,6 +14,12 @@
   revision = "435295ea180e58dbfa526db1ebab8c801b4c2b75"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/aerokube/util"
+  packages = ["."]
+  revision = "9a1a16b55d3d055bd148ffdad5ff29415a7bc461"
+
+[[projects]]
   name = "github.com/docker/distribution"
   packages = ["digestset","reference"]
   revision = "277ed486c948042cab91ad367c379524f3b25e18"
@@ -80,6 +86,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cc8b40851dab9a1120eeff286003a1dfd43413c829e2c3262b3b19f5e3bc539b"
+  inputs-digest = "b8d6fe2304c07e567b8e388aa210d2102373afc68466033d5e83e94ba924a6d5"
   solver-name = "gps-cdcl"
   solver-version = 1

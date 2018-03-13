@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"errors"
-	"github.com/aerokube/selenoid/util"
+	"github.com/aerokube/util"
 	"os"
 )
 
