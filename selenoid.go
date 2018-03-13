@@ -24,7 +24,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"github.com/aerokube/selenoid/session"
-	"github.com/aerokube/selenoid/util"
+	"github.com/aerokube/util"
 	"github.com/docker/docker/api/types"
 	"golang.org/x/net/websocket"
 	"github.com/docker/docker/pkg/stdcopy"
