@@ -11,13 +11,18 @@ import (
 	"bytes"
 )
 
-var IsNeedAccepted bool
-
-var Sched *Scheduler
-
-var MesosContainer *DockerInfo
+var (
+	Sched   *Scheduler
+	Channel = make(chan Task)
+)
 
 const schedulerUrlTemplate = "[MASTER]/api/v1/scheduler"
+
+type Task struct {
+	TaskId        string
+	Image         string
+	ReturnChannel chan *DockerInfo
+}
 
 type DockerInfo struct {
 	Id string
@@ -39,10 +44,7 @@ type Scheduler struct {
 
 type Message struct {
 	Offers struct {
-		Offers []struct {
-			Id      ID
-			AgentId ID `json:"agent_id"`
-		}
+		Offers []Offer
 	}
 	Subscribed struct {
 		FrameworkId              ID    `json:"framework_id"`
@@ -50,16 +52,25 @@ type Message struct {
 	}
 	Update struct {
 		Status struct {
-			Uuid    string
-			AgentId ID     `json:"agent_id"`
-			Data    string `json:"data"`
-			State   string `json:"state"`
+			Uuid       string
+			AgentId    ID     `json:"agent_id"`
+			Data       string `json:"data"`
+			State      string `json:"state"`
+			ExecutorId ID     `json:"executor_id"`
 		}
 	}
 	Type string
 }
 
+type Offer struct {
+	Id        ID         `json:"id"`
+	AgentId   ID         `json:"agent_id"`
+	Hostname  string     `json:"hostname"`
+	Resources []Resource `json:"resources"`
+}
+
 func Run(URL string) {
+	notRunningTasks := make(map[string]chan *DockerInfo)
 	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
 
 	body, _ := json.Marshal(GetSubscribedMessage("foo", "My first framework", []string{"test"}))
@@ -72,7 +83,6 @@ func Run(URL string) {
 	defer resp.Body.Close()
 
 	streamId := resp.Header.Get("Mesos-Stream-Id")
-	fmt.Println(streamId)
 
 	scanner := bufio.NewScanner(resp.Body)
 	scanner.Split(bufio.ScanLines)
@@ -87,12 +97,11 @@ func Run(URL string) {
 		if index != -1 {
 			jsonMessage := line[0:index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
+			handle(m)
 			if m.Type == "SUBSCRIBED" {
 				frameworkId = m.Subscribed.FrameworkId
 				fmt.Println("Ура, мы подписались! Id = " + frameworkId.Value)
 				Sched = &Scheduler{schedulerUrl, streamId, frameworkId}
-			} else if m.Type == "HEARTBEAT" {
-				fmt.Println("Мезос жил, мезос жив, мезос будет жить!!!")
 			} else if m.Type == "OFFERS" {
 				var offersIds []ID
 				offers := m.Offers.Offers
@@ -100,27 +109,38 @@ func Run(URL string) {
 					offersIds = append(offersIds, n.Id)
 					fmt.Println(offersIds)
 				}
-				b, _ := json.Marshal(offersIds)
-				if IsNeedAccepted == true {
-					Sched.Accept(m.Offers.Offers[0].AgentId.Value, string(b))
-					IsNeedAccepted = false
-					fmt.Println(IsNeedAccepted)
-				} else {
+				select {
+				case task := <-Channel:
+					notRunningTasks[task.TaskId] = task.ReturnChannel
+					Sched.Accept(m.Offers.Offers[0], task.TaskId)
+				default:
+					fmt.Println("nothing ready")
 					Sched.Decline(offersIds)
 				}
-			} else if m.Type == "FAILURE" {
-				fmt.Println("Все плохо")
 			} else if m.Type == "UPDATE" {
-				uuid := m.Update.Status.Uuid
-				Sched.Acknowledge(m.Update.Status.AgentId, uuid)
 				if m.Update.Status.State == "TASK_RUNNING" {
 					n, _ := base64.StdEncoding.DecodeString(m.Update.Status.Data)
 					fmt.Println(string(n))
 					var data []DockerInfo
 					json.Unmarshal(n, &data)
-					MesosContainer = &data[0]
+					container := &data[0]
+					taskId := m.Update.Status.ExecutorId.Value
+					channel, _ := notRunningTasks[taskId]
+					channel <- container
+					delete(notRunningTasks, taskId)
 				}
 			}
 		}
+	}
+}
+
+func handle(m Message) {
+	if m.Type == "HEARTBEAT" {
+		fmt.Println("Мезос жил, мезос жив, мезос будет жить!!!")
+	} else if m.Type == "FAILURE" {
+		fmt.Println("Все плохо")
+	} else if m.Type == "UPDATE" {
+		uuid := m.Update.Status.Uuid
+		Sched.Acknowledge(m.Update.Status.AgentId, uuid, m.Update.Status.ExecutorId)
 	}
 }

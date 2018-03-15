@@ -3,17 +3,9 @@ package scheduler
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"bytes"
 	"encoding/json"
 	"log"
-	"github.com/pborman/uuid"
-)
-
-const (
-	frameworkIdHolder = "__FRAMEWORK_ID__"
-	offerIdsHolder    = "__OFFER_IDS__"
-	agentIdHolder     = "__AGENT_ID__"
 )
 
 func (s *Scheduler) Decline(offers []ID) {
@@ -24,82 +16,12 @@ func (s *Scheduler) Decline(offers []ID) {
 	}
 }
 
-func (s *Scheduler) Accept(agentId string, offers string) {
-	//TO DO: запуск тестов со сгенерированным taskId
-	taskId := "selenoid-" + uuid.New()
-	fmt.Println("TASK ID: " + taskId)
+func (s *Scheduler) Accept(offer Offer, taskId string) {
+	body, _ := json.Marshal(GetAcceptMessage(s.FrameworkId, offer, taskId))
 
-	template := `{
-  "framework_id"   : {"value" : "__FRAMEWORK_ID__"},
-  "type"           : "ACCEPT",
-  "accept"         : {
-    "offer_ids"    : __OFFER_IDS__,
-     "operations"  : [
-                      {
-                       "type"         : "LAUNCH",
-                       "launch"       : {
-                         "task_infos" : [
-                                         {
-                                          "name"        : "My Task",
-                                          "task_id"     : {"value" : "12220-3440-12532-my-task"},
-                                          "agent_id"    : {"value" : "__AGENT_ID__"},
-                                          "command": {
-                                				"shell": false
-                             				 },
-										  "container": {
-                               					 "type": "DOCKER",
-												 "docker": {
-                                  					"image": "selenoid/chrome",
-													"network": "BRIDGE",
-													"privileged": true,
-													"port_mappings": [
-														{
-														  "container_port": 4444,
-														  "host_port": 31005,
-														  "protocol": "tcp",
-														  "name": "http"
-														}
-													]
-                               					 }
-                              				},
-                                          "resources"   : [
-														   {
-											"name":"ports",
-											"ranges": {
-												"range": [
-												{"begin":31005,"end":31005}
-												]},
-											"role":"*",
-											"type":"RANGES"
-										  },
-                                                           {
-                                  			"name": "cpus",
-                                  			"type": "SCALAR",
-                                  			"scalar": {
-                                    			"value": 1.0
-                                  			}
-										  },
-                                		  {
-                                  			"name": "mem",
-                                  			"type": "SCALAR",
-                                  			"scalar": {
-                                    			"value": 128.0
-                                  			}
-                               			  }
-                                                          ]
-                                         }
-                                        ]
-                       }
-                      }
-                     ],
-     "filters"     : {"refuse_seconds" : 5.0}
-  }
-}`
-	body := strings.Replace(template, frameworkIdHolder, s.FrameworkId.Value, 1)
-	bodyWithOffers := strings.Replace(body, offerIdsHolder, offers, 1)
-	bodyWithAgent := strings.Replace(bodyWithOffers, agentIdHolder, agentId, 1)
+	fmt.Println(string(body))
 
-	resp, err := s.sendToStream([]byte(bodyWithAgent))
+	resp , err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
 	}
@@ -110,17 +32,17 @@ func (s *Scheduler) Accept(agentId string, offers string) {
 	fmt.Println(resp.Status)
 }
 
-func (s *Scheduler) Acknowledge(agentId ID, uuid string) {
-	body, _ := json.Marshal(GetAcknowledgeMessage(s.FrameworkId, agentId, uuid))
+func (s *Scheduler) Acknowledge(agentId ID, uuid string, taskId ID) {
+	body, _ := json.Marshal(GetAcknowledgeMessage(s.FrameworkId, agentId, uuid, taskId))
 	_, err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (s *Scheduler) Kill() {
+func (s *Scheduler) Kill(taskId string) {
 	log.Printf("[%d] [REMOVING_CONTAINER] [%s]\n")
-	body, _ := json.Marshal(GetKillMessage(s.FrameworkId))
+	body, _ := json.Marshal(GetKillMessage(s.FrameworkId, taskId))
 	resp, err := s.sendToStream(body)
 	if err != nil {
 		log.Printf("[FAILED_TO_REMOVE_CONTAINER] [%v]\n", err)
