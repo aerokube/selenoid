@@ -9,6 +9,7 @@ import (
 	"bufio"
 	"encoding/base64"
 	"bytes"
+	"sort"
 )
 
 var (
@@ -109,6 +110,9 @@ func Run(URL string) {
 					offersIds = append(offersIds, n.Id)
 					fmt.Println(offersIds)
 				}
+				tasksCanRun,offersCapacity := getTotalOffersCapacity(offers)
+				log.Printf("[MESOS CONTAINERS CAN BE RUN NOW] [%d]\n",tasksCanRun)
+				log.Printf("[CURRENT MESOS CONTAINERS CAPACITY BY OFFERS] [%v]\n",offersCapacity)
 				select {
 				case task := <-Channel:
 					notRunningTasks[task.TaskId] = task.ReturnChannel
@@ -143,4 +147,36 @@ func handle(m Message) {
 		uuid := m.Update.Status.Uuid
 		Sched.Acknowledge(m.Update.Status.AgentId, uuid, m.Update.Status.ExecutorId)
 	}
+}
+
+func getTotalOffersCapacity(offers []Offer) (int,map[string]int){
+	tasksCanRun :=0
+	totalOffersCapacity := make(map[string]int)
+	for _, offer := range offers{
+		offerCapacity := getCapacityOfCurrentOffer(offer.Resources)
+		totalOffersCapacity[offer.Id.Value] = offerCapacity
+		tasksCanRun = tasksCanRun + offerCapacity
+	}
+
+	return tasksCanRun, totalOffersCapacity
+}
+func getCapacityOfCurrentOffer(resources []Resource) (int) {
+	var cpusCapacity int
+	var memCapacity int
+	var portsCapacity int
+	for _, resource := range resources {
+		switch resource.Name {
+		case "cpus":
+			cpusCapacity = int(resource.Scalar.Value / 0.2)
+		case "mem":
+			memCapacity = int(resource.Scalar.Value / 128)
+		case "ports":
+			for _, ports := range resource.Ranges.Range {
+				portsCapacity = int(portsCapacity + ((ports.End - ports.Begin)/2))
+			}
+		}
+	}
+	totalCapacity := []int{cpusCapacity,memCapacity,portsCapacity}
+	sort.Ints(totalCapacity)
+	return totalCapacity[0]
 }
