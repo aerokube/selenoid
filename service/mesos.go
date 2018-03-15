@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"fmt"
 	"github.com/aerokube/selenoid/mesos/scheduler"
-	"time"
+	"github.com/pborman/uuid"
 )
 
 type Mesos struct {
@@ -19,22 +19,23 @@ type Mesos struct {
 }
 
 func (m *Mesos) StartWithCancel() (*StartedService, error) {
-	time.Sleep(10 * time.Second)
-	scheduler.IsNeedAccepted = true
-	time.Sleep(20 * time.Second)
-	fmt.Println("Создаем контейнер мезос")
-	hostPort := scheduler.MesosContainer.NetworkSettings.Ports.ContainerPort[0].HostPort
+	taskId := "selenoid-" + uuid.New()
+	returnChannel := make(chan *scheduler.DockerInfo)
+	task := scheduler.Task{taskId, m.Service.Image.(string), returnChannel}
+	scheduler.Channel <- task
+	container := <-returnChannel
+	fmt.Println(container)
+	hostPort := container.NetworkSettings.Ports.ContainerPort[0].HostPort
 	u := &url.URL{Scheme: "http", Host: "127.0.0.1:" + hostPort, Path: m.Service.Path}
 	s := StartedService{
 		Url: u,
 		Container: &session.Container{
-			ID:        scheduler.MesosContainer.Id,
-			IPAddress: scheduler.MesosContainer.NetworkSettings.IPAddress,
+			ID:        container.Id,
+			IPAddress: container.NetworkSettings.IPAddress,
 		},
 		Cancel: func() {
-			scheduler.Sched.Kill()
+			scheduler.Sched.Kill(taskId)
 		},
 	}
-	fmt.Println(&s.Container.ID)
 	return &s, nil
 }

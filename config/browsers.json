@@ -14,7 +14,7 @@
 		"default": "latest",
 		"versions": {
 			"latest": {
-				"image": "selenoid/chrome",
+				"image": "selenoid/vnc:chrome_64.0",
 				"port": "4444",
 				"tmpfs": {"/tmp":"size=512m"}
 			}

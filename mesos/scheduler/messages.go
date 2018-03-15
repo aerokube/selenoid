@@ -134,31 +134,31 @@ type KillMessage struct {
 	Kill        Kill   `json:"kill"`
 }
 
-func GetPortMappings() *[]PortMappings {
+func GetPortMappings(portRange Range) *[]PortMappings {
 	var portMappings = PortMappings{ContainerPort: 4444}
 	portMappings.Name = "http"
 	portMappings.ContainerPort = 4444
-	portMappings.HostPort = 31005
+	portMappings.HostPort = portRange.Begin
 	portMappings.Protocol = "tcp"
 	return &[]PortMappings{portMappings}
 }
 
-func NewContainer() *Container {
+func NewContainer(portRange Range) *Container {
 	return &Container{
 		Type: "DOCKER",
 		Docker: Docker{
 			Image:        "selenoid/chrome",
 			Network:      "BRIDGE",
 			Privileged:   true,
-			PortMappings: GetPortMappings(),
+			PortMappings: GetPortMappings(portRange),
 		},
 	}
 }
 
-func NewResourcePorts() Resource {
+func NewResourcePorts(portRange Range) Resource {
 	var rangePort = Range{
-		Begin: 31005,
-		End:   31006,
+		Begin: portRange.Begin,
+		End:   portRange.Begin,
 	}
 
 	return Resource{
@@ -179,15 +179,16 @@ func NewResourcesContainer(name string, value float64) Resource {
 	}
 }
 
-func NewLaunchTaskInfo(agentId ID) *Launch {
+func NewLaunchTaskInfo(offer Offer, taskId string) *Launch {
+	portRange := offer.Resources[0].Ranges.Range[0]
 	var taskInfo = TaskInfo{
 		Name:      "My Task",
-		TaskID:    ID{"12220-3440-12532-my-task"},
-		AgentID:   agentId,
+		TaskID:    ID{taskId},
+		AgentID:   offer.AgentId,
 		Command:   Command{false},
-		Container: NewContainer(),
+		Container: NewContainer(portRange),
 		Resources: []Resource{
-			NewResourcePorts(),
+			NewResourcePorts(portRange),
 			NewResourcesContainer("cpus", 1.0),
 			NewResourcesContainer("mem", 128.0),
 		},
@@ -196,21 +197,22 @@ func NewLaunchTaskInfo(agentId ID) *Launch {
 	return &Launch{TaskInfos: []TaskInfo{taskInfo}}
 }
 
-func NewOperations(agentId ID) *[]Operation {
+func NewOperations(offer Offer, taskId string) *[]Operation {
 	return &[]Operation{{
 		Type:   "LAUNCH",
-		Launch: NewLaunchTaskInfo(agentId),
+		Launch: NewLaunchTaskInfo(offer, taskId),
 	},
 	}
 }
 
-func GetAcceptMessage(frameworkId ID, offers []ID, agentId ID) (AcceptMessage) {
+func GetAcceptMessage(frameworkId ID, offer Offer, taskId string) (AcceptMessage) {
+	offerIds := []ID{offer.Id}
 	return AcceptMessage{
 		FrameworkID: frameworkId,
 		Type:        "ACCEPT",
 		Accept: Accept{
-			offers,
-			NewOperations(agentId),
+			offerIds,
+			NewOperations(offer, taskId),
 			Filters{RefuseSeconds: 5.0},
 		},
 	}
@@ -229,13 +231,13 @@ func GetSubscribedMessage(user string, name string, roles []string) (SubscribeMe
 	}
 }
 
-func GetAcknowledgeMessage(frameworkId ID, agentId ID, UUID string) (AcknowledgeMessage) {
+func GetAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) (AcknowledgeMessage) {
 	return AcknowledgeMessage{
 		FrameworkID: frameworkId,
 		Type:        "ACKNOWLEDGE",
 		Acknowledge: Acknowledge{
 			AgentID: agentId,
-			TaskID:  ID{"12220-3440-12532-my-task"},
+			TaskID:  taskId,
 			UUID:    UUID,
 		},
 	}
@@ -254,12 +256,12 @@ func GetDeclineMessage(frameworkId ID, offerId []ID) (DeclineMessage) {
 	}
 }
 
-func GetKillMessage(frameworkId ID) (KillMessage) {
+func GetKillMessage(frameworkId ID, taskId string) (KillMessage) {
 	return KillMessage{
 		FrameworkID: frameworkId,
 		Type:        "KILL",
 		Kill: Kill{
-			TaskID: ID{"12220-3440-12532-my-task"},
+			TaskID: ID{taskId},
 		},
 	}
 }
