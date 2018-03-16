@@ -206,7 +206,7 @@ func getPortsRanges(offerCapacity int, ranges []Range) ([]Range) {
 	for i := 0; len(ranges) > i && len(portsRanges) != offerCapacity; i++ {
 		portsBegin := ranges[i].Begin
 		portsEnd := ranges[i].End
-		for ; portsBegin != portsEnd && len(portsRanges) != offerCapacity; {
+		for ; portsEnd-portsBegin > 1 && len(portsRanges) != offerCapacity; {
 			portsRanges = append(portsRanges, Range{portsBegin, portsEnd})
 			portsBegin = portsBegin + 1
 			portsEnd = portsEnd - 1
