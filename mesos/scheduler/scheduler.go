@@ -165,34 +165,53 @@ func handle(m Message) {
 	}
 }
 
-func getTotalOffersCapacity(offers []Offer) (int,map[string]int){
+func getTotalOffersCapacity(offers []Offer) (int, map[string][]Range) {
 	tasksCanRun :=0
-	totalOffersCapacity := make(map[string]int)
+	totalOffersCapacity := make(map[string][]Range)
 	for _, offer := range offers{
-		offerCapacity := getCapacityOfCurrentOffer(offer.Resources)
-		totalOffersCapacity[offer.Id.Value] = offerCapacity
+		offerCapacity, offersPortsRanges := getCapacityOfCurrentOffer(offer.Resources)
+		totalOffersCapacity[offer.Id.Value] = offersPortsRanges
 		tasksCanRun = tasksCanRun + offerCapacity
 	}
 
 	return tasksCanRun, totalOffersCapacity
 }
-func getCapacityOfCurrentOffer(resources []Resource) (int) {
-	var cpusCapacity int
-	var memCapacity int
-	var portsCapacity int
+
+func getCapacityOfCurrentOffer(resources []Resource) (int, []Range) {
+	cpuCapacity := 0
+	memCapacity := 0
+	portsCapacity := 0
+	var offersPortsResources []Range
 	for _, resource := range resources {
 		switch resource.Name {
 		case "cpus":
-			cpusCapacity = int(resource.Scalar.Value / CpuLimit)
+			cpuCapacity = int(resource.Scalar.Value / CpuLimit)
 		case "mem":
 			memCapacity = int(resource.Scalar.Value / MemLimit)
 		case "ports":
-			for _, ports := range resource.Ranges.Range {
+			offersPortsResources = resource.Ranges.Range
+			for _, ports := range offersPortsResources {
 				portsCapacity = int(portsCapacity + ((ports.End - ports.Begin)/2))
 			}
 		}
 	}
-	totalCapacity := []int{cpusCapacity,memCapacity,portsCapacity}
-	sort.Ints(totalCapacity)
-	return totalCapacity[0]
+	allResourcesCapacity := []int{cpuCapacity, memCapacity, portsCapacity}
+	sort.Ints(allResourcesCapacity)
+	totalCapacity := allResourcesCapacity[0]
+	offersPortsRanges := getPortsRanges(totalCapacity, offersPortsResources)
+	return totalCapacity, offersPortsRanges
+}
+func getPortsRanges(offerCapacity int, ranges []Range) ([]Range) {
+	portsRanges := make([]Range, 0)
+	for i := 0; len(ranges) > i && len(portsRanges) != offerCapacity; i++ {
+		portsBegin := ranges[i].Begin
+		portsEnd := ranges[i].End
+		for ; portsBegin != portsEnd && len(portsRanges) != offerCapacity; {
+			portsRanges = append(portsRanges, Range{portsBegin, portsEnd})
+			portsBegin = portsBegin + 1
+			portsEnd = portsEnd - 1
+		}
+
+	}
+	return portsRanges
 }
