@@ -13,8 +13,10 @@ import (
 )
 
 var (
-	Sched   *Scheduler
-	Channel = make(chan Task)
+	Sched    *Scheduler
+	Channel   = make(chan Task)
+	CpuLimit float64
+	MemLimit float64
 )
 
 const schedulerUrlTemplate = "[MASTER]/api/v1/scheduler"
@@ -70,7 +72,8 @@ type Offer struct {
 	Resources []Resource `json:"resources"`
 }
 
-func Run(URL string) {
+func Run(URL string, cpu int, mem int) {
+	setResourceLimits(cpu, mem)
 	notRunningTasks := make(map[string]chan *DockerInfo)
 	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
 
@@ -137,6 +140,19 @@ func Run(URL string) {
 		}
 	}
 }
+func setResourceLimits(cpu int, mem int) {
+	if cpu > 0 {
+		CpuLimit = float64(cpu) / 1000000000
+	} else {
+		CpuLimit = 0.2
+	}
+
+	if mem > 0 {
+		MemLimit = float64(mem)
+	} else {
+		MemLimit = 128
+	}
+}
 
 func handle(m Message) {
 	if m.Type == "HEARTBEAT" {
@@ -167,9 +183,9 @@ func getCapacityOfCurrentOffer(resources []Resource) (int) {
 	for _, resource := range resources {
 		switch resource.Name {
 		case "cpus":
-			cpusCapacity = int(resource.Scalar.Value / 0.2)
+			cpusCapacity = int(resource.Scalar.Value / CpuLimit)
 		case "mem":
-			memCapacity = int(resource.Scalar.Value / 128)
+			memCapacity = int(resource.Scalar.Value / MemLimit)
 		case "ports":
 			for _, ports := range resource.Ranges.Range {
 				portsCapacity = int(portsCapacity + ((ports.End - ports.Begin)/2))

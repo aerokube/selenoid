@@ -189,8 +189,8 @@ func NewLaunchTaskInfo(offer Offer, taskId string) *Launch {
 		Container: NewContainer(portRange),
 		Resources: []Resource{
 			NewResourcePorts(portRange),
-			NewResourcesContainer("cpus", 1.0),
-			NewResourcesContainer("mem", 128.0),
+			NewResourcesContainer("cpus", CpuLimit),
+			NewResourcesContainer("mem", MemLimit),
 		},
 	}
 
