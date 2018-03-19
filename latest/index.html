@@ -524,7 +524,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-03-17</span>
+<span id="revdate">2018-03-19</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -538,8 +538,16 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_run_your_tests">1.1.3. Run Your Tests</a></li>
 </ul>
 </li>
-<li><a href="#_selenoid_under_windows">1.2. Selenoid under Windows</a></li>
-<li><a href="#_browser_images">1.3. Browser Images</a></li>
+<li><a href="#_frequently_asked_questions">1.2. Frequently Asked Questions</a>
+<ul class="sectlevel3">
+<li><a href="#_logs_and_dirs">1.2.1. Logs and Dirs</a></li>
+<li><a href="#_limits_and_timeouts">1.2.2. Limits and Timeouts</a></li>
+<li><a href="#_resources_consumption">1.2.3. Resources Consumption</a></li>
+<li><a href="#_features_not_working">1.2.4. Features not Working</a></li>
+</ul>
+</li>
+<li><a href="#_selenoid_under_windows">1.3. Selenoid under Windows</a></li>
+<li><a href="#_browser_images">1.4. Browser Images</a></li>
 </ul>
 </li>
 <li><a href="#_configuration">2. Configuration</a>
@@ -860,7 +868,169 @@ By default UI is listening on port 8080. To start using it open the following pa
 </div>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_under_windows"><a class="anchor" href="#_selenoid_under_windows"></a>1.2. Selenoid under Windows</h3>
+<h3 id="_frequently_asked_questions"><a class="anchor" href="#_frequently_asked_questions"></a>1.2. Frequently Asked Questions</h3>
+<div class="sect3">
+<h4 id="_logs_and_dirs"><a class="anchor" href="#_logs_and_dirs"></a>1.2.1. Logs and Dirs</h4>
+<div class="paragraph">
+<p><strong>Where are Selenoid logs?</strong></p>
+</div>
+<div class="paragraph">
+<p>Selenoid outputs its logs to stdout. Selenoid launched as a binary should output logs to the screen. To see Selenoid logs launched as Docker container type:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ docker logs selenoid</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To follow the logs add one more flag:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ docker logs -f selenoid</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Where are recorded videos stored?</strong></p>
+</div>
+<div class="paragraph">
+<p>Default location when installed with <code>cm</code> is <code>~/.aerokube/selenoid/video</code> or <code>C:\Users\&lt;user&gt;\.aerokube\selenoid\video</code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_limits_and_timeouts"><a class="anchor" href="#_limits_and_timeouts"></a>1.2.2. Limits and Timeouts</h4>
+<div class="paragraph">
+<p><strong>How can I limit overall browsers consumption?</strong></p>
+</div>
+<div class="paragraph">
+<p>You have to use <code>-limit</code> flag to specify total number of parallel sessions. Default value is 5. See <a href="#_resources_consumption">Resources Consumption</a> section on how to determine total number of parallel sessions.</p>
+</div>
+<div class="paragraph">
+<p><strong>Can I limit per-version browser consumption?</strong></p>
+</div>
+<div class="paragraph">
+<p>No, this is not supported. We consider the only reasonable limitation should be the overall browsers consumption. This is important to not overload the hardware.</p>
+</div>
+<div class="paragraph">
+<p><strong>How can I adjust Selenoid timeouts?</strong></p>
+</div>
+<div class="paragraph">
+<p>The main timeout flag is <code>-timeout</code>, specified as <code>60s</code> or <code>2m</code> or <code>1h</code>. It means maximum amount of time between subsequent HTTP requests to Selenium API. When there are no requests during this time period - session is automatically closed. Selenoid also has more subtle timeouts like:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>-service-startup-timeout</code> - container or driver process startup timeout</p>
+</li>
+<li>
+<p><code>-session-attempt-timeout</code> - new session HTTP request timeout, applied when container or driver has started</p>
+</li>
+<li>
+<p><code>-session-delete-timeout</code> - container or process removal timeout, applied after <code>driver.quit()</code> call</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_resources_consumption"><a class="anchor" href="#_resources_consumption"></a>1.2.3. Resources Consumption</h4>
+<div class="paragraph">
+<p><strong>How many resources browser containers consume?</strong></p>
+</div>
+<div class="paragraph">
+<p>This depends on your tests. We recommend to start with 1 CPU and 1 Gb of memory per container as a rough estimate and then increase <code>-limit</code> checking that your tests work stably.</p>
+</div>
+<div class="paragraph">
+<p><strong>Do VNC and non-VNC browser images memory and CPU consumption differ?</strong></p>
+</div>
+<div class="paragraph">
+<p>The only difference between these images - is a running VNC server (<code>x11vnc</code>) consuming approximately 20 Megabytes of RAM in idle state which is negligible compared to browser memory consumption.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_features_not_working"><a class="anchor" href="#_features_not_working"></a>1.2.4. Features not Working</h4>
+<div class="paragraph">
+<p><strong>Selenoid does not start: open config/browsers.json: no such file or directory</strong></p>
+</div>
+<div class="paragraph">
+<p>This usually happens when Selenoid is started in Docker container with custom command-line arguments, e.g.:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ docker run &lt;some-args&gt; aerokube/selenoid:some-version -limit 10</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In that case you have to specify path to configuration file explicitly (<code>cm</code> tool does this automatically):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ docker run &lt;some-args&gt; aerokube/selenoid:some-version -limit 10 -conf /etc/selenoid/browsers.json</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Getting error: create container: Error response from daemon: client version 1.36 is too new</strong></p>
+</div>
+<div class="paragraph">
+<p>You have to run Selenoid binary \ container with <code>DOCKER_API_VERSION</code> variable specifying your Docker API version. <code>cm</code> tool does this automatically for you. To determine API version type:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ docker version | grep API</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then run Selenoid like the following:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ DOCKER_API_VERSION=1.32 ./selenoid &lt;rest-of-args&gt; # As a binary
+$ docker run -e DOCKER_API_VERSION=1.32 &lt;rest-of-args&gt; aerokube/selenoid:some-version # As Docker container</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Can&#8217;t open Selenoid video with Firefox</strong></p>
+</div>
+<div class="paragraph">
+<p>This is because we are using H264 codec which is not supported in Firefox for licensing reasons. Should work like a charm in Google Chrome or VLC player.</p>
+</div>
+<div class="paragraph">
+<p><strong>Can&#8217;t get VNC feature to work: Disconnected</strong></p>
+</div>
+<div class="paragraph">
+<p>Please check the following:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>You have <code>enableVNC = true</code> capability in your tests</p>
+</li>
+<li>
+<p>You are using browser images with <code>vnc</code> in their name, e.g. <code>selenoid/vnc:firefox:58.0</code>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p><strong>Seeing black screen with a cross in VNC window</strong></p>
+</div>
+<div class="paragraph">
+<p>You are using <code>driver.close()</code> instead of <code>driver.quit()</code> and just closed the last browser tab instead of removing the session.</p>
+</div>
+<div class="paragraph">
+<p><strong>Can&#8217;t maximize browser window</strong></p>
+</div>
+<div class="paragraph">
+<p>This is because of missing window manager in browser images. Should be fixed soon.</p>
+</div>
+<div class="paragraph">
+<p><strong>Can Selenoid pull browser images automatically?</strong></p>
+</div>
+<div class="paragraph">
+<p>No, we did not implement this feature intentionally. We consider that all such cluster maintenance tasks can influence performance and stability when done automatically.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_selenoid_under_windows"><a class="anchor" href="#_selenoid_under_windows"></a>1.3. Selenoid under Windows</h3>
 <div class="paragraph">
 <p>While we normally recommend to start Selenoid using <a href="http://aerokube.com/cm/latest">Configuration Manager</a> on any platform,
 it is possible to start it under Windows manually.</p>
@@ -935,7 +1105,7 @@ aerokube/selenoid:latest-release</pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_browser_images"><a class="anchor" href="#_browser_images"></a>1.3. Browser Images</h3>
+<h3 id="_browser_images"><a class="anchor" href="#_browser_images"></a>1.4. Browser Images</h3>
 <div class="paragraph">
 <p>We maintain a set of prebuilt Docker container images for different browsers including:</p>
 </div>
@@ -3510,7 +3680,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-03-17 14:33:19 UTC
+Last updated 2018-03-19 06:42:46 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
