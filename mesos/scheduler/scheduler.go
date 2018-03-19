@@ -9,6 +9,7 @@ import (
 	"bufio"
 	"encoding/base64"
 	"bytes"
+	"github.com/aerokube/selenoid/mesos/zookeeper"
 )
 
 var (
@@ -70,6 +71,8 @@ type Offer struct {
 }
 
 func Run(URL string) {
+	zookeeper.DelZk()
+	zookeeper.CreateZk()
 	notRunningTasks := make(map[string]chan *DockerInfo)
 	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
 

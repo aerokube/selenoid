@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/aerokube/selenoid/mesos/scheduler"
 	"github.com/pborman/uuid"
+	"github.com/aerokube/selenoid/mesos/zookeeper"
 )
 
 type Mesos struct {
@@ -20,6 +21,7 @@ type Mesos struct {
 
 func (m *Mesos) StartWithCancel() (*StartedService, error) {
 	taskId := "selenoid-" + uuid.New()
+	zookeeper.CreateChildNodeZk(taskId)
 	returnChannel := make(chan *scheduler.DockerInfo)
 	task := scheduler.Task{taskId, m.Service.Image.(string), returnChannel}
 	scheduler.Channel <- task
@@ -35,6 +37,7 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 		},
 		Cancel: func() {
 			scheduler.Sched.Kill(taskId)
+			zookeeper.DelNodeZk(taskId)
 		},
 	}
 	return &s, nil
