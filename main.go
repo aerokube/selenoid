@@ -23,6 +23,7 @@ import (
 	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/util/docker"
 	"github.com/docker/docker/client"
 	"path/filepath"
 )
@@ -85,8 +86,8 @@ var (
 	startTime = time.Now()
 
 	version     bool
-	gitRevision string = "HEAD"
-	buildStamp  string = "unknown"
+	gitRevision = "HEAD"
+	buildStamp  = "unknown"
 )
 
 func init() {
@@ -179,7 +180,17 @@ func init() {
 	}
 	ip, _, _ := net.SplitHostPort(u.Host)
 	environment.IP = ip
-	cli, err = client.NewEnvClient()
+	cli, err := docker.CreateCompatibleDockerClient(
+		func(specifiedApiVersion string) {
+			log.Printf("[-] [INIT] [Using Docker API version: %s]", specifiedApiVersion)
+		},
+		func(determinedApiVersion string) {
+			log.Printf("[-] [INIT] [Your Docker API version is %s]", determinedApiVersion)
+		},
+		func(defaultApiVersion string) {
+			log.Printf("[-] [INIT] [Did not manage to determine your Docker API version - using default version: %s]", defaultApiVersion)
+		},
+	)
 	if err != nil {
 		log.Fatalf("[-] [INIT] [New docker client: %v]", err)
 	}
