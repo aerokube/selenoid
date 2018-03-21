@@ -1,39 +1,47 @@
 package zookeeper
 
 import (
-	"github.com/samuel/go-zookeeper/zk"
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/samuel/go-zookeeper/zk"
 )
-const path = "/Tasks"
+
+const (
+	path   = "/Tasks"
+	conStr = "0.0.0.0:2181"
+)
 
 func CreateZk() {
-	conn := connect("0.0.0.0:2181")
+	conn := connect(conStr)
 	defer conn.Close()
-
-	flags := int32(0)
-	acl := zk.WorldACL(zk.PermAll)
-
-	path, err := conn.Create(path, []byte("data"), flags, acl)
+	exists, _, err := conn.Exists(path)
 	must(err)
-	fmt.Printf("******* create: %+v\n", path)
+	if !exists {
+		flags := int32(0)
+		acl := zk.WorldACL(zk.PermAll)
+
+		path, err := conn.Create(path, []byte("data"), flags, acl)
+		must(err)
+		fmt.Printf("******* create: %+v\n", path)
+	}
 }
 
 func CreateChildNodeZk(taskId string) {
-	conn := connect("0.0.0.0:2181")
+	conn := connect(conStr)
 	defer conn.Close()
 
 	flags := int32(0)
 	acl := zk.WorldACL(zk.PermAll)
 
-	path, err := conn.Create(path + "/"+taskId, []byte("data"), flags, acl)
+	path, err := conn.Create(path+"/"+taskId, []byte("data"), flags, acl)
 	must(err)
 	fmt.Printf("******* create: %+v\n", path)
 }
 
 func GetNodeZk(taskId string) {
-	conn := connect("0.0.0.0:2181")
+	conn := connect(conStr)
 	defer conn.Close()
 
 	data, stat, err := conn.Get(path + "/" + taskId)
@@ -41,8 +49,8 @@ func GetNodeZk(taskId string) {
 	fmt.Printf("******* get:    %+v %+v\n", string(data), stat)
 }
 
-func getChildrenZk() ([]string) {
-	conn := connect("0.0.0.0:2181")
+func getChildrenZk() []string {
+	conn := connect(conStr)
 	defer conn.Close()
 	exists, _, err := conn.Exists(path)
 	must(err)
@@ -56,7 +64,7 @@ func getChildrenZk() ([]string) {
 }
 
 func DelAllChildrenNodesZk() {
-	conn := connect("0.0.0.0:2181")
+	conn := connect(conStr)
 	defer conn.Close()
 	childs := getChildrenZk()
 	if childs != nil {
@@ -67,16 +75,16 @@ func DelAllChildrenNodesZk() {
 }
 
 func DelNodeZk(taskId string) {
-	conn := connect("0.0.0.0:2181")
+	conn := connect(conStr)
 	defer conn.Close()
 
-	err := conn.Delete(path + "/" + taskId, -1)
+	err := conn.Delete(path+"/"+taskId, -1)
 	must(err)
 	fmt.Printf("******* delete" + taskId + ": ok\n")
 }
 
 func DelZk() {
-	conn := connect("0.0.0.0:2181")
+	conn := connect(conStr)
 	defer conn.Close()
 
 	err := conn.Delete(path, -1)

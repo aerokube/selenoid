@@ -8,6 +8,7 @@ import (
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/samuel/go-zookeeper/zk"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -15,6 +16,7 @@ import (
 	"sync"
 	"testing"
 	"time"
+	"strings"
 )
 
 var (
@@ -293,4 +295,34 @@ func TestFindDriver(t *testing.T) {
 	starter, success := manager.Find(caps, 42)
 	AssertThat(t, success, Is{true})
 	AssertThat(t, starter, Not{nil})
+}
+
+func TestZK(t *testing.T){
+	conn := connect()
+	defer conn.Close()
+
+	flags := int32(0)
+	acl := zk.WorldACL(zk.PermAll)
+
+	path, err := conn.Create("/01", []byte("data"), flags, acl)
+	must(err)
+	fmt.Printf("create: %+v\n", path)
+
+	data, stat, err := conn.Get("/01")
+	must(err)
+	fmt.Printf("get:    %+v %+v\n", string(data), stat)
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func connect() *zk.Conn {
+	zksStr := "0.0.0.0:2181"/*os.Getenv("ZOOKEEPER_SERVERS")*/
+	zks := strings.Split(zksStr, ",")
+	conn, _, err := zk.Connect(zks, time.Second)
+	must(err)
+	return conn
 }

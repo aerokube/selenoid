@@ -1,14 +1,15 @@
 package scheduler
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
-	"log"
-	"bufio"
-	"encoding/base64"
-	"bytes"
+
 	"github.com/aerokube/selenoid/mesos/zookeeper"
 )
 
@@ -26,7 +27,7 @@ type Task struct {
 }
 
 type DockerInfo struct {
-	Id string
+	Id              string
 	NetworkSettings struct {
 		Ports struct {
 			ContainerPort []struct {
@@ -71,7 +72,7 @@ type Offer struct {
 }
 
 func Run(URL string) {
-	zookeeper.DelZk()
+	//zookeeper.DelZk()
 	zookeeper.CreateZk()
 	notRunningTasks := make(map[string]chan *DockerInfo)
 	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
@@ -98,7 +99,7 @@ func Run(URL string) {
 		fmt.Println(line)
 		var index = strings.LastIndex(line, "}")
 		if index != -1 {
-			jsonMessage := line[0:index+1]
+			jsonMessage := line[0 : index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
 			handle(m)
 			if m.Type == "SUBSCRIBED" {
