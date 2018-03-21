@@ -1,15 +1,15 @@
 package scheduler
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"strings"
 	"log"
-	"bufio"
-	"encoding/base64"
-	"bytes"
+	"net/http"
 	"sort"
+	"strings"
 )
 
 var (
@@ -28,7 +28,7 @@ type Task struct {
 }
 
 type DockerInfo struct {
-	Id string
+	Id              string
 	NetworkSettings struct {
 		Ports struct {
 			ContainerPort []struct {
@@ -105,7 +105,7 @@ func Run(URL string, cpu float64, mem float64) {
 		fmt.Println(line)
 		var index = strings.LastIndex(line, "}")
 		if index != -1 {
-			jsonMessage := line[0:index+1]
+			jsonMessage := line[0 : index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
 			handle(m)
 			if m.Type == "SUBSCRIBED" {
@@ -209,12 +209,12 @@ func getCapacityOfCurrentOffer(offer Offer) (int, []ResourcesForOneTask) {
 	return totalCapacityOfCurrentOffer, resourcesForTasks
 }
 
-func getResourcesForTasks(offer Offer, offerCapacity int, ranges []Range) ([]ResourcesForOneTask) {
+func getResourcesForTasks(offer Offer, offerCapacity int, ranges []Range) []ResourcesForOneTask {
 	resourcesForTasks := make([]ResourcesForOneTask, 0)
 	for i := 0; len(ranges) > i && len(resourcesForTasks) != offerCapacity; i++ {
 		portsBegin := ranges[i].Begin
 		portsEnd := ranges[i].End
-		for ; portsEnd-portsBegin >= 1 && len(resourcesForTasks) != offerCapacity; {
+		for portsEnd-portsBegin >= 1 && len(resourcesForTasks) != offerCapacity {
 			portRange := Range{portsBegin, portsBegin + 1}
 			resourcesForTasks = append(resourcesForTasks, ResourcesForOneTask{offer.Id, offer.AgentId, portRange})
 			portsBegin = portsBegin + 2
