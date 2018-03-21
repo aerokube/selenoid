@@ -24,13 +24,14 @@ type Caps struct {
 	HostsEntries          string                 `json:"hostsEntries"`
 	Labels                string                 `json:"labels"`
 	ExtensionCapabilities map[string]interface{} `json:"selenoid:options"`
+	AlwaysMatch           map[string]interface{} `json:"alwaysMatch"`
 }
 
 func (c *Caps) ProcessExtensionCapabilities() {
 	if c.W3CVersion != "" {
 		c.Version = c.W3CVersion
 	}
-	if len(c.ExtensionCapabilities) > 0 {
+	if len(c.ExtensionCapabilities) > 0 || len(c.AlwaysMatch) > 0 {
 		s := reflect.ValueOf(c).Elem()
 
 		tagToFieldMap := make(map[string]reflect.StructField)
@@ -41,10 +42,14 @@ func (c *Caps) ProcessExtensionCapabilities() {
 			tagToFieldMap[tag] = field
 		}
 
-		for k, v := range c.ExtensionCapabilities {
-			value := reflect.ValueOf(v)
-			if field, ok := tagToFieldMap[k]; ok && value.Type().ConvertibleTo(field.Type) {
-				s.FieldByName(field.Name).Set(value.Convert(field.Type))
+		//NOTE: entries from the first maps have less priority than then next ones
+		nestedMaps := []map[string]interface{}{c.ExtensionCapabilities, c.AlwaysMatch}
+		for _, nm := range nestedMaps {
+			for k, v := range nm {
+				value := reflect.ValueOf(v)
+				if field, ok := tagToFieldMap[k]; ok && value.Type().ConvertibleTo(field.Type) {
+					s.FieldByName(field.Name).Set(value.Convert(field.Type))
+				}
 			}
 		}
 	}

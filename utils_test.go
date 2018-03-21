@@ -128,7 +128,10 @@ func Selenium() http.Handler {
 
 func TestProcessExtensionCapabilities(t *testing.T) {
 	capsJson := `{
-		"browserName": "firefox", "browserVersion": "57.0",
+		"browserVersion": "57.0",
+		"alwaysMatch": {
+			"browserName": "firefox"
+		},
 		"selenoid:options": {
 			"name": "ExampleTestName",
 			"enableVNC": true,
@@ -139,10 +142,11 @@ func TestProcessExtensionCapabilities(t *testing.T) {
 	var caps session.Caps
 	err := json.Unmarshal([]byte(capsJson), &caps)
 	AssertThat(t, err, Is{nil})
-	AssertThat(t, caps.Name, EqualTo{"firefox"})
+	AssertThat(t, caps.Name, EqualTo{""})
 	AssertThat(t, caps.Version, EqualTo{""})
 	AssertThat(t, caps.TestName, EqualTo{""})
 	caps.ProcessExtensionCapabilities()
+	AssertThat(t, caps.Name, EqualTo{"firefox"})
 	AssertThat(t, caps.Version, EqualTo{"57.0"})
 	AssertThat(t, caps.TestName, EqualTo{"ExampleTestName"})
 	AssertThat(t, caps.VNC, EqualTo{true})    //Correct type
