@@ -16,8 +16,8 @@ func (s *Scheduler) Decline(offers []ID) {
 	}
 }
 
-func (s *Scheduler) Accept(offer Offer, taskId string) {
-	body, _ := json.Marshal(GetAcceptMessage(s.FrameworkId, offer, taskId))
+func (s *Scheduler) Accept(offers map[string][]Range, tasks []Task) {
+	body, _ := json.Marshal(s.NewAcceptMessage(s.FrameworkId, offers, tasks))
 
 	fmt.Println(string(body))
 

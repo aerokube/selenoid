@@ -22,7 +22,7 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 	taskId := "selenoid-" + uuid.New()
 	returnChannel := make(chan *scheduler.DockerInfo)
 	task := scheduler.Task{taskId, m.Service.Image.(string), returnChannel}
-	scheduler.Channel <- task
+	task.SendToMesos()
 	container := <-returnChannel
 	fmt.Println(container)
 	hostPort := container.NetworkSettings.Ports.ContainerPort[0].HostPort

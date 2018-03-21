@@ -14,7 +14,7 @@ import (
 
 var (
 	Sched    *Scheduler
-	Channel   = make(chan Task)
+	channel  = make(chan Task)
 	CpuLimit float64
 	MemLimit float64
 )
@@ -40,9 +40,10 @@ type DockerInfo struct {
 }
 
 type Scheduler struct {
-	Url         string
-	StreamId    string
-	FrameworkId ID
+	Url           string
+	StreamId      string
+	FrameworkId   ID
+	CurrentOffers []Offer
 }
 
 type Message struct {
@@ -105,7 +106,10 @@ func Run(URL string, cpu float64, mem float64) {
 			if m.Type == "SUBSCRIBED" {
 				frameworkId = m.Subscribed.FrameworkId
 				fmt.Println("Ура, мы подписались! Id = " + frameworkId.Value)
-				Sched = &Scheduler{schedulerUrl, streamId, frameworkId}
+				Sched = &Scheduler{
+					Url: schedulerUrl,
+					StreamId: streamId,
+					FrameworkId: frameworkId}
 			} else if m.Type == "OFFERS" {
 				var offersIds []ID
 				offers := m.Offers.Offers
@@ -113,21 +117,38 @@ func Run(URL string, cpu float64, mem float64) {
 					offersIds = append(offersIds, n.Id)
 					fmt.Println(offersIds)
 				}
-				tasksCanRun,offersCapacity := getTotalOffersCapacity(offers)
-				log.Printf("[MESOS CONTAINERS CAN BE RUN NOW] [%d]\n",tasksCanRun)
-				log.Printf("[CURRENT MESOS CONTAINERS CAPACITY BY OFFERS] [%v]\n",offersCapacity)
-				select {
-				case task := <-Channel:
-					notRunningTasks[task.TaskId] = task.ReturnChannel
-					Sched.Accept(m.Offers.Offers[0], task.TaskId)
-				default:
+				tasksCanRun, offersCapacity := getTotalOffersCapacity(offers)
+				log.Printf("[MESOS CONTAINERS CAN BE RUN NOW] [%d]\n", tasksCanRun)
+				log.Printf("[CURRENT MESOS CONTAINERS CAPACITY BY OFFERS] [%v]\n", offersCapacity)
+				var tasks []Task
+				if tasksCanRun == 0 {
 					fmt.Println("nothing ready")
 					Sched.Decline(offersIds)
+				} else {
+				Loop:
+					for i := 0; i < tasksCanRun; i++ {
+						select {
+						case task := <-channel:
+							notRunningTasks[task.TaskId] = task.ReturnChannel
+							tasks = append(tasks, task)
+						default:
+							fmt.Println("Задачки закончились")
+							break Loop
+						}
+					}
+					if len(tasks) == 0 {
+						Sched.Decline(offersIds)
+					} else {
+						fmt.Println("====================")
+						fmt.Println(len(tasks))
+						//Sched.DeprecatedAccept(m.Offers.Offers[0], tasks[0].TaskId)
+						Sched.CurrentOffers = m.Offers.Offers
+						Sched.Accept(offersCapacity, tasks)
+					}
 				}
 			} else if m.Type == "UPDATE" {
 				if m.Update.Status.State == "TASK_RUNNING" {
 					n, _ := base64.StdEncoding.DecodeString(m.Update.Status.Data)
-					fmt.Println(string(n))
 					var data []DockerInfo
 					json.Unmarshal(n, &data)
 					container := &data[0]
@@ -167,9 +188,9 @@ func handle(m Message) {
 }
 
 func getTotalOffersCapacity(offers []Offer) (int, map[string][]Range) {
-	tasksCanRun :=0
+	tasksCanRun := 0
 	totalOffersCapacity := make(map[string][]Range)
-	for _, offer := range offers{
+	for _, offer := range offers {
 		offerCapacity, offersPortsRanges := getCapacityOfCurrentOffer(offer.Resources)
 		totalOffersCapacity[offer.Id.Value] = offersPortsRanges
 		tasksCanRun = tasksCanRun + offerCapacity
@@ -192,7 +213,7 @@ func getCapacityOfCurrentOffer(resources []Resource) (int, []Range) {
 		case "ports":
 			offersPortsResources = resource.Ranges.Range
 			for _, ports := range offersPortsResources {
-				portsCapacity = int(portsCapacity + ((ports.End - ports.Begin)/2))
+				portsCapacity = int(portsCapacity + ((ports.End - ports.Begin) / 2))
 			}
 		}
 	}
@@ -215,4 +236,8 @@ func getPortsRanges(offerCapacity int, ranges []Range) ([]Range) {
 
 	}
 	return portsRanges
+}
+
+func (task Task) SendToMesos() {
+	channel <- task
 }

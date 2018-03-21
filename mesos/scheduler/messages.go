@@ -1,5 +1,9 @@
 package scheduler
 
+import (
+	"fmt"
+)
+
 //Универсальная структура для хранения  ID
 type ID struct {
 	Value string `json:"value"`
@@ -179,12 +183,11 @@ func NewResourcesContainer(name string, value float64) Resource {
 	}
 }
 
-func NewLaunchTaskInfo(offer Offer, taskId string) *Launch {
-	portRange := offer.Resources[0].Ranges.Range[0]
+func NewLaunchTaskInfo(agentId ID, portRange Range, task Task) *Launch {
 	var taskInfo = TaskInfo{
 		Name:      "My Task",
-		TaskID:    ID{taskId},
-		AgentID:   offer.AgentId,
+		TaskID:    ID{task.TaskId},
+		AgentID:   agentId,
 		Command:   Command{false},
 		Container: NewContainer(portRange),
 		Resources: []Resource{
@@ -197,22 +200,30 @@ func NewLaunchTaskInfo(offer Offer, taskId string) *Launch {
 	return &Launch{TaskInfos: []TaskInfo{taskInfo}}
 }
 
-func NewOperations(offer Offer, taskId string) *[]Operation {
-	return &[]Operation{{
-		Type:   "LAUNCH",
-		Launch: NewLaunchTaskInfo(offer, taskId),
-	},
+func (scheduler *Scheduler)NewOperations(offers map[string] []Range, tasks []Task) *[]Operation {
+	var operations []Operation
+	currentOffer := scheduler.CurrentOffers[0]
+	for i, n := range tasks {
+		operations = append(operations, Operation{
+			Type:   "LAUNCH",
+			Launch: NewLaunchTaskInfo(currentOffer.AgentId, offers[currentOffer.Id.Value][i], n),
+		})
 	}
+	return &operations
 }
 
-func GetAcceptMessage(frameworkId ID, offer Offer, taskId string) (AcceptMessage) {
-	offerIds := []ID{offer.Id}
+func (scheduler *Scheduler)NewAcceptMessage(frameworkId ID, offers map[string] []Range, tasks []Task) (AcceptMessage) {
+	var offerIds []ID
+	for k, _ := range offers {
+		offerIds = append(offerIds, ID{k})
+		fmt.Println(offerIds)
+	}
 	return AcceptMessage{
 		FrameworkID: frameworkId,
 		Type:        "ACCEPT",
 		Accept: Accept{
 			offerIds,
-			NewOperations(offer, taskId),
+			scheduler.NewOperations(offers, tasks),
 			Filters{RefuseSeconds: 5.0},
 		},
 	}
