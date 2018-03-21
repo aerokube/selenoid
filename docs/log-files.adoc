@@ -1,8 +1,8 @@
 == Log Files
 A typical log file looks like the following:
 ```
-2017/11/01 19:12:38 [NEW_REQUEST]
-2017/11/01 19:12:38 [NEW_REQUEST_ACCEPTED]
+2017/11/01 19:12:38 [-] [NEW_REQUEST]
+2017/11/01 19:12:38 [-] [NEW_REQUEST_ACCEPTED]
 2017/11/01 19:12:38 [41301] [LOCATING_SERVICE] [firefox-45.0]
 2017/11/01 19:12:38 [41301] [USING_DOCKER] [firefox-45.0]
 2017/11/01 19:12:38 [41301] [CREATING_CONTAINER] [selenoid/firefox:45.0]
@@ -24,11 +24,10 @@ Every line contains:
 | Time | 2017/11/01 19:12:42 | - 
 | Request counter | [41301] | So far as session ID is unknown when doing attempts this counter is used to find all session attempts for each new session request. 
 | Status | [SESSION_ATTEMPTED] | See table below for complete list of statuses. 
-| Quota name | [my_quota] | Extracted from basic HTTP auth headers. 
 | Browser | [firefox-45.0] | Name and version. Only present for new session requests.
 | Attempt number | [1] | For SESSION_ATTEMPTED entries means current attempt number. For SESSION_CREATED entries means total number of attempts to create this session. 
 | Session ID | [345bb886-7026-46d7-82d4-4788c0460110] | This value is unique for every browser session 
-| Session start time | [4.155712239s] | - 
+| Session start time | [4.15s] | - 
 |===
 
 The following statuses are available:
@@ -50,10 +49,12 @@ The following statuses are available:
 | CONTAINER_REMOVED | Docker container was successfully removed 
 | CONTAINER_STARTED | Docker container has successfully started 
 | CREATING_CONTAINER | Docker container with browser is creating 
+| DEFAULT_VERSION | Selenoid is using default browser version 
 | DELETED_VIDEO_FILE | Video file was deleted by user 
 | ENVIRONMENT_NOT_AVAILABLE | Browser with desired name and version does not exist
 | FAILED_TO_REMOVE_CONTAINER | Failed to remove Docker container 
 | FAILED_TO_TERMINATE_PROCESS | An error occurred while terminating driver process 
+| INIT | Server is starting 
 | PROCESS_STARTED | Driver process successfully started 
 | PROXY_TO | Starting to proxy requests to running container or driver process 
 | REMOVING_CONTAINER | Docker container with browser or video recorder is being removed
@@ -66,7 +67,8 @@ The following statuses are available:
 | SESSION_FAILED | An attempt to create a new session failed - user receives an error
 | SESSION_NOT_FOUND | Requested VNC or logs for unknown session.
 | STARTING_CONTAINER | Docker container with browser was created and is starting
-| STARTING_PROCESS | Starting driver process 
+| STARTING_PROCESS | Starting driver process
+| SHUTTING_DOWN | Server is stopping 
 | TERMINATING_PROCESS | Stopping driver process 
 | TERMINATED_PROCESS | Driver process was successfully stopped 
 | VNC_ENABLED | User requested VNC traffic 

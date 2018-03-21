@@ -67,7 +67,7 @@ type DefaultManager struct {
 func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, bool) {
 	browserName := caps.Name
 	version := caps.Version
-	log.Printf("[%d] [LOCATING_SERVICE] [%s-%s]\n", requestId, browserName, version)
+	log.Printf("[%d] [LOCATING_SERVICE] [%s] [%s]", requestId, browserName, version)
 	service, version, ok := m.Config.Find(browserName, version)
 	serviceBase := ServiceBase{RequestId: requestId, Service: service}
 	if !ok {
@@ -88,7 +88,7 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 		if m.Client == nil {
 			return nil, false
 		}
-		log.Printf("[%d] [USING_DOCKER] [%s-%s]\n", requestId, browserName, version)
+		log.Printf("[%d] [USING_DOCKER] [%s] [%s]", requestId, browserName, version)
 		return &Docker{
 			ServiceBase: serviceBase,
 			Environment: *m.Environment,
@@ -96,7 +96,7 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 			Client:      m.Client,
 			LogConfig:   m.Config.ContainerLogs}, true
 	case []interface{}:
-		log.Printf("[%d] [USING_DRIVER] [%s-%s]\n", requestId, browserName, version)
+		log.Printf("[%d] [USING_DRIVER] [%s] [%s]", requestId, browserName, version)
 		return &Driver{ServiceBase: serviceBase, Environment: *m.Environment}, true
 	}
 	}

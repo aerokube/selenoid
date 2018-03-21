@@ -125,18 +125,18 @@ func init() {
 	var err error
 	hostname, err = os.Hostname()
 	if err != nil {
-		log.Fatalf("%s: %v", os.Args[0], err)
+		log.Fatalf("[-] [INIT] [%s: %v]", os.Args[0], err)
 	}
 	queue = protect.New(limit, disableQueue)
 	conf = config.NewConfig()
 	err = conf.Load(confPath, logConfPath)
 	if err != nil {
-		log.Fatalf("%s: %v", os.Args[0], err)
+		log.Fatalf("[-] [INIT] [%s: %v]", os.Args[0], err)
 	}
 	onSIGHUP(func() {
 		err := conf.Load(confPath, logConfPath)
 		if err != nil {
-			log.Printf("%s: %v", os.Args[0], err)
+			log.Printf("[-] [INIT] [%s: %v]", os.Args[0], err)
 		}
 	})
 	cancelOnSignal()
@@ -145,14 +145,18 @@ func init() {
 	if err == nil {
 		inDocker = true
 	}
-	videoOutputDir, err = filepath.Abs(videoOutputDir)
-	if err != nil {
-		log.Fatalf("Invalid video output dir %s: %v", videoOutputDir, err)
+
+	if !disableDocker {
+		videoOutputDir, err = filepath.Abs(videoOutputDir)
+		if err != nil {
+			log.Fatalf("[-] [INIT] [Invalid video output dir %s: %v]", videoOutputDir, err)
+		}
+		err = os.MkdirAll(videoOutputDir, os.FileMode(0644))
+		if err != nil {
+			log.Fatalf("[-] [INIT] [Failed to create video output dir %s: %v]", videoOutputDir, err)
+		}
 	}
-	err = os.MkdirAll(videoOutputDir, os.FileMode(0644))
-	if err != nil {
-		log.Fatalf("Failed to create video output dir %s: %v", videoOutputDir, err)
-	}
+
 	environment := service.Environment{
 		InDocker:            inDocker,
 		CPU:                 int64(cpu),
@@ -173,21 +177,21 @@ func init() {
 	if dockerHost == "" {
 		dockerHost = client.DefaultDockerHost
 	}
-	_, addr, _, err := client.ParseHost(dockerHost)
+	u, err := client.ParseHostURL(dockerHost)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("[-] [INIT] [%v]", err)
 	}
-	ip, _, _ := net.SplitHostPort(addr)
+	ip, _, _ := net.SplitHostPort(u.Host)
 	environment.IP = ip
 	cli, err = client.NewEnvClient()
 	if err != nil {
-		log.Fatalf("new docker client: %v\n", err)
+		log.Fatalf("[-] [INIT] [New docker client: %v]", err)
 	}
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
 
 	if mesosMasterURL != "" {
 		log.Printf("[TRY TO REGISTER ON MESOS MASTER] [%s]", mesosMasterURL)
-		go scheduler.Run(mesosMasterURL)
+		go scheduler.Run(mesosMasterURL, float64(cpu), float64(mem))
 	}
 
 }
@@ -206,7 +210,7 @@ func cancelOnSignal() {
 		if !disableDocker {
 			err := cli.Close()
 			if err != nil {
-				log.Fatalf("close docker client: %v", err)
+				log.Fatalf("[-] [SHUTTING_DOWN] [Error closing docker client: %v]", err)
 				os.Exit(1)
 			}
 		}
@@ -243,6 +247,7 @@ func post(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func ping(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(struct {
 		Uptime         string `json:"uptime"`
 		LastReloadTime string `json:"lastReloadTime"`
@@ -275,7 +280,7 @@ func deleteFileIfExists(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Failed to delete file %s: %v", filePath, err), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("[%d] [DELETED_VIDEO_FILE] [%s]\n", serial(), fileName)
+	log.Printf("[%d] [DELETED_VIDEO_FILE] [%s]", serial(), fileName)
 }
 
 func handler() http.Handler {
@@ -291,6 +296,7 @@ func handler() http.Handler {
 		jsonError(w, "Session timed out or not found", http.StatusNotFound)
 	})
 	root.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
 	})
 	root.HandleFunc("/ping", ping)
@@ -309,8 +315,8 @@ func showVersion() {
 }
 
 func main() {
-	log.Printf("Timezone: %s\n", time.Local)
-	log.Printf("Video Dir: %s\n", videoOutputDir)
-	log.Printf("Listening on %s\n", listen)
+	log.Printf("[-] [INIT] [Timezone: %s]", time.Local)
+	log.Printf("[-] [INIT] [Video Dir: %s]", videoOutputDir)
+	log.Printf("[-] [INIT] [Listening on %s]", listen)
 	log.Fatal(http.ListenAndServe(listen, handler()))
 }
