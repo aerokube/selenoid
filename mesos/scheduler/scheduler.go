@@ -72,6 +72,12 @@ type Offer struct {
 	Resources []Resource `json:"resources"`
 }
 
+type ResourcesForOneTask struct {
+	OfferId ID
+	AgentId ID
+	Range
+}
+
 func Run(URL string, cpu float64, mem float64) {
 	setResourceLimits(cpu, mem)
 	notRunningTasks := make(map[string]chan *DockerInfo)
@@ -113,9 +119,9 @@ func Run(URL string, cpu float64, mem float64) {
 					offersIds = append(offersIds, n.Id)
 					fmt.Println(offersIds)
 				}
-				tasksCanRun,offersCapacity := getTotalOffersCapacity(offers)
+				tasksCanRun, resourcesForTasks := getTotalOffersCapacity(offers)
 				log.Printf("[MESOS CONTAINERS CAN BE RUN NOW] [%d]\n",tasksCanRun)
-				log.Printf("[CURRENT MESOS CONTAINERS CAPACITY BY OFFERS] [%v]\n",offersCapacity)
+				log.Printf("[CURRENT FREE MESOS CONTAINERS RESOURCES] [%v]\n", resourcesForTasks)
 				select {
 				case task := <-Channel:
 					notRunningTasks[task.TaskId] = task.ReturnChannel
@@ -166,24 +172,24 @@ func handle(m Message) {
 	}
 }
 
-func getTotalOffersCapacity(offers []Offer) (int, map[string][]Range) {
+func getTotalOffersCapacity(offers []Offer) (int, []ResourcesForOneTask) {
 	tasksCanRun :=0
-	totalOffersCapacity := make(map[string][]Range)
+	var resourcesForTasks []ResourcesForOneTask
 	for _, offer := range offers{
-		offerCapacity, offersPortsRanges := getCapacityOfCurrentOffer(offer.Resources)
-		totalOffersCapacity[offer.Id.Value] = offersPortsRanges
+		offerCapacity, resources := getCapacityOfCurrentOffer(offer)
 		tasksCanRun = tasksCanRun + offerCapacity
+		resourcesForTasks = append(resourcesForTasks, resources...)
 	}
 
-	return tasksCanRun, totalOffersCapacity
+	return tasksCanRun, resourcesForTasks
 }
 
-func getCapacityOfCurrentOffer(resources []Resource) (int, []Range) {
+func getCapacityOfCurrentOffer(offer Offer) (int, []ResourcesForOneTask) {
 	cpuCapacity := 0
 	memCapacity := 0
 	portsCapacity := 0
 	var offersPortsResources []Range
-	for _, resource := range resources {
+	for _, resource := range offer.Resources {
 		switch resource.Name {
 		case "cpus":
 			cpuCapacity = int(resource.Scalar.Value / CpuLimit)
@@ -198,21 +204,22 @@ func getCapacityOfCurrentOffer(resources []Resource) (int, []Range) {
 	}
 	allResourcesCapacity := []int{cpuCapacity, memCapacity, portsCapacity}
 	sort.Ints(allResourcesCapacity)
-	totalCapacity := allResourcesCapacity[0]
-	offersPortsRanges := getPortsRanges(totalCapacity, offersPortsResources)
-	return totalCapacity, offersPortsRanges
+	totalCapacityOfCurrentOffer := allResourcesCapacity[0]
+	resourcesForTasks := getResourcesForTasks(offer, totalCapacityOfCurrentOffer, offersPortsResources)
+	return totalCapacityOfCurrentOffer, resourcesForTasks
 }
 
-func getPortsRanges(offerCapacity int, ranges []Range) ([]Range) {
-	portsRanges := make([]Range, 0)
-	for i := 0; len(ranges) > i && len(portsRanges) != offerCapacity; i++ {
+func getResourcesForTasks(offer Offer, offerCapacity int, ranges []Range) ([]ResourcesForOneTask) {
+	resourcesForTasks := make([]ResourcesForOneTask, 0)
+	for i := 0; len(ranges) > i && len(resourcesForTasks) != offerCapacity; i++ {
 		portsBegin := ranges[i].Begin
 		portsEnd := ranges[i].End
-		for ; portsEnd-portsBegin >= 1 && len(portsRanges) != offerCapacity; {
-			portsRanges = append(portsRanges, Range{portsBegin, portsBegin + 1})
+		for ; portsEnd-portsBegin >= 1 && len(resourcesForTasks) != offerCapacity; {
+			portRange := Range{portsBegin, portsBegin + 1}
+			resourcesForTasks = append(resourcesForTasks, ResourcesForOneTask{offer.Id, offer.AgentId, portRange})
 			portsBegin = portsBegin + 2
 		}
 
 	}
-	return portsRanges
+	return resourcesForTasks
 }
