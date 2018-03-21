@@ -140,6 +140,7 @@ func Run(URL string, cpu float64, mem float64) {
 		}
 	}
 }
+
 func setResourceLimits(cpu float64, mem float64) {
 	if cpu > 0 {
 		CpuLimit = cpu / 1000000000
@@ -201,6 +202,7 @@ func getCapacityOfCurrentOffer(resources []Resource) (int, []Range) {
 	offersPortsRanges := getPortsRanges(totalCapacity, offersPortsResources)
 	return totalCapacity, offersPortsRanges
 }
+
 func getPortsRanges(offerCapacity int, ranges []Range) ([]Range) {
 	portsRanges := make([]Range, 0)
 	for i := 0; len(ranges) > i && len(portsRanges) != offerCapacity; i++ {
