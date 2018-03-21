@@ -14,7 +14,7 @@ import (
 
 var (
 	Sched    *Scheduler
-	Channel   = make(chan Task)
+	Channel  = make(chan Task)
 	CpuLimit float64
 	MemLimit float64
 )
@@ -120,7 +120,7 @@ func Run(URL string, cpu float64, mem float64) {
 					fmt.Println(offersIds)
 				}
 				tasksCanRun, resourcesForTasks := getTotalOffersCapacity(offers)
-				log.Printf("[MESOS CONTAINERS CAN BE RUN NOW] [%d]\n",tasksCanRun)
+				log.Printf("[MESOS CONTAINERS CAN BE RUN NOW] [%d]\n", tasksCanRun)
 				log.Printf("[CURRENT FREE MESOS CONTAINERS RESOURCES] [%v]\n", resourcesForTasks)
 				select {
 				case task := <-Channel:
@@ -173,9 +173,9 @@ func handle(m Message) {
 }
 
 func getTotalOffersCapacity(offers []Offer) (int, []ResourcesForOneTask) {
-	tasksCanRun :=0
+	tasksCanRun := 0
 	var resourcesForTasks []ResourcesForOneTask
-	for _, offer := range offers{
+	for _, offer := range offers {
 		offerCapacity, resources := getCapacityOfCurrentOffer(offer)
 		tasksCanRun = tasksCanRun + offerCapacity
 		resourcesForTasks = append(resourcesForTasks, resources...)
@@ -198,7 +198,7 @@ func getCapacityOfCurrentOffer(offer Offer) (int, []ResourcesForOneTask) {
 		case "ports":
 			offersPortsResources = resource.Ranges.Range
 			for _, ports := range offersPortsResources {
-				portsCapacity = int(portsCapacity + ((ports.End - ports.Begin)/2))
+				portsCapacity = int(portsCapacity + ((ports.End - ports.Begin) / 2))
 			}
 		}
 	}
