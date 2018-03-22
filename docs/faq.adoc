@@ -66,6 +66,17 @@ Then run Selenoid like the following:
     
     $ DOCKER_API_VERSION=1.32 ./selenoid <rest-of-args> # As a binary
     $ docker run -e DOCKER_API_VERSION=1.32 <rest-of-args> aerokube/selenoid:some-version # As Docker container
+
+**Video feature not working**
+
+When running Selenoid as Docker container video feature can be not working (because of misconfiguration). If your video files are named like `selenoid607667f7e1c7923779e35506b040300d.mp4` and you are seeing the following log message...
+```
+2018/03/20 21:06:37 [9] [VIDEO_ERROR] [Failed to rename /video/selenoid607667f7e1c7923779e35506b040300d.mp4 to /video/8019c4bc-9bec-4a8b-aa40-68d1db0cffd2.mp4: rename /video/selenoid607667f7e1c7923779e35506b040300d.mp4 /video/8019c4bc-9bec-4a8b-aa40-68d1db0cffd2.mp4: no such file or directory]
+```
+\... then check that:
+
+. You are passing an `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable pointing to a directory on the `host machine` where video files are actually stored
+. When passing custom arguments to Selenoid container (such as `-limit` or `-timeout`) you also have to pass `-video-output-dir /opt/selenoid/video` and mount host machine video dir to `/opt/selenoid/video`
     
 **Can't open Selenoid video with Firefox**
 
