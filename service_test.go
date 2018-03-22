@@ -160,6 +160,7 @@ func testConfig(env *service.Environment) *config.Config {
 				Port:    p,
 				Volumes: []string{"/test:/test"},
 				Labels:  map[string]string{"key": "value"},
+				Sysctl:  map[string]string{"sysctl net.ipv4.tcp_timestamps": "2"},
 			},
 		},
 	}
