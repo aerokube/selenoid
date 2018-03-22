@@ -57,5 +57,5 @@ Complete reference guide (including building instructions) can be found at: http
 
 ## Known Users
 
-[![JetBrains](docs/img/logo/jetbrains.png)](http://jetbrains.com/) [![Sberbank Technology](docs/img/logo/sbertech.png)](http://sber-tech.com/) [![PropellerAds](docs/img/logo/propellerads.png)](http://propellerads.com/)
+[![JetBrains](docs/img/logo/jetbrains.png)](http://jetbrains.com/) [![Yandex](docs/img/logo/yandex.png)](https://yandex.com/company/) [![Sberbank Technology](docs/img/logo/sbertech.png)](http://sber-tech.com/) [![PropellerAds](docs/img/logo/propellerads.png)](http://propellerads.com/)
 
