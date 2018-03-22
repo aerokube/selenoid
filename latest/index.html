@@ -988,6 +988,30 @@ $ docker run -e DOCKER_API_VERSION=1.32 &lt;rest-of-args&gt; aerokube/selenoid:s
 </div>
 </div>
 <div class="paragraph">
+<p><strong>Video feature not working</strong></p>
+</div>
+<div class="paragraph">
+<p>When running Selenoid as Docker container video feature can be not working (because of misconfiguration). If your video files are named like <code>selenoid607667f7e1c7923779e35506b040300d.mp4</code> and you are seeing the following log message&#8230;&#8203;</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>2018/03/20 21:06:37 [9] [VIDEO_ERROR] [Failed to rename /video/selenoid607667f7e1c7923779e35506b040300d.mp4 to /video/8019c4bc-9bec-4a8b-aa40-68d1db0cffd2.mp4: rename /video/selenoid607667f7e1c7923779e35506b040300d.mp4 /video/8019c4bc-9bec-4a8b-aa40-68d1db0cffd2.mp4: no such file or directory]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>... then check that:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>You are passing an <code>OVERRIDE_VIDEO_OUTPUT_DIR</code> environment variable pointing to a directory on the <code>host machine</code> where video files are actually stored</p>
+</li>
+<li>
+<p>When passing custom arguments to Selenoid container (such as <code>-limit</code> or <code>-timeout</code>) you also have to pass <code>-video-output-dir /opt/selenoid/video</code> and mount host machine video dir to <code>/opt/selenoid/video</code></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
 <p><strong>Can&#8217;t open Selenoid video with Firefox</strong></p>
 </div>
 <div class="paragraph">
@@ -3684,7 +3708,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-03-22 06:32:18 UTC
+Last updated 2018-03-22 06:35:50 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
