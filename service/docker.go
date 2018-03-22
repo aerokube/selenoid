@@ -78,6 +78,9 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		links := strings.Split(d.ApplicationContainers, comma)
 		hostConfig.Links = links
 	}
+	if len(d.Service.Sysctl) > 0 {
+		hostConfig.Sysctls = d.Service.Sysctl
+	}
 	cl := d.Client
 	env := getEnv(d.ServiceBase, d.Caps)
 	container, err := cl.ContainerCreate(ctx,
