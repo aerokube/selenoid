@@ -23,11 +23,12 @@ import (
 
 	"crypto/rand"
 	"encoding/hex"
+
 	"github.com/aerokube/selenoid/session"
 	"github.com/aerokube/util"
 	"github.com/docker/docker/api/types"
-	"golang.org/x/net/websocket"
 	"github.com/docker/docker/pkg/stdcopy"
+	"golang.org/x/net/websocket"
 )
 
 var (
@@ -126,7 +127,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var browser struct {
-		Caps session.Caps `json:"desiredCapabilities"`
+		Caps    session.Caps `json:"desiredCapabilities"`
+		W3CCaps struct {
+			Caps session.Caps `json:"alwaysMatch"`
+		} `json:"capabilities"`
 	}
 	err = json.Unmarshal(body, &browser)
 	if err != nil {
@@ -134,6 +138,9 @@ func create(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
+	}
+	if browser.W3CCaps.Caps.Name != "" {
+		browser.Caps = browser.W3CCaps.Caps
 	}
 	browser.Caps.ProcessExtensionCapabilities()
 	resolution, err := getScreenResolution(browser.Caps.ScreenResolution)
