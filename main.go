@@ -19,13 +19,15 @@ import (
 
 	"fmt"
 
+	"path/filepath"
+
 	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/util"
 	"github.com/aerokube/util/docker"
 	"github.com/docker/docker/client"
-	"path/filepath"
 )
 
 type memLimit int64
@@ -180,7 +182,7 @@ func init() {
 	}
 	ip, _, _ := net.SplitHostPort(u.Host)
 	environment.IP = ip
-	cli, err := docker.CreateCompatibleDockerClient(
+	cli, err = docker.CreateCompatibleDockerClient(
 		func(specifiedApiVersion string) {
 			log.Printf("[-] [INIT] [Using Docker API version: %s]", specifiedApiVersion)
 		},
@@ -202,6 +204,7 @@ func cancelOnSignal() {
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-sig
+		log.Println("[-] [-] [SHUTTING_DOWN] [-] [-] [-] [-] [-] [-] [-]")
 		sessions.Each(func(k string, s *session.Session) {
 			if enableFileUpload {
 				os.RemoveAll(path.Join(os.TempDir(), k))
@@ -212,7 +215,6 @@ func cancelOnSignal() {
 			err := cli.Close()
 			if err != nil {
 				log.Fatalf("[-] [SHUTTING_DOWN] [Error closing docker client: %v]", err)
-				os.Exit(1)
 			}
 		}
 		os.Exit(0)
@@ -232,7 +234,7 @@ func onSIGHUP(fn func()) {
 
 func mux() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/session", queue.Check(queue.Protect(post(create))))
+	mux.HandleFunc("/session", queue.Try(queue.Check(queue.Protect(post(create)))))
 	mux.HandleFunc("/session/", proxy)
 	return mux
 }
@@ -294,7 +296,7 @@ func handler() http.Handler {
 		mux().ServeHTTP(w, r)
 	})
 	root.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
-		jsonError(w, "Session timed out or not found", http.StatusNotFound)
+		util.JsonError(w, "Session timed out or not found", http.StatusNotFound)
 	})
 	root.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")

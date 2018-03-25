@@ -25,5 +25,5 @@
   name = "github.com/aandryashin/matchers"
 
 [[constraint]]
+  branch = "master"
   name = "github.com/aerokube/util"
-  revision = "94e53a31e9529f5117aaa93a6a5a5269339e9352"

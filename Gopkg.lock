@@ -14,9 +14,10 @@
   revision = "435295ea180e58dbfa526db1ebab8c801b4c2b75"
 
 [[projects]]
+  branch = "master"
   name = "github.com/aerokube/util"
   packages = [".","docker"]
-  revision = "94e53a31e9529f5117aaa93a6a5a5269339e9352"
+  revision = "1fc725516cd618815af748ee4ba842ad6f467551"
 
 [[projects]]
   name = "github.com/docker/distribution"
@@ -85,6 +86,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "de33486df3fa02391a254a6140fc21e5d19af5c854cdd12f938d6aefe9539c6d"
+  inputs-digest = "4515fd43fa0e85450a97e08a874ade4b0a2684d6925ac763ba2080a61848600a"
   solver-name = "gps-cdcl"
   solver-version = 1
