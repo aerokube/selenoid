@@ -13,11 +13,12 @@ import (
 
 	"time"
 
+	"testing"
+
 	. "github.com/aandryashin/matchers"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
 	"github.com/pborman/uuid"
-	"testing"
 )
 
 type HTTPTest struct {
@@ -128,10 +129,8 @@ func Selenium() http.Handler {
 
 func TestProcessExtensionCapabilities(t *testing.T) {
 	capsJson := `{
-		"browserVersion": "57.0",
-		"alwaysMatch": {
-			"browserName": "firefox"
-		},
+		"version": "57.0",
+		"browserName": "firefox",
 		"selenoid:options": {
 			"name": "ExampleTestName",
 			"enableVNC": true,
@@ -142,9 +141,10 @@ func TestProcessExtensionCapabilities(t *testing.T) {
 	var caps session.Caps
 	err := json.Unmarshal([]byte(capsJson), &caps)
 	AssertThat(t, err, Is{nil})
-	AssertThat(t, caps.Name, EqualTo{""})
-	AssertThat(t, caps.Version, EqualTo{""})
+	AssertThat(t, caps.Name, EqualTo{"firefox"})
+	AssertThat(t, caps.Version, EqualTo{"57.0"})
 	AssertThat(t, caps.TestName, EqualTo{""})
+
 	caps.ProcessExtensionCapabilities()
 	AssertThat(t, caps.Name, EqualTo{"firefox"})
 	AssertThat(t, caps.Version, EqualTo{"57.0"})
