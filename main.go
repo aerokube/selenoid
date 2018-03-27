@@ -306,6 +306,7 @@ func handler() http.Handler {
 	root.Handle("/vnc/", websocket.Handler(vnc))
 	root.Handle("/logs/", websocket.Handler(logs))
 	root.HandleFunc(videoPath, video)
+	root.HandleFunc("/download/", fileDownload)
 	if enableFileUpload {
 		root.HandleFunc("/file", fileUpload)
 	}

@@ -89,6 +89,12 @@ func testMux() http.Handler {
 						"HostPort": "%s"
 						}
 					],
+					"8080/tcp": [
+						{
+						"HostIp": "0.0.0.0",
+						"HostPort": "%s"
+						}
+					],
 					"5900/tcp": [
 						{
 						"HostIp": "0.0.0.0",
@@ -122,7 +128,7 @@ func testMux() http.Handler {
 			  "State": {},
 			  "Mounts": []
 			}
-			`, p, p, p)
+			`, p, p, p, p)
 			w.Write([]byte(output))
 		},
 	))

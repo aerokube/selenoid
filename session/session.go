@@ -62,14 +62,15 @@ type Container struct {
 
 // Session - holds session info
 type Session struct {
-	Quota     string
-	Caps      Caps
-	URL       *url.URL
-	Container *Container
-	VNC       string
-	Cancel    func()
-	Timeout   chan struct{}
-	Lock      sync.Mutex
+	Quota      string
+	Caps       Caps
+	URL        *url.URL
+	Container  *Container
+	Fileserver string
+	VNC        string
+	Cancel     func()
+	Timeout    chan struct{}
+	Lock       sync.Mutex
 }
 
 // Map - session uuid to sessions mapping
