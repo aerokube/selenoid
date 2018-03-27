@@ -14,12 +14,8 @@ Selenoid is a powerful implementation of [Selenium](http://github.com/SeleniumHQ
 ### One-command Installation
 Start browser automation in minutes by copy-pasting just **one command**:
 ```
-$ docker run --rm                                   \
-    -v /var/run/docker.sock:/var/run/docker.sock    \
-    -v ${HOME}:/root                                \
-    -e OVERRIDE_HOME=${HOME}                        \
-    aerokube/cm:latest-release selenoid start       \
-    --vnc --tmpfs 128
+$ curl -s aerokube.com/cm/bash | bash \
+    && ./cm selenoid start --vnc --tmpfs 128
 ```
 **That's it!** You can now use Selenoid instead of Selenium server. Specify the following Selenium URL in tests:
 ```
