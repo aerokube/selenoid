@@ -26,6 +26,8 @@ const (
 	colon                  = ":"
 	sysAdmin               = "SYS_ADMIN"
 	overrideVideoOutputDir = "OVERRIDE_VIDEO_OUTPUT_DIR"
+	vncPort                = "5900"
+	fileserverPort         = "8080"
 )
 
 // Docker - docker container manager
@@ -38,10 +40,11 @@ type Docker struct {
 }
 
 type portConfig struct {
-	SeleniumPort nat.Port
-	VNCPort      nat.Port
-	PortBindings nat.PortMap
-	ExposedPorts map[nat.Port]struct{}
+	SeleniumPort   nat.Port
+	FileserverPort nat.Port
+	VNCPort        nat.Port
+	PortBindings   nat.PortMap
+	ExposedPorts   map[nat.Port]struct{}
 }
 
 // StartWithCancel - Starter interface implementation
@@ -51,6 +54,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		return nil, fmt.Errorf("configuring ports: %v", err)
 	}
 	selenium := portConfig.SeleniumPort
+	fileserver := portConfig.FileserverPort
 	vnc := portConfig.VNCPort
 	requestId := d.RequestId
 	image := d.Service.Image
@@ -116,7 +120,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		removeContainer(ctx, cl, requestId, browserContainerId)
 		return nil, fmt.Errorf("no bindings available for %v", selenium)
 	}
-	seleniumHostPort, vncHostPort := getHostPort(d.Environment, d.Service, d.Caps, stat, selenium, vnc)
+	seleniumHostPort, vncHostPort, fileserverHostPort := getHostPort(d.Environment, d.Service, d.Caps, stat, selenium, vnc, fileserver)
 	u := &url.URL{Scheme: "http", Host: seleniumHostPort, Path: d.Service.Path}
 
 	if d.Video {
@@ -140,7 +144,8 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			ID:        browserContainerId,
 			IPAddress: getContainerIP(d.Environment.Network, stat),
 		},
-		VNCHostPort: vncHostPort,
+		FileserverHostPort: fileserverHostPort,
+		VNCHostPort:        vncHostPort,
 		Cancel: func() {
 			if videoContainerId != "" {
 				stopVideoContainer(ctx, cl, requestId, videoContainerId)
@@ -156,10 +161,14 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 	if err != nil {
 		return nil, fmt.Errorf("new selenium port: %v", err)
 	}
-	exposedPorts := map[nat.Port]struct{}{selenium: {}}
+	fileserver, err := nat.NewPort("tcp", fileserverPort)
+	if err != nil {
+		return nil, fmt.Errorf("new fileserver port: %v", err)
+	}
+	exposedPorts := map[nat.Port]struct{}{selenium: {}, fileserver: {}}
 	var vnc nat.Port
 	if caps.VNC {
-		vnc, err = nat.NewPort("tcp", "5900")
+		vnc, err = nat.NewPort("tcp", vncPort)
 		if err != nil {
 			return nil, fmt.Errorf("new vnc port: %v", err)
 		}
@@ -173,10 +182,11 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 		}
 	}
 	return &portConfig{
-		SeleniumPort: selenium,
-		VNCPort:      vnc,
-		PortBindings: portBindings,
-		ExposedPorts: exposedPorts}, nil
+		SeleniumPort:   selenium,
+		FileserverPort: fileserver,
+		VNCPort:        vnc,
+		PortBindings:   portBindings,
+		ExposedPorts:   exposedPorts}, nil
 }
 
 const (
@@ -266,28 +276,31 @@ func getLabels(service *config.Browser, caps session.Caps) map[string]string {
 	return labels
 }
 
-func getHostPort(env Environment, service *config.Browser, caps session.Caps, stat types.ContainerJSON, selenium nat.Port, vnc nat.Port) (string, string) {
-	seleniumHostPort, vncHostPort := "", ""
+func getHostPort(env Environment, service *config.Browser, caps session.Caps, stat types.ContainerJSON, selenium nat.Port, vnc nat.Port, fileserver nat.Port) (string, string, string) {
+	seleniumHostPort, vncHostPort, fileserverHostPort := "", "", ""
 	if env.IP == "" {
 		if env.InDocker {
 			containerIP := getContainerIP(env.Network, stat)
 			seleniumHostPort = net.JoinHostPort(containerIP, service.Port)
+			fileserverHostPort = net.JoinHostPort(containerIP, fileserverPort)
 			if caps.VNC {
-				vncHostPort = net.JoinHostPort(containerIP, "5900")
+				vncHostPort = net.JoinHostPort(containerIP, vncPort)
 			}
 		} else {
 			seleniumHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[selenium][0].HostPort)
+			fileserverHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[fileserver][0].HostPort)
 			if caps.VNC {
 				vncHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[vnc][0].HostPort)
 			}
 		}
 	} else {
 		seleniumHostPort = net.JoinHostPort(env.IP, stat.NetworkSettings.Ports[selenium][0].HostPort)
+		fileserverHostPort = net.JoinHostPort(env.IP, stat.NetworkSettings.Ports[fileserver][0].HostPort)
 		if caps.VNC {
 			vncHostPort = net.JoinHostPort(env.IP, stat.NetworkSettings.Ports[vnc][0].HostPort)
 		}
 	}
-	return seleniumHostPort, vncHostPort
+	return seleniumHostPort, vncHostPort, fileserverHostPort
 }
 
 func getContainerIP(networkName string, stat types.ContainerJSON) string {

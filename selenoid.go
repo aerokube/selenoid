@@ -30,6 +30,8 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+const slash = "/"
+
 var (
 	httpClient = &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -225,7 +227,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	if location != "" {
 		l, err := url.Parse(location)
 		if err == nil {
-			fragments := strings.Split(l.Path, "/")
+			fragments := strings.Split(l.Path, slash)
 			s.ID = fragments[len(fragments)-1]
 			u := &url.URL{
 				Scheme: "http",
@@ -264,12 +266,13 @@ func create(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	sessions.Put(s.ID, &session.Session{
-		Quota:     user,
-		Caps:      browser.Caps,
-		URL:       u,
-		Container: startedService.Container,
-		VNC:       startedService.VNCHostPort,
-		Cancel:    cancelAndRenameVideo,
+		Quota:      user,
+		Caps:       browser.Caps,
+		URL:        u,
+		Container:  startedService.Container,
+		Fileserver: startedService.FileserverHostPort,
+		VNC:        startedService.VNCHostPort,
+		Cancel:     cancelAndRenameVideo,
 		Timeout: onTimeout(timeout, func() {
 			request{r}.session(s.ID).Delete(requestId)
 		})})
@@ -345,7 +348,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 		(&httputil.ReverseProxy{
 			Director: func(r *http.Request) {
 				requestId := serial()
-				fragments := strings.Split(r.URL.Path, "/")
+				fragments := strings.Split(r.URL.Path, slash)
 				id := fragments[2]
 				sess, ok := sessions.Get(id)
 				if ok {
@@ -382,6 +385,30 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 		}).ServeHTTP(w, r)
 	}(w, r)
 	go (<-done)()
+}
+
+func fileDownload(w http.ResponseWriter, r *http.Request) {
+	requestId := serial()
+	sid, remainingPath := splitRequestPath(r.URL.Path)
+	sess, ok := sessions.Get(sid)
+	if ok {
+		(&httputil.ReverseProxy{
+			Director: func(r *http.Request) {
+				r.URL.Scheme = "http"
+				r.URL.Host = sess.Fileserver
+				r.URL.Path = remainingPath
+				log.Printf("[%d] [DOWNLOADING_FILE] [%s] [%s]", requestId, sid, remainingPath)
+			},
+		}).ServeHTTP(w, r)
+	} else {
+		util.JsonError(w, fmt.Sprintf("Unknown session %s", sid), http.StatusNotFound)
+		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
+	}
+}
+
+func splitRequestPath(p string) (string, string) {
+	fragments := strings.Split(p, slash)
+	return fragments[2], slash + strings.Join(fragments[3:], slash)
 }
 
 func fileUpload(w http.ResponseWriter, r *http.Request) {
@@ -439,7 +466,7 @@ func fileUpload(w http.ResponseWriter, r *http.Request) {
 func vnc(wsconn *websocket.Conn) {
 	defer wsconn.Close()
 	requestId := serial()
-	sid := strings.Split(wsconn.Request().URL.Path, "/")[2]
+	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
 	sess, ok := sessions.Get(sid)
 	if ok {
 		if sess.VNC != "" {
@@ -470,7 +497,7 @@ func vnc(wsconn *websocket.Conn) {
 func logs(wsconn *websocket.Conn) {
 	defer wsconn.Close()
 	requestId := serial()
-	sid := strings.Split(wsconn.Request().URL.Path, "/")[2]
+	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
 	sess, ok := sessions.Get(sid)
 	if ok && sess.Container != nil {
 		log.Printf("[%d] [CONTAINER_LOGS] [%s]", requestId, sess.Container)

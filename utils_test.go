@@ -46,7 +46,8 @@ func (m *HTTPTest) StartWithCancel() (*service.StartedService, error) {
 		m.Action(s)
 	}
 	ss := service.StartedService{
-		Url: u,
+		Url:                u,
+		FileserverHostPort: u.Host,
 		Cancel: func() {
 			log.Println("Stopping HTTPTest Service...")
 			s.Close()
@@ -123,6 +124,10 @@ func Selenium() http.Handler {
 		lock.Lock()
 		delete(sessions, u)
 		lock.Unlock()
+	})
+	mux.HandleFunc("/testfile", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("test-data"))
 	})
 	return mux
 }

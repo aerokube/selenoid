@@ -1,0 +1,13 @@
+== Accessing Files Downloaded with Browser
+
+[NOTE]
+====
+. This feature only works when browsers are run in containers.
+. Files are accessible only when browser session is running.
+====
+
+Your tests may need to download files with browsers. To analyze these files a common requirement is then to somehow extract downloaded files from browser containers. A possible solution can be dealing with container volumes. But Selenoid provides a `/download` API and dramatically simplifies downloading files. Having a running session `f2bcd32b-d932-4cdc-a639-687ab8e4f840` you can access all downloaded files using an URL:
+```
+http://selenoid-host.example.com:4444/download/f2bcd32b-d932-4cdc-a639-687ab8e4f840/myfile.txt
+```
+In order for this feature to work an HTTP file server should be listening inside browser container on port `8080`. Download directory inside container to be used in tests is usually `~/Downloads`.
