@@ -605,6 +605,7 @@ table.CodeRay td.code>pre{padding:0}
 </ul>
 </li>
 <li><a href="#_file_upload">3.4. File Upload</a></li>
+<li><a href="#_accessing_files_downloaded_with_browser">3.5. Accessing Files Downloaded with Browser</a></li>
 </ul>
 </li>
 <li><a href="#_contributing_development">4. Contributing &amp; Development</a>
@@ -2159,6 +2160,10 @@ Use only one of these commands.
 <td class="tableblock halign-left valign-top"><p class="tableblock">Video file was deleted by user</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DOWNLOADING_FILE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User requested to download file from browser container</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">ENVIRONMENT_NOT_AVAILABLE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Browser with desired name and version does not exist</p></td>
 </tr>
@@ -2827,6 +2832,41 @@ one_min.selenoid_example_com.httpjson_selenoid.total</code></pre>
 <h3 id="_file_upload"><a class="anchor" href="#_file_upload"></a>3.4. File Upload</h3>
 <div class="paragraph">
 <p>Some tests require to upload files. This feature is supported in WebDriver protocol by sending zipped file contents to <code>/file</code> handle. However not all driver binaries support this feature. For example this is not implemented in <a href="http://github.com/mozilla/geckodriver">Geckodriver</a> or <a href="https://github.com/SeleniumHQ/selenium/tree/master/cpp/iedriver">IEDriver</a>. When proxying requests <strong>directly</strong> to these drivers (i.e. when not using Docker) you need to start Selenoid with <code>-enable-file-upload</code> flag. In that case Selenoid will provide required API to tests. Firefox container images already include this parameter where needed.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_accessing_files_downloaded_with_browser"><a class="anchor" href="#_accessing_files_downloaded_with_browser"></a>3.5. Accessing Files Downloaded with Browser</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>This feature only works when browsers are run in containers.</p>
+</li>
+<li>
+<p>Files are accessible only when browser session is running.</p>
+</li>
+</ol>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Your tests may need to download files with browsers. To analyze these files a common requirement is then to somehow extract downloaded files from browser containers. A possible solution can be dealing with container volumes. But Selenoid provides a <code>/download</code> API and dramatically simplifies downloading files. Having a running session <code>f2bcd32b-d932-4cdc-a639-687ab8e4f840</code> you can access all downloaded files using an URL:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>http://selenoid-host.example.com:4444/download/f2bcd32b-d932-4cdc-a639-687ab8e4f840/myfile.txt</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order for this feature to work an HTTP file server should be listening inside browser container on port <code>8080</code>. Download directory inside container to be used in tests is usually <code>~/Downloads</code>.</p>
 </div>
 </div>
 </div>
@@ -3708,7 +3748,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-03-27 14:57:28 UTC
+Last updated 2018-03-27 17:51:31 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
