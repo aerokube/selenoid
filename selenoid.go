@@ -126,7 +126,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		queue.Drop()
 		return
 	}
-	if browser.W3CCaps.Caps.Name != "" {
+	if browser.W3CCaps.Caps.Name != "" && browser.Caps.Name == "" {
 		browser.Caps = browser.W3CCaps.Caps
 	}
 	browser.Caps.ProcessExtensionCapabilities()
