@@ -49,14 +49,26 @@ func GetNodeZk(taskId string) {
 	fmt.Printf("******* get:    %+v %+v\n", string(data), stat)
 }
 
-func getChildrenZk() []string {
+// func GetNodeTestZk(taskId string) {
+// 	conn := connect(conStr)
+// 	defer conn.Close()
+
+// 	data, stat, err := conn.Get("/mesos")
+// 	must(err)
+// 	fmt.Printf("******* get:    %+v %+v\n", string(data), stat)
+// }
+
+func GetChildrenZk() []string {
 	conn := connect(conStr)
 	defer conn.Close()
 	exists, _, err := conn.Exists(path)
 	must(err)
 	if exists {
-		childs, stat, err := conn.Children(path + "/")
-		must(err)
+		childs, stat, err := conn.Children(path)
+		if err != nil {
+			fmt.Printf("Children returned error: %+v", err)
+			return nil
+		}
 		fmt.Printf("******* get:    %+v %+v\n", []string(childs), stat)
 		return childs
 	}
@@ -66,7 +78,7 @@ func getChildrenZk() []string {
 func DelAllChildrenNodesZk() {
 	conn := connect(conStr)
 	defer conn.Close()
-	childs := getChildrenZk()
+	childs := GetChildrenZk()
 	if childs != nil {
 		for _, n := range childs {
 			DelNodeZk(n)

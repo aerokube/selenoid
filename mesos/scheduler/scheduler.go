@@ -74,6 +74,12 @@ type Offer struct {
 func Run(URL string) {
 	//zookeeper.DelZk()
 	zookeeper.CreateZk()
+	zkChilds := zookeeper.GetChildrenZk()
+	if zkChilds != nil {
+		for _, child := range zkChilds {
+			fmt.Printf("****** ZkChild: %s\n", child)
+		}
+	}
 	notRunningTasks := make(map[string]chan *DockerInfo)
 	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
 
