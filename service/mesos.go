@@ -23,10 +23,13 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 	taskId := "selenoid-" + uuid.New()
 	zookeeper.CreateChildNodeZk(taskId)
 	returnChannel := make(chan *scheduler.DockerInfo)
-	task := scheduler.Task{taskId, m.Service.Image.(string), returnChannel}
-	scheduler.Channel <- task
+	task := scheduler.Task{taskId, m.Service.Image.(string), m.Caps.VNC, returnChannel}
+	task.SendToMesos()
 	container := <-returnChannel
 	fmt.Println(container)
+	if container.ErrorMsg != "" {
+		return nil, fmt.Errorf(container.ErrorMsg)
+	}
 	hostPort := container.NetworkSettings.Ports.ContainerPort[0].HostPort
 	u := &url.URL{Scheme: "http", Host: "127.0.0.1:" + hostPort, Path: m.Service.Path}
 	s := StartedService{
@@ -39,6 +42,9 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 			scheduler.Sched.Kill(taskId)
 			zookeeper.DelNodeZk(taskId)
 		},
+	}
+	if m.Caps.VNC {
+		s.VNCHostPort = container.NetworkSettings.Ports.VncPort[0].HostPort
 	}
 	return &s, nil
 }
