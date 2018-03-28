@@ -41,6 +41,7 @@ type DockerInfo struct {
 		}
 		IPAddress string
 	}
+	ErrorMsg string
 }
 
 type Scheduler struct {
@@ -64,6 +65,9 @@ type Message struct {
 			Data       string `json:"data"`
 			State      string `json:"state"`
 			ExecutorId ID     `json:"executor_id"`
+			Source     string `json:"source"`
+			Message    string `json:"message"`
+			TaskId     ID     `json:"task_id"`
 		}
 	}
 	Type string
@@ -97,8 +101,8 @@ func Run(URL string, cpu float64, mem float64) {
 	defer resp.Body.Close()
 
 	Sched = &Scheduler{
-		Url:         schedulerUrl,
-		StreamId:     resp.Header.Get("Mesos-Stream-Id")}
+		Url:      schedulerUrl,
+		StreamId: resp.Header.Get("Mesos-Stream-Id")}
 
 	scanner := bufio.NewScanner(resp.Body)
 	scanner.Split(bufio.ScanLines)
@@ -148,19 +152,31 @@ func Run(URL string, cpu float64, mem float64) {
 					}
 				}
 			} else if m.Type == "UPDATE" {
-				state := m.Update.Status.State
+				status := m.Update.Status
+				state := status.State
+				taskId := status.TaskId.Value
+
 				if state == "TASK_RUNNING" {
 					n, _ := base64.StdEncoding.DecodeString(m.Update.Status.Data)
 					fmt.Println(string(n))
 					var data []DockerInfo
 					json.Unmarshal(n, &data)
 					container := &data[0]
-					taskId := m.Update.Status.ExecutorId.Value
 					channel, _ := notRunningTasks[taskId]
 					channel <- container
 					delete(notRunningTasks, taskId)
-				} else if state == "TASK_ERROR" {
-					fmt.Println("Сделать что-нибудь")
+				} else if state == "TASK_KILLED" {
+					fmt.Println("Exterminate! Exterminate! Exterminate!")
+				} else {
+					msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине "+  m.Update.Status.Source + "-" +  m.Update.Status.State + "-" + m.Update.Status.Message
+					if notRunningTasks[taskId] != nil {
+						container := &DockerInfo{ ErrorMsg: msg}
+						channel, _ := notRunningTasks[taskId]
+						channel <- container
+						delete(notRunningTasks, taskId)
+					} else {
+						log.Panic(msg)
+					}
 				}
 			}
 		}

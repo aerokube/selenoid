@@ -25,6 +25,9 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 	task.SendToMesos()
 	container := <-returnChannel
 	fmt.Println(container)
+	if container.ErrorMsg != "" {
+		return nil, fmt.Errorf(container.ErrorMsg)
+	}
 	hostPort := container.NetworkSettings.Ports.ContainerPort[0].HostPort
 	u := &url.URL{Scheme: "http", Host: "127.0.0.1:" + hostPort, Path: m.Service.Path}
 	s := StartedService{

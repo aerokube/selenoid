@@ -222,7 +222,7 @@ func (scheduler *Scheduler) NewAcceptMessage(resources []ResourcesForOneTask, ta
 		Accept: Accept{
 			getUniqueOfferIds(resources),
 			NewOperations(resources, tasks),
-			Filters{RefuseSeconds: 1.0},
+			Filters{RefuseSeconds: 5.0},
 		},
 	}
 }
