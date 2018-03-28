@@ -121,8 +121,6 @@ func Run(URL string, cpu float64, mem float64) {
 			} else if m.Type == "OFFERS" {
 				processOffers(m, notRunningTasks)
 			} else if m.Type == "UPDATE" {
-				uuid := m.Update.Status.Uuid
-				Sched.Acknowledge(m.Update.Status.AgentId, uuid, m.Update.Status.ExecutorId)
 				processUpdate(m, notRunningTasks)
 			} else if m.Type == "FAILURE" {
 				fmt.Println("Bce плохо")
@@ -135,9 +133,9 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo)  {
 	status := m.Update.Status
 	state := status.State
 	taskId := status.TaskId.Value
-
+	Sched.Acknowledge(status.AgentId, status.Uuid, status.ExecutorId)
 	if state == "TASK_RUNNING" {
-		n, _ := base64.StdEncoding.DecodeString(m.Update.Status.Data)
+		n, _ := base64.StdEncoding.DecodeString(status.Data)
 		fmt.Println(string(n))
 		var data []DockerInfo
 		json.Unmarshal(n, &data)
