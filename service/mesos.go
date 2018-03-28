@@ -21,7 +21,6 @@ type Mesos struct {
 
 func (m *Mesos) StartWithCancel() (*StartedService, error) {
 	taskId := "selenoid-" + uuid.New()
-	zookeeper.CreateChildNodeZk(taskId)
 	returnChannel := make(chan *scheduler.DockerInfo)
 	task := scheduler.Task{taskId, m.Service.Image.(string), m.Caps.VNC, returnChannel}
 	task.SendToMesos()
@@ -30,6 +29,7 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 	if container.ErrorMsg != "" {
 		return nil, fmt.Errorf(container.ErrorMsg)
 	}
+	zookeeper.CreateChildNodeZk(taskId)
 	hostPort := container.NetworkSettings.Ports.ContainerPort[0].HostPort
 	u := &url.URL{Scheme: "http", Host: "127.0.0.1:" + hostPort, Path: m.Service.Path}
 	s := StartedService{
