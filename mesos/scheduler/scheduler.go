@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-
 	"github.com/aerokube/selenoid/mesos/zookeeper"
 )
 
@@ -72,7 +71,6 @@ type Offer struct {
 }
 
 func Run(URL string) {
-	//zookeeper.DelZk()
 	zookeeper.CreateZk()
 	zkChilds := zookeeper.GetChildrenZk()
 	if zkChilds != nil {
