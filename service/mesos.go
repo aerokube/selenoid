@@ -21,7 +21,7 @@ type Mesos struct {
 func (m *Mesos) StartWithCancel() (*StartedService, error) {
 	taskId := "selenoid-" + uuid.New()
 	returnChannel := make(chan *scheduler.DockerInfo)
-	task := scheduler.Task{taskId, m.Service.Image.(string), returnChannel}
+	task := scheduler.Task{taskId, m.Service.Image.(string), m.Caps.VNC, returnChannel}
 	task.SendToMesos()
 	container := <-returnChannel
 	fmt.Println(container)
@@ -36,6 +36,9 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 		Cancel: func() {
 			scheduler.Sched.Kill(taskId)
 		},
+	}
+	if m.Caps.VNC {
+		s.VNCHostPort = container.NetworkSettings.Ports.VncPort[0].HostPort
 	}
 	return &s, nil
 }
