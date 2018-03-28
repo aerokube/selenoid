@@ -10,6 +10,7 @@ import (
 
 	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/selenoid/util"
 	"github.com/docker/docker/api/types"
 	ctr "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -22,6 +23,7 @@ import (
 
 const (
 	comma                  = ","
+	colon                  = ":"
 	sysAdmin               = "SYS_ADMIN"
 	overrideVideoOutputDir = "OVERRIDE_VIDEO_OUTPUT_DIR"
 )
@@ -53,7 +55,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	requestId := d.RequestId
 	image := d.Service.Image
 	ctx := context.Background()
-	log.Printf("[%d] [CREATING_CONTAINER] [%s]\n", requestId, image)
+	log.Printf("[%d] [CREATING_CONTAINER] [%s]", requestId, image)
 	hostConfig := ctr.HostConfig{
 		Binds:        d.Service.Volumes,
 		AutoRemove:   true,
@@ -84,6 +86,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			Image:        image.(string),
 			Env:          env,
 			ExposedPorts: portConfig.ExposedPorts,
+			Labels:       getLabels(d.Service, d.Caps),
 		},
 		&hostConfig,
 		&network.NetworkingConfig{}, "")
@@ -93,13 +96,13 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	browserContainerStartTime := time.Now()
 	browserContainerId := container.ID
 	videoContainerId := ""
-	log.Printf("[%d] [STARTING_CONTAINER] [%s] [%s]\n", requestId, image, browserContainerId)
+	log.Printf("[%d] [STARTING_CONTAINER] [%s] [%s]", requestId, image, browserContainerId)
 	err = cl.ContainerStart(ctx, browserContainerId, types.ContainerStartOptions{})
 	if err != nil {
 		removeContainer(ctx, cl, requestId, browserContainerId)
 		return nil, fmt.Errorf("start container: %v", err)
 	}
-	log.Printf("[%d] [CONTAINER_STARTED] [%s] [%s] [%v]\n", requestId, image, browserContainerId, time.Since(browserContainerStartTime))
+	log.Printf("[%d] [CONTAINER_STARTED] [%s] [%s] [%.2fs]", requestId, image, browserContainerId, util.SecondsSince(browserContainerStartTime))
 	stat, err := cl.ContainerInspect(ctx, browserContainerId)
 	if err != nil {
 		removeContainer(ctx, cl, requestId, browserContainerId)
@@ -126,8 +129,8 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		removeContainer(ctx, cl, requestId, browserContainerId)
 		return nil, fmt.Errorf("wait: %v", err)
 	}
-	log.Printf("[%d] [SERVICE_STARTED] [%s] [%s] [%v]\n", requestId, image, browserContainerId, time.Since(serviceStartTime))
-	log.Printf("[%d] [PROXY_TO] [%s] [%s] [%s]\n", requestId, image, browserContainerId, u.String())
+	log.Printf("[%d] [SERVICE_STARTED] [%s] [%s] [%.2fs]", requestId, image, browserContainerId, util.SecondsSince(serviceStartTime))
+	log.Printf("[%d] [PROXY_TO] [%s] [%s]", requestId, browserContainerId, u.String())
 	s := StartedService{
 		Url: u,
 		Container: &session.Container{
@@ -173,12 +176,20 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 		ExposedPorts: exposedPorts}, nil
 }
 
+const (
+	tag    = "tag"
+	labels = "labels"
+)
+
 func getLogConfig(logConfig ctr.LogConfig, caps session.Caps) ctr.LogConfig {
 	if logConfig.Config != nil {
-		const tag = "tag"
 		_, ok := logConfig.Config[tag]
 		if caps.TestName != "" && !ok {
 			logConfig.Config[tag] = caps.TestName
+		}
+		_, ok = logConfig.Config[labels]
+		if caps.Labels != "" && !ok {
+			logConfig.Config[labels] = caps.Labels
 		}
 	}
 	return logConfig
@@ -189,7 +200,7 @@ func getTimeZone(service ServiceBase, caps session.Caps) *time.Location {
 	if caps.TimeZone != "" {
 		tz, err := time.LoadLocation(caps.TimeZone)
 		if err != nil {
-			log.Printf("[%d] [BAD_TIMEZONE] [%s]\n", service.RequestId, caps.TimeZone)
+			log.Printf("[%d] [BAD_TIMEZONE] [%s]", service.RequestId, caps.TimeZone)
 		} else {
 			timeZone = tz
 		}
@@ -227,6 +238,29 @@ func getExtraHosts(service *config.Browser, caps session.Caps) []string {
 		extraHosts = append(strings.Split(caps.HostsEntries, comma), extraHosts...)
 	}
 	return extraHosts
+}
+
+func getLabels(service *config.Browser, caps session.Caps) map[string]string {
+	labels := make(map[string]string)
+	if caps.TestName != "" {
+		labels["name"] = caps.TestName
+	}
+	for k, v := range service.Labels {
+		labels[k] = v
+	}
+	if caps.Labels != "" {
+		for _, lbl := range strings.Split(caps.Labels, comma) {
+			kv := strings.SplitN(lbl, colon, 2)
+			if len(kv) == 2 {
+				key := kv[0]
+				value := kv[1]
+				labels[key] = value
+			} else {
+				labels[lbl] = ""
+			}
+		}
+	}
+	return labels
 }
 
 func getHostPort(env Environment, service *config.Browser, caps session.Caps, stat types.ContainerJSON, selenium nat.Port, vnc nat.Port) (string, string) {
@@ -299,7 +333,7 @@ func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint6
 		browserContainerName = defaultBrowserContainerName
 	}
 	env = append(env, fmt.Sprintf("BROWSER_CONTAINER_NAME=%s", browserContainerName))
-	log.Printf("[%d] [CREATING_VIDEO_CONTAINER] [%s]\n", requestId, videoContainerImage)
+	log.Printf("[%d] [CREATING_VIDEO_CONTAINER] [%s]", requestId, videoContainerImage)
 	videoContainer, err := cl.ContainerCreate(ctx,
 		&ctr.Config{
 			Image: videoContainerImage,
@@ -313,14 +347,14 @@ func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint6
 	}
 
 	videoContainerId := videoContainer.ID
-	log.Printf("[%d] [STARTING_VIDEO_CONTAINER] [%s] [%s]\n", requestId, videoContainerImage, videoContainerId)
+	log.Printf("[%d] [STARTING_VIDEO_CONTAINER] [%s] [%s]", requestId, videoContainerImage, videoContainerId)
 	err = cl.ContainerStart(ctx, videoContainerId, types.ContainerStartOptions{})
 	if err != nil {
 		removeContainer(ctx, cl, requestId, browserContainer.ID)
 		removeContainer(ctx, cl, requestId, videoContainerId)
 		return "", fmt.Errorf("start video container: %v", err)
 	}
-	log.Printf("[%d] [VIDEO_CONTAINER_STARTED] [%s] [%s] [%v]\n", requestId, videoContainerImage, videoContainerId, time.Since(videoContainerStartTime))
+	log.Printf("[%d] [VIDEO_CONTAINER_STARTED] [%s] [%s] [%.2fs]", requestId, videoContainerImage, videoContainerId, util.SecondsSince(videoContainerStartTime))
 	return videoContainerId, nil
 }
 
@@ -333,21 +367,21 @@ func getVideoOutputDir(env Environment) string {
 }
 
 func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint64, containerId string) {
-	log.Printf("[%d] [STOPPING_VIDEO_CONTAINER] [%s]\n", requestId, containerId)
+	log.Printf("[%d] [STOPPING_VIDEO_CONTAINER] [%s]", requestId, containerId)
 	err := cli.ContainerKill(ctx, containerId, "TERM")
 	if err != nil {
-		log.Printf("[%d] [FAILED_TO_STOP_VIDEO_CONTAINER] [%s] [%v]\n", requestId, containerId, err)
+		log.Printf("[%d] [FAILED_TO_STOP_VIDEO_CONTAINER] [%s] [%v]", requestId, containerId, err)
 		return
 	}
-	log.Printf("[%d] [STOPPED_VIDEO_CONTAINER] [%s]\n", requestId, containerId)
+	log.Printf("[%d] [STOPPED_VIDEO_CONTAINER] [%s]", requestId, containerId)
 }
 
 func removeContainer(ctx context.Context, cli *client.Client, requestId uint64, id string) {
-	log.Printf("[%d] [REMOVING_CONTAINER] [%s]\n", requestId, id)
+	log.Printf("[%d] [REMOVING_CONTAINER] [%s]", requestId, id)
 	err := cli.ContainerRemove(ctx, id, types.ContainerRemoveOptions{Force: true, RemoveVolumes: true})
 	if err != nil {
-		log.Printf("[%d] [FAILED_TO_REMOVE_CONTAINER] [%s] [%v]\n", requestId, id, err)
+		log.Printf("[%d] [FAILED_TO_REMOVE_CONTAINER] [%s] [%v]", requestId, id, err)
 		return
 	}
-	log.Printf("[%d] [CONTAINER_REMOVED] [%s]\n", requestId, id)
+	log.Printf("[%d] [CONTAINER_REMOVED] [%s]", requestId, id)
 }

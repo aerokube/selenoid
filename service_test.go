@@ -160,6 +160,7 @@ func testConfig(env *service.Environment) *config.Config {
 				Tmpfs:   map[string]string{"/tmp": "size=128m"},
 				Port:    p,
 				Volumes: []string{"/test:/test"},
+				Labels:  map[string]string{"key": "value"},
 			},
 		},
 	}
@@ -238,6 +239,7 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 		VideoScreenSize:       "1024x768",
 		VideoFrameRate:        25,
 		HostsEntries:          "example.com:192.168.0.1,test.com:192.168.0.2",
+		Labels:                "label1:some-value,label2",
 		ApplicationContainers: "one,two",
 		TimeZone:              "Europe/Moscow",
 		ContainerHostname:     "some-hostname",
