@@ -144,8 +144,6 @@ func Run(URL string, cpu float64, mem float64) {
 					if len(tasks) == 0 {
 						Sched.Decline(offersIds)
 					} else {
-						fmt.Println("====================")
-						fmt.Println(len(tasks))
 						Sched.Accept(resourcesForTasks[:len(tasks)], tasks)
 					}
 				}

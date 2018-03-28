@@ -220,14 +220,14 @@ func (scheduler *Scheduler) NewAcceptMessage(resources []ResourcesForOneTask, ta
 		FrameworkID: scheduler.FrameworkId,
 		Type:        "ACCEPT",
 		Accept: Accept{
-			getUniqueOfOfferIds(resources),
+			getUniqueOfferIds(resources),
 			NewOperations(resources, tasks),
 			Filters{RefuseSeconds: 1.0},
 		},
 	}
 }
 
-func getUniqueOfOfferIds(resources []ResourcesForOneTask) []ID {
+func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
 	offersMap := make(map[ID]bool)
 	var set []ID
 	for _, v := range resources {
