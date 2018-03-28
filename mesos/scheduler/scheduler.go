@@ -116,20 +116,28 @@ func Run(URL string, cpu float64, mem float64) {
 		if index != -1 {
 			jsonMessage := line[0: index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
-			if m.Type == "SUBSCRIBED" {
+			mType := m.Type
+			switch mType {
+			case "SUBSCRIBED":
 				Sched.FrameworkId = m.Subscribed.FrameworkId
-			} else if m.Type == "OFFERS" {
+				break
+			case "OFFERS":
 				processOffers(m, notRunningTasks)
-			} else if m.Type == "UPDATE" {
+				break
+			case "UPDATE":
 				processUpdate(m, notRunningTasks)
-			} else if m.Type == "FAILURE" {
+				break
+			case "FAILURE":
 				fmt.Println("Bce плохо")
+				break
+			default:
+				break
 			}
 		}
 	}
 }
 
-func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo)  {
+func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo) {
 	status := m.Update.Status
 	state := status.State
 	taskId := status.TaskId.Value
@@ -146,9 +154,9 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo)  {
 	} else if state == "TASK_KILLED" {
 		fmt.Println("Exterminate! Exterminate! Exterminate!")
 	} else {
-		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине "+  status.Source + "-" +  status.State + "-" + status.Message
+		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине " + status.Source + "-" + status.State + "-" + status.Message
 		if notRunningTasks[taskId] != nil {
-			container := &DockerInfo{ ErrorMsg: msg}
+			container := &DockerInfo{ErrorMsg: msg}
 			channel, _ := notRunningTasks[taskId]
 			channel <- container
 			delete(notRunningTasks, taskId)
