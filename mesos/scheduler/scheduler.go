@@ -116,8 +116,7 @@ func Run(URL string, cpu float64, mem float64) {
 		if index != -1 {
 			jsonMessage := line[0: index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
-			mType := m.Type
-			switch mType {
+			switch m.Type {
 			case "SUBSCRIBED":
 				Sched.FrameworkId = m.Subscribed.FrameworkId
 				break
