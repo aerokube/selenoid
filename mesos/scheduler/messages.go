@@ -6,9 +6,9 @@ type ID struct {
 }
 
 type Docker struct {
-	Image        string         `json:"image"`
-	Network      string         `json:"network"`
-	Privileged   bool           `json:"privileged"`
+	Image        string          `json:"image"`
+	Network      string          `json:"network"`
+	Privileged   bool            `json:"privileged"`
 	PortMappings *[]PortMappings `json:"port_mappings"`
 }
 
@@ -134,23 +134,30 @@ type KillMessage struct {
 	Kill        Kill   `json:"kill"`
 }
 
-func GetPortMappings(portRange Range) *[]PortMappings {
-	var portMappings = PortMappings{ContainerPort: 4444}
-	portMappings.Name = "http"
-	portMappings.ContainerPort = 4444
-	portMappings.HostPort = portRange.Begin
-	portMappings.Protocol = "tcp"
-	return &[]PortMappings{portMappings}
+func GetPortMappings(portRange Range, enableVNC bool) *[]PortMappings {
+	portMappings := []PortMappings{newMapping(4444, portRange.Begin)}
+	if enableVNC {
+		portMappings = append(portMappings, newMapping(5900, portRange.End))
+	}
+	return &portMappings
 }
 
-func NewContainer(portRange Range) *Container {
+func newMapping(containerPort int, hostPort int) PortMappings {
+	return PortMappings{
+		ContainerPort: containerPort,
+		Name:          "http",
+		HostPort:      hostPort,
+		Protocol:      "tcp"}
+}
+
+func NewContainer(portRange Range, task Task) *Container {
 	return &Container{
 		Type: "DOCKER",
 		Docker: Docker{
-			Image:        "selenoid/chrome",
+			Image:        task.Image,
 			Network:      "BRIDGE",
 			Privileged:   true,
-			PortMappings: GetPortMappings(portRange),
+			PortMappings: GetPortMappings(portRange, task.EnableVNC),
 		},
 	}
 }
@@ -158,7 +165,7 @@ func NewContainer(portRange Range) *Container {
 func NewResourcePorts(portRange Range) Resource {
 	var rangePort = Range{
 		Begin: portRange.Begin,
-		End:   portRange.Begin,
+		End:   portRange.End,
 	}
 
 	return Resource{
@@ -179,16 +186,16 @@ func NewResourcesContainer(name string, value float64) Resource {
 	}
 }
 
-func NewLaunchTaskInfo(offer Offer, taskId string) *Launch {
-	portRange := offer.Resources[0].Ranges.Range[0]
+func NewLaunchTaskInfo(resource ResourcesForOneTask, task Task) *Launch {
+
 	var taskInfo = TaskInfo{
 		Name:      "My Task",
-		TaskID:    ID{taskId},
-		AgentID:   offer.AgentId,
+		TaskID:    ID{task.TaskId},
+		AgentID:   resource.AgentId,
 		Command:   Command{false},
-		Container: NewContainer(portRange),
+		Container: NewContainer(resource.Range, task),
 		Resources: []Resource{
-			NewResourcePorts(portRange),
+			NewResourcePorts(resource.Range),
 			NewResourcesContainer("cpus", CpuLimit),
 			NewResourcesContainer("mem", MemLimit),
 		},
@@ -197,26 +204,43 @@ func NewLaunchTaskInfo(offer Offer, taskId string) *Launch {
 	return &Launch{TaskInfos: []TaskInfo{taskInfo}}
 }
 
-func NewOperations(offer Offer, taskId string) *[]Operation {
-	return &[]Operation{{
-		Type:   "LAUNCH",
-		Launch: NewLaunchTaskInfo(offer, taskId),
-	},
+func NewOperations(resources []ResourcesForOneTask, tasks []Task) *[]Operation {
+	var operations []Operation
+	for i, task := range tasks {
+		operations = append(operations, Operation{
+			Type:   "LAUNCH",
+			Launch: NewLaunchTaskInfo(resources[i], task),
+		})
 	}
+	return &operations
 }
 
-func GetAcceptMessage(frameworkId ID, offer Offer, taskId string) (AcceptMessage) {
-	offerIds := []ID{offer.Id}
+func (scheduler *Scheduler) NewAcceptMessage(resources []ResourcesForOneTask, tasks []Task) (AcceptMessage) {
 	return AcceptMessage{
-		FrameworkID: frameworkId,
+		FrameworkID: scheduler.FrameworkId,
 		Type:        "ACCEPT",
 		Accept: Accept{
-			offerIds,
-			NewOperations(offer, taskId),
+			getUniqueOfferIds(resources),
+			NewOperations(resources, tasks),
 			Filters{RefuseSeconds: 5.0},
 		},
 	}
 }
+
+func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
+	offersMap := make(map[ID]bool)
+	var set []ID
+	for _, v := range resources {
+		if !offersMap[v.OfferId] {
+			offersMap[v.OfferId] = true
+		}
+	}
+	for k,_ := range offersMap {
+		set = append(set, k)
+	}
+	return set
+}
+
 
 func GetSubscribedMessage(user string, name string, roles []string) (SubscribeMessage) {
 	return SubscribeMessage{
