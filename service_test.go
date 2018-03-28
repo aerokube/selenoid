@@ -295,33 +295,3 @@ func TestFindDriver(t *testing.T) {
 	AssertThat(t, success, Is{true})
 	AssertThat(t, starter, Not{nil})
 }
-
-// func TestZK(t *testing.T) {
-// 	conn := connect()
-// 	defer conn.Close()
-
-// 	flags := int32(0)
-// 	acl := zk.WorldACL(zk.PermAll)
-
-// 	path, err := conn.Create("/02", []byte("data"), flags, acl)
-// 	must(err)
-// 	fmt.Printf("create: %+v\n", path)
-
-// 	data, stat, err := conn.Get("/02")
-// 	must(err)
-// 	fmt.Printf("get:    %+v %+v\n", string(data), stat)
-// }
-
-// func must(err error) {
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }
-
-// func connect() *zk.Conn {
-// 	zksStr := "0.0.0.0:2181" /*os.Getenv("ZOOKEEPER_SERVERS")*/
-// 	zks := strings.Split(zksStr, ",")
-// 	conn, _, err := zk.Connect(zks, time.Second)
-// 	must(err)
-// 	return conn
-// }

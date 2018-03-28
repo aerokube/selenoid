@@ -49,15 +49,6 @@ func GetNodeZk(taskId string) {
 	fmt.Printf("******* get:    %+v %+v\n", string(data), stat)
 }
 
-// func GetNodeTestZk(taskId string) {
-// 	conn := connect(conStr)
-// 	defer conn.Close()
-
-// 	data, stat, err := conn.Get("/mesos")
-// 	must(err)
-// 	fmt.Printf("******* get:    %+v %+v\n", string(data), stat)
-// }
-
 func GetChildrenZk() []string {
 	conn := connect(conStr)
 	defer conn.Close()
