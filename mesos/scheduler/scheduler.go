@@ -8,13 +8,16 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 	"github.com/aerokube/selenoid/mesos/zookeeper"
 )
 
 var (
-	Sched   *Scheduler
-	Channel = make(chan Task)
+	Sched    *Scheduler
+	Channel  = make(chan Task)
+	CpuLimit float64
+	MemLimit float64
 )
 
 const schedulerUrlTemplate = "[MASTER]/api/v1/scheduler"
@@ -70,7 +73,13 @@ type Offer struct {
 	Resources []Resource `json:"resources"`
 }
 
-func Run(URL string) {
+type ResourcesForOneTask struct {
+	OfferId ID
+	AgentId ID
+	Range
+}
+
+func Run(URL string, cpu float64, mem float64) {
 	zookeeper.CreateZk()
 	zkChilds := zookeeper.GetChildrenZk()
 	if zkChilds != nil {
@@ -78,6 +87,7 @@ func Run(URL string) {
 			fmt.Printf("****** ZkChild: %s\n", child)
 		}
 	}
+	setResourceLimits(cpu, mem)
 	notRunningTasks := make(map[string]chan *DockerInfo)
 	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
 
@@ -117,6 +127,9 @@ func Run(URL string) {
 					offersIds = append(offersIds, n.Id)
 					fmt.Println(offersIds)
 				}
+				tasksCanRun, resourcesForTasks := getTotalOffersCapacity(offers)
+				log.Printf("[MESOS CONTAINERS CAN BE RUN NOW] [%d]\n", tasksCanRun)
+				log.Printf("[CURRENT FREE MESOS CONTAINERS RESOURCES] [%v]\n", resourcesForTasks)
 				select {
 				case task := <-Channel:
 					notRunningTasks[task.TaskId] = task.ReturnChannel
@@ -142,6 +155,20 @@ func Run(URL string) {
 	}
 }
 
+func setResourceLimits(cpu float64, mem float64) {
+	if cpu > 0 {
+		CpuLimit = cpu / 1000000000
+	} else {
+		CpuLimit = 0.2
+	}
+
+	if mem > 0 {
+		MemLimit = mem
+	} else {
+		MemLimit = 128
+	}
+}
+
 func handle(m Message) {
 	if m.Type == "HEARTBEAT" {
 		fmt.Println("Мезос жил, мезос жив, мезос будет жить!!!")
@@ -151,4 +178,56 @@ func handle(m Message) {
 		uuid := m.Update.Status.Uuid
 		Sched.Acknowledge(m.Update.Status.AgentId, uuid, m.Update.Status.ExecutorId)
 	}
+}
+
+func getTotalOffersCapacity(offers []Offer) (int, []ResourcesForOneTask) {
+	tasksCanRun := 0
+	var resourcesForTasks []ResourcesForOneTask
+	for _, offer := range offers {
+		offerCapacity, resources := getCapacityOfCurrentOffer(offer)
+		tasksCanRun = tasksCanRun + offerCapacity
+		resourcesForTasks = append(resourcesForTasks, resources...)
+	}
+
+	return tasksCanRun, resourcesForTasks
+}
+
+func getCapacityOfCurrentOffer(offer Offer) (int, []ResourcesForOneTask) {
+	cpuCapacity := 0
+	memCapacity := 0
+	portsCapacity := 0
+	var offersPortsResources []Range
+	for _, resource := range offer.Resources {
+		switch resource.Name {
+		case "cpus":
+			cpuCapacity = int(resource.Scalar.Value / CpuLimit)
+		case "mem":
+			memCapacity = int(resource.Scalar.Value / MemLimit)
+		case "ports":
+			offersPortsResources = resource.Ranges.Range
+			for _, ports := range offersPortsResources {
+				portsCapacity = int(portsCapacity + ((ports.End - ports.Begin) / 2))
+			}
+		}
+	}
+	allResourcesCapacity := []int{cpuCapacity, memCapacity, portsCapacity}
+	sort.Ints(allResourcesCapacity)
+	totalCapacityOfCurrentOffer := allResourcesCapacity[0]
+	resourcesForTasks := getResourcesForTasks(offer, totalCapacityOfCurrentOffer, offersPortsResources)
+	return totalCapacityOfCurrentOffer, resourcesForTasks
+}
+
+func getResourcesForTasks(offer Offer, offerCapacity int, ranges []Range) []ResourcesForOneTask {
+	resourcesForTasks := make([]ResourcesForOneTask, 0)
+	for i := 0; len(ranges) > i && len(resourcesForTasks) != offerCapacity; i++ {
+		portsBegin := ranges[i].Begin
+		portsEnd := ranges[i].End
+		for portsEnd-portsBegin >= 1 && len(resourcesForTasks) != offerCapacity {
+			portRange := Range{portsBegin, portsBegin + 1}
+			resourcesForTasks = append(resourcesForTasks, ResourcesForOneTask{offer.Id, offer.AgentId, portRange})
+			portsBegin = portsBegin + 2
+		}
+
+	}
+	return resourcesForTasks
 }
