@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"errors"
+	"github.com/aerokube/selenoid/session"
 	"github.com/aerokube/util"
 	"os"
 )
@@ -17,6 +18,7 @@ import (
 type Driver struct {
 	ServiceBase
 	Environment
+	session.Caps
 }
 
 // StartWithCancel - Starter interface implementation
@@ -47,6 +49,7 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 	cmdLine = append(cmdLine, fmt.Sprintf("--port=%s", port))
 	cmd := exec.Command(cmdLine[0], cmdLine[1:]...)
 	cmd.Env = append(cmd.Env, d.Service.Env...)
+	cmd.Env = append(cmd.Env, d.Caps.Env...)
 	if d.CaptureDriverLogs {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr

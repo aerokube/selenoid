@@ -87,7 +87,7 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 			LogConfig:   m.Config.ContainerLogs}, true
 	case []interface{}:
 		log.Printf("[%d] [USING_DRIVER] [%s] [%s]", requestId, browserName, version)
-		return &Driver{ServiceBase: serviceBase, Environment: *m.Environment}, true
+		return &Driver{ServiceBase: serviceBase, Environment: *m.Environment, Caps: caps}, true
 	}
 	return nil, false
 }
