@@ -524,7 +524,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-03-27</span>
+<span id="revdate">2018-03-29</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -591,10 +591,11 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate">3.1.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate</a></li>
 <li><a href="#_custom_test_name_name">3.1.4. Custom Test Name: name</a></li>
 <li><a href="#_per_session_time_zone_timezone">3.1.5. Per-session Time Zone: timeZone</a></li>
-<li><a href="#_links_to_application_containers_applicationcontainers">3.1.6. Links to Application Containers: applicationContainers</a></li>
-<li><a href="#_hosts_entries_hostsentries">3.1.7. Hosts Entries: hostsEntries</a></li>
-<li><a href="#_container_labels_labels">3.1.8. Container Labels: labels</a></li>
-<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.9. Specifying Capabilities via Protocol Extensions</a></li>
+<li><a href="#_per_session_environment_variables_env">3.1.6. Per-session Environment Variables: env</a></li>
+<li><a href="#_links_to_application_containers_applicationcontainers">3.1.7. Links to Application Containers: applicationContainers</a></li>
+<li><a href="#_hosts_entries_hostsentries">3.1.8. Hosts Entries: hostsEntries</a></li>
+<li><a href="#_container_labels_labels">3.1.9. Container Labels: labels</a></li>
+<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.10. Specifying Capabilities via Protocol Extensions</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -2509,29 +2510,44 @@ Without this capability launched browser containers will have the same timezone 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_links_to_application_containers_applicationcontainers"><a class="anchor" href="#_links_to_application_containers_applicationcontainers"></a>3.1.6. Links to Application Containers: applicationContainers</h4>
+<h4 id="_per_session_environment_variables_env"><a class="anchor" href="#_per_session_environment_variables_env"></a>3.1.6. Per-session Environment Variables: env</h4>
+<div class="paragraph">
+<p>Sometimes you may want to set some environment variables for every test case (for example to test with different default locales). To achieve this pass one more capability:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: array, format: &lt;key&gt;=&lt;value&gt;</div>
+<div class="content">
+<pre>env: ["LANG=ru_RU.UTF-8", "LANGUAGE=ru:en", "LC_ALL=ru_RU.UTF-8"]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Environment variables from this capability are appended to variables from configuration file.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_links_to_application_containers_applicationcontainers"><a class="anchor" href="#_links_to_application_containers_applicationcontainers"></a>3.1.7. Links to Application Containers: applicationContainers</h4>
 <div class="paragraph">
 <p>Sometimes you may need to link browser container to application container running on the same host machine.
 This allows you to use cool URLs like <code><a href="http://my-cool-app/" class="bare">http://my-cool-app/</a></code> in tests.
 To achieve this simply pass information about one or more desired links via capability:</p>
 </div>
 <div class="listingblock">
-<div class="title">Type: string, format: &lt;container-name&gt;[:alias] (comma-separated)</div>
+<div class="title">Type: array, format: &lt;container-name&gt;[:alias]</div>
 <div class="content">
-<pre>applicationContainers: "spring-application-main:my-cool-app,spring-application-gateway"</pre>
+<pre>applicationContainers: ["spring-application-main:my-cool-app", "spring-application-gateway"]</pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_hosts_entries_hostsentries"><a class="anchor" href="#_hosts_entries_hostsentries"></a>3.1.7. Hosts Entries: hostsEntries</h4>
+<h4 id="_hosts_entries_hostsentries"><a class="anchor" href="#_hosts_entries_hostsentries"></a>3.1.8. Hosts Entries: hostsEntries</h4>
 <div class="paragraph">
 <p>Although you can configure a separate list of <code>/etc/hosts</code> entries for every browser image in <a href="#_browsers_configuration_file">Browsers Configuration File</a>
 sometimes you may need to add more entries for particular test cases. This can be easily achieved with:</p>
 </div>
 <div class="listingblock">
-<div class="title">Type: string, format: &lt;hostname&gt;:&lt;ip-address&gt; (comma-separated)</div>
+<div class="title">Type: array, format: &lt;hostname&gt;:&lt;ip-address&gt;</div>
 <div class="content">
-<pre>hostsEntries: "example.com:192.168.0.1,test.com:192.168.0.2"</pre>
+<pre>hostsEntries: ["example.com:192.168.0.1", "test.com:192.168.0.2"]</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2540,14 +2556,14 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_container_labels_labels"><a class="anchor" href="#_container_labels_labels"></a>3.1.8. Container Labels: labels</h4>
+<h4 id="_container_labels_labels"><a class="anchor" href="#_container_labels_labels"></a>3.1.9. Container Labels: labels</h4>
 <div class="paragraph">
 <p>In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs.</p>
 </div>
 <div class="listingblock">
-<div class="title">Type: string, format: &lt;key&gt;:&lt;value&gt; (comma-separated)</div>
+<div class="title">Type: array, format: &lt;key&gt;=&lt;value&gt;</div>
 <div class="content">
-<pre>labels: "environment:testing,build-number:14353"</pre>
+<pre>labels: ["environment=testing", "build-number=14353"]</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2555,7 +2571,7 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.9. Specifying Capabilities via Protocol Extensions</h4>
+<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.10. Specifying Capabilities via Protocol Extensions</h4>
 <div class="paragraph">
 <p>Some Selenium clients allow passing only a limited number of capabilities specified in <a href="https://w3c.github.io/webdriver/webdriver-spec.html">WebDriver specification</a>. For such cases Selenoid supports reading capabilities using <a href="https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions">WebDriver protocol extensions</a> feature. The following two examples deliver the same result. Usually capabilities are passed like this:</p>
 </div>
@@ -3748,7 +3764,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-03-27 17:51:31 UTC
+Last updated 2018-03-29 06:29:22 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
