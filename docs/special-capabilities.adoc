@@ -100,15 +100,26 @@ timeZone: "Europe/Moscow"
 You can find most of available time zones https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[here].
 Without this capability launched browser containers will have the same timezone as Selenoid one.
 
+=== Per-session Environment Variables: env
+
+Sometimes you may want to set some environment variables for every test case (for example to test with different default locales). To achieve this pass one more capability: 
+
+.Type: array, format: <key>=<value>
+----
+env: ["LANG=ru_RU.UTF-8", "LANGUAGE=ru:en", "LC_ALL=ru_RU.UTF-8"]
+----
+
+Environment variables from this capability are appended to variables from configuration file.
+
 === Links to Application Containers: applicationContainers
 
 Sometimes you may need to link browser container to application container running on the same host machine.
 This allows you to use cool URLs like `http://my-cool-app/` in tests.
 To achieve this simply pass information about one or more desired links via capability:
 
-.Type: string, format: <container-name>[:alias] (comma-separated)
+.Type: array, format: <container-name>[:alias] 
 ----
-applicationContainers: "spring-application-main:my-cool-app,spring-application-gateway"
+applicationContainers: ["spring-application-main:my-cool-app", "spring-application-gateway"]
 ----
 
 === Hosts Entries: hostsEntries
@@ -116,9 +127,9 @@ applicationContainers: "spring-application-main:my-cool-app,spring-application-g
 Although you can configure a separate list of `/etc/hosts` entries for every browser image in <<Browsers Configuration File>>
 sometimes you may need to add more entries for particular test cases. This can be easily achieved with:
 
-.Type: string, format: <hostname>:<ip-address> (comma-separated)
+.Type: array, format: <hostname>:<ip-address>
 ----
-hostsEntries: "example.com:192.168.0.1,test.com:192.168.0.2"
+hostsEntries: ["example.com:192.168.0.1", "test.com:192.168.0.2"]
 ----
 
 Entries will be inserted to `/etc/hosts` before entries from browsers configuration file.
@@ -128,9 +139,9 @@ Thus entries from capabilities override entries from configuration file if some 
 
 In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs. 
 
-.Type: string, format: <key>:<value> (comma-separated)
+.Type: array, format: <key>=<value>
 ----
-labels: "environment:testing,build-number:14353"
+labels: ["environment=testing", "build-number=14353"]
 ----
 
 Labels from this capability override labels from browsers configuration file. When `name` capability is specified - it is automatically added as a label to container.

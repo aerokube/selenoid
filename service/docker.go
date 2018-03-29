@@ -23,7 +23,7 @@ import (
 
 const (
 	comma                  = ","
-	colon                  = ":"
+	equality               = "="
 	sysAdmin               = "SYS_ADMIN"
 	overrideVideoOutputDir = "OVERRIDE_VIDEO_OUTPUT_DIR"
 	vncPort                = "5900"
@@ -78,9 +78,8 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	if !d.Privileged {
 		hostConfig.CapAdd = strslice.StrSlice{sysAdmin}
 	}
-	if d.ApplicationContainers != "" {
-		links := strings.Split(d.ApplicationContainers, comma)
-		hostConfig.Links = links
+	if len(d.ApplicationContainers) > 0 {
+		hostConfig.Links = d.ApplicationContainers
 	}
 	if len(d.Service.Sysctl) > 0 {
 		hostConfig.Sysctls = d.Service.Sysctl
@@ -201,8 +200,8 @@ func getLogConfig(logConfig ctr.LogConfig, caps session.Caps) ctr.LogConfig {
 			logConfig.Config[tag] = caps.TestName
 		}
 		_, ok = logConfig.Config[labels]
-		if caps.Labels != "" && !ok {
-			logConfig.Config[labels] = caps.Labels
+		if len(caps.Labels) > 0 && !ok {
+			logConfig.Config[labels] = strings.Join(caps.Labels, comma)
 		}
 	}
 	return logConfig
@@ -228,6 +227,7 @@ func getEnv(service ServiceBase, caps session.Caps) []string {
 		fmt.Sprintf("ENABLE_VNC=%v", caps.VNC),
 	}
 	env = append(env, service.Service.Env...)
+	env = append(env, caps.Env...)
 	return env
 }
 
@@ -247,8 +247,8 @@ func getContainerHostname(caps session.Caps) string {
 
 func getExtraHosts(service *config.Browser, caps session.Caps) []string {
 	extraHosts := service.Hosts
-	if caps.HostsEntries != "" {
-		extraHosts = append(strings.Split(caps.HostsEntries, comma), extraHosts...)
+	if len(caps.HostsEntries) > 0 {
+		extraHosts = append(caps.HostsEntries, extraHosts...)
 	}
 	return extraHosts
 }
@@ -261,9 +261,9 @@ func getLabels(service *config.Browser, caps session.Caps) map[string]string {
 	for k, v := range service.Labels {
 		labels[k] = v
 	}
-	if caps.Labels != "" {
-		for _, lbl := range strings.Split(caps.Labels, comma) {
-			kv := strings.SplitN(lbl, colon, 2)
+	if len(caps.Labels) > 0 {
+		for _, lbl := range caps.Labels {
+			kv := strings.SplitN(lbl, equality, 2)
 			if len(kv) == 2 {
 				key := kv[0]
 				value := kv[1]

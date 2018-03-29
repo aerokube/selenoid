@@ -20,9 +20,10 @@ type Caps struct {
 	TestName              string                 `json:"name"`
 	TimeZone              string                 `json:"timeZone"`
 	ContainerHostname     string                 `json:"containerHostname"`
-	ApplicationContainers string                 `json:"applicationContainers"`
-	HostsEntries          string                 `json:"hostsEntries"`
-	Labels                string                 `json:"labels"`
+	Env                   []string               `json:"env"`
+	ApplicationContainers []string               `json:"applicationContainers"`
+	HostsEntries          []string               `json:"hostsEntries"`
+	Labels                []string               `json:"labels"`
 	ExtensionCapabilities map[string]interface{} `json:"selenoid:options"`
 }
 
