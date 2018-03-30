@@ -46,6 +46,7 @@ Maintained by a growing community:
 * Telegram [support channel](https://t.me/aerokube)
 * Support by [email](mailto:support@aerokube.com)
 * StackOverflow [tag](https://stackoverflow.com/questions/tagged/selenoid)
+* YouTube [channel](https://www.youtube.com/channel/UC9HvE3FNfTvftzpvXi9c69g)
 
 ## Complete Guide & Build Instructions
 
