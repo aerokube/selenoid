@@ -500,7 +500,7 @@ func logs(wsconn *websocket.Conn) {
 	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
 	sess, ok := sessions.Get(sid)
 	if ok && sess.Container != nil {
-		log.Printf("[%d] [CONTAINER_LOGS] [%s]", requestId, sess.Container)
+		log.Printf("[%d] [CONTAINER_LOGS] [%s]", requestId, sess.Container.ID)
 		r, err := cli.ContainerLogs(wsconn.Request().Context(), sess.Container.ID, types.ContainerLogsOptions{
 			ShowStdout: true,
 			ShowStderr: true,
