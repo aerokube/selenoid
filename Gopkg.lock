@@ -17,7 +17,7 @@
   branch = "master"
   name = "github.com/aerokube/util"
   packages = [".","docker"]
-  revision = "1fc725516cd618815af748ee4ba842ad6f467551"
+  revision = "2fa5cda33a2e16b7639e40386ca232c9f6cf9475"
 
 [[projects]]
   name = "github.com/docker/distribution"
@@ -27,7 +27,7 @@
 [[projects]]
   name = "github.com/docker/docker"
   packages = ["api","api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/image","api/types/mount","api/types/network","api/types/registry","api/types/strslice","api/types/swarm","api/types/swarm/runtime","api/types/time","api/types/versions","api/types/volume","client","pkg/stdcopy"]
-  revision = "92309e34e42aec3a0e041403bdd3c4fc0dc20269"
+  revision = "635f359f8b61887faa9427d9c673be96faf992b5"
 
 [[projects]]
   name = "github.com/docker/go-connections"
