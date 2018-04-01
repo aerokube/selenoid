@@ -32,6 +32,10 @@ New images are added right after official releases. You can create your custom i
 New **[rich user interface]((https://github.com/aerokube/selenoid-ui))** showing browser screen and Selenium session logs:
 ![Selenoid UI](docs/img/selenoid-ui.png)
 
+### Video Recording
+* Any browser session can be saved to [H.264](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC) video ([example](https://www.youtube.com/watch?v=maB298oO5cI))
+* An API to list, download and delete recorded video files
+
 ### Lightweight and Lightning Fast
 Suitable for personal usage and in big clusters:
 * Consumes **10 times** less memory than Java-based Selenium server under the same load
