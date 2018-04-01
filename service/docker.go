@@ -22,8 +22,6 @@ import (
 )
 
 const (
-	comma                  = ","
-	equality               = "="
 	sysAdmin               = "SYS_ADMIN"
 	overrideVideoOutputDir = "OVERRIDE_VIDEO_OUTPUT_DIR"
 	vncPort                = "5900"
@@ -201,7 +199,11 @@ func getLogConfig(logConfig ctr.LogConfig, caps session.Caps) ctr.LogConfig {
 		}
 		_, ok = logConfig.Config[labels]
 		if len(caps.Labels) > 0 && !ok {
-			logConfig.Config[labels] = strings.Join(caps.Labels, comma)
+			joinedLabels := []string{}
+			for k, v := range caps.Labels {
+				joinedLabels = append(joinedLabels, fmt.Sprintf("%s=%s", k, v))
+			}
+			logConfig.Config[labels] = strings.Join(joinedLabels, ",")
 		}
 	}
 	return logConfig
@@ -262,15 +264,8 @@ func getLabels(service *config.Browser, caps session.Caps) map[string]string {
 		labels[k] = v
 	}
 	if len(caps.Labels) > 0 {
-		for _, lbl := range caps.Labels {
-			kv := strings.SplitN(lbl, equality, 2)
-			if len(kv) == 2 {
-				key := kv[0]
-				value := kv[1]
-				labels[key] = value
-			} else {
-				labels[lbl] = ""
-			}
+		for k, v := range caps.Labels {
+			labels[k] = v
 		}
 	}
 	return labels
