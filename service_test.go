@@ -1,13 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	. "github.com/aandryashin/matchers"
 	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/util"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"golang.org/x/net/websocket"
+	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -15,11 +20,6 @@ import (
 	"sync"
 	"testing"
 	"time"
-	"golang.org/x/net/websocket"
-	"github.com/aerokube/util"
-	"bytes"
-	"net"
-	"io"
 )
 
 var (
@@ -264,7 +264,7 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 		VideoFrameRate:        25,
 		Env:                   []string{"LANG=ru_RU.UTF-8", "LANGUAGE=ru:en"},
 		HostsEntries:          []string{"example.com:192.168.0.1", "test.com:192.168.0.2"},
-		Labels:                []string{"label1=some-value", "label2"},
+		Labels:                map[string]string{"label1": "some-value", "label2": ""},
 		ApplicationContainers: []string{"one", "two"},
 		TimeZone:              "Europe/Moscow",
 		ContainerHostname:     "some-hostname",
@@ -327,8 +327,8 @@ func TestGetVNC(t *testing.T) {
 
 	srv := httptest.NewServer(handler())
 	defer srv.Close()
-	
-	testTcpServer := testTCPServer("test-data")	
+
+	testTcpServer := testTCPServer("test-data")
 	sessions.Put("test-session", &session.Session{
 		VNC: testTcpServer.Addr().String(),
 	})
@@ -354,7 +354,7 @@ func testTCPServer(data string) net.Listener {
 	return l
 }
 
-func readDataFromWebSocket(t * testing.T, wsURL string) string {
+func readDataFromWebSocket(t *testing.T, wsURL string) string {
 	ws, err := websocket.Dial(wsURL, "", "http://localhost")
 	AssertThat(t, err, Is{nil})
 
@@ -369,10 +369,10 @@ func TestGetLogs(t *testing.T) {
 
 	srv := httptest.NewServer(handler())
 	defer srv.Close()
-	
+
 	sessions.Put("test-session", &session.Session{
 		Container: &session.Container{
-			ID: "e90e34656806",
+			ID:        "e90e34656806",
 			IPAddress: "127.0.0.1",
 		},
 	})

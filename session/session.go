@@ -23,7 +23,7 @@ type Caps struct {
 	Env                   []string               `json:"env"`
 	ApplicationContainers []string               `json:"applicationContainers"`
 	HostsEntries          []string               `json:"hostsEntries"`
-	Labels                []string               `json:"labels"`
+	Labels                map[string]string      `json:"labels"`
 	ExtensionCapabilities map[string]interface{} `json:"selenoid:options"`
 }
 
