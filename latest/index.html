@@ -2561,9 +2561,9 @@ Thus entries from capabilities override entries from configuration file if some 
 <p>In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs.</p>
 </div>
 <div class="listingblock">
-<div class="title">Type: array, format: &lt;key&gt;=&lt;value&gt;</div>
+<div class="title">Type: map, format: "&lt;key&gt;": "&lt;value&gt;"</div>
 <div class="content">
-<pre>labels: ["environment=testing", "build-number=14353"]</pre>
+<pre>labels: {"environment": "testing", "build-number": "14353"]</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -3764,7 +3764,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-04-01 08:20:56 UTC
+Last updated 2018-04-01 09:48:16 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
