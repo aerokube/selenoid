@@ -10,22 +10,50 @@
 [[projects]]
   branch = "master"
   name = "github.com/aandryashin/matchers"
-  packages = [".","httpresp"]
+  packages = [
+    ".",
+    "httpresp"
+  ]
   revision = "435295ea180e58dbfa526db1ebab8c801b4c2b75"
 
 [[projects]]
   name = "github.com/docker/distribution"
-  packages = ["digestset","reference"]
+  packages = [
+    "digestset",
+    "reference"
+  ]
   revision = "277ed486c948042cab91ad367c379524f3b25e18"
 
 [[projects]]
   name = "github.com/docker/docker"
-  packages = ["api","api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/image","api/types/mount","api/types/network","api/types/registry","api/types/strslice","api/types/swarm","api/types/swarm/runtime","api/types/time","api/types/versions","api/types/volume","client"]
+  packages = [
+    "api",
+    "api/types",
+    "api/types/blkiodev",
+    "api/types/container",
+    "api/types/events",
+    "api/types/filters",
+    "api/types/image",
+    "api/types/mount",
+    "api/types/network",
+    "api/types/registry",
+    "api/types/strslice",
+    "api/types/swarm",
+    "api/types/swarm/runtime",
+    "api/types/time",
+    "api/types/versions",
+    "api/types/volume",
+    "client"
+  ]
   revision = "92309e34e42aec3a0e041403bdd3c4fc0dc20269"
 
 [[projects]]
   name = "github.com/docker/go-connections"
-  packages = ["nat","sockets","tlsconfig"]
+  packages = [
+    "nat",
+    "sockets",
+    "tlsconfig"
+  ]
   revision = "3ede32e2033de7505e6500d6c868c2b9ed9f169d"
   version = "v0.3.0"
 
@@ -49,7 +77,10 @@
 
 [[projects]]
   name = "github.com/opencontainers/image-spec"
-  packages = ["specs-go","specs-go/v1"]
+  packages = [
+    "specs-go",
+    "specs-go/v1"
+  ]
   revision = "d60099175f88c47cd379c4738d158884749ed235"
   version = "v1.0.1"
 
@@ -67,8 +98,19 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/samuel/go-zookeeper"
+  packages = ["zk"]
+  revision = "c4fab1ac1bec58281ad0667dc3f0907a9476ac47"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/net"
-  packages = ["context","context/ctxhttp","proxy","websocket"]
+  packages = [
+    "context",
+    "context/ctxhttp",
+    "proxy",
+    "websocket"
+  ]
   revision = "5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec"
 
 [[projects]]
@@ -80,6 +122,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "de7116c491df8566e62ca53bea50792b7f133ab933d79982467f465cf8742b57"
+  inputs-digest = "cbe1b26304fbb2fa3bf9787d72cd50827f49dcf4ff047f435a1359e412abd4a0"
   solver-name = "gps-cdcl"
   solver-version = 1

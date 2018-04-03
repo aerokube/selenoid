@@ -14,7 +14,7 @@ import (
 
 var (
 	Sched    *Scheduler
-	Channel  = make(chan Task)
+	channel  = make(chan Task)
 	CpuLimit float64
 	MemLimit float64
 )
@@ -24,6 +24,7 @@ const schedulerUrlTemplate = "[MASTER]/api/v1/scheduler"
 type Task struct {
 	TaskId        string
 	Image         string
+	EnableVNC     bool
 	ReturnChannel chan *DockerInfo
 }
 
@@ -34,9 +35,13 @@ type DockerInfo struct {
 			ContainerPort []struct {
 				HostPort string
 			} `json:"4444/tcp"`
+			VncPort []struct {
+				HostPort string
+			} `json:"5900/tcp"`
 		}
 		IPAddress string
 	}
+	ErrorMsg string
 }
 
 type Scheduler struct {
@@ -60,6 +65,9 @@ type Message struct {
 			Data       string `json:"data"`
 			State      string `json:"state"`
 			ExecutorId ID     `json:"executor_id"`
+			Source     string `json:"source"`
+			Message    string `json:"message"`
+			TaskId     ID     `json:"task_id"`
 		}
 	}
 	Type string
@@ -83,7 +91,7 @@ func Run(URL string, cpu float64, mem float64) {
 	notRunningTasks := make(map[string]chan *DockerInfo)
 	schedulerUrl := strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)
 
-	body, _ := json.Marshal(GetSubscribedMessage("foo", "My first framework", []string{"test"}))
+	body, _ := json.Marshal(newSubscribedMessage("foo", "My first framework", []string{"test"}))
 
 	resp, err := http.Post(schedulerUrl, "application/json", bytes.NewReader(body))
 	if err != nil {
@@ -92,12 +100,13 @@ func Run(URL string, cpu float64, mem float64) {
 
 	defer resp.Body.Close()
 
-	streamId := resp.Header.Get("Mesos-Stream-Id")
+	Sched = &Scheduler{
+		Url:      schedulerUrl,
+		StreamId: resp.Header.Get("Mesos-Stream-Id")}
 
 	scanner := bufio.NewScanner(resp.Body)
 	scanner.Split(bufio.ScanLines)
 
-	var frameworkId ID
 	for scanner.Scan() {
 		var line = scanner.Text()
 		var m Message
@@ -105,45 +114,88 @@ func Run(URL string, cpu float64, mem float64) {
 		fmt.Println(line)
 		var index = strings.LastIndex(line, "}")
 		if index != -1 {
-			jsonMessage := line[0 : index+1]
+			jsonMessage := line[0: index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
-			handle(m)
-			if m.Type == "SUBSCRIBED" {
-				frameworkId = m.Subscribed.FrameworkId
-				fmt.Println("Ура, мы подписались! Id = " + frameworkId.Value)
-				Sched = &Scheduler{schedulerUrl, streamId, frameworkId}
-			} else if m.Type == "OFFERS" {
-				var offersIds []ID
-				offers := m.Offers.Offers
-				for _, n := range offers {
-					offersIds = append(offersIds, n.Id)
-					fmt.Println(offersIds)
-				}
-				tasksCanRun, resourcesForTasks := getTotalOffersCapacity(offers)
-				log.Printf("[MESOS CONTAINERS CAN BE RUN NOW] [%d]\n", tasksCanRun)
-				log.Printf("[CURRENT FREE MESOS CONTAINERS RESOURCES] [%v]\n", resourcesForTasks)
-				select {
-				case task := <-Channel:
-					notRunningTasks[task.TaskId] = task.ReturnChannel
-					Sched.Accept(m.Offers.Offers[0], task.TaskId)
-				default:
-					fmt.Println("nothing ready")
-					Sched.Decline(offersIds)
-				}
-
-			} else if m.Type == "UPDATE" {
-				if m.Update.Status.State == "TASK_RUNNING" {
-					n, _ := base64.StdEncoding.DecodeString(m.Update.Status.Data)
-					fmt.Println(string(n))
-					var data []DockerInfo
-					json.Unmarshal(n, &data)
-					container := &data[0]
-					taskId := m.Update.Status.ExecutorId.Value
-					channel, _ := notRunningTasks[taskId]
-					channel <- container
-					delete(notRunningTasks, taskId)
-				}
+			switch m.Type {
+			case "SUBSCRIBED":
+				Sched.FrameworkId = m.Subscribed.FrameworkId
+				break
+			case "OFFERS":
+				processOffers(m, notRunningTasks)
+				break
+			case "UPDATE":
+				processUpdate(m, notRunningTasks)
+				break
+			case "FAILURE":
+				fmt.Println("Bce плохо")
+				break
+			default:
+				break
 			}
+		}
+	}
+}
+
+func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo) {
+	status := m.Update.Status
+	state := status.State
+	taskId := status.TaskId.Value
+	Sched.Acknowledge(status.AgentId, status.Uuid, status.ExecutorId)
+	if state == "TASK_RUNNING" {
+		n, _ := base64.StdEncoding.DecodeString(status.Data)
+		var data []DockerInfo
+		json.Unmarshal(n, &data)
+		container := &data[0]
+		channel, _ := notRunningTasks[taskId]
+		channel <- container
+		delete(notRunningTasks, taskId)
+	} else if state == "TASK_KILLED" {
+		fmt.Println("Exterminate! Exterminate! Exterminate!")
+	} else if state == "TASK_LOST" {
+		fmt.Println("Здесь должен быть reconcile или типа того")
+	} else {
+		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине " + status.Source + "-" + status.State + "-" + status.Message
+		if notRunningTasks[taskId] != nil {
+			container := &DockerInfo{ErrorMsg: msg}
+			channel, _ := notRunningTasks[taskId]
+			channel <- container
+			delete(notRunningTasks, taskId)
+		} else {
+			log.Panic(msg)
+		}
+	}
+}
+
+func processOffers(m Message, notRunningTasks map[string]chan *DockerInfo) {
+	var offersIds []ID
+	offers := m.Offers.Offers
+	for _, n := range offers {
+		offersIds = append(offersIds, n.Id)
+		fmt.Println(offersIds)
+	}
+	tasksCanRun, resourcesForTasks := getTotalOffersCapacity(offers)
+	log.Printf("[MESOS CONTAINERS CAN BE RUN NOW] [%d]\n", tasksCanRun)
+	log.Printf("[CURRENT FREE MESOS CONTAINERS RESOURCES] [%v]\n", resourcesForTasks)
+	var tasks []Task
+	if tasksCanRun == 0 {
+		fmt.Println("nothing ready")
+		Sched.Decline(offersIds)
+	} else {
+	Loop:
+		for i := 0; i < tasksCanRun; i++ {
+			select {
+			case task := <-channel:
+				notRunningTasks[task.TaskId] = task.ReturnChannel
+				tasks = append(tasks, task)
+			default:
+				fmt.Println("Задачки закончились")
+				break Loop
+			}
+		}
+		if len(tasks) == 0 {
+			Sched.Decline(offersIds)
+		} else {
+			Sched.Accept(resourcesForTasks[:len(tasks)], tasks)
 		}
 	}
 }
@@ -159,17 +211,6 @@ func setResourceLimits(cpu float64, mem float64) {
 		MemLimit = mem
 	} else {
 		MemLimit = 128
-	}
-}
-
-func handle(m Message) {
-	if m.Type == "HEARTBEAT" {
-		fmt.Println("Мезос жил, мезос жив, мезос будет жить!!!")
-	} else if m.Type == "FAILURE" {
-		fmt.Println("Все плохо")
-	} else if m.Type == "UPDATE" {
-		uuid := m.Update.Status.Uuid
-		Sched.Acknowledge(m.Update.Status.AgentId, uuid, m.Update.Status.ExecutorId)
 	}
 }
 
@@ -223,4 +264,8 @@ func getResourcesForTasks(offer Offer, offerCapacity int, ranges []Range) []Reso
 
 	}
 	return resourcesForTasks
+}
+
+func (task Task) SendToMesos() {
+	channel <- task
 }

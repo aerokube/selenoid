@@ -143,37 +143,38 @@ type KillMessage struct {
 	Kill        Kill   `json:"kill"`
 }
 
-type ReconcileMessage struct {
-	FrameworkID ID        `json:"framework_id"`
-	Type        string    `json:"type"`
-	Reconcile   Reconcile `json:"reconcile"`
+func newPortMappings(portRange Range, enableVNC bool) *[]PortMappings {
+	portMappings := []PortMappings{newMapping(4444, portRange.Begin)}
+	if enableVNC {
+		portMappings = append(portMappings, newMapping(5900, portRange.End))
+	}
+	return &portMappings
 }
 
-func GetPortMappings(portRange Range) *[]PortMappings {
-	var portMappings = PortMappings{ContainerPort: 4444}
-	portMappings.Name = "http"
-	portMappings.ContainerPort = 4444
-	portMappings.HostPort = portRange.Begin
-	portMappings.Protocol = "tcp"
-	return &[]PortMappings{portMappings}
+func newMapping(containerPort int, hostPort int) PortMappings {
+	return PortMappings{
+		ContainerPort: containerPort,
+		Name:          "http",
+		HostPort:      hostPort,
+		Protocol:      "tcp"}
 }
 
-func NewContainer(portRange Range) *Container {
+func newContainer(portRange Range, task Task) *Container {
 	return &Container{
 		Type: "DOCKER",
 		Docker: Docker{
-			Image:        "selenoid/chrome",
+			Image:        task.Image,
 			Network:      "BRIDGE",
 			Privileged:   true,
-			PortMappings: GetPortMappings(portRange),
+			PortMappings: newPortMappings(portRange, task.EnableVNC),
 		},
 	}
 }
 
-func NewResourcePorts(portRange Range) Resource {
+func newResourcePorts(portRange Range) Resource {
 	var rangePort = Range{
 		Begin: portRange.Begin,
-		End:   portRange.Begin,
+		End:   portRange.End,
 	}
 
 	return Resource{
@@ -186,7 +187,7 @@ func NewResourcePorts(portRange Range) Resource {
 	}
 }
 
-func NewResourcesContainer(name string, value float64) Resource {
+func newResourcesContainer(name string, value float64) Resource {
 	return Resource{
 		Type:   "SCALAR",
 		Name:   name,
@@ -194,46 +195,63 @@ func NewResourcesContainer(name string, value float64) Resource {
 	}
 }
 
-func NewLaunchTaskInfo(offer Offer, taskId string) *Launch {
-	portRange := offer.Resources[0].Ranges.Range[0]
+func newLaunchTaskInfo(resource ResourcesForOneTask, task Task) *Launch {
+
 	var taskInfo = TaskInfo{
 		Name:      "My Task",
-		TaskID:    ID{taskId},
-		AgentID:   offer.AgentId,
+		TaskID:    ID{task.TaskId},
+		AgentID:   resource.AgentId,
 		Command:   Command{false},
-		Container: NewContainer(portRange),
+		Container: newContainer(resource.Range, task),
 		Resources: []Resource{
-			NewResourcePorts(portRange),
-			NewResourcesContainer("cpus", CpuLimit),
-			NewResourcesContainer("mem", MemLimit),
+			newResourcePorts(resource.Range),
+			newResourcesContainer("cpus", CpuLimit),
+			newResourcesContainer("mem", MemLimit),
 		},
 	}
 
 	return &Launch{TaskInfos: []TaskInfo{taskInfo}}
 }
 
-func NewOperations(offer Offer, taskId string) *[]Operation {
-	return &[]Operation{{
-		Type:   "LAUNCH",
-		Launch: NewLaunchTaskInfo(offer, taskId),
-	},
+func newOperations(resources []ResourcesForOneTask, tasks []Task) *[]Operation {
+	var operations []Operation
+	for i, task := range tasks {
+		operations = append(operations, Operation{
+			Type:   "LAUNCH",
+			Launch: newLaunchTaskInfo(resources[i], task),
+		})
 	}
+	return &operations
 }
 
-func GetAcceptMessage(frameworkId ID, offer Offer, taskId string) (AcceptMessage) {
-	offerIds := []ID{offer.Id}
+func (scheduler *Scheduler) newAcceptMessage(resources []ResourcesForOneTask, tasks []Task) (AcceptMessage) {
 	return AcceptMessage{
-		FrameworkID: frameworkId,
+		FrameworkID: scheduler.FrameworkId,
 		Type:        "ACCEPT",
 		Accept: Accept{
-			offerIds,
-			NewOperations(offer, taskId),
-			Filters{RefuseSeconds: 5.0},
+			getUniqueOfferIds(resources),
+			newOperations(resources, tasks),
+			Filters{RefuseSeconds: 1.0},
 		},
 	}
 }
 
-func GetSubscribedMessage(user string, name string, roles []string) (SubscribeMessage) {
+func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
+	offersMap := make(map[ID]bool)
+	var set []ID
+	for _, v := range resources {
+		if !offersMap[v.OfferId] {
+			offersMap[v.OfferId] = true
+		}
+	}
+	for k,_ := range offersMap {
+		set = append(set, k)
+	}
+	return set
+}
+
+
+func newSubscribedMessage(user string, name string, roles []string) (SubscribeMessage) {
 	return SubscribeMessage{
 		Type: "SUBSCRIBE",
 		Subscribe: Subscribe{
@@ -246,7 +264,7 @@ func GetSubscribedMessage(user string, name string, roles []string) (SubscribeMe
 	}
 }
 
-func GetAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) (AcknowledgeMessage) {
+func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) (AcknowledgeMessage) {
 	return AcknowledgeMessage{
 		FrameworkID: frameworkId,
 		Type:        "ACKNOWLEDGE",
@@ -258,35 +276,25 @@ func GetAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) (
 	}
 }
 
-func GetDeclineMessage(frameworkId ID, offerId []ID) (DeclineMessage) {
+func newDeclineMessage(frameworkId ID, offerId []ID) (DeclineMessage) {
 	return DeclineMessage{
 		FrameworkID: frameworkId,
 		Type:        "DECLINE",
 		Decline: Decline{
 			OfferIds: offerId,
 			Filters: Filters{
-				RefuseSeconds: 5.0,
+				RefuseSeconds: 1.0,
 			},
 		},
 	}
 }
 
-func GetKillMessage(frameworkId ID, taskId string) (KillMessage) {
+func newKillMessage(frameworkId ID, taskId string) (KillMessage) {
 	return KillMessage{
 		FrameworkID: frameworkId,
 		Type:        "KILL",
 		Kill: Kill{
 			TaskID: ID{taskId},
-		},
-	}
-}
-
-func GetReconcileMessage(frameworkId ID, tasks []Tasks) (ReconcileMessage) {
-	return ReconcileMessage{
-		FrameworkID: frameworkId,
-		Type:        "RECONCILE",
-		Reconcile: Reconcile {
-			Task: tasks,
 		},
 	}
 }
