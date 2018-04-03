@@ -21,7 +21,7 @@ func (s *Scheduler) Accept(offer Offer, taskId string) {
 
 	fmt.Println(string(body))
 
-	resp , err := s.sendToStream(body)
+	resp, err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
 	}
@@ -65,4 +65,13 @@ func (s *Scheduler) sendToStream(body []byte) (*http.Response, error) {
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	return client.Do(req)
+}
+
+func (s *Scheduler) Reconcile(tasks []Tasks) {
+	body, _ := json.Marshal(GetReconcileMessage(s.FrameworkId, tasks))
+	fmt.Println(string(body))
+	_, err := s.sendToStream(body)
+	if err != nil {
+		panic(err)
+	}
 }

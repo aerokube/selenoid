@@ -6,9 +6,9 @@ type ID struct {
 }
 
 type Docker struct {
-	Image        string         `json:"image"`
-	Network      string         `json:"network"`
-	Privileged   bool           `json:"privileged"`
+	Image        string          `json:"image"`
+	Network      string          `json:"network"`
+	Privileged   bool            `json:"privileged"`
 	PortMappings *[]PortMappings `json:"port_mappings"`
 }
 
@@ -63,6 +63,15 @@ type TaskInfo struct {
 	Command   Command    `json:"command"`
 	Container *Container `json:"container"`
 	Resources []Resource `json:"resources"`
+}
+
+type Tasks struct {
+	TaskID  ID `json:"task_id"`
+	AgentID ID `json:"agent_id"`
+}
+
+type Reconcile struct {
+	Task []Tasks `json:"tasks"`
 }
 
 type FrameworkInfo struct {
@@ -132,6 +141,12 @@ type KillMessage struct {
 	FrameworkID ID     `json:"framework_id"`
 	Type        string `json:"type"`
 	Kill        Kill   `json:"kill"`
+}
+
+type ReconcileMessage struct {
+	FrameworkID ID        `json:"framework_id"`
+	Type        string    `json:"type"`
+	Reconcile   Reconcile `json:"reconcile"`
 }
 
 func GetPortMappings(portRange Range) *[]PortMappings {
@@ -262,6 +277,16 @@ func GetKillMessage(frameworkId ID, taskId string) (KillMessage) {
 		Type:        "KILL",
 		Kill: Kill{
 			TaskID: ID{taskId},
+		},
+	}
+}
+
+func GetReconcileMessage(frameworkId ID, tasks []Tasks) (ReconcileMessage) {
+	return ReconcileMessage{
+		FrameworkID: frameworkId,
+		Type:        "RECONCILE",
+		Reconcile: Reconcile {
+			Task: tasks,
 		},
 	}
 }

@@ -130,6 +130,7 @@ func Run(URL string, cpu float64, mem float64) {
 					fmt.Println("nothing ready")
 					Sched.Decline(offersIds)
 				}
+
 			} else if m.Type == "UPDATE" {
 				if m.Update.Status.State == "TASK_RUNNING" {
 					n, _ := base64.StdEncoding.DecodeString(m.Update.Status.Data)
