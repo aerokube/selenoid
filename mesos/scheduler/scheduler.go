@@ -143,7 +143,6 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo) {
 	Sched.Acknowledge(status.AgentId, status.Uuid, status.ExecutorId)
 	if state == "TASK_RUNNING" {
 		n, _ := base64.StdEncoding.DecodeString(status.Data)
-		fmt.Println(string(n))
 		var data []DockerInfo
 		json.Unmarshal(n, &data)
 		container := &data[0]
@@ -152,6 +151,8 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo) {
 		delete(notRunningTasks, taskId)
 	} else if state == "TASK_KILLED" {
 		fmt.Println("Exterminate! Exterminate! Exterminate!")
+	} else if state == "TASK_LOST" {
+		fmt.Println("Здесь должен быть reconcile или типа того")
 	} else {
 		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине " + status.Source + "-" + status.State + "-" + status.Message
 		if notRunningTasks[taskId] != nil {

@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+set -euo pipefail
 killall selenoid
 go build
 docker kill `docker ps -q`
