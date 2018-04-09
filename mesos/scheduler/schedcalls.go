@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Scheduler) Decline(offers []ID) {
-	body, _ := json.Marshal(GetDeclineMessage(s.FrameworkId, offers))
+	body, _ := json.Marshal(newDeclineMessage(s.FrameworkId, offers))
 	_, err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
@@ -17,7 +17,7 @@ func (s *Scheduler) Decline(offers []ID) {
 }
 
 func (s *Scheduler) Accept(resources []ResourcesForOneTask, tasks []Task) {
-	body, _ := json.Marshal(s.NewAcceptMessage(resources, tasks))
+	body, _ := json.Marshal(s.newAcceptMessage(resources, tasks))
 
 	fmt.Println(string(body))
 
@@ -33,7 +33,7 @@ func (s *Scheduler) Accept(resources []ResourcesForOneTask, tasks []Task) {
 }
 
 func (s *Scheduler) Acknowledge(agentId ID, uuid string, taskId ID) {
-	body, _ := json.Marshal(GetAcknowledgeMessage(s.FrameworkId, agentId, uuid, taskId))
+	body, _ := json.Marshal(newAcknowledgeMessage(s.FrameworkId, agentId, uuid, taskId))
 	_, err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
@@ -42,7 +42,7 @@ func (s *Scheduler) Acknowledge(agentId ID, uuid string, taskId ID) {
 
 func (s *Scheduler) Kill(taskId string) {
 	log.Printf("[%d] [REMOVING_CONTAINER] [%s]\n")
-	body, _ := json.Marshal(GetKillMessage(s.FrameworkId, taskId))
+	body, _ := json.Marshal(newKillMessage(s.FrameworkId, taskId))
 	resp, err := s.sendToStream(body)
 	if err != nil {
 		log.Printf("[FAILED_TO_REMOVE_CONTAINER] [%v]\n", err)
