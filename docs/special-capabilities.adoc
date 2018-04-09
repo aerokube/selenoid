@@ -152,12 +152,12 @@ Some Selenium clients allow passing only a limited number of capabilities specif
 
 .Passing Capabilities as Usually
 ----
-{"browserName": "firefox", "value": "57.0", "screenResolution": "1280x1024x24"}
+{"browserName": "firefox", "version": "57.0", "screenResolution": "1280x1024x24"}
 ----
 
 Selenoid is using `selenoid:options` key to read protocol extension capabilities:
 
 .Passing Capabilities using Protocol Extensions
 ----
-{"browserName": "firefox", "value": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}
+{"browserName": "firefox", "version": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}
 ----
