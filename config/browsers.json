@@ -14,7 +14,7 @@
 		"default": "latest",
 		"versions": {
 			"latest": {
-				"image": "selenoid/vnc:chrome_64.0",
+				"image": "docker.moscow.alfaintra.net/selenoid/chrome",
 				"port": "4444",
 				"tmpfs": {"/tmp":"size=512m"}
 			}
