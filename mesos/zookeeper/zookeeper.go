@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	path   = "/Tasks"
+	path   = "/Selenoid"
 	conStr = "0.0.0.0:2181"
 )
 
