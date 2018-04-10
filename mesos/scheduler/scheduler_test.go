@@ -9,12 +9,13 @@ import (
 )
 
 var (
-	scheduler *Scheduler
-	cpu       Resource
-	mem       Resource
-	srv       *httptest.Server
-	offer     Offer
-	resources []Resource
+	scheduler     *Scheduler
+	cpu           Resource
+	mem           Resource
+	srv           *httptest.Server
+	offer         Offer
+	resources     []Resource
+	resourcePorts Resource
 )
 
 func init() {
@@ -24,10 +25,35 @@ func init() {
 		"streamID",
 		ID{"testFrameworkID_1"},
 	}
+
+	resourcePorts = Resource{
+		Type: "RANGES",
+		Name: "ports",
+		Ranges: &Ranges{
+			[]Range{goodRange},
+		},
+		Role: "*",
+	}
+
+	cpu = Resource{
+		Type:   "SCALAR",
+		Name:   "cpus",
+		Scalar: &Scalar{1.0},
+	}
+
+	mem = Resource{
+		Type:   "SCALAR",
+		Name:   "mem",
+		Scalar: &Scalar{512.0},
+	}
+
+	resources = []Resource{cpu, mem, resourcePorts}
+
 	offer = Offer{offerID[0],
 		agentID,
 		srv.URL,
 		resources}
+
 }
 
 func handler() http.Handler {
@@ -50,4 +76,22 @@ func TestGetResourcesForTasks(t *testing.T) {
 	actualGetResourcesForTasks := getResourcesForTasks(offer, 2, []Range{goodRange})
 	AssertThat(t, expectResourcesForTasks, EqualTo{actualGetResourcesForTasks})
 
+}
+
+func TestGetCapacityOfCurrentOffer(t *testing.T) {
+	CpuLimit = 0.2
+	MemLimit = 128
+	expectCapacity := 4
+	actualCapacityOfCurrentOffer, actualResourcesForTasks := getCapacityOfCurrentOffer(offer)
+	AssertThat(t, expectCapacity, EqualTo{actualCapacityOfCurrentOffer})
+	AssertThat(t, expectCapacity, EqualTo{len(actualResourcesForTasks)})
+}
+
+func TestGetTotalOffersCapacity(t *testing.T) {
+	CpuLimit = 0.2
+	MemLimit = 128
+	expectCapacity := 8
+	actualTotalOffersCapacity, actualResourcesForTasks := getTotalOffersCapacity([]Offer{offer, offer})
+	AssertThat(t, expectCapacity, EqualTo{actualTotalOffersCapacity})
+	AssertThat(t, expectCapacity, EqualTo{len(actualResourcesForTasks)})
 }

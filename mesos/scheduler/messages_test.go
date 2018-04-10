@@ -16,7 +16,6 @@ var (
 	containerPortMapping PortMappings
 	vncPortMapping       PortMappings
 	vncContainer         Container
-	resourcePorts        Resource
 )
 
 func init() {
@@ -30,8 +29,6 @@ func init() {
 	initContainerPortMapping()
 	initTasks()
 	initVncContainer()
-	initResourcePort()
-
 }
 
 func initVncPortMapping() {
@@ -72,17 +69,6 @@ func initVncContainer() {
 			true,
 			&[]PortMappings{containerPortMapping, vncPortMapping},
 		},
-	}
-}
-
-func initResourcePort() {
-	resourcePorts = Resource{
-		Type: "RANGES",
-		Name: "ports",
-		Ranges: &Ranges{
-			[]Range{goodRange},
-		},
-		Role: "*",
 	}
 }
 
