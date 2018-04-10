@@ -104,7 +104,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	setResourceLimits(cpu, mem)
 	notRunningTasks := make(map[string]chan *DockerInfo)
 
-	body, _ := json.Marshal(GetSubscribedMessage("root", "My first framework", []string{"test"}))
+	body, _ := json.Marshal(newSubscribedMessage("root", "My first framework", []string{"test"}))
 
 	resp, err := http.Post(Sched.Url, "application/json", bytes.NewReader(body))
 	if err != nil {
@@ -135,7 +135,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 				processOffers(m, notRunningTasks)
 				break
 			case "UPDATE":
-				processUpdate(m, notRunningTasks)
+				processUpdate(m, notRunningTasks, zookeeperUrl)
 				break
 			case "FAILURE":
 				fmt.Println("Bce плохо")
@@ -147,7 +147,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	}
 }
 
-func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo) {
+func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo, zookeeperUrl string) {
 	status := m.Update.Status
 	state := status.State
 	taskId := status.TaskId.Value
@@ -160,6 +160,9 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo) {
 		channel, _ := notRunningTasks[taskId]
 		channel <- container
 		delete(notRunningTasks, taskId)
+		if zookeeperUrl!= "" {
+			zookeeper.CreateTaskNode(status.TaskId.Value, status.AgentId.Value)
+		}
 	} else if state == "TASK_KILLED" {
 		fmt.Println("Exterminate! Exterminate! Exterminate!")
 	} else if state == "TASK_LOST" {
