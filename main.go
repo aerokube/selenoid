@@ -83,6 +83,7 @@ var (
 	manager                  service.Manager
 	cli                      *client.Client
 	mesosMasterURL           string
+	zookeeper				 string
 
 	startTime = time.Now()
 
@@ -115,6 +116,7 @@ func init() {
 	flag.StringVar(&videoOutputDir, "video-output-dir", "video", "Directory to save recorded video to")
 	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder", "Image to use as video recorder")
 	flag.StringVar(&mesosMasterURL, "mesos", "", "URL to mesos master")
+	flag.StringVar(&zookeeper, "zk", "", "URL to zookeeper cluster")
 	flag.Parse()
 
 	if version {
@@ -168,6 +170,7 @@ func init() {
 		VideoContainerImage: videoRecorderImage,
 		Privileged:          !disablePrivileged,
 		MesosMasterUrl:      mesosMasterURL,
+		Zookeeper:			 zookeeper,
 	}
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}
@@ -189,9 +192,9 @@ func init() {
 	}
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
 
-	if mesosMasterURL != "" {
+	if mesosMasterURL != "" || zookeeper != "" {
 		log.Printf("[TRY TO REGISTER ON MESOS MASTER] [%s]", mesosMasterURL)
-		go scheduler.Run(mesosMasterURL, float64(cpu), float64(mem))
+		go scheduler.Run(mesosMasterURL, zookeeper, float64(cpu), float64(mem))
 	}
 
 }

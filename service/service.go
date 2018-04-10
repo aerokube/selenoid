@@ -26,6 +26,7 @@ type Environment struct {
 	VideoContainerImage string
 	Privileged          bool
 	MesosMasterUrl      string
+	Zookeeper			string
 }
 
 const (
@@ -73,7 +74,7 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 	if !ok {
 		return nil, false
 	}
-	if m.Environment.MesosMasterUrl != "" {
+	if m.Environment.MesosMasterUrl != "" || m.Environment.Zookeeper != "" {
 		log.Printf("[%d] [USING_MESOS] [%s-%s]\n", requestId, browserName, version)
 		return &Mesos{
 			ServiceBase: serviceBase,
