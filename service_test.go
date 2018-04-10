@@ -2,12 +2,6 @@ package main
 
 import (
 	"fmt"
-	. "github.com/aandryashin/matchers"
-	"github.com/aerokube/selenoid/config"
-	"github.com/aerokube/selenoid/service"
-	"github.com/aerokube/selenoid/session"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -15,6 +9,13 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	. "github.com/aandryashin/matchers"
+	"github.com/aerokube/selenoid/config"
+	"github.com/aerokube/selenoid/service"
+	"github.com/aerokube/selenoid/session"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 )
 
 var (
