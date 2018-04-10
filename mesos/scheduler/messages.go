@@ -304,12 +304,18 @@ func newKillMessage(frameworkId ID, taskId string) (KillMessage) {
 	}
 }
 
-func GetReconcileMessage(frameworkId ID, tasks []Tasks) (ReconcileMessage) {
+func GetReconcileMessage(frameworkId ID, tasksId ID, agentId ID) (ReconcileMessage) {
+	tasks := Tasks{
+		TaskID:  tasksId,
+		AgentID: agentId,
+	}
 	return ReconcileMessage{
 		FrameworkID: frameworkId,
 		Type:        "RECONCILE",
 		Reconcile: Reconcile{
-			Tasks: tasks,
+			Tasks: []Tasks{
+				tasks,
+			},
 		},
 	}
 }

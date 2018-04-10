@@ -30,7 +30,7 @@ type Task struct {
 }
 
 type DockerInfo struct {
-	Id              string
+	Id string
 	NetworkSettings struct {
 		Ports struct {
 			ContainerPort []struct {
@@ -42,7 +42,7 @@ type DockerInfo struct {
 		}
 		IPAddress string
 	}
-	ErrorMsg string
+	ErrorMsg  string
 	AgentHost string
 }
 
@@ -70,6 +70,7 @@ type Message struct {
 			Source     string `json:"source"`
 			Message    string `json:"message"`
 			TaskId     ID     `json:"task_id"`
+			Reason     string `json:"reason"`
 		}
 	}
 	Type string
@@ -91,7 +92,7 @@ type ResourcesForOneTask struct {
 func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	if zookeeperUrl != "" {
 		zookeeper.Zk = &zookeeper.Zoo{
-			Url:zookeeperUrl,
+			Url: zookeeperUrl,
 		}
 		Sched = &Scheduler{
 			Url: zookeeper.DetectMaster() + "/api/v1/scheduler"}
@@ -125,7 +126,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 		fmt.Println(line)
 		var index = strings.LastIndex(line, "}")
 		if index != -1 {
-			jsonMessage := line[0: index+1]
+			jsonMessage := line[0 : index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
 			switch m.Type {
 			case "SUBSCRIBED":
@@ -160,13 +161,21 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo, zooke
 		channel, _ := notRunningTasks[taskId]
 		channel <- container
 		delete(notRunningTasks, taskId)
-		if zookeeperUrl!= "" {
+		if zookeeperUrl != "" {
 			zookeeper.CreateTaskNode(status.TaskId.Value, status.AgentId.Value)
 		}
 	} else if state == "TASK_KILLED" {
 		fmt.Println("Exterminate! Exterminate! Exterminate!")
 	} else if state == "TASK_LOST" {
-		fmt.Println("Здесь должен быть reconcile или типа того")
+		if zookeeperUrl != "" && notRunningTasks[taskId] != nil {
+			var agentId = zookeeper.GetAgentIdForTask(taskId);
+			Sched.Reconcile(status.TaskId, ID{agentId})
+			msg := "Задача " + taskId + " для агента " + agentId + " потеряна, но хочеть жить снова и сделала RECONCILIATION"
+			log.Printf(msg)
+		} else if (status.Reason == "REASON_RECONCILIATION") {
+			msg := "У нас прблемы! Невозможно сделать RECONCILIATION задачи " + taskId + " по причине " + status.Source + "-" + status.State + "-" + status.Message
+			log.Printf(msg)
+		}
 	} else {
 		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине " + status.Source + "-" + status.State + "-" + status.Message
 		if notRunningTasks[taskId] != nil {

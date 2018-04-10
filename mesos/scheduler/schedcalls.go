@@ -67,8 +67,8 @@ func (s *Scheduler) sendToStream(body []byte) (*http.Response, error) {
 	return client.Do(req)
 }
 
-func (s *Scheduler) Reconcile(tasks []Tasks) {
-	body, _ := json.Marshal(GetReconcileMessage(s.FrameworkId, tasks))
+func (s *Scheduler) Reconcile(taskId ID, agentId ID) {
+	body, _ := json.Marshal(GetReconcileMessage(s.FrameworkId, taskId, agentId))
 	fmt.Println(string(body))
 	_, err := s.sendToStream(body)
 	if err != nil {
