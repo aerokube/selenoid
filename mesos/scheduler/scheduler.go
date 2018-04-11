@@ -171,10 +171,10 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo, zooke
 			var agentId = zookeeper.GetAgentIdForTask(taskId);
 			Sched.Reconcile(status.TaskId, ID{agentId})
 			msg := "Задача " + taskId + " для агента " + agentId + " потеряна, но хочеть жить снова и сделала RECONCILIATION"
-			log.Printf(msg)
+			log.Print(msg)
 		} else if (status.Reason == "REASON_RECONCILIATION") {
 			msg := "У нас прблемы! Невозможно сделать RECONCILIATION задачи " + taskId + " по причине " + status.Source + "-" + status.State + "-" + status.Message
-			log.Printf(msg)
+			log.Print(msg)
 		}
 	} else {
 		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине " + status.Source + "-" + status.State + "-" + status.Message
