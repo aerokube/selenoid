@@ -8,7 +8,7 @@ type ID struct {
 type Docker struct {
 	Image        string          `json:"image"`
 	Network      string          `json:"network"`
-	Parameters   []Param          `json:"parameters"`
+	//Parameters   []Param          `json:"parameters"`
 	Privileged   bool            `json:"privileged"`
 	PortMappings *[]PortMappings `json:"port_mappings"`
 }
@@ -158,17 +158,17 @@ func newMapping(containerPort int, hostPort int) PortMappings {
 }
 
 func newContainer(portRange Range, task Task) *Container {
-	var params []Param
+	//var params []Param
 	return &Container{
 		Type: "DOCKER",
 		Docker: Docker{
 			Image:        task.Image,
 			Network:      "BRIDGE",
 			Privileged:   true,
-			Parameters: append(params, Param{
-				Key: "hostname",
-				Value: "localhost",
-			}),
+			//Parameters: append(params, Param{
+			//	Key: "hostname",
+			//	Value: "localhost",
+			//}),
 			PortMappings: newPortMappings(portRange, task.EnableVNC),
 		},
 	}
