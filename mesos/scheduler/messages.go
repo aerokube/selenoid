@@ -8,9 +8,16 @@ type ID struct {
 type Docker struct {
 	Image        string          `json:"image"`
 	Network      string          `json:"network"`
+	Parameters   []Param          `json:"parameters"`
 	Privileged   bool            `json:"privileged"`
 	PortMappings *[]PortMappings `json:"port_mappings"`
 }
+
+type Param struct {
+	Key string `json:"key"`
+	Value string `json:"value"`
+}
+
 
 //Структура для хранения данных о контейнере
 type Container struct {
@@ -68,7 +75,7 @@ type TaskInfo struct {
 type FrameworkInfo struct {
 	User  string   `json:"user"`
 	Name  string   `json:"name"`
-	Roles []string `json:"roles"`
+//	Roles []string `json:"roles"`
 }
 
 type Subscribe struct {
@@ -151,12 +158,17 @@ func newMapping(containerPort int, hostPort int) PortMappings {
 }
 
 func newContainer(portRange Range, task Task) *Container {
+	var params []Param
 	return &Container{
 		Type: "DOCKER",
 		Docker: Docker{
 			Image:        task.Image,
 			Network:      "BRIDGE",
 			Privileged:   true,
+			Parameters: append(params, Param{
+				Key: "hostname",
+				Value: "localhost",
+			}),
 			PortMappings: newPortMappings(portRange, task.EnableVNC),
 		},
 	}
@@ -204,27 +216,31 @@ func newLaunchTaskInfo(resource ResourcesForOneTask, task Task) *Launch {
 	return &Launch{TaskInfos: []TaskInfo{taskInfo}}
 }
 
-func newOperations(resources []ResourcesForOneTask, tasks []Task) *[]Operation {
+func newOperations(resources []ResourcesForOneTask, tasks []Task) (*[]Operation, map[string]string) {
+	hostsMap := make(map[string]string)
 	var operations []Operation
 	for i, task := range tasks {
+		resource := resources[i]
+		hostsMap[task.TaskId] = resource.AgentHost
 		operations = append(operations, Operation{
 			Type:   "LAUNCH",
-			Launch: newLaunchTaskInfo(resources[i], task),
+			Launch: newLaunchTaskInfo(resource, task),
 		})
 	}
-	return &operations
+	return &operations, hostsMap
 }
 
-func (scheduler *Scheduler) newAcceptMessage(resources []ResourcesForOneTask, tasks []Task) (AcceptMessage) {
+func (scheduler *Scheduler) newAcceptMessage(resources []ResourcesForOneTask, tasks []Task) (AcceptMessage, map[string]string) {
+	operations, hostsMap := newOperations(resources, tasks)
 	return AcceptMessage{
 		FrameworkID: scheduler.FrameworkId,
 		Type:        "ACCEPT",
 		Accept: Accept{
 			getUniqueOfferIds(resources),
-			newOperations(resources, tasks),
+			operations,
 			Filters{RefuseSeconds: 1.0},
 		},
-	}
+	}, hostsMap
 }
 
 func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
@@ -249,7 +265,7 @@ func newSubscribedMessage(user string, name string, roles []string) (SubscribeMe
 			FrameworkInfo{
 				User:  user,
 				Name:  name,
-				Roles: roles,
+//				Roles: roles,
 			},
 		},
 	}

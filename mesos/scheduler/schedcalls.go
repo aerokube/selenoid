@@ -16,8 +16,9 @@ func (s *Scheduler) Decline(offers []ID) {
 	}
 }
 
-func (s *Scheduler) Accept(resources []ResourcesForOneTask, tasks []Task) {
-	body, _ := json.Marshal(s.newAcceptMessage(resources, tasks))
+func (s *Scheduler) Accept(resources []ResourcesForOneTask, tasks []Task) map[string] string {
+	acceptMessage, hostMap := s.newAcceptMessage(resources, tasks)
+	body, _ := json.Marshal(acceptMessage)
 
 	fmt.Println(string(body))
 
@@ -30,6 +31,7 @@ func (s *Scheduler) Accept(resources []ResourcesForOneTask, tasks []Task) {
 	buf.ReadFrom(resp.Body)
 	fmt.Println(buf.String())
 	fmt.Println(resp.Status)
+	return hostMap
 }
 
 func (s *Scheduler) Acknowledge(agentId ID, uuid string, taskId ID) {

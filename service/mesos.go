@@ -34,7 +34,7 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 		return nil, fmt.Errorf(container.ErrorMsg)
 	}
 	hostPort := container.NetworkSettings.Ports.ContainerPort[0].HostPort
-	u := &url.URL{Scheme: "http", Host: "127.0.0.1:" + hostPort, Path: m.Service.Path}
+	u := &url.URL{Scheme: "http", Host: container.AgentHost + ":" + hostPort, Path: m.Service.Path}
 	s := StartedService{
 		Url: u,
 		Container: &session.Container{
@@ -42,7 +42,7 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 			IPAddress: container.NetworkSettings.IPAddress,
 		},
 		Cancel: func() {
-			scheduler.Sched.Kill(taskId)
+			//scheduler.Sched.Kill(taskId)
 			if m.Zookeeper != "" {
 				zookeeper.DelNode(taskId)
 			}
