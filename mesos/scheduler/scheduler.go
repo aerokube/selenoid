@@ -181,6 +181,8 @@ func processUpdate(m Message, notRunningTasks map[string]*Info, zookeeperUrl str
 		fmt.Println("Exterminate! Exterminate! Exterminate!")
 	} else if state == "TASK_LOST" {
 		fmt.Println("Здесь должен быть reconcile или типа того")
+	} else if state == "TASK_STARTING"{
+		fmt.Println("Ололо")
 	} else {
 		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине " + status.Source + "-" + status.State + "-" + status.Message
 		if notRunningTasks[taskId] != nil {
