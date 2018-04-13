@@ -27,7 +27,7 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 		Image:         m.Service.Image.(string),
 		EnableVNC:     m.Caps.VNC,
 		ReturnChannel: returnChannel,
-		Environment:   getEnvForMesos(m.ServiceBase, m.Caps)}
+		Environment:   getEnvForTask(m.ServiceBase, m.Caps)}
 	task.SendToMesos()
 	container := <-returnChannel
 	fmt.Println(container)
@@ -55,7 +55,7 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 	return &s, nil
 }
 
-func getEnvForMesos(service ServiceBase, caps session.Caps) scheduler.Env {
+func getEnvForTask(service ServiceBase, caps session.Caps) scheduler.Env {
 	env := make([]scheduler.EnvVariable, 0)
 	env = append(env, scheduler.EnvVariable{"TZ", getTimeZone(service, caps).String()})
 	env = append(env, scheduler.EnvVariable{"SCREEN_RESOLUTION", caps.ScreenResolution})

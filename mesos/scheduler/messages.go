@@ -53,13 +53,14 @@ type Launch struct {
 }
 
 type Env struct {
-	Variable []EnvVariable `json:"variables"`
+	Variables []EnvVariable `json:"variables"`
 }
 
 type EnvVariable struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }
+
 type Command struct {
 	Env   Env  `json:"environment"`
 	Shell bool `json:"shell"`
