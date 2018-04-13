@@ -6,11 +6,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/aerokube/selenoid/mesos/zookeeper"
 	"log"
 	"net/http"
 	"sort"
 	"strings"
-	"github.com/aerokube/selenoid/mesos/zookeeper"
 )
 
 var (
@@ -27,6 +27,7 @@ type Task struct {
 	Image         string
 	EnableVNC     bool
 	ReturnChannel chan *DockerInfo
+	Environment   Env
 }
 
 type DockerInfo struct {
@@ -42,14 +43,14 @@ type DockerInfo struct {
 		}
 		IPAddress string
 	}
-	ErrorMsg string
+	ErrorMsg  string
 	AgentHost string
 }
 
 type Scheduler struct {
-	Url           string
-	StreamId      string
-	FrameworkId   ID
+	Url         string
+	StreamId    string
+	FrameworkId ID
 }
 
 type Message struct {
@@ -91,7 +92,7 @@ type ResourcesForOneTask struct {
 func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	if zookeeperUrl != "" {
 		zookeeper.Zk = &zookeeper.Zoo{
-			Url:zookeeperUrl,
+			Url: zookeeperUrl,
 		}
 		Sched = &Scheduler{
 			Url: zookeeper.DetectMaster() + "/api/v1/scheduler"}
@@ -125,7 +126,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 		fmt.Println(line)
 		var index = strings.LastIndex(line, "}")
 		if index != -1 {
-			jsonMessage := line[0: index+1]
+			jsonMessage := line[0 : index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
 			switch m.Type {
 			case "SUBSCRIBED":
@@ -160,7 +161,7 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo, zooke
 		channel, _ := notRunningTasks[taskId]
 		channel <- container
 		delete(notRunningTasks, taskId)
-		if zookeeperUrl!= "" {
+		if zookeeperUrl != "" {
 			zookeeper.CreateTaskNode(status.TaskId.Value, status.AgentId.Value)
 		}
 	} else if state == "TASK_KILLED" {
