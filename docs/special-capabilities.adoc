@@ -141,7 +141,7 @@ In big clusters you may want to pass additional metadata to every browser sessio
 
 .Type: map, format: "<key>": "<value>"
 ----
-labels: {"environment": "testing", "build-number": "14353"]
+labels: {"environment": "testing", "build-number": "14353"}
 ----
 
 Labels from this capability override labels from browsers configuration file. When `name` capability is specified - it is automatically added as a label to container.
