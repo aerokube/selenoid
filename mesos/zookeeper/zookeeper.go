@@ -74,13 +74,14 @@ func CreateTaskNode(taskId string, agentId string) {
 	fmt.Printf("******* create: %+v\n", path)
 }
 
-func GetAgentIdForTask(taskId string) {
+func GetAgentIdForTask(taskId string) string{
 	conn := connect()
 	defer conn.Close()
 
 	data, stat, err := conn.Get(selenoidPath + "/tasks/" + taskId)
 	must(err)
 	fmt.Printf("******* get:    %+v %+v\n", string(data), stat)
+	return string(data)
 }
 
 func GetChildren() []string {
