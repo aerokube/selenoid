@@ -6,11 +6,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/aerokube/selenoid/mesos/zookeeper"
 	"log"
 	"net/http"
 	"sort"
 	"strings"
-	"github.com/aerokube/selenoid/mesos/zookeeper"
 )
 
 var (
@@ -27,6 +27,7 @@ type Task struct {
 	Image         string
 	EnableVNC     bool
 	ReturnChannel chan *DockerInfo
+	Environment   Env
 }
 
 type DockerInfo struct {

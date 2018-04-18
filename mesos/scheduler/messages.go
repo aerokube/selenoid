@@ -39,7 +39,7 @@ type Scalar struct {
 }
 
 type Ranges struct {
-	Range [] Range `json:"range"`
+	Range []Range `json:"range"`
 }
 
 type Range struct {
@@ -52,7 +52,17 @@ type Launch struct {
 	TaskInfos []TaskInfo `json:"task_infos"`
 }
 
+type Env struct {
+	Variables []EnvVariable `json:"variables"`
+}
+
+type EnvVariable struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 type Command struct {
+	Env   Env  `json:"environment"`
 	Shell bool `json:"shell"`
 }
 
@@ -207,7 +217,7 @@ func newLaunchTaskInfo(resource ResourcesForOneTask, task Task) *Launch {
 		Name:      "My Task",
 		TaskID:    ID{task.TaskId},
 		AgentID:   resource.AgentId,
-		Command:   Command{false},
+		Command:   Command{task.Environment, false},
 		Container: newContainer(resource.Range, task),
 		Resources: []Resource{
 			newResourcePorts(resource.Range),
@@ -230,7 +240,7 @@ func newOperations(resources []ResourcesForOneTask, tasks []Task) *[]Operation {
 	return &operations
 }
 
-func (scheduler *Scheduler) newAcceptMessage(resources []ResourcesForOneTask, tasks []Task) (AcceptMessage) {
+func (scheduler *Scheduler) newAcceptMessage(resources []ResourcesForOneTask, tasks []Task) AcceptMessage {
 	return AcceptMessage{
 		FrameworkID: scheduler.FrameworkId,
 		Type:        "ACCEPT",
@@ -255,8 +265,7 @@ func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
 	}
 	return set
 }
-
-func newSubscribedMessage(user string, name string, roles []string) (SubscribeMessage) {
+func newSubscribedMessage(user string, name string, roles []string) SubscribeMessage {
 	return SubscribeMessage{
 		Type: "SUBSCRIBE",
 		Subscribe: Subscribe{
@@ -269,7 +278,7 @@ func newSubscribedMessage(user string, name string, roles []string) (SubscribeMe
 	}
 }
 
-func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) (AcknowledgeMessage) {
+func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) AcknowledgeMessage {
 	return AcknowledgeMessage{
 		FrameworkID: frameworkId,
 		Type:        "ACKNOWLEDGE",
@@ -281,7 +290,7 @@ func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) (
 	}
 }
 
-func newDeclineMessage(frameworkId ID, offerId []ID) (DeclineMessage) {
+func newDeclineMessage(frameworkId ID, offerId []ID) DeclineMessage {
 	return DeclineMessage{
 		FrameworkID: frameworkId,
 		Type:        "DECLINE",
@@ -294,7 +303,7 @@ func newDeclineMessage(frameworkId ID, offerId []ID) (DeclineMessage) {
 	}
 }
 
-func newKillMessage(frameworkId ID, taskId string) (KillMessage) {
+func newKillMessage(frameworkId ID, taskId string) KillMessage {
 	return KillMessage{
 		FrameworkID: frameworkId,
 		Type:        "KILL",

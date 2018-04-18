@@ -1,14 +1,14 @@
 package service
 
 import (
-	"github.com/aerokube/selenoid/session"
-	"github.com/docker/docker/client"
-	ctr "github.com/docker/docker/api/types/container"
-	"net/url"
 	"fmt"
 	"github.com/aerokube/selenoid/mesos/scheduler"
-	"github.com/pborman/uuid"
 	"github.com/aerokube/selenoid/mesos/zookeeper"
+	"github.com/aerokube/selenoid/session"
+	ctr "github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
+	"github.com/pborman/uuid"
+	"net/url"
 )
 
 type Mesos struct {
@@ -26,7 +26,8 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 		TaskId:        taskId,
 		Image:         m.Service.Image.(string),
 		EnableVNC:     m.Caps.VNC,
-		ReturnChannel: returnChannel}
+		ReturnChannel: returnChannel,
+		Environment:   getEnvForTask(m.ServiceBase, m.Caps)}
 	task.SendToMesos()
 	container := <-returnChannel
 	fmt.Println(container)
@@ -52,4 +53,11 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 		s.VNCHostPort = container.NetworkSettings.Ports.VncPort[0].HostPort
 	}
 	return &s, nil
+}
+
+func getEnvForTask(service ServiceBase, caps session.Caps) scheduler.Env {
+	env := make([]scheduler.EnvVariable, 0)
+	env = append(env, scheduler.EnvVariable{"TZ", getTimeZone(service, caps).String()})
+	env = append(env, scheduler.EnvVariable{"SCREEN_RESOLUTION", caps.ScreenResolution})
+	return scheduler.Env{env}
 }
