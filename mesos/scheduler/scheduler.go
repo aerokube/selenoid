@@ -31,7 +31,7 @@ type Task struct {
 }
 
 type DockerInfo struct {
-	Id              string
+	Id string
 	NetworkSettings struct {
 		Ports struct {
 			ContainerPort []struct {
@@ -71,6 +71,7 @@ type Message struct {
 			Source     string `json:"source"`
 			Message    string `json:"message"`
 			TaskId     ID     `json:"task_id"`
+			Reason     string `json:"reason"`
 		}
 	}
 	Type string
@@ -167,7 +168,15 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo, zooke
 	} else if state == "TASK_KILLED" {
 		fmt.Println("Exterminate! Exterminate! Exterminate!")
 	} else if state == "TASK_LOST" {
-		fmt.Println("Здесь должен быть reconcile или типа того")
+		if zookeeperUrl != "" && notRunningTasks[taskId] != nil {
+			var agentId = zookeeper.GetAgentIdForTask(taskId);
+			Sched.Reconcile(status.TaskId, ID{agentId})
+			msg := "Задача " + taskId + " для агента " + agentId + " потеряна, но хочеть жить снова и сделала RECONCILIATION"
+			log.Print(msg)
+		} else if (status.Reason == "REASON_RECONCILIATION") {
+			msg := "У нас прблемы! Невозможно сделать RECONCILIATION задачи " + taskId + " по причине " + status.Source + "-" + status.State + "-" + status.Message
+			log.Print(msg)
+		}
 	} else {
 		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине " + status.Source + "-" + status.State + "-" + status.Message
 		if notRunningTasks[taskId] != nil {

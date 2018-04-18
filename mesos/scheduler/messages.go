@@ -75,6 +75,21 @@ type TaskInfo struct {
 	Resources []Resource `json:"resources"`
 }
 
+type Tasks struct {
+	TaskID  ID `json:"task_id"`
+	AgentID ID `json:"agent_id"`
+}
+
+type Reconcile struct {
+	Tasks []Tasks `json:"tasks"`
+}
+
+type ReconcileMessage struct {
+	FrameworkID ID        `json:"framework_id"`
+	Type        string    `json:"type"`
+	Reconcile   Reconcile `json:"reconcile"`
+}
+
 type FrameworkInfo struct {
 	User  string   `json:"user"`
 	Name  string   `json:"name"`
@@ -250,7 +265,6 @@ func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
 	}
 	return set
 }
-
 func newSubscribedMessage(user string, name string, roles []string) SubscribeMessage {
 	return SubscribeMessage{
 		Type: "SUBSCRIBE",
@@ -295,6 +309,22 @@ func newKillMessage(frameworkId ID, taskId string) KillMessage {
 		Type:        "KILL",
 		Kill: Kill{
 			TaskID: ID{taskId},
+		},
+	}
+}
+
+func GetReconcileMessage(frameworkId ID, tasksId ID, agentId ID) (ReconcileMessage) {
+	tasks := Tasks{
+		TaskID:  tasksId,
+		AgentID: agentId,
+	}
+	return ReconcileMessage{
+		FrameworkID: frameworkId,
+		Type:        "RECONCILE",
+		Reconcile: Reconcile{
+			Tasks: []Tasks{
+				tasks,
+			},
 		},
 	}
 }
