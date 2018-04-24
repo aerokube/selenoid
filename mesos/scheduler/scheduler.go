@@ -115,7 +115,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	setResourceLimits(cpu, mem)
 	notRunningTasks := make(map[string]*Info)
 
-	body, _ := json.Marshal(newSubscribedMessage("root", "My first framework", []string{"test"}))
+	body, _ := json.Marshal(newSubscribedMessage("root", "My first framework"))
 
 	resp, err := http.Post(Sched.Url, "application/json", bytes.NewReader(body))
 	if err != nil {
