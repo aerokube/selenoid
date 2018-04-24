@@ -43,7 +43,7 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 			IPAddress: container.NetworkSettings.IPAddress,
 		},
 		Cancel: func() {
-			//scheduler.Sched.Kill(taskId)
+			scheduler.Sched.Kill(taskId)
 			if m.Zookeeper != "" {
 				zookeeper.DelNode(taskId)
 			}

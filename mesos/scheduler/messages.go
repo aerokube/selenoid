@@ -8,16 +8,9 @@ type ID struct {
 type Docker struct {
 	Image        string          `json:"image"`
 	Network      string          `json:"network"`
-	//Parameters   []Param          `json:"parameters"`
 	Privileged   bool            `json:"privileged"`
 	PortMappings *[]PortMappings `json:"port_mappings"`
 }
-
-type Param struct {
-	Key string `json:"key"`
-	Value string `json:"value"`
-}
-
 
 //Структура для хранения данных о контейнере
 type Container struct {
@@ -100,7 +93,6 @@ type ReconcileMessage struct {
 type FrameworkInfo struct {
 	User  string   `json:"user"`
 	Name  string   `json:"name"`
-//	Roles []string `json:"roles"`
 }
 
 type Subscribe struct {
@@ -278,14 +270,13 @@ func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
 }
 
 
-func newSubscribedMessage(user string, name string, roles []string) (SubscribeMessage) {
+func newSubscribedMessage(user string, name string) SubscribeMessage {
 	return SubscribeMessage{
 		Type: "SUBSCRIBE",
 		Subscribe: Subscribe{
 			FrameworkInfo{
 				User:  user,
 				Name:  name,
-//				Roles: roles,
 			},
 		},
 	}

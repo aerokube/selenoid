@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/aerokube/selenoid/mesos/zookeeper"
 	"log"
 	"net/http"
 	"sort"
@@ -183,18 +182,17 @@ func processUpdate(m Message, notRunningTasks map[string]*Info, zookeeperUrl str
 	} else if state == "TASK_KILLED" {
 		fmt.Println("Exterminate! Exterminate! Exterminate!")
 	} else if state == "TASK_LOST" {
-		fmt.Println("Здесь должен быть reconcile или типа того")
-	} else if state == "TASK_STARTING"{
-		fmt.Println("Ололо")
 		if zookeeperUrl != "" && notRunningTasks[taskId] != nil {
 			var agentId = zookeeper.GetAgentIdForTask(taskId);
 			Sched.Reconcile(status.TaskId, ID{agentId})
 			msg := "Задача " + taskId + " для агента " + agentId + " потеряна, но хочеть жить снова и сделала RECONCILIATION"
 			log.Print(msg)
-		} else if (status.Reason == "REASON_RECONCILIATION") {
-			msg := "У нас прблемы! Невозможно сделать RECONCILIATION задачи " + taskId + " по причине " + status.Source + "-" + status.State + "-" + status.Message
+		} else if status.Reason == "REASON_RECONCILIATION" {
+			msg := "У нас проблемы! Невозможно сделать RECONCILIATION задачи " + taskId + " по причине " + status.Source + "-" + status.State + "-" + status.Message
 			log.Print(msg)
 		}
+	} else if state == "TASK_STARTING"{
+		fmt.Println("Ололо")
 	} else {
 		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине " + status.Source + "-" + status.State + "-" + status.Message
 		if notRunningTasks[taskId] != nil {
