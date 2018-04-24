@@ -20,12 +20,12 @@ import (
 	"fmt"
 
 	"github.com/aerokube/selenoid/config"
+	"github.com/aerokube/selenoid/mesos/scheduler"
 	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/client"
 	"path/filepath"
-	"github.com/aerokube/selenoid/mesos/scheduler"
 )
 
 type memLimit int64
@@ -69,21 +69,21 @@ var (
 	sessionDeleteTimeout     time.Duration
 	serviceStartupTimeout    time.Duration
 	limit                    int
-	retryCount               int
-	containerNetwork         string
-	sessions                 = session.NewMap()
-	confPath                 string
-	logConfPath              string
-	captureDriverLogs        bool
-	disablePrivileged        bool
-	videoOutputDir           string
-	videoRecorderImage       string
-	conf                     *config.Config
-	queue                    *protect.Queue
-	manager                  service.Manager
-	cli                      *client.Client
-	mesosMasterURL           string
-	zookeeper				 string
+	retryCount         int
+	containerNetwork   string
+	sessions                            = session.NewMap()
+	confPath           string
+	logConfPath        string
+	captureDriverLogs  bool
+	disablePrivileged  bool
+	videoOutputDir     string
+	videoRecorderImage string
+	conf               *config.Config
+	queue              *protect.Queue
+	manager            service.Manager
+	cli                *client.Client
+	mesosMasterURL     string
+	zookeeper          string
 
 	startTime = time.Now()
 
@@ -170,7 +170,7 @@ func init() {
 		VideoContainerImage: videoRecorderImage,
 		Privileged:          !disablePrivileged,
 		MesosMasterUrl:      mesosMasterURL,
-		Zookeeper:			 zookeeper,
+		Zookeeper:           zookeeper,
 	}
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}

@@ -14,6 +14,8 @@ services:
     ports:
       - 5050:5050
     environment:
+      MESOS_HOSTNAME: localhost
+      MESOS_HOSTNAME_LOOKUP: "false"
       MESOS_PORT: 5050
       MESOS_ZK: zk://zookeeper:2181/mesos
       MESOS_QUORUM: 1
@@ -26,8 +28,12 @@ services:
     privileged: true
     depends_on:
       - mesos-master
+    ports:
+      - 5051:5051
     environment:
       MESOS_PORT: 5051
+      MESOS_HOSTNAME: localhost
+      MESOS_HOSTNAME_LOOKUP: "false"
       MESOS_MASTER: zk://zookeeper:2181/mesos
       MESOS_SWITCH_USER: 0
       MESOS_CONTAINERIZERS: docker,mesos
@@ -37,21 +43,3 @@ services:
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
         - /usr/local/bin/docker:/usr/local/bin/docker
-
-  marathon-service:
-    image: mesosphere/marathon:latest
-    entrypoint:
-      - ./bin/start
-      - --disable_ha
-    depends_on:
-      - zookeeper
-      - mesos-master
-      - mesos-slave
-    links:
-      - zookeeper
-      - mesos-master
-    ports:
-      - "8080:8080"
-    environment:
-      - MARATHON_ZK=zk://zookeeper:2181/marathon
-      - MARATHON_MASTER=zk://zookeeper:2181/mesos

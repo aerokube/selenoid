@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
 	"github.com/samuel/go-zookeeper/zk"
 	"sort"
 	"encoding/json"

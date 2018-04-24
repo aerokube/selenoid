@@ -6,11 +6,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/aerokube/selenoid/mesos/zookeeper"
 	"log"
 	"net/http"
 	"sort"
 	"strings"
+	"github.com/aerokube/selenoid/mesos/zookeeper"
 )
 
 var (
@@ -74,6 +74,9 @@ type Message struct {
 			Reason     string `json:"reason"`
 		}
 	}
+	Error struct{
+		Message string `json:"message"`
+	}
 	Type string
 }
 
@@ -87,7 +90,13 @@ type Offer struct {
 type ResourcesForOneTask struct {
 	OfferId ID
 	AgentId ID
+	AgentHost string
 	Range
+}
+
+type Info struct {
+	ReturnChannel chan *DockerInfo
+	AgentHost string
 }
 
 func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
@@ -104,9 +113,9 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 			Url: strings.Replace(schedulerUrlTemplate, "[MASTER]", URL, 1)}
 	}
 	setResourceLimits(cpu, mem)
-	notRunningTasks := make(map[string]chan *DockerInfo)
+	notRunningTasks := make(map[string]*Info)
 
-	body, _ := json.Marshal(newSubscribedMessage("root", "My first framework", []string{"test"}))
+	body, _ := json.Marshal(newSubscribedMessage("root", "My first framework"))
 
 	resp, err := http.Post(Sched.Url, "application/json", bytes.NewReader(body))
 	if err != nil {
@@ -142,6 +151,10 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 			case "FAILURE":
 				fmt.Println("Bce плохо")
 				break
+			case "ERROR": {
+				log.Fatal(m.Error.Message)
+				break
+			}
 			default:
 				break
 			}
@@ -149,7 +162,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	}
 }
 
-func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo, zookeeperUrl string) {
+func processUpdate(m Message, notRunningTasks map[string]*Info, zookeeperUrl string) {
 	status := m.Update.Status
 	state := status.State
 	taskId := status.TaskId.Value
@@ -159,7 +172,8 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo, zooke
 		var data []DockerInfo
 		json.Unmarshal(n, &data)
 		container := &data[0]
-		channel, _ := notRunningTasks[taskId]
+		container.AgentHost = notRunningTasks[taskId].AgentHost
+		channel := notRunningTasks[taskId].ReturnChannel
 		channel <- container
 		delete(notRunningTasks, taskId)
 		if zookeeperUrl != "" {
@@ -173,15 +187,17 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo, zooke
 			Sched.Reconcile(status.TaskId, ID{agentId})
 			msg := "Задача " + taskId + " для агента " + agentId + " потеряна, но хочеть жить снова и сделала RECONCILIATION"
 			log.Print(msg)
-		} else if (status.Reason == "REASON_RECONCILIATION") {
-			msg := "У нас прблемы! Невозможно сделать RECONCILIATION задачи " + taskId + " по причине " + status.Source + "-" + status.State + "-" + status.Message
+		} else if status.Reason == "REASON_RECONCILIATION" {
+			msg := "У нас проблемы! Невозможно сделать RECONCILIATION задачи " + taskId + " по причине " + status.Source + "-" + status.State + "-" + status.Message
 			log.Print(msg)
 		}
+	} else if state == "TASK_STARTING"{
+		fmt.Println("Ололо")
 	} else {
 		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине " + status.Source + "-" + status.State + "-" + status.Message
 		if notRunningTasks[taskId] != nil {
 			container := &DockerInfo{ErrorMsg: msg}
-			channel, _ := notRunningTasks[taskId]
+			channel := notRunningTasks[taskId].ReturnChannel
 			channel <- container
 			delete(notRunningTasks, taskId)
 		} else {
@@ -190,7 +206,7 @@ func processUpdate(m Message, notRunningTasks map[string]chan *DockerInfo, zooke
 	}
 }
 
-func processOffers(m Message, notRunningTasks map[string]chan *DockerInfo) {
+func processOffers(m Message, notRunningTasks map[string]*Info) {
 	var offersIds []ID
 	offers := m.Offers.Offers
 	for _, n := range offers {
@@ -209,7 +225,7 @@ func processOffers(m Message, notRunningTasks map[string]chan *DockerInfo) {
 		for i := 0; i < tasksCanRun; i++ {
 			select {
 			case task := <-channel:
-				notRunningTasks[task.TaskId] = task.ReturnChannel
+				notRunningTasks[task.TaskId] = &Info{ReturnChannel: task.ReturnChannel}
 				tasks = append(tasks, task)
 			default:
 				fmt.Println("Задачки закончились")
@@ -219,7 +235,10 @@ func processOffers(m Message, notRunningTasks map[string]chan *DockerInfo) {
 		if len(tasks) == 0 {
 			Sched.Decline(offersIds)
 		} else {
-			Sched.Accept(resourcesForTasks[:len(tasks)], tasks)
+			hostMap := Sched.Accept(resourcesForTasks[:len(tasks)], tasks)
+			for k, v := range hostMap {
+				notRunningTasks[k].AgentHost = v
+			}
 		}
 	}
 }
@@ -234,7 +253,7 @@ func setResourceLimits(cpu float64, mem float64) {
 	if mem > 0 {
 		MemLimit = mem
 	} else {
-		MemLimit = 128
+		MemLimit = 256
 	}
 }
 
@@ -282,7 +301,7 @@ func getResourcesForTasks(offer Offer, offerCapacity int, ranges []Range) []Reso
 		portsEnd := ranges[i].End
 		for portsEnd-portsBegin >= 1 && len(resourcesForTasks) != offerCapacity {
 			portRange := Range{portsBegin, portsBegin + 1}
-			resourcesForTasks = append(resourcesForTasks, ResourcesForOneTask{offer.Id, offer.AgentId, portRange})
+			resourcesForTasks = append(resourcesForTasks, ResourcesForOneTask{offer.Id, offer.AgentId, offer.Hostname, portRange})
 			portsBegin = portsBegin + 2
 		}
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+
 killall selenoid
 go build
 docker kill `docker ps -q`
-minimesos up
+docker-compose up -d
 ./selenoid -mesos http://localhost:5050
