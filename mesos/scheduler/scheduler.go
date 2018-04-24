@@ -253,7 +253,7 @@ func setResourceLimits(cpu float64, mem float64) {
 	if mem > 0 {
 		MemLimit = mem
 	} else {
-		MemLimit = 128
+		MemLimit = 256
 	}
 }
 
