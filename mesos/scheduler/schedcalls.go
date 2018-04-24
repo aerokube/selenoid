@@ -22,7 +22,7 @@ func (s *Scheduler) Accept(resources []ResourcesForOneTask, tasks []Task) map[st
 
 	fmt.Println(string(body))
 
-	resp , err := s.sendToStream(body)
+	resp, err := s.sendToStream(body)
 	if err != nil {
 		panic(err)
 	}
@@ -67,4 +67,13 @@ func (s *Scheduler) sendToStream(body []byte) (*http.Response, error) {
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	return client.Do(req)
+}
+
+func (s *Scheduler) Reconcile(taskId ID, agentId ID) {
+	body, _ := json.Marshal(GetReconcileMessage(s.FrameworkId, taskId, agentId))
+	fmt.Println(string(body))
+	_, err := s.sendToStream(body)
+	if err != nil {
+		panic(err)
+	}
 }

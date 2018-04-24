@@ -46,7 +46,7 @@ type Scalar struct {
 }
 
 type Ranges struct {
-	Range [] Range `json:"range"`
+	Range []Range `json:"range"`
 }
 
 type Range struct {
@@ -59,7 +59,17 @@ type Launch struct {
 	TaskInfos []TaskInfo `json:"task_infos"`
 }
 
+type Env struct {
+	Variables []EnvVariable `json:"variables"`
+}
+
+type EnvVariable struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 type Command struct {
+	Env   Env  `json:"environment"`
 	Shell bool `json:"shell"`
 }
 
@@ -70,6 +80,21 @@ type TaskInfo struct {
 	Command   Command    `json:"command"`
 	Container *Container `json:"container"`
 	Resources []Resource `json:"resources"`
+}
+
+type Tasks struct {
+	TaskID  ID `json:"task_id"`
+	AgentID ID `json:"agent_id"`
+}
+
+type Reconcile struct {
+	Tasks []Tasks `json:"tasks"`
+}
+
+type ReconcileMessage struct {
+	FrameworkID ID        `json:"framework_id"`
+	Type        string    `json:"type"`
+	Reconcile   Reconcile `json:"reconcile"`
 }
 
 type FrameworkInfo struct {
@@ -158,17 +183,12 @@ func newMapping(containerPort int, hostPort int) PortMappings {
 }
 
 func newContainer(portRange Range, task Task) *Container {
-	//var params []Param
 	return &Container{
 		Type: "DOCKER",
 		Docker: Docker{
 			Image:        task.Image,
 			Network:      "BRIDGE",
 			Privileged:   true,
-			//Parameters: append(params, Param{
-			//	Key: "hostname",
-			//	Value: "localhost",
-			//}),
 			PortMappings: newPortMappings(portRange, task.EnableVNC),
 		},
 	}
@@ -204,7 +224,7 @@ func newLaunchTaskInfo(resource ResourcesForOneTask, task Task) *Launch {
 		Name:      "My Task",
 		TaskID:    ID{task.TaskId},
 		AgentID:   resource.AgentId,
-		Command:   Command{false},
+		Command:   Command{task.Environment, false},
 		Container: newContainer(resource.Range, task),
 		Resources: []Resource{
 			newResourcePorts(resource.Range),
@@ -251,7 +271,7 @@ func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
 			offersMap[v.OfferId] = true
 		}
 	}
-	for k,_ := range offersMap {
+	for k, _ := range offersMap {
 		set = append(set, k)
 	}
 	return set
@@ -271,7 +291,7 @@ func newSubscribedMessage(user string, name string, roles []string) (SubscribeMe
 	}
 }
 
-func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) (AcknowledgeMessage) {
+func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) AcknowledgeMessage {
 	return AcknowledgeMessage{
 		FrameworkID: frameworkId,
 		Type:        "ACKNOWLEDGE",
@@ -283,7 +303,7 @@ func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) (
 	}
 }
 
-func newDeclineMessage(frameworkId ID, offerId []ID) (DeclineMessage) {
+func newDeclineMessage(frameworkId ID, offerId []ID) DeclineMessage {
 	return DeclineMessage{
 		FrameworkID: frameworkId,
 		Type:        "DECLINE",
@@ -296,12 +316,28 @@ func newDeclineMessage(frameworkId ID, offerId []ID) (DeclineMessage) {
 	}
 }
 
-func newKillMessage(frameworkId ID, taskId string) (KillMessage) {
+func newKillMessage(frameworkId ID, taskId string) KillMessage {
 	return KillMessage{
 		FrameworkID: frameworkId,
 		Type:        "KILL",
 		Kill: Kill{
 			TaskID: ID{taskId},
+		},
+	}
+}
+
+func GetReconcileMessage(frameworkId ID, tasksId ID, agentId ID) (ReconcileMessage) {
+	tasks := Tasks{
+		TaskID:  tasksId,
+		AgentID: agentId,
+	}
+	return ReconcileMessage{
+		FrameworkID: frameworkId,
+		Type:        "RECONCILE",
+		Reconcile: Reconcile{
+			Tasks: []Tasks{
+				tasks,
+			},
 		},
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/aerokube/selenoid/mesos/zookeeper"
 	"log"
 	"net/http"
 	"sort"
@@ -27,10 +28,11 @@ type Task struct {
 	Image         string
 	EnableVNC     bool
 	ReturnChannel chan *DockerInfo
+	Environment   Env
 }
 
 type DockerInfo struct {
-	Id              string
+	Id string
 	NetworkSettings struct {
 		Ports struct {
 			ContainerPort []struct {
@@ -42,14 +44,14 @@ type DockerInfo struct {
 		}
 		IPAddress string
 	}
-	ErrorMsg string
+	ErrorMsg  string
 	AgentHost string
 }
 
 type Scheduler struct {
-	Url           string
-	StreamId      string
-	FrameworkId   ID
+	Url         string
+	StreamId    string
+	FrameworkId ID
 }
 
 type Message struct {
@@ -70,6 +72,7 @@ type Message struct {
 			Source     string `json:"source"`
 			Message    string `json:"message"`
 			TaskId     ID     `json:"task_id"`
+			Reason     string `json:"reason"`
 		}
 	}
 	Error struct{
@@ -100,7 +103,7 @@ type Info struct {
 func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	if zookeeperUrl != "" {
 		zookeeper.Zk = &zookeeper.Zoo{
-			Url:zookeeperUrl,
+			Url: zookeeperUrl,
 		}
 		Sched = &Scheduler{
 			Url: zookeeper.DetectMaster() + "/api/v1/scheduler"}
@@ -134,7 +137,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 		fmt.Println(line)
 		var index = strings.LastIndex(line, "}")
 		if index != -1 {
-			jsonMessage := line[0: index+1]
+			jsonMessage := line[0 : index+1]
 			json.Unmarshal([]byte(jsonMessage), &m)
 			switch m.Type {
 			case "SUBSCRIBED":
@@ -174,7 +177,7 @@ func processUpdate(m Message, notRunningTasks map[string]*Info, zookeeperUrl str
 		channel := notRunningTasks[taskId].ReturnChannel
 		channel <- container
 		delete(notRunningTasks, taskId)
-		if zookeeperUrl!= "" {
+		if zookeeperUrl != "" {
 			zookeeper.CreateTaskNode(status.TaskId.Value, status.AgentId.Value)
 		}
 	} else if state == "TASK_KILLED" {
@@ -183,6 +186,15 @@ func processUpdate(m Message, notRunningTasks map[string]*Info, zookeeperUrl str
 		fmt.Println("Здесь должен быть reconcile или типа того")
 	} else if state == "TASK_STARTING"{
 		fmt.Println("Ололо")
+		if zookeeperUrl != "" && notRunningTasks[taskId] != nil {
+			var agentId = zookeeper.GetAgentIdForTask(taskId);
+			Sched.Reconcile(status.TaskId, ID{agentId})
+			msg := "Задача " + taskId + " для агента " + agentId + " потеряна, но хочеть жить снова и сделала RECONCILIATION"
+			log.Print(msg)
+		} else if (status.Reason == "REASON_RECONCILIATION") {
+			msg := "У нас прблемы! Невозможно сделать RECONCILIATION задачи " + taskId + " по причине " + status.Source + "-" + status.State + "-" + status.Message
+			log.Print(msg)
+		}
 	} else {
 		msg := "Галактика в опасности! Задача " + taskId + " непредвиденно упала по причине " + status.Source + "-" + status.State + "-" + status.Message
 		if notRunningTasks[taskId] != nil {
