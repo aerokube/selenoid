@@ -121,7 +121,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	u := &url.URL{Scheme: "http", Host: seleniumHostPort, Path: d.Service.Path}
 
 	if d.Video {
-		videoContainerId, err = startVideoContainer(ctx, cl, requestId, stat, d.Environment, d.Caps)
+		videoContainerId, err = startVideoContainer(ctx, cl, requestId, stat, d.Environment, d.ServiceBase, d.Caps)
 		if err != nil {
 			return nil, fmt.Errorf("start video container: %v", err)
 		}
@@ -321,10 +321,11 @@ func getContainerIP(networkName string, stat types.ContainerJSON) string {
 	return ""
 }
 
-func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint64, browserContainer types.ContainerJSON, environ Environment, caps session.Caps) (string, error) {
+func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint64, browserContainer types.ContainerJSON, environ Environment, service ServiceBase, caps session.Caps) (string, error) {
 	videoContainerStartTime := time.Now()
 	videoContainerImage := environ.VideoContainerImage
-	env := []string{fmt.Sprintf("FILE_NAME=%s", caps.VideoName)}
+	env := getEnv(service, caps)
+	env = append(env, fmt.Sprintf("FILE_NAME=%s", caps.VideoName))
 	videoScreenSize := caps.VideoScreenSize
 	if videoScreenSize != "" {
 		env = append(env, fmt.Sprintf("VIDEO_SIZE=%s", videoScreenSize))
