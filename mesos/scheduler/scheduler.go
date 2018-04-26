@@ -138,8 +138,9 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 			json.Unmarshal([]byte(jsonMessage), &m)
 			switch m.Type {
 			case "SUBSCRIBED":
-				log.Println("[SELENOID SUBSCRIBED AS FRAMEWORK ON MESOS MASTER]")
-				Sched.FrameworkId = m.Subscribed.FrameworkId
+				frameworkId := m.Subscribed.FrameworkId
+				log.Printf("[-] [SELENOID_SUBSCRIBED_AS_FRAMEWORK_ON_MESOS_MASTER] [%s]", frameworkId)
+				Sched.FrameworkId = frameworkId
 				break
 			case "OFFERS":
 				processOffers(m, notRunningTasks)
@@ -184,7 +185,7 @@ func processUpdate(m Message, notRunningTasks map[string]*Info, zookeeperUrl str
 		if zookeeperUrl != "" && notRunningTasks[taskId] != nil {
 			var agentId = zookeeper.GetAgentIdForTask(taskId);
 			Sched.Reconcile(status.TaskId, ID{agentId})
-			log.Printf("[-] [SELENOID_MAKE_RECONCILE] [%s] [%s]", taskId, agentId)
+			log.Printf("[-] [SELENOID_MAKES_RECONCILIATION] [%s] [%s]", taskId, agentId)
 		} else if status.Reason == "REASON_RECONCILIATION" {
 			processFailedTask(taskId, notRunningTasks, m)
 		}
@@ -193,7 +194,7 @@ func processUpdate(m Message, notRunningTasks map[string]*Info, zookeeperUrl str
 
 func processFailedTask(taskId string, notRunningTasks map[string]*Info, m Message) {
 	status := m.Update.Status
-	msg := "Task with id [" + taskId + "] was failed by the reason [" + status.Source + "-" + status.State + "-" + status.Message + "]"
+	msg := "Task with id [" + taskId + "] has been failed by the reason [" + status.Source + "-" + status.State + "-" + status.Message + "]"
 	if notRunningTasks[taskId] != nil {
 		container := &DockerInfo{ErrorMsg: msg}
 		channel := notRunningTasks[taskId].ReturnChannel
@@ -211,10 +212,10 @@ func processOffers(m Message, notRunningTasks map[string]*Info) {
 		offersIds = append(offersIds, n.Id)
 	}
 	tasksCanRun, resourcesForTasks := getTotalOffersCapacity(offers)
-	log.Printf("[-] [MESOS_HAVE_RESOURCES_FOR_TASKS] [%d]\n", tasksCanRun)
+	log.Printf("[-] [MESOS_HAS_RESOURCES_FOR_TASKS] [%d]\n", tasksCanRun)
 	var tasks []Task
 	if tasksCanRun == 0 {
-		log.Println("[-] [MESOS_HAVE_NO_RESOURCES_FOR_RUNNING_TASKS]")
+		log.Println("[-] [MESOS_HAS_NO_RESOURCES_FOR_RUNNING_TASKS]")
 		Sched.Decline(offersIds)
 	} else {
 	Loop:
