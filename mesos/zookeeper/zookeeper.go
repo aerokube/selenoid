@@ -8,6 +8,8 @@ import (
 	"sort"
 	"encoding/json"
 	"strconv"
+	"net/url"
+	"log"
 )
 
 const (
@@ -50,12 +52,16 @@ func Create() {
 	}
 }
 
-func DetectMaster() string {
-	conn := connect()
+func DetectMaster(flagUrl *url.URL) string {
+	conn := connectToMesosZk(flagUrl.Host)
 	defer conn.Close()
-	c, _, _ := conn.Children("/mesos")
+	path := flagUrl.Path
+	if path == "" {
+		log.Fatal("There is no path to mesos in zookeeper")
+	}
+	c, _, _ := conn.Children(flagUrl.Path)
 	sort.Strings(c)
-	data, _, _ := conn.Get("/mesos/" + c[0])
+	data, _, _ := conn.Get(flagUrl.Path + "/" + c[0])
 	var config MesosConfig
 	json.Unmarshal(data, &config)
 	return "http://" + config.Hostname + ":" + strconv.Itoa(config.Port)
@@ -137,6 +143,13 @@ func must(err error) {
 
 func connect() *zk.Conn {
 	zks := strings.Split(Zk.Url, ",")
+	conn, _, err := zk.Connect(zks, time.Minute)
+	must(err)
+	return conn
+}
+
+func connectToMesosZk(url string) *zk.Conn {
+	zks := strings.Split(url, ",")
 	conn, _, err := zk.Connect(zks, time.Minute)
 	must(err)
 	return conn
