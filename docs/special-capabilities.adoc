@@ -87,6 +87,17 @@ name: "myCoolTestName"
 
 The main application of this capability - is debugging tests in the UI which is showing specified name for every running session.
 
+=== Custom Session Timeout: sessionTimeout
+
+Sometimes you may want to change idle timeout for selected browser session. To achieve this - pass the following capability:
+
+.Type: int
+----
+sessionTimeout: 30
+----
+
+Timeout is always specified in seconds, should be positive and can be no more than the value set by `-max-timeout` flag.
+
 === Per-session Time Zone: timeZone
 
 Some tests require particular time zone to be set in operating system.

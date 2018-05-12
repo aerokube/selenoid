@@ -67,6 +67,7 @@ var (
 	enableFileUpload         bool
 	listen                   string
 	timeout                  time.Duration
+	maxTimeout               time.Duration
 	newSessionAttemptTimeout time.Duration
 	sessionDeleteTimeout     time.Duration
 	serviceStartupTimeout    time.Duration
@@ -104,6 +105,7 @@ func init() {
 	flag.IntVar(&limit, "limit", 5, "Simultaneous container runs")
 	flag.IntVar(&retryCount, "retry-count", 1, "New session attempts retry count")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
+	flag.DurationVar(&maxTimeout, "max-timeout", 1*time.Hour, "Maximum valid session idle timeout in time.Duration format")
 	flag.DurationVar(&newSessionAttemptTimeout, "session-attempt-timeout", 30*time.Second, "New session attempt timeout in time.Duration format")
 	flag.DurationVar(&sessionDeleteTimeout, "session-delete-timeout", 30*time.Second, "Session delete timeout in time.Duration format")
 	flag.DurationVar(&serviceStartupTimeout, "service-startup-timeout", 30*time.Second, "Service startup timeout in time.Duration format")

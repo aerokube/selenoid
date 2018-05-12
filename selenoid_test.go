@@ -89,6 +89,24 @@ func TestGetShortScreenResolution(t *testing.T) {
 	AssertThat(t, res, EqualTo{"1024x768x24"})
 }
 
+func TestInvalidSessionTimeoutCapability(t *testing.T) {
+	testBadSessionTimeoutCapability(t, 3601)
+}
+
+func TestNegativeSessionTimeoutCapability(t *testing.T) {
+	testBadSessionTimeoutCapability(t, -1)
+}
+
+func testBadSessionTimeoutCapability(t *testing.T, timeoutValue int) {
+	manager = &BrowserNotFound{}
+
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(fmt.Sprintf(`{"desiredCapabilities":{"sessionTimeout":%d}}`, timeoutValue))))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusBadRequest})
+
+	AssertThat(t, queue.Used(), EqualTo{0})
+}
+
 func TestMalformedScreenResolutionCapability(t *testing.T) {
 	manager = &BrowserNotFound{}
 
@@ -174,8 +192,9 @@ func TestNewSessionBadHostResponse(t *testing.T) {
 
 func TestSessionCreated(t *testing.T) {
 	manager = &HTTPTest{Handler: Selenium()}
+	timeout = 5 * time.Second
 
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities": {"enableVideo": true, "enableVNC": true}}`)))
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities": {"enableVideo": true, "enableVNC": true, "sessionTimeout": 3}}`)))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
