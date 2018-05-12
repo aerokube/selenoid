@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"reflect"
 	"sync"
+	"time"
 )
 
 // Caps - user capabilities
@@ -24,6 +25,7 @@ type Caps struct {
 	ApplicationContainers []string               `json:"applicationContainers"`
 	HostsEntries          []string               `json:"hostsEntries"`
 	Labels                map[string]string      `json:"labels"`
+	SessionTimeout        uint32                 `json:"sessionTimeout"`
 	ExtensionCapabilities map[string]interface{} `json:"selenoid:options"`
 }
 
@@ -70,7 +72,8 @@ type Session struct {
 	Fileserver string
 	VNC        string
 	Cancel     func()
-	Timeout    chan struct{}
+	Timeout    time.Duration
+	TimeoutCh  chan struct{}
 	Lock       sync.Mutex
 }
 

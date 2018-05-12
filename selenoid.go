@@ -132,6 +132,13 @@ func create(w http.ResponseWriter, r *http.Request) {
 		browser.Caps = browser.W3CCaps.Caps
 	}
 	browser.Caps.ProcessExtensionCapabilities()
+	sessionTimeout, err := getSessionTimeout(browser.Caps.SessionTimeout, maxTimeout, timeout)
+	if err != nil {
+		log.Printf("[%d] [BAD_SESSION_TIMEOUT] [%ds]", requestId, browser.Caps.SessionTimeout)
+		util.JsonError(w, err.Error(), http.StatusBadRequest)
+		queue.Drop()
+		return
+	}
 	resolution, err := getScreenResolution(browser.Caps.ScreenResolution)
 	if err != nil {
 		log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s]", requestId, browser.Caps.ScreenResolution)
@@ -273,7 +280,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 		Fileserver: startedService.FileserverHostPort,
 		VNC:        startedService.VNCHostPort,
 		Cancel:     cancelAndRenameVideo,
-		Timeout: onTimeout(timeout, func() {
+		Timeout:    sessionTimeout,
+		TimeoutCh: onTimeout(sessionTimeout, func() {
 			request{r}.session(s.ID).Delete(requestId)
 		})})
 	queue.Create()
@@ -320,6 +328,18 @@ func getVideoScreenSize(videoScreenSize string, screenResolution string) (string
 	return shortenScreenResolution(screenResolution), nil
 }
 
+func getSessionTimeout(sessionTimeout uint32, maxTimeout time.Duration, defaultTimeout time.Duration) (time.Duration, error) {
+	if sessionTimeout > 0 {
+		std := time.Duration(sessionTimeout) * time.Second
+		if std <= maxTimeout {
+			return std, nil
+		} else {
+			return 0, fmt.Errorf("Invalid sessionTimeout capability: should be <= %s", maxTimeout)
+		}
+	}
+	return defaultTimeout, nil
+}
+
 func getVideoFileName(videoOutputDir string) string {
 	filename := ""
 	for {
@@ -355,9 +375,9 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 					sess.Lock.Lock()
 					defer sess.Lock.Unlock()
 					select {
-					case <-sess.Timeout:
+					case <-sess.TimeoutCh:
 					default:
-						close(sess.Timeout)
+						close(sess.TimeoutCh)
 					}
 					if r.Method == http.MethodDelete && len(fragments) == 3 {
 						if enableFileUpload {
@@ -368,7 +388,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 						queue.Release()
 						log.Printf("[%d] [SESSION_DELETED] [%s]", requestId, id)
 					} else {
-						sess.Timeout = onTimeout(timeout, func() {
+						sess.TimeoutCh = onTimeout(sess.Timeout, func() {
 							request{r}.session(id).Delete(requestId)
 						})
 						if len(fragments) == 4 && fragments[len(fragments)-1] == "file" && enableFileUpload {
