@@ -264,6 +264,7 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 		VideoFrameRate:        25,
 		Env:                   []string{"LANG=ru_RU.UTF-8", "LANGUAGE=ru:en"},
 		HostsEntries:          []string{"example.com:192.168.0.1", "test.com:192.168.0.2"},
+		DNSServers:          []string{"192.168.0.1", "192.168.0.2"},
 		Labels:                map[string]string{"label1": "some-value", "label2": ""},
 		ApplicationContainers: []string{"one", "two"},
 		TimeZone:              "Europe/Moscow",
