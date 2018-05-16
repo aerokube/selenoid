@@ -24,6 +24,7 @@ type Caps struct {
 	Env                   []string               `json:"env"`
 	ApplicationContainers []string               `json:"applicationContainers"`
 	HostsEntries          []string               `json:"hostsEntries"`
+	DNSServers            []string               `json:"dnsServers"`
 	Labels                map[string]string      `json:"labels"`
 	SessionTimeout        uint32                 `json:"sessionTimeout"`
 	ExtensionCapabilities map[string]interface{} `json:"selenoid:options"`
