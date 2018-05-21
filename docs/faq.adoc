@@ -1,0 +1,102 @@
+== Frequently Asked Questions
+
+=== Logs and Dirs
+
+**Where are Selenoid logs?**
+
+Selenoid outputs its logs to stdout. Selenoid launched as a binary should output logs to the screen. To see Selenoid logs launched as Docker container type:
+
+    $ docker logs selenoid
+
+To follow the logs add one more flag:
+
+    $ docker logs -f selenoid
+
+**Where are recorded videos stored?**
+
+Default location when installed with `cm` is `~/.aerokube/selenoid/video` or `C:\Users\<user>\.aerokube\selenoid\video`.
+
+=== Limits and Timeouts
+
+**How can I limit overall browsers consumption?**
+
+You have to use `-limit` flag to specify total number of parallel sessions. Default value is 5. See <<Resources Consumption>> section on how to determine total number of parallel sessions.
+
+**Can I limit per-version browser consumption?**
+
+No, this is not supported. We consider the only reasonable limitation should be the overall browsers consumption. This is important to not overload the hardware. 
+
+**How can I adjust Selenoid timeouts?**
+
+The main timeout flag is `-timeout`, specified as `60s` or `2m` or `1h`. It means maximum amount of time between subsequent HTTP requests to Selenium API. When there are no requests during this time period - session is automatically closed. Selenoid also has more subtle timeouts like:
+
+* `-service-startup-timeout` - container or driver process startup timeout
+* `-session-attempt-timeout` - new session HTTP request timeout, applied when container or driver has started
+* `-session-delete-timeout` - container or process removal timeout, applied after `driver.quit()` call
+
+=== Resources Consumption
+
+**How many resources browser containers consume?**
+
+This depends on your tests. We recommend to start with 1 CPU and 1 Gb of memory per container as a rough estimate and then increase `-limit` checking that your tests work stably.
+
+**Do VNC and non-VNC browser images memory and CPU consumption differ?**
+
+The only difference between these images - is a running VNC server (`x11vnc`) consuming approximately 20 Megabytes of RAM in idle state which is negligible compared to browser memory consumption.
+
+=== Features not Working
+
+**Selenoid does not start: open config/browsers.json: no such file or directory**
+
+This usually happens when Selenoid is started in Docker container with custom command-line arguments, e.g.:
+
+    $ docker run <some-args> aerokube/selenoid:some-version -limit 10
+    
+In that case you have to specify path to configuration file explicitly (`cm` tool does this automatically):
+
+    $ docker run <some-args> aerokube/selenoid:some-version -limit 10 -conf /etc/selenoid/browsers.json 
+
+**Getting error: create container: Error response from daemon: client version 1.36 is too new**
+
+You have to run Selenoid binary \ container with `DOCKER_API_VERSION` variable specifying your Docker API version. `cm` tool does this automatically for you. To determine API version type:
+
+    $ docker version | grep API
+
+Then run Selenoid like the following:
+    
+    $ DOCKER_API_VERSION=1.32 ./selenoid <rest-of-args> # As a binary
+    $ docker run -e DOCKER_API_VERSION=1.32 <rest-of-args> aerokube/selenoid:some-version # As Docker container
+
+**Video feature not working**
+
+When running Selenoid as Docker container video feature can be not working (because of misconfiguration). If your video files are named like `selenoid607667f7e1c7923779e35506b040300d.mp4` and you are seeing the following log message...
+```
+2018/03/20 21:06:37 [9] [VIDEO_ERROR] [Failed to rename /video/selenoid607667f7e1c7923779e35506b040300d.mp4 to /video/8019c4bc-9bec-4a8b-aa40-68d1db0cffd2.mp4: rename /video/selenoid607667f7e1c7923779e35506b040300d.mp4 /video/8019c4bc-9bec-4a8b-aa40-68d1db0cffd2.mp4: no such file or directory]
+```
+\... then check that:
+
+. You are passing an `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable pointing to a directory on the `host machine` where video files are actually stored
+. When passing custom arguments to Selenoid container (such as `-limit` or `-timeout`) you also have to pass `-video-output-dir /opt/selenoid/video` and mount host machine video dir to `/opt/selenoid/video`
+    
+**Can't open Selenoid video with Firefox**
+
+This is because we are using H264 codec which is not supported in Firefox for licensing reasons. Should work like a charm in Google Chrome or VLC player.
+
+**Can't get VNC feature to work: Disconnected**
+
+Please check the following:
+
+. You have `enableVNC = true` capability in your tests
+. You are using browser images with `vnc` in their name, e.g. `selenoid/vnc:firefox:58.0`.
+
+**Seeing black screen with a cross in VNC window**
+
+You are using `driver.close()` instead of `driver.quit()` and just closed the last browser tab instead of removing the session.
+
+**Can't maximize browser window**
+
+This is because of missing window manager in browser images. Should be fixed soon.
+
+**Can Selenoid pull browser images automatically?**
+
+No, we did not implement this feature intentionally. We consider that all such cluster maintenance tasks can influence performance and stability when done automatically.
