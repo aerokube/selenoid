@@ -115,8 +115,8 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 
 	frameworkId := ""
 	if zookeeperUrl != "" && zookeeper.GetFrameworkInfo() != nil {
-		for _, n := range zookeeper.GetFrameworkInfo() {
-			frameworkId = n
+		for _, id := range zookeeper.GetFrameworkInfo() {
+			frameworkId = id
 		}
 	}
 	body, _ := json.Marshal(newSubscribedMessage("test", "Selenoid", ID{frameworkId}))
