@@ -79,6 +79,26 @@ func CreateTaskNode(taskId string, agentId string) {
 	fmt.Printf("******* create: %+v\n", path)
 }
 
+func CreateFrameworkNode(framewordId string) {
+	DelAllFrameworkNodes()
+
+	conn := connect()
+	defer conn.Close()
+
+	flags := int32(0)
+	acl := zk.WorldACL(zk.PermAll)
+
+	exists, _, _ := conn.Exists(selenoidPath + "/frameworkInfo")
+	if !exists {
+		fi, _ := conn.Create("/selenoid/frameworkInfo", []byte{}, flags, acl)
+		fmt.Printf("******* create: %+v %+v\n", fi)
+	}
+
+	path, err := conn.Create(selenoidPath+"/frameworkInfo/"+framewordId, []byte{}, flags, acl)
+	must(err)
+	fmt.Printf("******* create FrameworkId: %+v\n", path)
+}
+
 func GetAgentIdForTask(taskId string) string{
 	conn := connect()
 	defer conn.Close()
@@ -87,6 +107,23 @@ func GetAgentIdForTask(taskId string) string{
 	must(err)
 	fmt.Printf("******* get:    %+v %+v\n", string(data), stat)
 	return string(data)
+}
+
+func GetFrameworkInfo() []string{
+	conn := connect()
+	defer conn.Close()
+	exists, _, err := conn.Exists(selenoidPath + "/frameworkInfo")
+	must(err)
+	if exists {
+		childs, stat, err := conn.Children(selenoidPath + "/frameworkInfo")
+		if err != nil {
+			fmt.Printf("Children returned error: %+v", err)
+			return nil
+		}
+		fmt.Printf("******* get FrameworkId:    %+v %+v\n", []string(childs), stat)
+		return childs
+	}
+	return nil
 }
 
 func GetChildren() []string {
@@ -117,13 +154,33 @@ func DelAllChildrenNodes() {
 	}
 }
 
+func DelAllFrameworkNodes() {
+	conn := connect()
+	defer conn.Close()
+	childs := GetFrameworkInfo()
+	if childs != nil {
+		for _, n := range childs {
+			DelFrameworkNode(n)
+		}
+	}
+}
+
 func DelNode(taskId string) {
 	conn := connect()
 	defer conn.Close()
 
 	err := conn.Delete(selenoidPath+"/tasks/"+taskId, -1)
 	must(err)
-	fmt.Printf("******* delete" + taskId + ": ok\n")
+	fmt.Printf("******* delete FrameworkId " + taskId + ": ok\n")
+}
+
+func DelFrameworkNode(id string) {
+	conn := connect()
+	defer conn.Close()
+
+	err := conn.Delete(selenoidPath+"/frameworkInfo/"+id, -1)
+	must(err)
+	fmt.Printf("******* delete " + id + ": ok\n")
 }
 
 func Del() {

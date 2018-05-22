@@ -91,8 +91,9 @@ type ReconcileMessage struct {
 }
 
 type FrameworkInfo struct {
-	User  string   `json:"user"`
-	Name  string   `json:"name"`
+	User         string `json:"user"`
+	Name         string `json:"name"`
+	FrameworkId ID `json:"framework_id,omitempty"`
 }
 
 type Subscribe struct {
@@ -277,6 +278,19 @@ func newSubscribedMessage(user string, name string) SubscribeMessage {
 			FrameworkInfo{
 				User:  user,
 				Name:  name,
+			},
+		},
+	}
+}
+
+func newSubscribedMessageWithId(user string, name string, frameworkId ID) SubscribeMessage {
+	return SubscribeMessage{
+		Type: "SUBSCRIBE",
+		Subscribe: Subscribe{
+			FrameworkInfo{
+				User:  user,
+				Name:  name,
+				FrameworkId: frameworkId,
 			},
 		},
 	}
