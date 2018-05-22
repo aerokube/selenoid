@@ -271,8 +271,8 @@ func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
 }
 
 
-func newSubscribedMessage(user string, name string) SubscribeMessage {
-	return SubscribeMessage{
+func newSubscribedMessage(user string, name string, frameworkId ID) SubscribeMessage {
+	subscribedMessage :=  SubscribeMessage{
 		Type: "SUBSCRIBE",
 		Subscribe: Subscribe{
 			FrameworkInfo{
@@ -281,19 +281,10 @@ func newSubscribedMessage(user string, name string) SubscribeMessage {
 			},
 		},
 	}
-}
-
-func newSubscribedMessageWithId(user string, name string, frameworkId ID) SubscribeMessage {
-	return SubscribeMessage{
-		Type: "SUBSCRIBE",
-		Subscribe: Subscribe{
-			FrameworkInfo{
-				User:  user,
-				Name:  name,
-				FrameworkId: frameworkId,
-			},
-		},
+	if frameworkId.Value != ""{
+		subscribedMessage.Subscribe.FrameworkInfo.FrameworkId = frameworkId
 	}
+	return subscribedMessage
 }
 
 func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) AcknowledgeMessage {

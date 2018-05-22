@@ -113,17 +113,13 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	setResourceLimits(cpu, mem)
 	notRunningTasks := make(map[string]*Info)
 
-	var body []byte
-	if zookeeperUrl != "" && zookeeper.GetFrameworkInfo() != nil{
-		frameworkId := ""
+	frameworkId := ""
+	if zookeeperUrl != "" && zookeeper.GetFrameworkInfo() != nil {
 		for _, n := range zookeeper.GetFrameworkInfo() {
 			frameworkId = n
 		}
-		body, _ = json.Marshal(newSubscribedMessageWithId("test", "Selenoid", ID{frameworkId}))
-	} else {
-		body, _ = json.Marshal(newSubscribedMessage("test", "Selenoid"))
 	}
-
+	body, _ := json.Marshal(newSubscribedMessage("test", "Selenoid", ID{frameworkId}))
 	resp, err := http.Post(Sched.Url, "application/json", bytes.NewReader(body))
 	if err != nil {
 		log.Fatal(err)
