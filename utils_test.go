@@ -13,11 +13,12 @@ import (
 
 	"time"
 
+	"testing"
+
 	. "github.com/aandryashin/matchers"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
 	"github.com/pborman/uuid"
-	"testing"
 )
 
 type HTTPTest struct {
@@ -45,7 +46,8 @@ func (m *HTTPTest) StartWithCancel() (*service.StartedService, error) {
 		m.Action(s)
 	}
 	ss := service.StartedService{
-		Url: u,
+		Url:                u,
+		FileserverHostPort: u.Host,
 		Cancel: func() {
 			log.Println("Stopping HTTPTest Service...")
 			s.Close()
@@ -123,12 +125,17 @@ func Selenium() http.Handler {
 		delete(sessions, u)
 		lock.Unlock()
 	})
+	mux.HandleFunc("/testfile", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("test-data"))
+	})
 	return mux
 }
 
 func TestProcessExtensionCapabilities(t *testing.T) {
 	capsJson := `{
-		"browserName": "firefox", "version": "57.0",
+		"version": "57.0",
+		"browserName": "firefox",
 		"selenoid:options": {
 			"name": "ExampleTestName",
 			"enableVNC": true,
@@ -142,7 +149,10 @@ func TestProcessExtensionCapabilities(t *testing.T) {
 	AssertThat(t, caps.Name, EqualTo{"firefox"})
 	AssertThat(t, caps.Version, EqualTo{"57.0"})
 	AssertThat(t, caps.TestName, EqualTo{""})
+
 	caps.ProcessExtensionCapabilities()
+	AssertThat(t, caps.Name, EqualTo{"firefox"})
+	AssertThat(t, caps.Version, EqualTo{"57.0"})
 	AssertThat(t, caps.TestName, EqualTo{"ExampleTestName"})
 	AssertThat(t, caps.VNC, EqualTo{true})    //Correct type
 	AssertThat(t, caps.Video, EqualTo{false}) //Wrong type in JSON

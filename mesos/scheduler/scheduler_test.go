@@ -68,9 +68,11 @@ func handler() http.Handler {
 func TestGetResourcesForTasks(t *testing.T) {
 	expectResourcesForTasks := []ResourcesForOneTask{{offerID[0],
 		agentID,
+		srv.URL,
 		Range{8000, 8001}},
 		{offerID[0],
 			agentID,
+			srv.URL,
 			Range{8002, 8003}}}
 
 	actualGetResourcesForTasks := getResourcesForTasks(offer, 2, []Range{goodRange})

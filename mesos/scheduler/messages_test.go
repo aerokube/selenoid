@@ -53,11 +53,11 @@ func initTasks() {
 	tasks = []Task{{"taskForTestWithVNC",
 		"imageForTest",
 		true,
-		make(chan *DockerInfo)},
+		make(chan *DockerInfo), Env{}},
 		{"taskForTestWithoutVNC",
 			"imageForTest",
 			false,
-			make(chan *DockerInfo)}}
+			make(chan *DockerInfo), Env{}}}
 }
 
 func initVncContainer() {
@@ -111,7 +111,6 @@ func TestNewAcknowledgeMessage(t *testing.T) {
 func TestNewSubscribedMessage(t *testing.T) {
 	user := "testUser"
 	name := "testName"
-	roles := []string{"testRole_1", "testRole_2"}
 
 	expectSubscribedMessage := SubscribeMessage{
 		"SUBSCRIBE",
@@ -119,12 +118,11 @@ func TestNewSubscribedMessage(t *testing.T) {
 			FrameworkInfo{
 				user,
 				name,
-				roles,
 			},
 		},
 	}
 
-	actualSubscribeMessage := newSubscribedMessage(user, name, roles)
+	actualSubscribeMessage := newSubscribedMessage(user, name)
 	AssertThat(t, expectSubscribedMessage, EqualTo{actualSubscribeMessage})
 }
 

@@ -25,9 +25,5 @@
   name = "github.com/aandryashin/matchers"
 
 [[constraint]]
-  name = "github.com/docker/docker"
-  revision = "92309e34e42aec3a0e041403bdd3c4fc0dc20269"
-  
-[[override]]
-  name = "github.com/docker/distribution"
-  revision = "277ed486c948042cab91ad367c379524f3b25e18"
+  branch = "master"
+  name = "github.com/aerokube/util"
