@@ -78,7 +78,7 @@ func CreateTaskNode(taskId string, agentId string) {
 	log.Printf("******* create: %+v\n", path)
 }
 
-func CreateFrameworkNode(framewordId string) {
+func CreateFrameworkNode(frameworkId string) {
 	DelAllFrameworkNodes()
 
 	conn := connect()
@@ -93,7 +93,7 @@ func CreateFrameworkNode(framewordId string) {
 		log.Printf("******* create: %+v %+v\n", fi)
 	}
 
-	path, err := conn.Create(selenoidPath+"/frameworkInfo/"+framewordId, []byte{}, flags, acl)
+	path, err := conn.Create(selenoidPath+"/frameworkInfo/"+frameworkId, []byte{}, flags, acl)
 	must(err)
 	log.Printf("******* create FrameworkId: %+v\n", path)
 }
