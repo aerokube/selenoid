@@ -108,7 +108,7 @@ func GetAgentIdForTask(taskId string) string{
 	return string(data)
 }
 
-func GetFrameworkInfo() []string{
+func GetFrameworkInfo() []string {
 	conn := connect()
 	defer conn.Close()
 	exists, _, err := conn.Exists(selenoidPath + "/frameworkInfo")

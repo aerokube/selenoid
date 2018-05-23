@@ -113,14 +113,11 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	setResourceLimits(cpu, mem)
 	notRunningTasks := make(map[string]*Info)
 
-	body, _ := json.Marshal(newSubscribedMessage("root", "Selenoid"))
-	fmt.Println(string(body))
-
 	frameworkId := ""
 	if zookeeperUrl != "" && zookeeper.GetFrameworkInfo() != nil {
 		frameworkId = zookeeper.GetFrameworkInfo()[0]
 	}
-	body, _ := json.Marshal(newSubscribedMessage("test", "Selenoid", ID{frameworkId}))
+	body, _ := json.Marshal(newSubscribedMessage("root", "Selenoid", ID{frameworkId}))
 	resp, err := http.Post(Sched.Url, "application/json", bytes.NewReader(body))
 	if err != nil {
 		log.Fatal(err)
@@ -145,9 +142,9 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 			switch m.Type {
 			case "SUBSCRIBED":
 				frameworkId := m.Subscribed.FrameworkId
-				if zookeeperUrl != ""{
+				if zookeeperUrl != "" {
 					frameworkInfo := zookeeper.GetFrameworkInfo()
-					if frameworkInfo == nil || !contains(frameworkInfo, frameworkId.Value){
+					if frameworkInfo == nil || !contains(frameworkInfo, frameworkId.Value) {
 						zookeeper.CreateFrameworkNode(frameworkId.Value)
 					}
 				}
