@@ -14,12 +14,8 @@ Selenoid is a powerful implementation of [Selenium](http://github.com/SeleniumHQ
 ### One-command Installation
 Start browser automation in minutes by copy-pasting just **one command**:
 ```
-$ docker run --rm                                   \
-    -v /var/run/docker.sock:/var/run/docker.sock    \
-    -v ${HOME}:/root                                \
-    -e OVERRIDE_HOME=${HOME}                        \
-    aerokube/cm:latest-release selenoid start       \
-    --vnc --tmpfs 128
+$ curl -s https://aerokube.com/cm/bash | bash \
+    && ./cm selenoid start --vnc --tmpfs 128
 ```
 **That's it!** You can now use Selenoid instead of Selenium server. Specify the following Selenium URL in tests:
 ```
@@ -36,10 +32,14 @@ New images are added right after official releases. You can create your custom i
 New **[rich user interface]((https://github.com/aerokube/selenoid-ui))** showing browser screen and Selenium session logs:
 ![Selenoid UI](docs/img/selenoid-ui.png)
 
+### Video Recording
+* Any browser session can be saved to [H.264](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC) video ([example](https://www.youtube.com/watch?v=maB298oO5cI))
+* An API to list, download and delete recorded video files
+
 ### Lightweight and Lightning Fast
 Suitable for personal usage and in big clusters:
 * Consumes **10 times** less memory than Java-based Selenium server under the same load
-* **Small 7 Mb binary** with no external dependencies (no need to install Java)
+* **Small 6 Mb binary** with no external dependencies (no need to install Java)
 * **Browser consumption API** working out of the box
 * Ability to send browser logs to **centralized log storage** (e.g. to the [ELK-stack](https://logz.io/learn/complete-guide-elk-stack/))
 * Fully **isolated** and **reproducible** environment
@@ -50,7 +50,13 @@ Maintained by a growing community:
 * Telegram [support channel](https://t.me/aerokube)
 * Support by [email](mailto:support@aerokube.com)
 * StackOverflow [tag](https://stackoverflow.com/questions/tagged/selenoid)
+* YouTube [channel](https://www.youtube.com/channel/UC9HvE3FNfTvftzpvXi9c69g)
 
 ## Complete Guide & Build Instructions
 
 Complete reference guide (including building instructions) can be found at: http://aerokube.com/selenoid/latest/
+
+## Known Users
+
+[![JetBrains](docs/img/logo/jetbrains.png)](http://jetbrains.com/) [![Yandex](docs/img/logo/yandex.png)](https://yandex.com/company/) [![Sberbank Technology](docs/img/logo/sbertech.png)](http://sber-tech.com/) [![ThoughtWorks](docs/img/logo/thoughtworks.png)](https://thoughtworks.com/) [![SuperJob](docs/img/logo/superjob.png)](http://superjob.ru/) [![PropellerAds](docs/img/logo/propellerads.png)](http://propellerads.com/) [![AlfaBank](docs/img/logo/alfabank.png)](https://alfabank.com/) [![3CX](docs/img/logo/3cx.png)](https://www.3cx.com/) [![IQ Option](docs/img/logo/iq_option.png)](https://iqoption.com/)
+

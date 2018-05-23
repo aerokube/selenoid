@@ -5,12 +5,13 @@ import (
 	"github.com/aerokube/selenoid/mesos/scheduler"
 	"github.com/aerokube/selenoid/mesos/zookeeper"
 	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/selenoid/util"
 	ctr "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/pborman/uuid"
-	"net/url"
-	"github.com/aerokube/selenoid/util"
 	"log"
+	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -67,5 +68,6 @@ func getEnvForTask(service ServiceBase, caps session.Caps) scheduler.Env {
 	env := make([]scheduler.EnvVariable, 0)
 	env = append(env, scheduler.EnvVariable{"TZ", getTimeZone(service, caps).String()})
 	env = append(env, scheduler.EnvVariable{"SCREEN_RESOLUTION", caps.ScreenResolution})
+	env = append(env, scheduler.EnvVariable{"ENABLE_VNC", strconv.FormatBool(caps.VNC)})
 	return scheduler.Env{env}
 }

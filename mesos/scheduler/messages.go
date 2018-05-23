@@ -91,8 +91,9 @@ type ReconcileMessage struct {
 }
 
 type FrameworkInfo struct {
-	User  string   `json:"user"`
-	Name  string   `json:"name"`
+	User         string `json:"user"`
+	Name         string `json:"name"`
+	FrameworkId ID `json:"framework_id,omitempty"`
 }
 
 type Subscribe struct {
@@ -270,8 +271,8 @@ func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
 }
 
 
-func newSubscribedMessage(user string, name string) SubscribeMessage {
-	return SubscribeMessage{
+func newSubscribedMessage(user string, name string, frameworkId ID) SubscribeMessage {
+	subscribedMessage :=  SubscribeMessage{
 		Type: "SUBSCRIBE",
 		Subscribe: Subscribe{
 			FrameworkInfo{
@@ -280,6 +281,10 @@ func newSubscribedMessage(user string, name string) SubscribeMessage {
 			},
 		},
 	}
+	if frameworkId.Value != ""{
+		subscribedMessage.Subscribe.FrameworkInfo.FrameworkId = frameworkId
+	}
+	return subscribedMessage
 }
 
 func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) AcknowledgeMessage {

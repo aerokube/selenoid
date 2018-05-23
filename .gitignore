@@ -3,3 +3,4 @@
 selenoid
 vendor/*/
 coverage.*
+.DS_Store

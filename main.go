@@ -19,13 +19,16 @@ import (
 
 	"fmt"
 
+	"path/filepath"
+
 	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/mesos/scheduler"
 	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/util"
+	"github.com/aerokube/util/docker"
 	"github.com/docker/docker/client"
-	"path/filepath"
 )
 
 type memLimit int64
@@ -65,6 +68,7 @@ var (
 	enableFileUpload         bool
 	listen                   string
 	timeout                  time.Duration
+	maxTimeout               time.Duration
 	newSessionAttemptTimeout time.Duration
 	sessionDeleteTimeout     time.Duration
 	serviceStartupTimeout    time.Duration
@@ -88,8 +92,8 @@ var (
 	startTime = time.Now()
 
 	version     bool
-	gitRevision string = "HEAD"
-	buildStamp  string = "unknown"
+	gitRevision = "HEAD"
+	buildStamp  = "unknown"
 )
 
 func init() {
@@ -104,6 +108,7 @@ func init() {
 	flag.IntVar(&limit, "limit", 5, "Simultaneous container runs")
 	flag.IntVar(&retryCount, "retry-count", 1, "New session attempts retry count")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
+	flag.DurationVar(&maxTimeout, "max-timeout", 1*time.Hour, "Maximum valid session idle timeout in time.Duration format")
 	flag.DurationVar(&newSessionAttemptTimeout, "session-attempt-timeout", 30*time.Second, "New session attempt timeout in time.Duration format")
 	flag.DurationVar(&sessionDeleteTimeout, "session-delete-timeout", 30*time.Second, "Session delete timeout in time.Duration format")
 	flag.DurationVar(&serviceStartupTimeout, "service-startup-timeout", 30*time.Second, "Service startup timeout in time.Duration format")
@@ -186,7 +191,17 @@ func init() {
 	}
 	ip, _, _ := net.SplitHostPort(u.Host)
 	environment.IP = ip
-	cli, err = client.NewEnvClient()
+	cli, err = docker.CreateCompatibleDockerClient(
+		func(specifiedApiVersion string) {
+			log.Printf("[-] [INIT] [Using Docker API version: %s]", specifiedApiVersion)
+		},
+		func(determinedApiVersion string) {
+			log.Printf("[-] [INIT] [Your Docker API version is %s]", determinedApiVersion)
+		},
+		func(defaultApiVersion string) {
+			log.Printf("[-] [INIT] [Did not manage to determine your Docker API version - using default version: %s]", defaultApiVersion)
+		},
+	)
 	if err != nil {
 		log.Fatalf("[-] [INIT] [New docker client: %v]", err)
 	}
@@ -204,6 +219,7 @@ func cancelOnSignal() {
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-sig
+		log.Println("[-] [-] [SHUTTING_DOWN] [-] [-] [-] [-] [-] [-] [-]")
 		sessions.Each(func(k string, s *session.Session) {
 			if enableFileUpload {
 				os.RemoveAll(path.Join(os.TempDir(), k))
@@ -214,7 +230,6 @@ func cancelOnSignal() {
 			err := cli.Close()
 			if err != nil {
 				log.Fatalf("[-] [SHUTTING_DOWN] [Error closing docker client: %v]", err)
-				os.Exit(1)
 			}
 		}
 		os.Exit(0)
@@ -234,7 +249,7 @@ func onSIGHUP(fn func()) {
 
 func mux() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/session", queue.Check(queue.Protect(post(create))))
+	mux.HandleFunc("/session", queue.Try(queue.Check(queue.Protect(post(create)))))
 	mux.HandleFunc("/session/", proxy)
 	return mux
 }
@@ -296,7 +311,7 @@ func handler() http.Handler {
 		mux().ServeHTTP(w, r)
 	})
 	root.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
-		jsonError(w, "Session timed out or not found", http.StatusNotFound)
+		util.JsonError(w, "Session timed out or not found", http.StatusNotFound)
 	})
 	root.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
@@ -306,6 +321,7 @@ func handler() http.Handler {
 	root.Handle("/vnc/", websocket.Handler(vnc))
 	root.Handle("/logs/", websocket.Handler(logs))
 	root.HandleFunc(videoPath, video)
+	root.HandleFunc("/download/", fileDownload)
 	if enableFileUpload {
 		root.HandleFunc("/file", fileUpload)
 	}

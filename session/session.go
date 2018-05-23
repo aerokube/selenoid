@@ -4,12 +4,14 @@ import (
 	"net/url"
 	"reflect"
 	"sync"
+	"time"
 )
 
 // Caps - user capabilities
 type Caps struct {
 	Name                  string                 `json:"browserName"`
 	Version               string                 `json:"version"`
+	W3CVersion            string                 `json:"browserVersion"`
 	ScreenResolution      string                 `json:"screenResolution"`
 	VNC                   bool                   `json:"enableVNC"`
 	Video                 bool                   `json:"enableVideo"`
@@ -19,13 +21,19 @@ type Caps struct {
 	TestName              string                 `json:"name"`
 	TimeZone              string                 `json:"timeZone"`
 	ContainerHostname     string                 `json:"containerHostname"`
-	ApplicationContainers string                 `json:"applicationContainers"`
-	HostsEntries          string                 `json:"hostsEntries"`
-	Labels                string                 `json:"labels"`
+	Env                   []string               `json:"env"`
+	ApplicationContainers []string               `json:"applicationContainers"`
+	HostsEntries          []string               `json:"hostsEntries"`
+	DNSServers            []string               `json:"dnsServers"`
+	Labels                map[string]string      `json:"labels"`
+	SessionTimeout        uint32                 `json:"sessionTimeout"`
 	ExtensionCapabilities map[string]interface{} `json:"selenoid:options"`
 }
 
 func (c *Caps) ProcessExtensionCapabilities() {
+	if c.W3CVersion != "" {
+		c.Version = c.W3CVersion
+	}
 	if len(c.ExtensionCapabilities) > 0 {
 		s := reflect.ValueOf(c).Elem()
 
@@ -37,10 +45,14 @@ func (c *Caps) ProcessExtensionCapabilities() {
 			tagToFieldMap[tag] = field
 		}
 
-		for k, v := range c.ExtensionCapabilities {
-			value := reflect.ValueOf(v)
-			if field, ok := tagToFieldMap[k]; ok && value.Type().ConvertibleTo(field.Type) {
-				s.FieldByName(field.Name).Set(value.Convert(field.Type))
+		//NOTE: entries from the first maps have less priority than then next ones
+		nestedMaps := []map[string]interface{}{c.ExtensionCapabilities}
+		for _, nm := range nestedMaps {
+			for k, v := range nm {
+				value := reflect.ValueOf(v)
+				if field, ok := tagToFieldMap[k]; ok && value.Type().ConvertibleTo(field.Type) {
+					s.FieldByName(field.Name).Set(value.Convert(field.Type))
+				}
 			}
 		}
 	}
@@ -54,14 +66,16 @@ type Container struct {
 
 // Session - holds session info
 type Session struct {
-	Quota     string
-	Caps      Caps
-	URL       *url.URL
-	Container *Container
-	VNC       string
-	Cancel    func()
-	Timeout   chan struct{}
-	Lock      sync.Mutex
+	Quota      string
+	Caps       Caps
+	URL        *url.URL
+	Container  *Container
+	Fileserver string
+	VNC        string
+	Cancel     func()
+	Timeout    time.Duration
+	TimeoutCh  chan struct{}
+	Lock       sync.Mutex
 }
 
 // Map - session uuid to sessions mapping
