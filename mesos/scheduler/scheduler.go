@@ -115,9 +115,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 
 	frameworkId := ""
 	if zookeeperUrl != "" && zookeeper.GetFrameworkInfo() != nil {
-		for _, id := range zookeeper.GetFrameworkInfo() {
-			frameworkId = id
-		}
+		frameworkId = zookeeper.GetFrameworkInfo()[0]
 	}
 	body, _ := json.Marshal(newSubscribedMessage("test", "Selenoid", ID{frameworkId}))
 	resp, err := http.Post(Sched.Url, "application/json", bytes.NewReader(body))
@@ -146,7 +144,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 				frameworkId := m.Subscribed.FrameworkId
 				if zookeeperUrl != ""{
 					frameworkInfo := zookeeper.GetFrameworkInfo()
-					if frameworkInfo == nil && !contains(frameworkInfo, frameworkId.Value){
+					if frameworkInfo == nil || !contains(frameworkInfo, frameworkId.Value){
 						zookeeper.CreateFrameworkNode(frameworkId.Value)
 					}
 				}
