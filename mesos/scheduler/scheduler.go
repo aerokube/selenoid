@@ -75,7 +75,7 @@ type Message struct {
 			Reason     string `json:"reason"`
 		}
 	}
-	Error struct{
+	Error struct {
 		Message string `json:"message"`
 	}
 	Type string
@@ -89,15 +89,15 @@ type Offer struct {
 }
 
 type ResourcesForOneTask struct {
-	OfferId ID
-	AgentId ID
+	OfferId   ID
+	AgentId   ID
 	AgentHost string
 	Range
 }
 
 type Info struct {
 	ReturnChannel chan *DockerInfo
-	AgentHost string
+	AgentHost     string
 }
 
 func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
@@ -113,7 +113,8 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	setResourceLimits(cpu, mem)
 	notRunningTasks := make(map[string]*Info)
 
-	body, _ := json.Marshal(newSubscribedMessage("test", "Selenoid"))
+	body, _ := json.Marshal(newSubscribedMessage("root", "Selenoid"))
+	fmt.Println(string(body))
 
 	resp, err := http.Post(Sched.Url, "application/json", bytes.NewReader(body))
 	if err != nil {

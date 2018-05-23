@@ -9,6 +9,7 @@ import (
 )
 
 func (s *Scheduler) Decline(offers []ID) {
+	log.Printf("[-] [SELENOID_DECLINED_CURRENT_OFFERS]")
 	body, _ := json.Marshal(newDeclineMessage(s.FrameworkId, offers))
 	_, err := s.sendToStream(body)
 	if err != nil {
@@ -70,7 +71,7 @@ func (s *Scheduler) sendToStream(body []byte) (*http.Response, error) {
 }
 
 func (s *Scheduler) Reconcile(taskId ID, agentId ID) {
-	body, _ := json.Marshal(GetReconcileMessage(s.FrameworkId, taskId, agentId))
+	body, _ := json.Marshal(newReconcileMessage(s.FrameworkId, taskId, agentId))
 	fmt.Println(string(body))
 	_, err := s.sendToStream(body)
 	if err != nil {

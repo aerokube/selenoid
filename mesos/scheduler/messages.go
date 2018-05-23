@@ -250,7 +250,7 @@ func (scheduler *Scheduler) newAcceptMessage(resources []ResourcesForOneTask, ta
 		Accept: Accept{
 			getUniqueOfferIds(resources),
 			operations,
-			Filters{RefuseSeconds: 1.0},
+			Filters{RefuseSeconds: 5.0},
 		},
 	}, hostsMap
 }
@@ -294,14 +294,14 @@ func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) A
 	}
 }
 
-func newDeclineMessage(frameworkId ID, offerId []ID) DeclineMessage {
+func newDeclineMessage(frameworkId ID, offerIds []ID) DeclineMessage {
 	return DeclineMessage{
 		FrameworkID: frameworkId,
 		Type:        "DECLINE",
 		Decline: Decline{
-			OfferIds: offerId,
+			OfferIds: offerIds,
 			Filters: Filters{
-				RefuseSeconds: 1.0,
+				RefuseSeconds: 16.0,
 			},
 		},
 	}
@@ -317,7 +317,7 @@ func newKillMessage(frameworkId ID, taskId string) KillMessage {
 	}
 }
 
-func GetReconcileMessage(frameworkId ID, tasksId ID, agentId ID) (ReconcileMessage) {
+func newReconcileMessage(frameworkId ID, tasksId ID, agentId ID) ReconcileMessage {
 	tasks := Tasks{
 		TaskID:  tasksId,
 		AgentID: agentId,
