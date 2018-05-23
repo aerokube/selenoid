@@ -113,8 +113,11 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	setResourceLimits(cpu, mem)
 	notRunningTasks := make(map[string]*Info)
 
-	body, _ := json.Marshal(newSubscribedMessage("test", "Selenoid"))
-
+	frameworkId := ""
+	if zookeeperUrl != "" && zookeeper.GetFrameworkInfo() != nil {
+		frameworkId = zookeeper.GetFrameworkInfo()[0]
+	}
+	body, _ := json.Marshal(newSubscribedMessage("test", "Selenoid", ID{frameworkId}))
 	resp, err := http.Post(Sched.Url, "application/json", bytes.NewReader(body))
 	if err != nil {
 		log.Fatal(err)
@@ -139,6 +142,12 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 			switch m.Type {
 			case "SUBSCRIBED":
 				frameworkId := m.Subscribed.FrameworkId
+				if zookeeperUrl != ""{
+					frameworkInfo := zookeeper.GetFrameworkInfo()
+					if frameworkInfo == nil || !contains(frameworkInfo, frameworkId.Value){
+						zookeeper.CreateFrameworkNode(frameworkId.Value)
+					}
+				}
 				log.Printf("[-] [SELENOID_SUBSCRIBED_AS_FRAMEWORK_ON_MESOS_MASTER] [%s]", frameworkId)
 				Sched.FrameworkId = frameworkId
 				break
@@ -320,4 +329,13 @@ func createSchedulerUrl(rawurl string) string {
 	} else {
 		return rawurl + schedulerPath
 	}
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
