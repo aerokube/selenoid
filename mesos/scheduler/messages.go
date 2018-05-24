@@ -107,7 +107,6 @@ type SubscribeMessage struct {
 
 type Decline struct {
 	OfferIds []ID    `json:"offer_ids"`
-	Filters  Filters `json:"filters"`
 }
 
 type DeclineMessage struct {
@@ -123,7 +122,6 @@ type Filters struct {
 type Accept struct {
 	OfferIds   []ID         `json:"offer_ids"`
 	Operations *[]Operation `json:"operations"`
-	Filters    Filters      `json:"filters"`
 }
 
 type AcceptMessage struct {
@@ -251,7 +249,6 @@ func (scheduler *Scheduler) newAcceptMessage(resources []ResourcesForOneTask, ta
 		Accept: Accept{
 			getUniqueOfferIds(resources),
 			operations,
-			Filters{RefuseSeconds: 5.0},
 		},
 	}, hostsMap
 }
@@ -304,9 +301,6 @@ func newDeclineMessage(frameworkId ID, offerIds []ID) DeclineMessage {
 		Type:        "DECLINE",
 		Decline: Decline{
 			OfferIds: offerIds,
-			Filters: Filters{
-				RefuseSeconds: 16.0,
-			},
 		},
 	}
 }

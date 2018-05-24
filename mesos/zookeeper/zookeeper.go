@@ -60,7 +60,10 @@ func DetectMaster(flagUrl *url.URL) string {
 	}
 	c, _, _ := conn.Children(flagUrl.Path)
 	sort.Strings(c)
-	data, _, _ := conn.Get(flagUrl.Path + "/" + c[0])
+	data, _, err := conn.Get(flagUrl.Path + "/" + c[0])
+	if err != nil {
+		log.Fatal("Can't find mesos master url in zk")
+	}
 	var config MesosConfig
 	json.Unmarshal(data, &config)
 	return "http://" + config.Hostname + ":" + strconv.Itoa(config.Port)

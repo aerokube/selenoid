@@ -158,10 +158,10 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 				processUpdate(m, notRunningTasks, zookeeperUrl)
 				break
 			case "FAILURE":
-				log.Fatal(m)
+				log.Fatal("Mesos return FAILURE with message: " + m.Error.Message)
 				break
 			case "ERROR":
-				log.Fatal(m.Error.Message)
+				log.Fatal("Mesos return ERROR with message: " + m.Error.Message)
 				break
 			default:
 				break
