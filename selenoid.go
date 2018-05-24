@@ -116,7 +116,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var browser struct {
-		Caps    session.Caps `json:"desiredCapabilities"`
+		Caps session.Caps `json:"desiredCapabilities"`
 		W3CCaps struct {
 			Caps session.Caps `json:"alwaysMatch"`
 		} `json:"capabilities"`

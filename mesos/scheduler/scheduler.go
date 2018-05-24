@@ -5,13 +5,13 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
+	"github.com/aerokube/selenoid/mesos/zookeeper"
 	"log"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
-	"github.com/aerokube/selenoid/mesos/zookeeper"
-	"net/url"
-	"fmt"
 )
 
 var (
@@ -75,7 +75,7 @@ type Message struct {
 			Reason     string `json:"reason"`
 		}
 	}
-	Error struct{
+	Error struct {
 		Message string `json:"message"`
 	}
 	Type string
@@ -89,15 +89,15 @@ type Offer struct {
 }
 
 type ResourcesForOneTask struct {
-	OfferId ID
-	AgentId ID
+	OfferId   ID
+	AgentId   ID
 	AgentHost string
 	Range
 }
 
 type Info struct {
 	ReturnChannel chan *DockerInfo
-	AgentHost string
+	AgentHost     string
 }
 
 func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
@@ -117,7 +117,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	if zookeeperUrl != "" && zookeeper.GetFrameworkInfo() != nil {
 		frameworkId = zookeeper.GetFrameworkInfo()[0]
 	}
-	body, _ := json.Marshal(newSubscribedMessage("test", "Selenoid", ID{frameworkId}))
+	body, _ := json.Marshal(newSubscribedMessage("root", "Selenoid", ID{frameworkId}))
 	resp, err := http.Post(Sched.Url, "application/json", bytes.NewReader(body))
 	if err != nil {
 		log.Fatal(err)
@@ -142,9 +142,9 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 			switch m.Type {
 			case "SUBSCRIBED":
 				frameworkId := m.Subscribed.FrameworkId
-				if zookeeperUrl != ""{
+				if zookeeperUrl != "" {
 					frameworkInfo := zookeeper.GetFrameworkInfo()
-					if frameworkInfo == nil || !contains(frameworkInfo, frameworkId.Value){
+					if frameworkInfo == nil || !contains(frameworkInfo, frameworkId.Value) {
 						zookeeper.CreateFrameworkNode(frameworkId.Value)
 					}
 				}
@@ -158,10 +158,10 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 				processUpdate(m, notRunningTasks, zookeeperUrl)
 				break
 			case "FAILURE":
-				log.Fatal(m)
+				log.Fatal("Mesos return FAILURE with message: " + m.Error.Message)
 				break
 			case "ERROR":
-				log.Fatal(m.Error.Message)
+				log.Fatal("Mesos return ERROR with message: " + m.Error.Message)
 				break
 			default:
 				break
@@ -192,7 +192,7 @@ func processUpdate(m Message, notRunningTasks map[string]*Info, zookeeperUrl str
 		processFailedTask(taskId, notRunningTasks, m)
 	} else if state == "TASK_LOST" {
 		if zookeeperUrl != "" && notRunningTasks[taskId] != nil {
-			var agentId = zookeeper.GetAgentIdForTask(taskId);
+			var agentId = zookeeper.GetAgentIdForTask(taskId)
 			Sched.Reconcile(status.TaskId, ID{agentId})
 			log.Printf("[-] [SELENOID_MAKES_RECONCILIATION] [%s] [%s]", taskId, agentId)
 		} else if status.Reason == "REASON_RECONCILIATION" {

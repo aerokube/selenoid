@@ -207,7 +207,7 @@ func init() {
 	}
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
 
-	if mesosMasterURL != "" || zookeeper != "" {
+	if mesosMasterURL != "" {
 		log.Printf("[TRY TO REGISTER ON MESOS MASTER] [%s]", mesosMasterURL)
 		go scheduler.Run(mesosMasterURL, zookeeper, float64(cpu), float64(mem))
 	}

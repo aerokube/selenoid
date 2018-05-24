@@ -26,7 +26,7 @@ type Environment struct {
 	VideoContainerImage string
 	Privileged          bool
 	MesosMasterUrl      string
-	Zookeeper			string
+	Zookeeper           string
 }
 
 const (
@@ -85,22 +85,22 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 			LogConfig:   m.Config.ContainerLogs,
 		}, true
 	} else {
-	switch service.Image.(type) {
-	case string:
-		if m.Client == nil {
-			return nil, false
+		switch service.Image.(type) {
+		case string:
+			if m.Client == nil {
+				return nil, false
+			}
+			log.Printf("[%d] [USING_DOCKER] [%s] [%s]", requestId, browserName, version)
+			return &Docker{
+				ServiceBase: serviceBase,
+				Environment: *m.Environment,
+				Caps:        caps,
+				Client:      m.Client,
+				LogConfig:   m.Config.ContainerLogs}, true
+		case []interface{}:
+			log.Printf("[%d] [USING_DRIVER] [%s] [%s]", requestId, browserName, version)
+			return &Driver{ServiceBase: serviceBase, Environment: *m.Environment, Caps: caps}, true
 		}
-		log.Printf("[%d] [USING_DOCKER] [%s] [%s]", requestId, browserName, version)
-		return &Docker{
-			ServiceBase: serviceBase,
-			Environment: *m.Environment,
-			Caps:        caps,
-			Client:      m.Client,
-			LogConfig:   m.Config.ContainerLogs}, true
-	case []interface{}:
-		log.Printf("[%d] [USING_DRIVER] [%s] [%s]", requestId, browserName, version)
-		return &Driver{ServiceBase: serviceBase, Environment: *m.Environment, Caps: caps}, true
-	}
 	}
 	return nil, false
 }

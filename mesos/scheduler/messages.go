@@ -91,9 +91,9 @@ type ReconcileMessage struct {
 }
 
 type FrameworkInfo struct {
-	User         string `json:"user"`
-	Name         string `json:"name"`
-	FrameworkId ID `json:"framework_id,omitempty"`
+	User        string `json:"user"`
+	Name        string `json:"name"`
+	FrameworkId ID     `json:"framework_id,omitempty"`
 }
 
 type Subscribe struct {
@@ -106,8 +106,7 @@ type SubscribeMessage struct {
 }
 
 type Decline struct {
-	OfferIds []ID    `json:"offer_ids"`
-	Filters  Filters `json:"filters"`
+	OfferIds []ID `json:"offer_ids"`
 }
 
 type DeclineMessage struct {
@@ -123,7 +122,6 @@ type Filters struct {
 type Accept struct {
 	OfferIds   []ID         `json:"offer_ids"`
 	Operations *[]Operation `json:"operations"`
-	Filters    Filters      `json:"filters"`
 }
 
 type AcceptMessage struct {
@@ -251,7 +249,6 @@ func (scheduler *Scheduler) newAcceptMessage(resources []ResourcesForOneTask, ta
 		Accept: Accept{
 			getUniqueOfferIds(resources),
 			operations,
-			Filters{RefuseSeconds: 1.0},
 		},
 	}, hostsMap
 }
@@ -264,24 +261,23 @@ func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
 			offersMap[v.OfferId] = true
 		}
 	}
-	for k, _ := range offersMap {
+	for k := range offersMap {
 		set = append(set, k)
 	}
 	return set
 }
 
-
 func newSubscribedMessage(user string, name string, frameworkId ID) SubscribeMessage {
-	subscribedMessage :=  SubscribeMessage{
+	subscribedMessage := SubscribeMessage{
 		Type: "SUBSCRIBE",
 		Subscribe: Subscribe{
 			FrameworkInfo{
-				User:  user,
-				Name:  name,
+				User: user,
+				Name: name,
 			},
 		},
 	}
-	if frameworkId.Value != ""{
+	if frameworkId.Value != "" {
 		subscribedMessage.Subscribe.FrameworkInfo.FrameworkId = frameworkId
 	}
 	return subscribedMessage
@@ -299,15 +295,12 @@ func newAcknowledgeMessage(frameworkId ID, agentId ID, UUID string, taskId ID) A
 	}
 }
 
-func newDeclineMessage(frameworkId ID, offerId []ID) DeclineMessage {
+func newDeclineMessage(frameworkId ID, offerIds []ID) DeclineMessage {
 	return DeclineMessage{
 		FrameworkID: frameworkId,
 		Type:        "DECLINE",
 		Decline: Decline{
-			OfferIds: offerId,
-			Filters: Filters{
-				RefuseSeconds: 1.0,
-			},
+			OfferIds: offerIds,
 		},
 	}
 }
@@ -322,7 +315,7 @@ func newKillMessage(frameworkId ID, taskId string) KillMessage {
 	}
 }
 
-func GetReconcileMessage(frameworkId ID, tasksId ID, agentId ID) (ReconcileMessage) {
+func newReconcileMessage(frameworkId ID, tasksId ID, agentId ID) ReconcileMessage {
 	tasks := Tasks{
 		TaskID:  tasksId,
 		AgentID: agentId,

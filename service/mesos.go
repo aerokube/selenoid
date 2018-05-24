@@ -5,7 +5,7 @@ import (
 	"github.com/aerokube/selenoid/mesos/scheduler"
 	"github.com/aerokube/selenoid/mesos/zookeeper"
 	"github.com/aerokube/selenoid/session"
-	"github.com/aerokube/selenoid/util"
+	"github.com/aerokube/util"
 	ctr "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/pborman/uuid"

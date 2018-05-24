@@ -1,14 +1,14 @@
 package zookeeper
 
 import (
+	"encoding/json"
+	"github.com/samuel/go-zookeeper/zk"
+	"log"
+	"net/url"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
-	"github.com/samuel/go-zookeeper/zk"
-	"sort"
-	"encoding/json"
-	"strconv"
-	"net/url"
-	"log"
 )
 
 const (
@@ -60,7 +60,10 @@ func DetectMaster(flagUrl *url.URL) string {
 	}
 	c, _, _ := conn.Children(flagUrl.Path)
 	sort.Strings(c)
-	data, _, _ := conn.Get(flagUrl.Path + "/" + c[0])
+	data, _, err := conn.Get(flagUrl.Path + "/" + c[0])
+	if err != nil {
+		log.Fatal("Can't find mesos master url in zk")
+	}
 	var config MesosConfig
 	json.Unmarshal(data, &config)
 	return "http://" + config.Hostname + ":" + strconv.Itoa(config.Port)
@@ -98,7 +101,7 @@ func CreateFrameworkNode(frameworkId string) {
 	log.Printf("created FrameworkId in zk: %+v\n", path)
 }
 
-func GetAgentIdForTask(taskId string) string{
+func GetAgentIdForTask(taskId string) string {
 	conn := connect()
 	defer conn.Close()
 
@@ -108,7 +111,7 @@ func GetAgentIdForTask(taskId string) string{
 	return string(data)
 }
 
-func GetFrameworkInfo() []string{
+func GetFrameworkInfo() []string {
 	conn := connect()
 	defer conn.Close()
 	exists, _, err := conn.Exists(selenoidPath + "/frameworkInfo")
