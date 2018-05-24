@@ -95,7 +95,7 @@ func CreateFrameworkNode(frameworkId string) {
 
 	path, err := conn.Create(selenoidPath+"/frameworkInfo/"+frameworkId, []byte{}, flags, acl)
 	must(err)
-	log.Printf("******* create FrameworkId: %+v\n", path)
+	log.Printf("create FrameworkId in zk: %+v\n", path)
 }
 
 func GetAgentIdForTask(taskId string) string{
@@ -119,7 +119,7 @@ func GetFrameworkInfo() []string{
 			log.Printf("Children returned error: %+v", err)
 			return nil
 		}
-		log.Printf("get FrameworkId:    %+v %+v\n", []string(childs), stat)
+		log.Printf("get FrameworkId from zk:    %+v %+v\n", []string(childs), stat)
 		return childs
 	}
 	return nil
@@ -170,7 +170,7 @@ func DelNode(taskId string) {
 
 	err := conn.Delete(selenoidPath+"/tasks/"+taskId, -1)
 	must(err)
-	log.Printf("delete FrameworkId " + taskId + ": ok\n")
+	log.Printf("delete node from zk " + taskId + ": ok\n")
 }
 
 func DelFrameworkNode(id string) {
@@ -179,7 +179,7 @@ func DelFrameworkNode(id string) {
 
 	err := conn.Delete(selenoidPath+"/frameworkInfo/"+id, -1)
 	must(err)
-	log.Printf("delete " + id + ": ok\n")
+	log.Printf("delete FrameworkId from zk " + id + ": ok\n")
 }
 
 func Del() {
