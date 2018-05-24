@@ -5,13 +5,13 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
+	"github.com/aerokube/selenoid/mesos/zookeeper"
 	"log"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
-	"github.com/aerokube/selenoid/mesos/zookeeper"
-	"net/url"
-	"fmt"
 )
 
 var (
@@ -192,7 +192,7 @@ func processUpdate(m Message, notRunningTasks map[string]*Info, zookeeperUrl str
 		processFailedTask(taskId, notRunningTasks, m)
 	} else if state == "TASK_LOST" {
 		if zookeeperUrl != "" && notRunningTasks[taskId] != nil {
-			var agentId = zookeeper.GetAgentIdForTask(taskId);
+			var agentId = zookeeper.GetAgentIdForTask(taskId)
 			Sched.Reconcile(status.TaskId, ID{agentId})
 			log.Printf("[-] [SELENOID_MAKES_RECONCILIATION] [%s] [%s]", taskId, agentId)
 		} else if status.Reason == "REASON_RECONCILIATION" {

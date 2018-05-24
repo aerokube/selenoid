@@ -106,7 +106,7 @@ type SubscribeMessage struct {
 }
 
 type Decline struct {
-	OfferIds []ID    `json:"offer_ids"`
+	OfferIds []ID `json:"offer_ids"`
 }
 
 type DeclineMessage struct {
@@ -272,8 +272,8 @@ func newSubscribedMessage(user string, name string, frameworkId ID) SubscribeMes
 		Type: "SUBSCRIBE",
 		Subscribe: Subscribe{
 			FrameworkInfo{
-				User:  user,
-				Name:  name,
+				User: user,
+				Name: name,
 			},
 		},
 	}

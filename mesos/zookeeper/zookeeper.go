@@ -1,14 +1,14 @@
 package zookeeper
 
 import (
+	"encoding/json"
+	"github.com/samuel/go-zookeeper/zk"
+	"log"
+	"net/url"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
-	"github.com/samuel/go-zookeeper/zk"
-	"sort"
-	"encoding/json"
-	"strconv"
-	"net/url"
-	"log"
 )
 
 const (
@@ -101,7 +101,7 @@ func CreateFrameworkNode(frameworkId string) {
 	log.Printf("******* create FrameworkId: %+v\n", path)
 }
 
-func GetAgentIdForTask(taskId string) string{
+func GetAgentIdForTask(taskId string) string {
 	conn := connect()
 	defer conn.Close()
 

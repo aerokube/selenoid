@@ -1,10 +1,10 @@
 package scheduler
 
 import (
-	"net/http"
 	"bytes"
 	"encoding/json"
 	"log"
+	"net/http"
 )
 
 func (s *Scheduler) Decline(offers []ID) {
@@ -16,7 +16,7 @@ func (s *Scheduler) Decline(offers []ID) {
 	}
 }
 
-func (s *Scheduler) Accept(resources []ResourcesForOneTask, tasks []Task) map[string] string {
+func (s *Scheduler) Accept(resources []ResourcesForOneTask, tasks []Task) map[string]string {
 	acceptMessage, hostMap := s.newAcceptMessage(resources, tasks)
 	body, _ := json.Marshal(acceptMessage)
 	_, err := s.sendToStream(body)
