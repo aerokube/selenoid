@@ -261,7 +261,7 @@ func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
 			offersMap[v.OfferId] = true
 		}
 	}
-	for k, _ := range offersMap {
+	for k := range offersMap {
 		set = append(set, k)
 	}
 	return set
