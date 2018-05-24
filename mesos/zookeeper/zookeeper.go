@@ -37,14 +37,14 @@ func Create() {
 		must(err)
 
 		aa, _ := conn.Create("/selenoid/tasks", []byte{}, flags, acl)
-		log.Printf("******* create: %+v %+v\n", path, aa)
+		log.Printf("created zk node: %+v %+v\n", path, aa)
 	} else {
 		exists, _, _ := conn.Exists(selenoidPath + "/tasks")
 		if !exists {
 			flags := int32(0)
 			acl := zk.WorldACL(zk.PermAll)
 			aa, _ := conn.Create("/selenoid/tasks", []byte{}, flags, acl)
-			log.Printf("******* create: %+v %+v\n", aa)
+			log.Printf("created zk node: %+v %+v\n", aa)
 		} else {
 			DelAllChildrenNodes()
 		}
@@ -75,7 +75,7 @@ func CreateTaskNode(taskId string, agentId string) {
 
 	path, err := conn.Create(selenoidPath+"/tasks/"+taskId, []byte(agentId), flags, acl)
 	must(err)
-	log.Printf("******* create: %+v\n", path)
+	log.Printf("created zk node: %+v\n", path)
 }
 
 func CreateFrameworkNode(frameworkId string) {
@@ -90,7 +90,7 @@ func CreateFrameworkNode(frameworkId string) {
 	exists, _, _ := conn.Exists(selenoidPath + "/frameworkInfo")
 	if !exists {
 		fi, _ := conn.Create("/selenoid/frameworkInfo", []byte{}, flags, acl)
-		log.Printf("******* create: %+v %+v\n", fi)
+		log.Printf("created zk node: %+v %+v\n", fi)
 	}
 
 	path, err := conn.Create(selenoidPath+"/frameworkInfo/"+frameworkId, []byte{}, flags, acl)
@@ -104,7 +104,7 @@ func GetAgentIdForTask(taskId string) string{
 
 	data, stat, err := conn.Get(selenoidPath + "/tasks/" + taskId)
 	must(err)
-	log.Printf("******* get:    %+v %+v\n", string(data), stat)
+	log.Printf("get Agent ID from zk:    %+v %+v\n", string(data), stat)
 	return string(data)
 }
 
@@ -119,7 +119,7 @@ func GetFrameworkInfo() []string{
 			log.Printf("Children returned error: %+v", err)
 			return nil
 		}
-		log.Printf("******* get FrameworkId:    %+v %+v\n", []string(childs), stat)
+		log.Printf("get FrameworkId:    %+v %+v\n", []string(childs), stat)
 		return childs
 	}
 	return nil
@@ -136,7 +136,7 @@ func GetChildren() []string {
 			log.Printf("Children returned error: %+v", err)
 			return nil
 		}
-		log.Printf("******* get:    %+v %+v\n", []string(childs), stat)
+		log.Printf("get childs zk:    %+v %+v\n", []string(childs), stat)
 		return childs
 	}
 	return nil
@@ -170,7 +170,7 @@ func DelNode(taskId string) {
 
 	err := conn.Delete(selenoidPath+"/tasks/"+taskId, -1)
 	must(err)
-	log.Printf("******* delete FrameworkId " + taskId + ": ok\n")
+	log.Printf("delete FrameworkId " + taskId + ": ok\n")
 }
 
 func DelFrameworkNode(id string) {
@@ -179,7 +179,7 @@ func DelFrameworkNode(id string) {
 
 	err := conn.Delete(selenoidPath+"/frameworkInfo/"+id, -1)
 	must(err)
-	log.Printf("******* delete " + id + ": ok\n")
+	log.Printf("delete " + id + ": ok\n")
 }
 
 func Del() {
@@ -188,7 +188,7 @@ func Del() {
 
 	err := conn.Delete(selenoidPath, -1)
 	must(err)
-	log.Printf("******* delete /Tasks: ok\n")
+	log.Printf("delete /Tasks: ok\n")
 }
 
 func must(err error) {
