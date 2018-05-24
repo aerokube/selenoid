@@ -95,7 +95,7 @@ func CreateFrameworkNode(frameworkId string) {
 
 	path, err := conn.Create(selenoidPath+"/frameworkInfo/"+frameworkId, []byte{}, flags, acl)
 	must(err)
-	log.Printf("create FrameworkId in zk: %+v\n", path)
+	log.Printf("created FrameworkId in zk: %+v\n", path)
 }
 
 func GetAgentIdForTask(taskId string) string{
