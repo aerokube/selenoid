@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-05-24</span>
+<span id="revdate">2018-05-30</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -626,6 +626,7 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_firefox">A.1. Firefox</a></li>
 <li><a href="#_chrome">A.2. Chrome</a></li>
 <li><a href="#_opera">A.3. Opera</a></li>
+<li><a href="#_android">A.4. Android</a></li>
 </ul>
 </li>
 </ul>
@@ -3789,6 +3790,12 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <td class="tableblock halign-left valign-top"><p class="tableblock">2.35</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">52.0.2871.37</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/opera:53.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/vnc:opera_53.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2.36</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">53.0.2907.68</p></td>
+</tr>
 </tbody>
 </table>
 <div class="admonitionblock note">
@@ -3813,13 +3820,101 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_android"><a class="anchor" href="#_android"></a>A.4. Android</h3>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Hardware server or virtual machine with nested virtualization support is required to run Android images.
+</td>
+</tr>
+</table>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 8. Android Images</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Image</th>
+<th class="tableblock halign-left valign-top">Android version</th>
+<th class="tableblock halign-left valign-top">Appium version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/android:4.4</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4.4</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.8.1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/android:5.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">5.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.8.1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/android:6.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">6.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.8.1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/android:7.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">7.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.8.1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/android:7.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">7.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.8.1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/android:8.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.8.1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/android:8.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.8.1</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>These images include VNC server and Android Quick Boot snapshot.</p>
+</li>
+<li>
+<p>Neither Chromedriver nor Chrome Mobile are installed. To test hybrid apps build your own image using provided automation script.</p>
+</li>
+</ol>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-05-24 17:08:28 UTC
+Last updated 2018-05-30 06:34:03 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
