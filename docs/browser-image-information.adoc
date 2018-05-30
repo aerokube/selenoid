@@ -166,3 +166,25 @@ We do not consider these images really stable. Many of base operations like work
 . Images for older Opera versions were not built because we have no Debian packages. If you have such packages - we could create more images.
 ====
 
+=== Android
+
+WARNING: Hardware server or virtual machine with nested virtualization support is required to run Android images.
+
+.Android Images
+|===
+| Image | Android version | Appium version
+
+| selenoid/android:4.4 | 4.4 | 1.8.1 
+| selenoid/android:5.1 | 5.1 | 1.8.1 
+| selenoid/android:6.0 | 6.0 | 1.8.1 
+| selenoid/android:7.0 | 7.0 | 1.8.1 
+| selenoid/android:7.1 | 7.1 | 1.8.1 
+| selenoid/android:8.0 | 8.0 | 1.8.1 
+| selenoid/android:8.1 | 8.1 | 1.8.1 
+|===
+
+[NOTE]
+====
+. These images include VNC server and Android Quick Boot snapshot.
+. Neither Chromedriver nor Chrome Mobile are installed. To test hybrid apps build your own image using provided automation script.
+====
