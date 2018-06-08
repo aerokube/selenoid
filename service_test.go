@@ -255,7 +255,7 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 	AssertThat(t, err, Is{nil})
 	manager := service.DefaultManager{Environment: env, Client: cli, Config: cfg}
 	caps := session.Caps{
-		Name:                  "firefox",
+		DeviceName:                  "firefox",
 		Version:               "33.0",
 		ScreenResolution:      "1024x768",
 		VNC:                   true,

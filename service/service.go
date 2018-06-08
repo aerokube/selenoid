@@ -65,7 +65,7 @@ type DefaultManager struct {
 
 // Find - default implementation Manager interface
 func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, bool) {
-	browserName := caps.Name
+	browserName := browser(caps)
 	version := caps.Version
 	log.Printf("[%d] [LOCATING_SERVICE] [%s] [%s]", requestId, browserName, version)
 	service, version, ok := m.Config.Find(browserName, version)
@@ -90,6 +90,14 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 		return &Driver{ServiceBase: serviceBase, Environment: *m.Environment, Caps: caps}, true
 	}
 	return nil, false
+}
+
+func browser(caps session.Caps) string {
+	browserName := caps.Name
+	if browserName != "" {
+		return browserName
+	}
+	return caps.DeviceName
 }
 
 func wait(u string, t time.Duration) error {
