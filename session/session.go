@@ -10,6 +10,7 @@ import (
 // Caps - user capabilities
 type Caps struct {
 	Name                  string                 `json:"browserName"`
+	DeviceName            string                 `json:"deviceName"`
 	Version               string                 `json:"version"`
 	W3CVersion            string                 `json:"browserVersion"`
 	ScreenResolution      string                 `json:"screenResolution"`
