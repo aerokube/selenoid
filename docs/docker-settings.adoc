@@ -1,6 +1,7 @@
 == Recommended Docker Settings
 
-* We recommend to use modern Docker storage drivers like https://en.wikipedia.org/wiki/Aufs[AUFS] or https://en.wikipedia.org/wiki/OverlayFS[OverfayFS]. Never use https://en.wikipedia.org/wiki/Device_mapper[Device Mapper] - it is very slow. See https://docs.docker.com/engine/userguide/storagedriver/selectadriver/[this] page on how to adjust Docker storage driver. To check your currently used driver type:
+* We recommend to use latest Docker release and Linux core 4.x and above. Older kernels and Docker releases have known bugs.
+* Use modern https://en.wikipedia.org/wiki/OverlayFS[OverfayFS] Docker storage driver. https://en.wikipedia.org/wiki/Aufs[AUFS] is also fast but has some bugs that can lead to orphaned containers. Never use https://en.wikipedia.org/wiki/Device_mapper[Device Mapper] - it is very slow. See https://docs.docker.com/engine/userguide/storagedriver/selectadriver/[this] page on how to adjust Docker storage driver. To check your currently used driver type:
 +
 ```
 # docker info | grep Storage
