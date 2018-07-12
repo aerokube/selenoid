@@ -120,3 +120,10 @@ func (m *Map) Each(fn func(k string, v *Session)) {
 		fn(k, v)
 	}
 }
+
+// Len - get total number of sessions
+func (m *Map) Len() int {
+	m.l.RLock()
+	defer m.l.RUnlock()
+	return len(m.m)
+}

@@ -607,6 +607,28 @@ func TestPing(t *testing.T) {
 	AssertThat(t, version, EqualTo{"test-revision"})
 }
 
+func TestStatus(t *testing.T) {
+	rsp, err := http.Get(With(srv.URL).Path("/wd/hub/status"))
+
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+	AssertThat(t, rsp.Body, Is{Not{nil}})
+
+	var data map[string]interface{}
+	bt, readErr := ioutil.ReadAll(rsp.Body)
+	AssertThat(t, readErr, Is{nil})
+	jsonErr := json.Unmarshal(bt, &data)
+	AssertThat(t, jsonErr, Is{nil})
+	value, hasValue := data["value"]
+	AssertThat(t, hasValue, Is{true})
+	valueMap := value.(map[string]interface{})
+	ready, hasReady := valueMap["ready"]
+	AssertThat(t, hasReady, Is{true})
+	AssertThat(t, ready, Is{true})
+	_, hasMessage := valueMap["message"]
+	AssertThat(t, hasMessage, Is{true})
+}
+
 func TestServeAndDeleteFile(t *testing.T) {
 	fileName := "testfile"
 	filePath := filepath.Join(videoOutputDir, fileName)

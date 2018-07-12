@@ -539,6 +539,18 @@ func logs(wsconn *websocket.Conn) {
 	}
 }
 
+func status(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	ready := limit > sessions.Len()
+	json.NewEncoder(w).Encode(
+		map[string]interface{}{
+			"value": map[string]interface{}{
+				"message": fmt.Sprintf("Selenoid %s built at %s", gitRevision, buildStamp),
+				"ready":   ready,
+			},
+		})
+}
+
 func onTimeout(t time.Duration, f func()) chan struct{} {
 	cancel := make(chan struct{})
 	go func(cancel chan struct{}) {
