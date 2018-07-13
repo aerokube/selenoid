@@ -238,6 +238,7 @@ func mux() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/session", queue.Try(queue.Check(queue.Protect(post(create)))))
 	mux.HandleFunc("/session/", proxy)
+	mux.HandleFunc("/status", status)
 	return mux
 }
 
