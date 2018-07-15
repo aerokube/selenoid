@@ -1,0 +1,49 @@
+== Saving Session Logs
+
+Selenoid can save log files for every running session to a separate file. By default log files are saved as `<session-id>.txt` but you can alter file name via `logName` capability.
+
+To enable this feature you only need to add `-log-output-dir </path/to/some/dir>` flag to Selenoid:
+
+    $ ./selenoid -log-output-dir /path/to/some/dir
+
+When running Selenoid **in Docker container** - don't forget to mount logs directory from the host machine:
+
+.Example Docker Command
+----
+$ docker run -d
+--name selenoid                                 \
+-p 4444:4444                                    \
+-v /var/run/docker.sock:/var/run/docker.sock    \
+-v `pwd`/config/:/etc/selenoid/:ro              \
+-v `pwd`/logs/:/opt/selenoid/logs/              \
+aerokube/selenoid:latest-release -log-output-dir /opt/selenoid/logs
+----
+
+TIP: This feature is automatically enabled when starting Selenoid via http://aerokube.com/cm/latest/[Configuration Manager] `selenoid start` command.
+
+=== Downloading Log Files from Selenoid
+
+You can access saved log files using the following URL:
+
+.Direct Link to Log File
+----
+http://selenoid-host.example.com:4444/logs/<filename>.txt
+----
+
+NOTE: Direct link will works only after session has finished because Selenoid renames temporary filename to `<session-id>.mp4` (by default) at the session close.
+
+To see all available files use:
+
+.Listing All Log Files
+----
+http://selenoid-host.example.com:4444/logs/
+----
+
+=== Deleting Log Files
+
+Similarly to video files it's up to you when to delete old log files. Either remove log files from the directory using a scheduled job or send log removal requests:
+
+.Deleting Log File via HTTP API
+----
+$ curl -X DELETE http://selenoid-host.example.com:4444/logs/<filename>.txt
+----

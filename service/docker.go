@@ -16,8 +16,10 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -150,7 +152,30 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			if videoContainerId != "" {
 				stopVideoContainer(ctx, cl, requestId, videoContainerId)
 			}
-			removeContainer(ctx, cl, requestId, browserContainerId)
+			defer removeContainer(ctx, cl, requestId, browserContainerId)
+			if d.LogOutputDir != "" {
+				r, err := d.Client.ContainerLogs(ctx, browserContainerId, types.ContainerLogsOptions{
+					Timestamps: true,
+					ShowStdout: true,
+					ShowStderr: true,
+				})
+				defer r.Close()
+				if err != nil {
+					log.Printf("[%d] [FAILED_TO_COPY_LOGS] [%s] [Failed to capture container logs: %v]", requestId, browserContainerId, err)
+					return
+				}
+				filename := filepath.Join(d.LogOutputDir, d.LogName)
+				f, err := os.Create(filename)
+				if err != nil {
+					log.Printf("[%d] [FAILED_TO_COPY_LOGS] [%s] [Failed to create log file %s: %v]", requestId, browserContainerId, filename, err)
+					return
+				}
+				defer f.Close()
+				_, err = stdcopy.StdCopy(f, f, r)
+				if err != nil {
+					log.Printf("[%d] [FAILED_TO_COPY_LOGS] [%s] [Failed to copy data to log file %s: %v]", requestId, browserContainerId, filename, err)
+				}
+			}
 		},
 	}
 	return &s, nil
@@ -203,7 +228,7 @@ func getLogConfig(logConfig ctr.LogConfig, caps session.Caps) ctr.LogConfig {
 		}
 		_, ok = logConfig.Config[labels]
 		if len(caps.Labels) > 0 && !ok {
-			joinedLabels := []string{}
+			var joinedLabels []string
 			for k, v := range caps.Labels {
 				joinedLabels = append(joinedLabels, fmt.Sprintf("%s=%s", k, v))
 			}
@@ -308,7 +333,7 @@ func getContainerIP(networkName string, stat types.ContainerJSON) string {
 		return stat.NetworkSettings.IPAddress
 	}
 	if len(ns.Networks) > 0 {
-		possibleAddresses := []string{}
+		var possibleAddresses []string
 		for name, nt := range ns.Networks {
 			if nt.IPAddress != "" {
 				if name == networkName {

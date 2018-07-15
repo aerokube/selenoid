@@ -81,6 +81,7 @@ var (
 	disablePrivileged        bool
 	videoOutputDir           string
 	videoRecorderImage       string
+	logOutputDir             string
 	conf                     *config.Config
 	queue                    *protect.Queue
 	manager                  service.Manager
@@ -117,6 +118,7 @@ func init() {
 	flag.BoolVar(&disablePrivileged, "disable-privileged", false, "Whether to disable privileged container mode")
 	flag.StringVar(&videoOutputDir, "video-output-dir", "video", "Directory to save recorded video to")
 	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder", "Image to use as video recorder")
+	flag.StringVar(&logOutputDir, "log-output-dir", "log", "Directory to save session log to")
 	flag.Parse()
 
 	if version {
@@ -157,6 +159,14 @@ func init() {
 		if err != nil {
 			log.Fatalf("[-] [INIT] [Failed to create video output dir %s: %v]", videoOutputDir, err)
 		}
+		logOutputDir, err = filepath.Abs(logOutputDir)
+		if err != nil {
+			log.Fatalf("[-] [INIT] [Invalid log output dir %s: %v]", logOutputDir, err)
+		}
+		err = os.MkdirAll(logOutputDir, os.FileMode(0644))
+		if err != nil {
+			log.Fatalf("[-] [INIT] [Failed to create log output dir %s: %v]", logOutputDir, err)
+		}
 	}
 
 	environment := service.Environment{
@@ -168,6 +178,7 @@ func init() {
 		CaptureDriverLogs:   captureDriverLogs,
 		VideoOutputDir:      videoOutputDir,
 		VideoContainerImage: videoRecorderImage,
+		LogOutputDir:        logOutputDir,
 		Privileged:          !disablePrivileged,
 	}
 	if disableDocker {
@@ -262,20 +273,18 @@ func ping(w http.ResponseWriter, _ *http.Request) {
 	}{time.Since(startTime).String(), conf.LastReloadTime.String(), getSerial(), gitRevision})
 }
 
-const videoPath = "/video/"
-
 func video(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodDelete {
-		deleteFileIfExists(w, r)
+		deleteFileIfExists(w, r, videoOutputDir, videoPath, "DELETED_VIDEO_FILE")
 		return
 	}
 	fileServer := http.StripPrefix(videoPath, http.FileServer(http.Dir(videoOutputDir)))
 	fileServer.ServeHTTP(w, r)
 }
 
-func deleteFileIfExists(w http.ResponseWriter, r *http.Request) {
-	fileName := strings.TrimPrefix(r.URL.Path, videoPath)
-	filePath := filepath.Join(videoOutputDir, fileName)
+func deleteFileIfExists(w http.ResponseWriter, r *http.Request, dir string, prefix string, status string) {
+	fileName := strings.TrimPrefix(r.URL.Path, prefix)
+	filePath := filepath.Join(dir, fileName)
 	_, err := os.Stat(filePath)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Unknown file %s", filePath), http.StatusNotFound)
@@ -286,8 +295,14 @@ func deleteFileIfExists(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Failed to delete file %s: %v", filePath, err), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("[%d] [DELETED_VIDEO_FILE] [%s]", serial(), fileName)
+	log.Printf("[%d] [%s] [%s]", serial(), status, fileName)
 }
+
+const (
+	videoPath = "/video/"
+	logsPath  = "/logs/"
+	errorPath = "/error"
+)
 
 func handler() http.Handler {
 	root := http.NewServeMux()
@@ -298,7 +313,7 @@ func handler() http.Handler {
 		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/wd/hub")
 		mux().ServeHTTP(w, r)
 	})
-	root.HandleFunc("/error", func(w http.ResponseWriter, r *http.Request) {
+	root.HandleFunc(errorPath, func(w http.ResponseWriter, r *http.Request) {
 		util.JsonError(w, "Session timed out or not found", http.StatusNotFound)
 	})
 	root.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
@@ -307,7 +322,7 @@ func handler() http.Handler {
 	})
 	root.HandleFunc("/ping", ping)
 	root.Handle("/vnc/", websocket.Handler(vnc))
-	root.Handle("/logs/", websocket.Handler(logs))
+	root.HandleFunc(logsPath, logs)
 	root.HandleFunc(videoPath, video)
 	root.HandleFunc("/download/", fileDownload)
 	if enableFileUpload {
@@ -324,6 +339,7 @@ func showVersion() {
 func main() {
 	log.Printf("[-] [INIT] [Timezone: %s]", time.Local)
 	log.Printf("[-] [INIT] [Video Dir: %s]", videoOutputDir)
+	log.Printf("[-] [INIT] [Logs Dir: %s]", logOutputDir)
 	log.Printf("[-] [INIT] [Listening on %s]", listen)
 	log.Fatal(http.ListenAndServe(listen, handler()))
 }

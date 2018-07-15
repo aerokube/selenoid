@@ -25,6 +25,8 @@ The following flags are supported by `selenoid` command:
     Network address to accept connections (default ":4444")
 -log-conf string
     Container logging configuration file (default "config/container-logs.json")
+-log-output-dir string
+    Directory to save session log to (default "log")
 -max-timeout duration
     Maximum valid session idle timeout in time.Duration format (default 1h0m0s)
 -mem value
