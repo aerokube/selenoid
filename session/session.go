@@ -19,6 +19,7 @@ type Caps struct {
 	VideoName             string                 `json:"videoName"`
 	VideoScreenSize       string                 `json:"videoScreenSize"`
 	VideoFrameRate        uint16                 `json:"videoFrameRate"`
+	LogName               string                 `json:"logName"`
 	TestName              string                 `json:"name"`
 	TimeZone              string                 `json:"timeZone"`
 	ContainerHostname     string                 `json:"containerHostname"`

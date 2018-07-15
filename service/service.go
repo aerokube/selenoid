@@ -24,6 +24,7 @@ type Environment struct {
 	CaptureDriverLogs   bool
 	VideoOutputDir      string
 	VideoContainerImage string
+	LogOutputDir        string
 	Privileged          bool
 }
 

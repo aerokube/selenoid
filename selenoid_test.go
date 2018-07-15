@@ -29,6 +29,7 @@ var (
 func init() {
 	enableFileUpload = true
 	videoOutputDir, _ = ioutil.TempDir("", "selenoid-test")
+	logOutputDir, _ = ioutil.TempDir("", "selenoid-test")
 	gitRevision = "test-revision"
 	srv = httptest.NewServer(handler())
 }
@@ -361,7 +362,7 @@ func TestSessionDeleted(t *testing.T) {
 		Cancel:  ch,
 	}
 
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities": {"enableVideo": true}}`)))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
@@ -629,7 +630,7 @@ func TestStatus(t *testing.T) {
 	AssertThat(t, hasMessage, Is{true})
 }
 
-func TestServeAndDeleteFile(t *testing.T) {
+func TestServeAndDeleteVideoFile(t *testing.T) {
 	fileName := "testfile"
 	filePath := filepath.Join(videoOutputDir, fileName)
 	ioutil.WriteFile(filePath, []byte("test-data"), 0644)
@@ -644,6 +645,25 @@ func TestServeAndDeleteFile(t *testing.T) {
 	AssertThat(t, rsp, Code{http.StatusOK})
 
 	//Deleting already deleted file
+	rsp, err = http.DefaultClient.Do(deleteReq)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusNotFound})
+}
+
+func TestServeAndDeleteLogFile(t *testing.T) {
+	fileName := "logfile.txt"
+	filePath := filepath.Join(logOutputDir, fileName)
+	ioutil.WriteFile(filePath, []byte("test-data"), 0644)
+
+	rsp, err := http.Get(With(srv.URL).Path("/logs/logfile.txt"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
+	deleteReq, _ := http.NewRequest(http.MethodDelete, With(srv.URL).Path("/logs/logfile.txt"), nil)
+	rsp, err = http.DefaultClient.Do(deleteReq)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
 	rsp, err = http.DefaultClient.Do(deleteReq)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusNotFound})

@@ -12,6 +12,7 @@ import (
 	"github.com/aerokube/selenoid/session"
 	"github.com/aerokube/util"
 	"os"
+	"path/filepath"
 )
 
 // Driver - driver processes manager
@@ -28,7 +29,7 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 	if !ok {
 		return nil, fmt.Errorf("configuration error: image is not an array: %v", d.Service.Image)
 	}
-	cmdLine := []string{}
+	var cmdLine []string
 	for _, c := range slice {
 		if _, ok := c.(string); !ok {
 			return nil, fmt.Errorf("configuration error: value is not a string: %v", c)
@@ -53,31 +54,42 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 	if d.CaptureDriverLogs {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+	} else if d.LogOutputDir != "" {
+		filename := filepath.Join(d.LogOutputDir, d.LogName)
+		f, err := os.Create(filename)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create log file %s: %v", d.LogName, err)
+		}
+		cmd.Stdout = f
+		cmd.Stderr = f
 	}
 	l.Close()
 	log.Printf("[%d] [STARTING_PROCESS] [%s]", requestId, cmdLine)
 	s := time.Now()
 	err = cmd.Start()
 	if err != nil {
-		e := fmt.Errorf("cannot start process %v: %v", cmdLine, err)
-		return nil, e
+		return nil, fmt.Errorf("cannot start process %v: %v", cmdLine, err)
 	}
 	err = wait(u.String(), d.StartupTimeout)
 	if err != nil {
 		d.stopProcess(cmd)
 		return nil, err
 	}
-	log.Printf("[%d] [PROCESS_STARTED] [%d] [%v]", requestId, cmd.Process.Pid, util.SecondsSince(s))
+	log.Printf("[%d] [PROCESS_STARTED] [%d] [%.2fs]", requestId, cmd.Process.Pid, util.SecondsSince(s))
 	log.Printf("[%d] [PROXY_TO] [%s]", requestId, u.String())
 	return &StartedService{Url: u, Cancel: func() { d.stopProcess(cmd) }}, nil
 }
 
 func (d *Driver) stopProcess(cmd *exec.Cmd) {
+	s := time.Now()
 	log.Printf("[%d] [TERMINATING_PROCESS] [%d]", d.RequestId, cmd.Process.Pid)
 	err := stopProc(cmd)
 	if err != nil {
 		log.Printf("[%d] [FAILED_TO_TERMINATE_PROCESS] [%d] [%v]", d.RequestId, cmd.Process.Pid, err)
 		return
 	}
-	log.Printf("[%d] [TERMINATED_PROCESS] [%d]", d.RequestId, cmd.Process.Pid)
+	if d.CaptureDriverLogs && d.LogOutputDir != "" {
+		cmd.Stdout.(*os.File).Close()
+	}
+	log.Printf("[%d] [TERMINATED_PROCESS] [%d] [%.2fs]", d.RequestId, cmd.Process.Pid, util.SecondsSince(s))
 }

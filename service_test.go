@@ -12,6 +12,7 @@ import (
 	"github.com/docker/docker/client"
 	"golang.org/x/net/websocket"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -41,7 +42,7 @@ func updateMux(mux http.Handler) {
 	mockServer = httptest.NewServer(mux)
 	os.Setenv("DOCKER_HOST", "tcp://"+hostPort(mockServer.URL))
 	os.Setenv("DOCKER_API_VERSION", "1.29")
-	cli, _ = client.NewEnvClient()
+	cli, _ = client.NewClientWithOpts(client.FromEnv)
 }
 
 func testMux() http.Handler {
@@ -202,6 +203,7 @@ func testConfig(env *service.Environment) *config.Config {
 }
 
 func testEnvironment() *service.Environment {
+	logOutputDir, _ = ioutil.TempDir("", "selenoid-test")
 	return &service.Environment{
 		CPU:                 int64(0),
 		Memory:              int64(0),
@@ -210,6 +212,7 @@ func testEnvironment() *service.Environment {
 		CaptureDriverLogs:   captureDriverLogs,
 		VideoContainerImage: "aerokube/video-recorder",
 		VideoOutputDir:      "/some/dir",
+		LogOutputDir:        logOutputDir,
 		Privileged:          false,
 	}
 }
@@ -251,20 +254,21 @@ func testDocker(t *testing.T, env *service.Environment, cfg *config.Config) {
 }
 
 func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Config) service.Starter {
-	cli, err := client.NewEnvClient()
+	cli, err := client.NewClientWithOpts(client.FromEnv)
 	AssertThat(t, err, Is{nil})
 	manager := service.DefaultManager{Environment: env, Client: cli, Config: cfg}
 	caps := session.Caps{
-		DeviceName:                  "firefox",
+		DeviceName:            "firefox",
 		Version:               "33.0",
 		ScreenResolution:      "1024x768",
 		VNC:                   true,
 		Video:                 true,
 		VideoScreenSize:       "1024x768",
 		VideoFrameRate:        25,
+		LogName:               "testfile",
 		Env:                   []string{"LANG=ru_RU.UTF-8", "LANGUAGE=ru:en"},
 		HostsEntries:          []string{"example.com:192.168.0.1", "test.com:192.168.0.2"},
-		DNSServers:          []string{"192.168.0.1", "192.168.0.2"},
+		DNSServers:            []string{"192.168.0.1", "192.168.0.2"},
 		Labels:                map[string]string{"label1": "some-value", "label2": ""},
 		ApplicationContainers: []string{"one", "two"},
 		TimeZone:              "Europe/Moscow",

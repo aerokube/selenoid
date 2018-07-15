@@ -48,14 +48,17 @@ The following statuses are available:
 | CONTAINER_LOGS_DISCONNECTED | User logs client disconnected
 | CONTAINER_REMOVED | Docker container was successfully removed 
 | CONTAINER_STARTED | Docker container has successfully started 
+| FAILED_TO_COPY_LOGS | Failed to copy logs from Docker container  
 | CREATING_CONTAINER | Docker container with browser is creating 
 | DEFAULT_VERSION | Selenoid is using default browser version 
+| DELETED_LOG_FILE | Log file was deleted by user 
 | DELETED_VIDEO_FILE | Video file was deleted by user 
 | DOWNLOADING_FILE | User requested to download file from browser container 
 | ENVIRONMENT_NOT_AVAILABLE | Browser with desired name and version does not exist
 | FAILED_TO_REMOVE_CONTAINER | Failed to remove Docker container 
 | FAILED_TO_TERMINATE_PROCESS | An error occurred while terminating driver process 
 | INIT | Server is starting 
+| LOG_ERROR | An error occurred when post-processing session logs 
 | PROCESS_STARTED | Driver process successfully started 
 | PROXY_TO | Starting to proxy requests to running container or driver process 
 | REMOVING_CONTAINER | Docker container with browser or video recorder is being removed
@@ -72,6 +75,7 @@ The following statuses are available:
 | SHUTTING_DOWN | Server is stopping 
 | TERMINATING_PROCESS | Stopping driver process 
 | TERMINATED_PROCESS | Driver process was successfully stopped 
+| VIDEO_ERROR | An error occurred when post-processing recorded video 
 | VNC_ENABLED | User requested VNC traffic 
 | VNC_ERROR | An error occurred when trying to send VNC traffic 
 | VNC_SESSION_CLOSED | Sending VNC traffic was stopped 

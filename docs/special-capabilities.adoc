@@ -39,7 +39,7 @@ You need to use `setSize` method instead.
 
 === Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate
 
-NOTE: This feature requires some preparation. Please refer to <<Video Recording>> section for details.
+NOTE: This feature requires some preparation. Please refer to <<Video Recording>> section for more details.
 
 To enable video recording for session, add:
 
@@ -48,7 +48,7 @@ To enable video recording for session, add:
 enableVideo: true
 ----
 
-* By default files are named `<session-id>.mp4` where `<session-id>` is a unique identifier of Selenium session.
+* By default saved video files are named `<session-id>.mp4` where `<session-id>` is a unique identifier of Selenium session.
 To provide custom video name specify:
 +
 .Type: string
@@ -74,6 +74,20 @@ videoScreenSize: "1024x768"
 ----
 videoFrameRate: 24
 ----
+
+=== Saving Session Logs: logName
+
+NOTE: This feature requires some preparation. Please refer to <<Saving Session Logs>> section for more details.
+
+By default saved log files are named `<session-id>.txt` where `<session-id>` is a unique identifier of Selenium session.
+To provide custom log file name specify:
+
+.Type: string
+----
+logName: "my-cool-log.txt"
+----
+
+WARNING: It is important to add `txt` file extension.
 
 === Custom Test Name: name
 

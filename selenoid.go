@@ -157,7 +157,11 @@ func create(w http.ResponseWriter, r *http.Request) {
 	browser.Caps.VideoScreenSize = videoScreenSize
 	finalVideoName := browser.Caps.VideoName
 	if browser.Caps.Video {
-		browser.Caps.VideoName = getVideoFileName(videoOutputDir)
+		browser.Caps.VideoName = getTemporaryFileName(videoOutputDir, videoFileExtension)
+	}
+	finalLogName := browser.Caps.LogName
+	if logOutputDir != "" {
+		browser.Caps.LogName = getTemporaryFileName(logOutputDir, logFileExtension)
 	}
 	starter, ok := manager.Find(browser.Caps, requestId)
 	if !ok {
@@ -258,7 +262,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		cancel()
 		return
 	}
-	cancelAndRenameVideo := func() {
+	cancelAndRenameFiles := func() {
 		cancel()
 		if browser.Caps.Video {
 			oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
@@ -271,6 +275,19 @@ func create(w http.ResponseWriter, r *http.Request) {
 				log.Printf("[%d] [VIDEO_ERROR] [%s]", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldVideoName, newVideoName, err))
 			}
 		}
+		if logOutputDir != "" {
+			//The following logic will fail if -capture-driver-logs is enabled and a session is requested in driver mode.
+			//Specifying both -log-output-dir and -capture-driver-logs in that case is considered a misconfiguration.
+			oldLogName := filepath.Join(logOutputDir, browser.Caps.LogName)
+			if finalLogName == "" {
+				finalLogName = s.ID + logFileExtension
+			}
+			newLogName := filepath.Join(logOutputDir, finalLogName)
+			err := os.Rename(oldLogName, newLogName)
+			if err != nil {
+				log.Printf("[%d] [LOG_ERROR] [%s]", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldLogName, newLogName, err))
+			}
+		}
 	}
 	sessions.Put(s.ID, &session.Session{
 		Quota:      user,
@@ -279,7 +296,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		Container:  startedService.Container,
 		Fileserver: startedService.FileserverHostPort,
 		VNC:        startedService.VNCHostPort,
-		Cancel:     cancelAndRenameVideo,
+		Cancel:     cancelAndRenameFiles,
 		Timeout:    sessionTimeout,
 		TimeoutCh: onTimeout(sessionTimeout, func() {
 			request{r}.session(s.ID).Delete(requestId)
@@ -288,7 +305,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%d] [%.2fs]", requestId, s.ID, i, util.SecondsSince(sessionStartTime))
 }
 
-const videoFileExtension = ".mp4"
+const (
+	videoFileExtension = ".mp4"
+	logFileExtension   = ".txt"
+)
 
 var (
 	fullFormat  = regexp.MustCompile(`^([0-9]+x[0-9]+)x(8|16|24)$`)
@@ -340,11 +360,11 @@ func getSessionTimeout(sessionTimeout uint32, maxTimeout time.Duration, defaultT
 	return defaultTimeout, nil
 }
 
-func getVideoFileName(videoOutputDir string) string {
+func getTemporaryFileName(dir string, extension string) string {
 	filename := ""
 	for {
-		filename = generateRandomFileName()
-		_, err := os.Stat(filepath.Join(videoOutputDir, filename))
+		filename = generateRandomFileName(extension)
+		_, err := os.Stat(filepath.Join(dir, filename))
 		if err != nil {
 			break
 		}
@@ -352,10 +372,10 @@ func getVideoFileName(videoOutputDir string) string {
 	return filename
 }
 
-func generateRandomFileName() string {
+func generateRandomFileName(extension string) string {
 	randBytes := make([]byte, 16)
 	rand.Read(randBytes)
-	return "selenoid" + hex.EncodeToString(randBytes) + videoFileExtension
+	return "selenoid" + hex.EncodeToString(randBytes) + extension
 }
 
 func proxy(w http.ResponseWriter, r *http.Request) {
@@ -400,7 +420,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 					r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
 					return
 				}
-				r.URL.Path = "/error"
+				r.URL.Path = errorPath
 			},
 		}).ServeHTTP(w, r)
 	}(w, r)
@@ -514,7 +534,21 @@ func vnc(wsconn *websocket.Conn) {
 	}
 }
 
-func logs(wsconn *websocket.Conn) {
+func logs(w http.ResponseWriter, r *http.Request) {
+	fileNameOrSessionID := strings.TrimPrefix(r.URL.Path, logsPath)
+	if fileNameOrSessionID == "" || strings.HasSuffix(fileNameOrSessionID, logFileExtension) {
+		if r.Method == http.MethodDelete {
+			deleteFileIfExists(w, r, logOutputDir, logsPath, "DELETED_LOG_FILE")
+			return
+		}
+		fileServer := http.StripPrefix(logsPath, http.FileServer(http.Dir(logOutputDir)))
+		fileServer.ServeHTTP(w, r)
+		return
+	}
+	websocket.Handler(streamLogs).ServeHTTP(w, r)
+}
+
+func streamLogs(wsconn *websocket.Conn) {
 	defer wsconn.Close()
 	requestId := serial()
 	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
