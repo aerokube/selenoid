@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-07-13</span>
+<span id="revdate">2018-07-15</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -581,10 +581,16 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_deleting_video_files">2.6.3. Deleting Video Files</a></li>
 </ul>
 </li>
-<li><a href="#_reloading_configuration">2.7. Reloading Configuration</a></li>
-<li><a href="#_selenoid_with_docker_compose">2.8. Selenoid with Docker Compose</a></li>
-<li><a href="#_log_files">2.9. Log Files</a></li>
-<li><a href="#_selenoid_cli_flags">2.10. Selenoid CLI Flags</a></li>
+<li><a href="#_saving_session_logs">2.7. Saving Session Logs</a>
+<ul class="sectlevel3">
+<li><a href="#_downloading_log_files_from_selenoid">2.7.1. Downloading Log Files from Selenoid</a></li>
+<li><a href="#_deleting_log_files">2.7.2. Deleting Log Files</a></li>
+</ul>
+</li>
+<li><a href="#_reloading_configuration">2.8. Reloading Configuration</a></li>
+<li><a href="#_selenoid_with_docker_compose">2.9. Selenoid with Docker Compose</a></li>
+<li><a href="#_log_files">2.10. Log Files</a></li>
+<li><a href="#_selenoid_cli_flags">2.11. Selenoid CLI Flags</a></li>
 </ul>
 </li>
 <li><a href="#_advanced_features">3. Advanced Features</a>
@@ -594,15 +600,16 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_live_browser_screen_enablevnc">3.1.1. Live Browser Screen: enableVNC</a></li>
 <li><a href="#_custom_screen_resolution_screenresolution">3.1.2. Custom Screen Resolution: screenResolution</a></li>
 <li><a href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate">3.1.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate</a></li>
-<li><a href="#_custom_test_name_name">3.1.4. Custom Test Name: name</a></li>
-<li><a href="#_custom_session_timeout_sessiontimeout">3.1.5. Custom Session Timeout: sessionTimeout</a></li>
-<li><a href="#_per_session_time_zone_timezone">3.1.6. Per-session Time Zone: timeZone</a></li>
-<li><a href="#_per_session_environment_variables_env">3.1.7. Per-session Environment Variables: env</a></li>
-<li><a href="#_links_to_application_containers_applicationcontainers">3.1.8. Links to Application Containers: applicationContainers</a></li>
-<li><a href="#_hosts_entries_hostsentries">3.1.9. Hosts Entries: hostsEntries</a></li>
-<li><a href="#_custom_dns_servers_dnsservers">3.1.10. Custom DNS Servers: dnsServers</a></li>
-<li><a href="#_container_labels_labels">3.1.11. Container Labels: labels</a></li>
-<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.12. Specifying Capabilities via Protocol Extensions</a></li>
+<li><a href="#_saving_session_logs_logname">3.1.4. Saving Session Logs: logName</a></li>
+<li><a href="#_custom_test_name_name">3.1.5. Custom Test Name: name</a></li>
+<li><a href="#_custom_session_timeout_sessiontimeout">3.1.6. Custom Session Timeout: sessionTimeout</a></li>
+<li><a href="#_per_session_time_zone_timezone">3.1.7. Per-session Time Zone: timeZone</a></li>
+<li><a href="#_per_session_environment_variables_env">3.1.8. Per-session Environment Variables: env</a></li>
+<li><a href="#_links_to_application_containers_applicationcontainers">3.1.9. Links to Application Containers: applicationContainers</a></li>
+<li><a href="#_hosts_entries_hostsentries">3.1.10. Hosts Entries: hostsEntries</a></li>
+<li><a href="#_custom_dns_servers_dnsservers">3.1.11. Custom DNS Servers: dnsServers</a></li>
+<li><a href="#_container_labels_labels">3.1.12. Container Labels: labels</a></li>
+<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.13. Specifying Capabilities via Protocol Extensions</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -1807,7 +1814,7 @@ Video recording works by attaching a separate container with <a href="https://ww
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Mount from host a directory (e.g. <code>~/.aerokube/selenoid/video</code>) to store video files to <code>/opt/selenoid/video</code>.</p>
+<p>Mount a directory from the host machine (e.g. <code>~/.aerokube/selenoid/video</code>) to store video files to <code>/opt/selenoid/video</code>.</p>
 </li>
 <li>
 <p>Pass an additional <code>OVERRIDE_VIDEO_OUTPUT_DIR</code> environment variable with absolute path to video directory on host machine. This is required because video recorder container, automatically created by Selenoid should save video to host machine video storage directory.</p>
@@ -1924,7 +1931,8 @@ Direct link will works only after session has finished because Selenoid renames 
 <ol class="arabic">
 <li>
 <p>Schedule scripts automatically removing files older than desired date and time. An example command under Unix operating systems can look like:</p>
-<div class="literalblock">
+<div class="listingblock">
+<div class="title">Shell Command to Remove Old Video Files</div>
 <div class="content">
 <pre>$ find /path/to/video/dir -mindepth 1 -maxdepth 1 -mmin +120 -name '*.mp4' | xargs rm -rf</pre>
 </div>
@@ -1935,7 +1943,8 @@ Direct link will works only after session has finished because Selenoid renames 
 </li>
 <li>
 <p>Send video removal requests (e.g. from passed test cases). Just use <code>DELETE</code> HTTP method and Selenoid video URL:</p>
-<div class="literalblock">
+<div class="listingblock">
+<div class="title">Deleting Video File via HTTP API</div>
 <div class="content">
 <pre>$ curl -X DELETE http://selenoid-host.example.com:4444/video/&lt;filename&gt;.mp4</pre>
 </div>
@@ -1946,7 +1955,93 @@ Direct link will works only after session has finished because Selenoid renames 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_reloading_configuration"><a class="anchor" href="#_reloading_configuration"></a>2.7. Reloading Configuration</h3>
+<h3 id="_saving_session_logs"><a class="anchor" href="#_saving_session_logs"></a>2.7. Saving Session Logs</h3>
+<div class="paragraph">
+<p>Selenoid can save log files for every running session to a separate file. By default log files are saved as <code>&lt;session-id&gt;.txt</code> but you can alter file name via <code>logName</code> capability.</p>
+</div>
+<div class="paragraph">
+<p>To enable this feature you only need to add <code>-log-output-dir &lt;/path/to/some/dir&gt;</code> flag to Selenoid:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./selenoid -log-output-dir /path/to/some/dir</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When running Selenoid <strong>in Docker container</strong> - don&#8217;t forget to mount logs directory from the host machine:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example Docker Command</div>
+<div class="content">
+<pre>$ docker run -d
+--name selenoid                                 \
+-p 4444:4444                                    \
+-v /var/run/docker.sock:/var/run/docker.sock    \
+-v `pwd`/config/:/etc/selenoid/:ro              \
+-v `pwd`/logs/:/opt/selenoid/logs/              \
+aerokube/selenoid:latest-release -log-output-dir /opt/selenoid/logs</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+This feature is automatically enabled when starting Selenoid via <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> <code>selenoid start</code> command.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_downloading_log_files_from_selenoid"><a class="anchor" href="#_downloading_log_files_from_selenoid"></a>2.7.1. Downloading Log Files from Selenoid</h4>
+<div class="paragraph">
+<p>You can access saved log files using the following URL:</p>
+</div>
+<div class="listingblock">
+<div class="title">Direct Link to Log File</div>
+<div class="content">
+<pre>http://selenoid-host.example.com:4444/logs/&lt;filename&gt;.txt</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Direct link will works only after session has finished because Selenoid renames temporary filename to <code>&lt;session-id&gt;.mp4</code> (by default) at the session close.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To see all available files use:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing All Log Files</div>
+<div class="content">
+<pre>http://selenoid-host.example.com:4444/logs/</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_deleting_log_files"><a class="anchor" href="#_deleting_log_files"></a>2.7.2. Deleting Log Files</h4>
+<div class="paragraph">
+<p>Similarly to video files it&#8217;s up to you when to delete old log files. Either remove log files from the directory using a scheduled job or send log removal requests:</p>
+</div>
+<div class="listingblock">
+<div class="title">Deleting Log File via HTTP API</div>
+<div class="content">
+<pre>$ curl -X DELETE http://selenoid-host.example.com:4444/logs/&lt;filename&gt;.txt</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reloading_configuration"><a class="anchor" href="#_reloading_configuration"></a>2.8. Reloading Configuration</h3>
 <div class="paragraph">
 <p>To reload configuration without restart send SIGHUP:</p>
 </div>
@@ -1992,7 +2087,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.8. Selenoid with Docker Compose</h3>
+<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.9. Selenoid with Docker Compose</h3>
 <div class="paragraph">
 <p>To avoid network problems between browser drivers inside containers and Selenoid when using <a href="https://docs.docker.com/compose/">Docker Compose</a> for combining with another services (such as UI or ggr) you need to enable <strong>bridge</strong> network mode for all services:</p>
 </div>
@@ -2019,7 +2114,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_log_files"><a class="anchor" href="#_log_files"></a>2.9. Log Files</h3>
+<h3 id="_log_files"><a class="anchor" href="#_log_files"></a>2.10. Log Files</h3>
 <div class="paragraph">
 <p>A typical log file looks like the following:</p>
 </div>
@@ -2160,12 +2255,20 @@ Use only one of these commands.
 <td class="tableblock halign-left valign-top"><p class="tableblock">Docker container has successfully started</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FAILED_TO_COPY_LOGS</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Failed to copy logs from Docker container</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">CREATING_CONTAINER</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Docker container with browser is creating</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">DEFAULT_VERSION</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Selenoid is using default browser version</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DELETED_LOG_FILE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Log file was deleted by user</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">DELETED_VIDEO_FILE</p></td>
@@ -2190,6 +2293,10 @@ Use only one of these commands.
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">INIT</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Server is starting</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">LOG_ERROR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An error occurred when post-processing session logs</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">PROCESS_STARTED</p></td>
@@ -2256,6 +2363,10 @@ Use only one of these commands.
 <td class="tableblock halign-left valign-top"><p class="tableblock">Driver process was successfully stopped</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VIDEO_ERROR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An error occurred when post-processing recorded video</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">VNC_ENABLED</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">User requested VNC traffic</p></td>
 </tr>
@@ -2279,7 +2390,7 @@ Use only one of these commands.
 </table>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.10. Selenoid CLI Flags</h3>
+<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.11. Selenoid CLI Flags</h3>
 <div class="paragraph">
 <p>The following flags are supported by <code>selenoid</code> command:</p>
 </div>
@@ -2307,6 +2418,8 @@ Use only one of these commands.
     Network address to accept connections (default ":4444")
 -log-conf string
     Container logging configuration file (default "config/container-logs.json")
+-log-output-dir string
+    Directory to save session log to (default "log")
 -max-timeout duration
     Maximum valid session idle timeout in time.Duration format (default 1h0m0s)
 -mem value
@@ -2427,7 +2540,7 @@ You need to use <code>setSize</code> method instead.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-This feature requires some preparation. Please refer to <a href="#_video_recording">Video Recording</a> section for details.
+This feature requires some preparation. Please refer to <a href="#_video_recording">Video Recording</a> section for more details.
 </td>
 </tr>
 </table>
@@ -2444,7 +2557,7 @@ This feature requires some preparation. Please refer to <a href="#_video_recordi
 <div class="ulist">
 <ul>
 <li>
-<p>By default files are named <code>&lt;session-id&gt;.mp4</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
+<p>By default saved video files are named <code>&lt;session-id&gt;.mp4</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
 To provide custom video name specify:</p>
 <div class="listingblock">
 <div class="title">Type: string</div>
@@ -2490,7 +2603,44 @@ resolution is less than actual, screen on video will be trimmed starting from to
 </div>
 </div>
 <div class="sect3">
-<h4 id="_custom_test_name_name"><a class="anchor" href="#_custom_test_name_name"></a>3.1.4. Custom Test Name: name</h4>
+<h4 id="_saving_session_logs_logname"><a class="anchor" href="#_saving_session_logs_logname"></a>3.1.4. Saving Session Logs: logName</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This feature requires some preparation. Please refer to <a href="#_saving_session_logs">Saving Session Logs</a> section for more details.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>By default saved log files are named <code>&lt;session-id&gt;.txt</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
+To provide custom log file name specify:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>logName: "my-cool-log.txt"</pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+It is important to add <code>txt</code> file extension.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_custom_test_name_name"><a class="anchor" href="#_custom_test_name_name"></a>3.1.5. Custom Test Name: name</h4>
 <div class="paragraph">
 <p>For debugging purposes it is often useful to give a distinct name to every test case.
 When working with Selenoid you can set test case name by passing the following capability:</p>
@@ -2506,7 +2656,7 @@ When working with Selenoid you can set test case name by passing the following c
 </div>
 </div>
 <div class="sect3">
-<h4 id="_custom_session_timeout_sessiontimeout"><a class="anchor" href="#_custom_session_timeout_sessiontimeout"></a>3.1.5. Custom Session Timeout: sessionTimeout</h4>
+<h4 id="_custom_session_timeout_sessiontimeout"><a class="anchor" href="#_custom_session_timeout_sessiontimeout"></a>3.1.6. Custom Session Timeout: sessionTimeout</h4>
 <div class="paragraph">
 <p>Sometimes you may want to change idle timeout for selected browser session. To achieve this - pass the following capability:</p>
 </div>
@@ -2521,7 +2671,7 @@ When working with Selenoid you can set test case name by passing the following c
 </div>
 </div>
 <div class="sect3">
-<h4 id="_per_session_time_zone_timezone"><a class="anchor" href="#_per_session_time_zone_timezone"></a>3.1.6. Per-session Time Zone: timeZone</h4>
+<h4 id="_per_session_time_zone_timezone"><a class="anchor" href="#_per_session_time_zone_timezone"></a>3.1.7. Per-session Time Zone: timeZone</h4>
 <div class="paragraph">
 <p>Some tests require particular time zone to be set in operating system.
 To achieve this with Selenoid use:</p>
@@ -2538,7 +2688,7 @@ Without this capability launched browser containers will have the same timezone 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_per_session_environment_variables_env"><a class="anchor" href="#_per_session_environment_variables_env"></a>3.1.7. Per-session Environment Variables: env</h4>
+<h4 id="_per_session_environment_variables_env"><a class="anchor" href="#_per_session_environment_variables_env"></a>3.1.8. Per-session Environment Variables: env</h4>
 <div class="paragraph">
 <p>Sometimes you may want to set some environment variables for every test case (for example to test with different default locales). To achieve this pass one more capability:</p>
 </div>
@@ -2553,7 +2703,7 @@ Without this capability launched browser containers will have the same timezone 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_links_to_application_containers_applicationcontainers"><a class="anchor" href="#_links_to_application_containers_applicationcontainers"></a>3.1.8. Links to Application Containers: applicationContainers</h4>
+<h4 id="_links_to_application_containers_applicationcontainers"><a class="anchor" href="#_links_to_application_containers_applicationcontainers"></a>3.1.9. Links to Application Containers: applicationContainers</h4>
 <div class="paragraph">
 <p>Sometimes you may need to link browser container to application container running on the same host machine.
 This allows you to use cool URLs like <code><a href="http://my-cool-app/" class="bare">http://my-cool-app/</a></code> in tests.
@@ -2567,7 +2717,7 @@ To achieve this simply pass information about one or more desired links via capa
 </div>
 </div>
 <div class="sect3">
-<h4 id="_hosts_entries_hostsentries"><a class="anchor" href="#_hosts_entries_hostsentries"></a>3.1.9. Hosts Entries: hostsEntries</h4>
+<h4 id="_hosts_entries_hostsentries"><a class="anchor" href="#_hosts_entries_hostsentries"></a>3.1.10. Hosts Entries: hostsEntries</h4>
 <div class="paragraph">
 <p>Although you can configure a separate list of <code>/etc/hosts</code> entries for every browser image in <a href="#_browsers_configuration_file">Browsers Configuration File</a>
 sometimes you may need to add more entries for particular test cases. This can be easily achieved with:</p>
@@ -2584,7 +2734,7 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_custom_dns_servers_dnsservers"><a class="anchor" href="#_custom_dns_servers_dnsservers"></a>3.1.10. Custom DNS Servers: dnsServers</h4>
+<h4 id="_custom_dns_servers_dnsservers"><a class="anchor" href="#_custom_dns_servers_dnsservers"></a>3.1.11. Custom DNS Servers: dnsServers</h4>
 <div class="paragraph">
 <p>By default Selenoid browser containers are using global DNS settings of Docker daemon. Sometimes you may need to override used DNS servers list for particular test cases. This can be easily achieved with:</p>
 </div>
@@ -2596,7 +2746,7 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_container_labels_labels"><a class="anchor" href="#_container_labels_labels"></a>3.1.11. Container Labels: labels</h4>
+<h4 id="_container_labels_labels"><a class="anchor" href="#_container_labels_labels"></a>3.1.12. Container Labels: labels</h4>
 <div class="paragraph">
 <p>In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs.</p>
 </div>
@@ -2611,7 +2761,7 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.12. Specifying Capabilities via Protocol Extensions</h4>
+<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.13. Specifying Capabilities via Protocol Extensions</h4>
 <div class="paragraph">
 <p>Some Selenium clients allow passing only a limited number of capabilities specified in <a href="https://w3c.github.io/webdriver/webdriver-spec.html">WebDriver specification</a>. For such cases Selenoid supports reading capabilities using <a href="https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions">WebDriver protocol extensions</a> feature. The following two examples deliver the same result. Usually capabilities are passed like this:</p>
 </div>
@@ -3936,7 +4086,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-07-13 19:12:15 UTC
+Last updated 2018-07-15 12:36:03 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
