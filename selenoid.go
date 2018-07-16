@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/selenoid/upload"
 	"github.com/aerokube/util"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -262,6 +263,17 @@ func create(w http.ResponseWriter, r *http.Request) {
 		cancel()
 		return
 	}
+	sess := &session.Session{
+		Quota:      user,
+		Caps:       browser.Caps,
+		URL:        u,
+		Container:  startedService.Container,
+		Fileserver: startedService.FileserverHostPort,
+		VNC:        startedService.VNCHostPort,
+		Timeout:    sessionTimeout,
+		TimeoutCh: onTimeout(sessionTimeout, func() {
+			request{r}.session(s.ID).Delete(requestId)
+		})}
 	cancelAndRenameFiles := func() {
 		cancel()
 		if browser.Caps.Video {
@@ -273,6 +285,15 @@ func create(w http.ResponseWriter, r *http.Request) {
 			err := os.Rename(oldVideoName, newVideoName)
 			if err != nil {
 				log.Printf("[%d] [VIDEO_ERROR] [%s]", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldVideoName, newVideoName, err))
+			} else {
+				input := &upload.UploadRequest{
+					RequestId: requestId,
+					Filename: newVideoName,
+					SessionId: s.ID,
+					Session: sess,
+					Type: "video",
+				}
+				upload.Upload(input)
 			}
 		}
 		if logOutputDir != "" {
@@ -286,21 +307,20 @@ func create(w http.ResponseWriter, r *http.Request) {
 			err := os.Rename(oldLogName, newLogName)
 			if err != nil {
 				log.Printf("[%d] [LOG_ERROR] [%s]", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldLogName, newLogName, err))
+			} else {
+				input := &upload.UploadRequest{
+					RequestId: requestId,
+					Filename: newLogName,
+					SessionId: s.ID,
+					Session: sess,
+					Type: "log",
+				}
+				upload.Upload(input)
 			}
 		}
 	}
-	sessions.Put(s.ID, &session.Session{
-		Quota:      user,
-		Caps:       browser.Caps,
-		URL:        u,
-		Container:  startedService.Container,
-		Fileserver: startedService.FileserverHostPort,
-		VNC:        startedService.VNCHostPort,
-		Cancel:     cancelAndRenameFiles,
-		Timeout:    sessionTimeout,
-		TimeoutCh: onTimeout(sessionTimeout, func() {
-			request{r}.session(s.ID).Delete(requestId)
-		})})
+	sess.Cancel = cancelAndRenameFiles
+	sessions.Put(s.ID, sess)
 	queue.Create()
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%d] [%.2fs]", requestId, s.ID, i, util.SecondsSince(sessionStartTime))
 }
