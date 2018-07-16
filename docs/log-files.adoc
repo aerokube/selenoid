@@ -75,6 +75,8 @@ The following statuses are available:
 | SHUTTING_DOWN | Server is stopping 
 | TERMINATING_PROCESS | Stopping driver process 
 | TERMINATED_PROCESS | Driver process was successfully stopped 
+| UPLOADING_FILE | An issue occurred while uploading file 
+| UPLOADED_FILE | File successfully uploaded
 | VIDEO_ERROR | An error occurred when post-processing recorded video 
 | VNC_ENABLED | User requested VNC traffic 
 | VNC_ERROR | An error occurred when trying to send VNC traffic 

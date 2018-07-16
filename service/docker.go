@@ -414,6 +414,11 @@ func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint6
 		log.Printf("[%d] [FAILED_TO_STOP_VIDEO_CONTAINER] [%s] [%v]", requestId, containerId, err)
 		return
 	}
+	notRunning, doesNotExist := cli.ContainerWait(ctx, containerId, ctr.WaitConditionNotRunning)
+	select {
+	case <-notRunning:
+	case <-doesNotExist:
+	}
 	log.Printf("[%d] [STOPPED_VIDEO_CONTAINER] [%s]", requestId, containerId)
 }
 
