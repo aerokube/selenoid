@@ -160,6 +160,7 @@ func init() {
 		if err != nil {
 			log.Fatalf("[-] [INIT] [Failed to create video output dir %s: %v]", videoOutputDir, err)
 		}
+		log.Printf("[-] [INIT] [Video Dir: %s]", videoOutputDir)
 	}
 	if logOutputDir != "" {
 		logOutputDir, err = filepath.Abs(logOutputDir)
@@ -170,6 +171,7 @@ func init() {
 		if err != nil {
 			log.Fatalf("[-] [INIT] [Failed to create log output dir %s: %v]", logOutputDir, err)
 		}
+		log.Printf("[-] [INIT] [Logs Dir: %s]", logOutputDir)
 	}
 
 	upload.Init()
@@ -343,8 +345,6 @@ func showVersion() {
 
 func main() {
 	log.Printf("[-] [INIT] [Timezone: %s]", time.Local)
-	log.Printf("[-] [INIT] [Video Dir: %s]", videoOutputDir)
-	log.Printf("[-] [INIT] [Logs Dir: %s]", logOutputDir)
 	log.Printf("[-] [INIT] [Listening on %s]", listen)
 	log.Fatal(http.ListenAndServe(listen, handler()))
 }
