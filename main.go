@@ -119,7 +119,7 @@ func init() {
 	flag.BoolVar(&disablePrivileged, "disable-privileged", false, "Whether to disable privileged container mode")
 	flag.StringVar(&videoOutputDir, "video-output-dir", "video", "Directory to save recorded video to")
 	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder", "Image to use as video recorder")
-	flag.StringVar(&logOutputDir, "log-output-dir", "log", "Directory to save session log to")
+	flag.StringVar(&logOutputDir, "log-output-dir", "", "Directory to save session log to")
 	flag.Parse()
 
 	if version {
@@ -160,6 +160,8 @@ func init() {
 		if err != nil {
 			log.Fatalf("[-] [INIT] [Failed to create video output dir %s: %v]", videoOutputDir, err)
 		}
+	}
+	if logOutputDir != "" {
 		logOutputDir, err = filepath.Abs(logOutputDir)
 		if err != nil {
 			log.Fatalf("[-] [INIT] [Invalid log output dir %s: %v]", logOutputDir, err)
