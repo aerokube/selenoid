@@ -556,7 +556,7 @@ func vnc(wsconn *websocket.Conn) {
 
 func logs(w http.ResponseWriter, r *http.Request) {
 	fileNameOrSessionID := strings.TrimPrefix(r.URL.Path, logsPath)
-	if fileNameOrSessionID == "" || strings.HasSuffix(fileNameOrSessionID, logFileExtension) {
+	if logOutputDir != "" && (fileNameOrSessionID == "" || strings.HasSuffix(fileNameOrSessionID, logFileExtension)) {
 		if r.Method == http.MethodDelete {
 			deleteFileIfExists(w, r, logOutputDir, logsPath, "DELETED_LOG_FILE")
 			return
