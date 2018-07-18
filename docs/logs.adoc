@@ -1,6 +1,6 @@
 == Saving Session Logs
 
-Selenoid can save log files for every running session to a separate file. By default log files are saved as `<session-id>.txt` but you can alter file name via `logName` capability.
+Selenoid can save log files for every running session to a separate file. By default log files are saved as `<session-id>.log` but you can alter file name via `logName` capability.
 
 To enable this feature you only need to add `-log-output-dir </path/to/some/dir>` flag to Selenoid:
 
@@ -27,10 +27,10 @@ You can access saved log files using the following URL:
 
 .Direct Link to Log File
 ----
-http://selenoid-host.example.com:4444/logs/<filename>.txt
+http://selenoid-host.example.com:4444/logs/<filename>.log
 ----
 
-NOTE: Direct link will work only after session has finished because Selenoid renames temporary filename to `<session-id>.txt` (by default) at the session close.
+NOTE: Direct link will work only after session has finished because Selenoid renames temporary filename to `<session-id>.log` (by default) at the session close.
 
 To see all available files use:
 
@@ -45,5 +45,5 @@ Similarly to video files it's up to you when to delete old log files. Either rem
 
 .Deleting Log File via HTTP API
 ----
-$ curl -X DELETE http://selenoid-host.example.com:4444/logs/<filename>.txt
+$ curl -X DELETE http://selenoid-host.example.com:4444/logs/<filename>.log
 ----

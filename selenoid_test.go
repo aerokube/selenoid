@@ -651,15 +651,15 @@ func TestServeAndDeleteVideoFile(t *testing.T) {
 }
 
 func TestServeAndDeleteLogFile(t *testing.T) {
-	fileName := "logfile.txt"
+	fileName := "logfile.log"
 	filePath := filepath.Join(logOutputDir, fileName)
 	ioutil.WriteFile(filePath, []byte("test-data"), 0644)
 
-	rsp, err := http.Get(With(srv.URL).Path("/logs/logfile.txt"))
+	rsp, err := http.Get(With(srv.URL).Path("/logs/logfile.log"))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
 
-	deleteReq, _ := http.NewRequest(http.MethodDelete, With(srv.URL).Path("/logs/logfile.txt"), nil)
+	deleteReq, _ := http.NewRequest(http.MethodDelete, With(srv.URL).Path("/logs/logfile.log"), nil)
 	rsp, err = http.DefaultClient.Do(deleteReq)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
