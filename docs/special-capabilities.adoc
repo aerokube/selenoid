@@ -79,15 +79,15 @@ videoFrameRate: 24
 
 NOTE: This feature requires some preparation. Please refer to <<Saving Session Logs>> section for more details.
 
-By default saved log files are named `<session-id>.txt` where `<session-id>` is a unique identifier of Selenium session.
+By default saved log files are named `<session-id>.log` where `<session-id>` is a unique identifier of Selenium session.
 To provide custom log file name specify:
 
 .Type: string
 ----
-logName: "my-cool-log.txt"
+logName: "my-cool-log.log"
 ----
 
-WARNING: It is important to add `txt` file extension.
+WARNING: It is important to add `log` file extension.
 
 === Custom Test Name: name
 

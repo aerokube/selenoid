@@ -288,10 +288,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 			} else {
 				input := &upload.UploadRequest{
 					RequestId: requestId,
-					Filename: newVideoName,
+					Filename:  newVideoName,
 					SessionId: s.ID,
-					Session: sess,
-					Type: "video",
+					Session:   sess,
+					Type:      "video",
 				}
 				upload.Upload(input)
 			}
@@ -310,10 +310,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 			} else {
 				input := &upload.UploadRequest{
 					RequestId: requestId,
-					Filename: newLogName,
+					Filename:  newLogName,
 					SessionId: s.ID,
-					Session: sess,
-					Type: "log",
+					Session:   sess,
+					Type:      "log",
 				}
 				upload.Upload(input)
 			}
@@ -327,7 +327,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 
 const (
 	videoFileExtension = ".mp4"
-	logFileExtension   = ".txt"
+	logFileExtension   = ".log"
 )
 
 var (
