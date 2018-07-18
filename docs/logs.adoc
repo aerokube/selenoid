@@ -30,7 +30,7 @@ You can access saved log files using the following URL:
 http://selenoid-host.example.com:4444/logs/<filename>.txt
 ----
 
-NOTE: Direct link will works only after session has finished because Selenoid renames temporary filename to `<session-id>.mp4` (by default) at the session close.
+NOTE: Direct link will work only after session has finished because Selenoid renames temporary filename to `<session-id>.txt` (by default) at the session close.
 
 To see all available files use:
 
