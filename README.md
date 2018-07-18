@@ -36,6 +36,11 @@ New **[rich user interface]((https://github.com/aerokube/selenoid-ui))** showing
 * Any browser session can be saved to [H.264](https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC) video ([example](https://www.youtube.com/watch?v=maB298oO5cI))
 * An API to list, download and delete recorded video files
 
+### Convenient Logging
+
+* Any browser session logs are automatically saved to files - one per session
+* An API to list, download and delete saved log files
+
 ### Lightweight and Lightning Fast
 Suitable for personal usage and in big clusters:
 * Consumes **10 times** less memory than Java-based Selenium server under the same load
