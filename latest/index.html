@@ -2004,7 +2004,7 @@ Direct link will work only after session has finished because Selenoid renames t
 <div class="sect2">
 <h3 id="_saving_session_logs"><a class="anchor" href="#_saving_session_logs"></a>2.8. Saving Session Logs</h3>
 <div class="paragraph">
-<p>Selenoid can save log files for every running session to a separate file. By default log files are saved as <code>&lt;session-id&gt;.txt</code> but you can alter file name via <code>logName</code> capability.</p>
+<p>Selenoid can save log files for every running session to a separate file. By default log files are saved as <code>&lt;session-id&gt;.log</code> but you can alter file name via <code>logName</code> capability.</p>
 </div>
 <div class="paragraph">
 <p>To enable this feature you only need to add <code>-log-output-dir &lt;/path/to/some/dir&gt;</code> flag to Selenoid:</p>
@@ -2049,7 +2049,7 @@ This feature is automatically enabled when starting Selenoid via <a href="http:/
 <div class="listingblock">
 <div class="title">Direct Link to Log File</div>
 <div class="content">
-<pre>http://selenoid-host.example.com:4444/logs/&lt;filename&gt;.txt</pre>
+<pre>http://selenoid-host.example.com:4444/logs/&lt;filename&gt;.log</pre>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -2059,7 +2059,7 @@ This feature is automatically enabled when starting Selenoid via <a href="http:/
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Direct link will work only after session has finished because Selenoid renames temporary filename to <code>&lt;session-id&gt;.txt</code> (by default) at the session close.
+Direct link will work only after session has finished because Selenoid renames temporary filename to <code>&lt;session-id&gt;.log</code> (by default) at the session close.
 </td>
 </tr>
 </table>
@@ -2082,7 +2082,7 @@ Direct link will work only after session has finished because Selenoid renames t
 <div class="listingblock">
 <div class="title">Deleting Log File via HTTP API</div>
 <div class="content">
-<pre>$ curl -X DELETE http://selenoid-host.example.com:4444/logs/&lt;filename&gt;.txt</pre>
+<pre>$ curl -X DELETE http://selenoid-host.example.com:4444/logs/&lt;filename&gt;.log</pre>
 </div>
 </div>
 </div>
@@ -2113,7 +2113,7 @@ This feature only becomes available when Selenoid is compiled with <code>s3</cod
 </div>
 </div>
 <div class="paragraph">
-<p>By default uploaded file name is preserved, i.e. S3 path is <code>/&lt;session-id&gt;.txt</code> or <code>/myCustomVideo.mp4</code>. You can optionally provide your custom key pattern using <code>-s3-key-pattern</code> flag and a set of placeholders:</p>
+<p>By default uploaded file name is preserved, i.e. S3 path is <code>/&lt;session-id&gt;.log</code> or <code>/myCustomVideo.mp4</code>. You can optionally provide your custom key pattern using <code>-s3-key-pattern</code> flag and a set of placeholders:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. S3 Key Placeholders</caption>
@@ -2705,13 +2705,13 @@ This feature requires some preparation. Please refer to <a href="#_saving_sessio
 </table>
 </div>
 <div class="paragraph">
-<p>By default saved log files are named <code>&lt;session-id&gt;.txt</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
+<p>By default saved log files are named <code>&lt;session-id&gt;.log</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
 To provide custom log file name specify:</p>
 </div>
 <div class="listingblock">
 <div class="title">Type: string</div>
 <div class="content">
-<pre>logName: "my-cool-log.txt"</pre>
+<pre>logName: "my-cool-log.log"</pre>
 </div>
 </div>
 <div class="admonitionblock warning">
@@ -2721,7 +2721,7 @@ To provide custom log file name specify:</p>
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-It is important to add <code>txt</code> file extension.
+It is important to add <code>log</code> file extension.
 </td>
 </tr>
 </table>
@@ -4174,7 +4174,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-07-18 09:20:25 UTC
+Last updated 2018-07-18 19:29:26 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
