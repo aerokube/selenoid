@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-07-18</span>
+<span id="revdate">2018-07-19</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -2111,6 +2111,18 @@ This feature only becomes available when Selenoid is compiled with <code>s3</cod
 <div class="content">
 <pre>$ ./selenoid -s3-endpoint https://s3.us-east-2.amazonaws.com -s3-region us-east-2 -s3-bucket-name my-bucket -s3-access-key &lt;your-access-key&gt; -s3-secret-key &lt;your-secret-key&gt;</pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags then environment variables and shared credentials file are automatically tried as a fallback.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>By default uploaded file name is preserved, i.e. S3 path is <code>/&lt;session-id&gt;.log</code> or <code>/myCustomVideo.mp4</code>. You can optionally provide your custom key pattern using <code>-s3-key-pattern</code> flag and a set of placeholders:</p>
@@ -4174,7 +4186,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-07-18 19:29:26 UTC
+Last updated 2018-07-19 16:36:30 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
