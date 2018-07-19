@@ -40,11 +40,14 @@ type S3Uploader struct {
 
 func (s3 *S3Uploader) Init() {
 	if s3.Endpoint != "" {
-		sess, err := awssession.NewSession(&aws.Config{
-			Endpoint:    aws.String(s3.Endpoint),
-			Region:      aws.String(s3.Region),
-			Credentials: credentials.NewStaticCredentials(s3.AccessKey, s3.SecretKey, ""),
-		})
+		config := &aws.Config{
+			Endpoint: aws.String(s3.Endpoint),
+			Region:   aws.String(s3.Region),
+		}
+		if s3.AccessKey != "" && s3.SecretKey != "" {
+			config.Credentials = credentials.NewStaticCredentials(s3.AccessKey, s3.SecretKey, "")
+		}
+		sess, err := awssession.NewSession(config)
 		if err != nil {
 			log.Fatalf("[-] [INIT] [Failed to initialize S3 support: %v]", err)
 		}

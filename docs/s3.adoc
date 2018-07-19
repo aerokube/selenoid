@@ -8,6 +8,8 @@ To enable this feature you need to specify S3 access information as follows:
 
     $ ./selenoid -s3-endpoint https://s3.us-east-2.amazonaws.com -s3-region us-east-2 -s3-bucket-name my-bucket -s3-access-key <your-access-key> -s3-secret-key <your-secret-key>
 
+NOTE: If you omit `-s3-access-key` and `-s3-secret-key` flags then environment variables and shared credentials file are automatically tried as a fallback. 
+
 By default uploaded file name is preserved, i.e. S3 path is `/<session-id>.log` or `/myCustomVideo.mp4`. You can optionally provide your custom key pattern using `-s3-key-pattern` flag and a set of placeholders:
 
 .S3 Key Placeholders
