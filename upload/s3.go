@@ -24,16 +24,18 @@ func init() {
 	flag.StringVar(&(s3.SecretKey), "s3-secret-key", "", "S3 secret key")
 	flag.StringVar(&(s3.BucketName), "s3-bucket-name", "", "S3 bucket name")
 	flag.StringVar(&(s3.KeyPattern), "s3-key-pattern", "$fileName", "S3 bucket name")
+	flag.BoolVar(&(s3.ReducedRedundancy), "s3-reduced-redundancy", false, "Use reduced redundancy storage class")
 	uploader = s3
 }
 
 type S3Uploader struct {
-	Endpoint   string
-	Region     string
-	AccessKey  string
-	SecretKey  string
-	BucketName string
-	KeyPattern string
+	Endpoint          string
+	Region            string
+	AccessKey         string
+	SecretKey         string
+	BucketName        string
+	KeyPattern        string
+	ReducedRedundancy bool
 
 	manager *s3manager.Uploader
 }
@@ -64,11 +66,15 @@ func (s3 *S3Uploader) Upload(input *UploadRequest) error {
 		if err != nil {
 			return fmt.Errorf("failed to open file %s: %v", filename, err)
 		}
-		_, err = s3.manager.Upload(&s3manager.UploadInput{
+		uploadInput := &s3manager.UploadInput{
 			Bucket: aws.String(s3.BucketName),
 			Key:    aws.String(key),
 			Body:   file,
-		})
+		}
+		if s3.ReducedRedundancy {
+			uploadInput.StorageClass = aws.String("REDUCED_REDUNDANCY")
+		}
+		_, err = s3.manager.Upload(uploadInput)
 		if err != nil {
 			return fmt.Errorf("failed to S3 upload %s as %s: %v", filename, key, err)
 		}
