@@ -52,20 +52,21 @@ var testSession = &session.Session{
 
 func TestS3Uploader(t *testing.T) {
 	uploader := &upload.S3Uploader{
-		Endpoint:   "http://s3-mock.example.com",
-		Region:     "us-west-1",
-		AccessKey:  "some-access-key",
-		SecretKey:  "some-secret-key",
-		BucketName: "test-bucket",
-		KeyPattern: "$fileName",
+		Endpoint:          "http://s3-mock.example.com",
+		Region:            "us-west-1",
+		AccessKey:         "some-access-key",
+		SecretKey:         "some-secret-key",
+		BucketName:        "test-bucket",
+		KeyPattern:        "$fileName",
+		ReducedRedundancy: true,
 	}
 	uploader.Init()
 	f, _ := ioutil.TempFile("", "some-file")
 	input := &upload.UploadRequest{
-		Filename: f.Name(),
+		Filename:  f.Name(),
 		SessionId: "some-session-id",
-		Session: testSession,
-		Type: "log",
+		Session:   testSession,
+		Type:      "log",
 		RequestId: 4342,
 	}
 	err := uploader.Upload(input)
@@ -75,10 +76,10 @@ func TestS3Uploader(t *testing.T) {
 func TestGetKey(t *testing.T) {
 	const testPattern = "$quota/$sessionId_$browserName_$browserVersion_$platformName/$fileType$fileExtension"
 	input := &upload.UploadRequest{
-		Filename: "/path/to/some-file.txt",
+		Filename:  "/path/to/some-file.txt",
 		SessionId: "some-session-id",
-		Session: testSession,
-		Type: "log",
+		Session:   testSession,
+		Type:      "log",
 		RequestId: 12345,
 	}
 
