@@ -44,7 +44,7 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot bind to port: %v", err)
 	}
-	u := &url.URL{Scheme: "http", Host: l.Addr().String()}
+	u := &url.URL{Scheme: "http", Host: l.Addr().String(), Path: d.Service.Path}
 	_, port, _ := net.SplitHostPort(l.Addr().String())
 	log.Printf("[%d] [ALLOCATED_PORT] [%s]", requestId, port)
 	cmdLine = append(cmdLine, fmt.Sprintf("--port=%s", port))
