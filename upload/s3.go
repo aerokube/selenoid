@@ -25,6 +25,7 @@ func init() {
 	flag.StringVar(&(s3.BucketName), "s3-bucket-name", "", "S3 bucket name")
 	flag.StringVar(&(s3.KeyPattern), "s3-key-pattern", "$fileName", "S3 bucket name")
 	flag.BoolVar(&(s3.ReducedRedundancy), "s3-reduced-redundancy", false, "Use reduced redundancy storage class")
+	flag.BoolVar(&(s3.KeepFiles), "s3-keep-files", false, "Do not remove uploaded files")
 	uploader = s3
 }
 
@@ -36,6 +37,7 @@ type S3Uploader struct {
 	BucketName        string
 	KeyPattern        string
 	ReducedRedundancy bool
+	KeepFiles         bool
 
 	manager *s3manager.Uploader
 }
@@ -63,6 +65,7 @@ func (s3 *S3Uploader) Upload(input *UploadRequest) error {
 		filename := input.Filename
 		key := GetS3Key(s3.KeyPattern, input)
 		file, err := os.Open(filename)
+		defer file.Close()
 		if err != nil {
 			return fmt.Errorf("failed to open file %s: %v", filename, err)
 		}
@@ -77,6 +80,9 @@ func (s3 *S3Uploader) Upload(input *UploadRequest) error {
 		_, err = s3.manager.Upload(uploadInput)
 		if err != nil {
 			return fmt.Errorf("failed to S3 upload %s as %s: %v", filename, key, err)
+		}
+		if !s3.KeepFiles && os.Remove(filename) != nil {
+			return fmt.Errorf("failed to remove uploaded file %s: %v", filename, err)
 		}
 		return nil
 	}
