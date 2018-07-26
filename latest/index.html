@@ -588,7 +588,11 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_deleting_log_files">2.8.2. Deleting Log Files</a></li>
 </ul>
 </li>
-<li><a href="#_uploading_files_to_s3">2.9. Uploading Files To S3</a></li>
+<li><a href="#_uploading_files_to_s3">2.9. Uploading Files To S3</a>
+<ul class="sectlevel3">
+<li><a href="#_s3_cli_flags">2.9.1. S3 CLI Flags</a></li>
+</ul>
+</li>
 <li><a href="#_selenoid_with_docker_compose">2.10. Selenoid with Docker Compose</a></li>
 <li><a href="#_log_files">2.11. Log Files</a></li>
 <li><a href="#_selenoid_cli_flags">2.12. Selenoid CLI Flags</a></li>
@@ -2176,6 +2180,32 @@ If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags th
 </table>
 <div class="paragraph">
 <p>For example, when launching Selenoid with <code>-s3-key-pattern $browserName/$sessionId/log.txt</code> files will be accessible as <code>firefox/0ee0b48b-e29b-6749-b4f1-2277b8f8d6c5/log.txt</code>.</p>
+</div>
+<div class="sect3">
+<h4 id="_s3_cli_flags"><a class="anchor" href="#_s3_cli_flags"></a>2.9.1. S3 CLI Flags</h4>
+<div class="paragraph">
+<p>The following flags are supported by <code>selenoid</code> command when compiled with S3 support:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>-s3-access-key string
+    S3 access key
+-s3-bucket-name string
+    S3 bucket name
+-s3-endpoint string
+    S3 endpoint URL
+-s3-keep-files
+    Do not remove uploaded files
+-s3-key-pattern string
+    S3 bucket name (default "$fileName")
+-s3-reduced-redundancy
+    Use reduced redundancy storage class
+-s3-region string
+    S3 region
+-s3-secret-key string
+    S3 secret key</code></pre>
+</div>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -4192,7 +4222,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-07-26 10:44:03 UTC
+Last updated 2018-07-26 14:41:03 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
