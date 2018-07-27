@@ -159,11 +159,11 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 					ShowStdout: true,
 					ShowStderr: true,
 				})
-				defer r.Close()
 				if err != nil {
 					log.Printf("[%d] [FAILED_TO_COPY_LOGS] [%s] [Failed to capture container logs: %v]", requestId, browserContainerId, err)
 					return
 				}
+				defer r.Close()
 				filename := filepath.Join(d.LogOutputDir, d.LogName)
 				f, err := os.Create(filename)
 				if err != nil {
