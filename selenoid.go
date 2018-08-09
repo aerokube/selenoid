@@ -157,7 +157,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	browser.Caps.VideoScreenSize = videoScreenSize
 	finalVideoName := browser.Caps.VideoName
-	if browser.Caps.Video {
+	if browser.Caps.Video && !disableDocker {
 		browser.Caps.VideoName = getTemporaryFileName(videoOutputDir, videoFileExtension)
 	}
 	finalLogName := browser.Caps.LogName
@@ -276,7 +276,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		})}
 	cancelAndRenameFiles := func() {
 		cancel()
-		if browser.Caps.Video {
+		if browser.Caps.Video && !disableDocker {
 			oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
 			if finalVideoName == "" {
 				finalVideoName = s.ID + videoFileExtension
