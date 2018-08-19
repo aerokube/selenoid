@@ -195,3 +195,17 @@ Selenoid is using `selenoid:options` key to read protocol extension capabilities
 ----
 {"browserName": "firefox", "version": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}
 ----
+
+=== Android skins
+
+For <<Android>> container there is option for specify emulator skin. List of availiable skins is:
+
+----
+HVGA  QVGA  WQVGA400  WQVGA432  WSVGA  WVGA800  WVGA854  WXGA720  WXGA800  WXGA800-7in
+----
+
+For specify exact skin you need to pass `env` parameter throw capabilities (i.e. Java):
+
+----
+.setCapability("env", new ArrayList<String>() { { add("SKIN=WXGA720"); } } );
+----
