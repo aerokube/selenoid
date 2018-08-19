@@ -198,14 +198,25 @@ Selenoid is using `selenoid:options` key to read protocol extension capabilities
 
 === Android skins
 
-For <<Android>> container there is option for specify emulator skin. List of availiable skins is:
+For <<Android>> containers there is option for specify emulator skin. List of availiable skins is:
 
 ----
-HVGA  QVGA  WQVGA400  WQVGA432  WSVGA  WVGA800  WVGA854  WXGA720  WXGA800  WXGA800-7in
+skin | WxH | density
+QVGA | 240x320 | 120
+WQVGA400 | 240x400 | 120
+WQVGA432 | 240x432 | 120
+HVGA | 320x480 | 160
+WVGA800 | 480x800 | 240
+WVGA854 | 480x854 | 240
+WSVGA | 1024x600 | 160
+WXGA720 | 720x1280 | 320
+WXGA800 | 1280x800 | 160
+WXGA800-7in | 800x1280 | 213
 ----
 
-For specify exact skin you need to pass `env` parameter throw capabilities (i.e. Java):
+For specify exact skin you need to set *env* optional parameter throw capabilities:
 
+.Type: array, format: <key>=<value>
 ----
-.setCapability("env", new ArrayList<String>() { { add("SKIN=WXGA720"); } } );
+env: ["SKIN=WXGA720"]
 ----
