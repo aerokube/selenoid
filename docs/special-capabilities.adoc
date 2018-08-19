@@ -198,7 +198,7 @@ Selenoid is using `selenoid:options` key to read protocol extension capabilities
 
 === Android skins
 
-For <<Android>> containers there is option for specify emulator skin. List of availiable skins is:
+For <<Android>> containers there is an option to select emulator skin. List of available skins is:
 
 ----
 skin | WxH | density
@@ -214,7 +214,7 @@ WXGA800 | 1280x800 | 160
 WXGA800-7in | 800x1280 | 213
 ----
 
-For specify exact skin you need to set *env* optional parameter throw capabilities:
+For specifying exact skin you need to set *env* optional parameter by capabilities:
 
 .Type: array, format: <key>=<value>
 ----
