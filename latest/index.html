@@ -615,7 +615,7 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_custom_dns_servers_dnsservers">3.1.11. Custom DNS Servers: dnsServers</a></li>
 <li><a href="#_container_labels_labels">3.1.12. Container Labels: labels</a></li>
 <li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.13. Specifying Capabilities via Protocol Extensions</a></li>
-<li><a href="#_android_skins">3.1.14. Android skins</a></li>
+<li><a href="#_changing_android_skins">3.1.14. Changing Android Skins</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -2913,32 +2913,91 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_android_skins"><a class="anchor" href="#_android_skins"></a>3.1.14. Android skins</h4>
+<h4 id="_changing_android_skins"><a class="anchor" href="#_changing_android_skins"></a>3.1.14. Changing Android Skins</h4>
 <div class="paragraph">
-<p>For <a href="#_android">Android</a> containers there is an option to select emulator skin. List of available skins is:</p>
+<p>For <a href="#_android">Android</a> containers you can select emulator skin with capabilities. List of available skins:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 4. Available Android Skins</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Skin</th>
+<th class="tableblock halign-left valign-top">Screen Resolution</th>
+<th class="tableblock halign-left valign-top">DPI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">QVGA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">240x320</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WQVGA400</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">240x400</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WQVGA432</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">240x432</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HVGA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">320x480</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">160</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WVGA800</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">480x800</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">240</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WVGA854</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">480x854</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">240</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WSVGA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1024x600</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">160</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WXGA720</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">720x1280</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">320</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WXGA800</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1280x800</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">160</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WXGA800-7in</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">800x1280</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">213</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>To select a skin - set one more environment variable using <strong>env</strong> capability:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>skin | WxH | density
-QVGA | 240x320 | 120
-WQVGA400 | 240x400 | 120
-WQVGA432 | 240x432 | 120
-HVGA | 320x480 | 160
-WVGA800 | 480x800 | 240
-WVGA854 | 480x854 | 240
-WSVGA | 1024x600 | 160
-WXGA720 | 720x1280 | 320
-WXGA800 | 1280x800 | 160
-WXGA800-7in | 800x1280 | 213</pre>
+<pre class="CodeRay highlight"><code>env: ["SKIN=WXGA720"]</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>For specifying exact skin you need to set <strong>env</strong> optional parameter by capabilities:</p>
+<p>You can also pass desired screen resolution as follows:</p>
 </div>
 <div class="listingblock">
-<div class="title">Type: array, format: &lt;key&gt;=&lt;value&gt;</div>
 <div class="content">
-<pre>env: ["SKIN=WXGA720"]</pre>
+<pre class="CodeRay highlight"><code>env: ["SKIN=720x1280"]</code></pre>
 </div>
 </div>
 </div>
@@ -3335,7 +3394,7 @@ $ docker build -t selenoid:latest .</code></pre>
 <div class="sect2">
 <h3 id="_firefox"><a class="anchor" href="#_firefox"></a>A.1. Firefox</h3>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 4. Firefox Images with Selenium Server</caption>
+<caption class="title">Table 5. Firefox Images with Selenium Server</caption>
 <colgroup>
 <col style="width: 20%;">
 <col style="width: 20%;">
@@ -3645,7 +3704,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </table>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 5. Firefox Images with Selenoid</caption>
+<caption class="title">Table 6. Firefox Images with Selenoid</caption>
 <colgroup>
 <col style="width: 16.6666%;">
 <col style="width: 16.6666%;">
@@ -3771,7 +3830,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div class="sect2">
 <h3 id="_chrome"><a class="anchor" href="#_chrome"></a>A.2. Chrome</h3>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 6. Chrome Images</caption>
+<caption class="title">Table 7. Chrome Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -3940,7 +3999,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div class="sect2">
 <h3 id="_opera"><a class="anchor" href="#_opera"></a>A.3. Opera</h3>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 7. Opera Presto Images</caption>
+<caption class="title">Table 8. Opera Presto Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -3987,7 +4046,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </table>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 8. Opera Blink Images</caption>
+<caption class="title">Table 9. Opera Blink Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -4180,7 +4239,7 @@ Hardware server or virtual machine with nested virtualization support is require
 </table>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 9. Android Images</caption>
+<caption class="title">Table 10. Android Images</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -4259,7 +4318,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-08-20 12:26:49 UTC
+Last updated 2018-08-20 13:25:53 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
