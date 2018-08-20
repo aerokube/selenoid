@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-08-18</span>
+<span id="revdate">2018-08-20</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -615,6 +615,7 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_custom_dns_servers_dnsservers">3.1.11. Custom DNS Servers: dnsServers</a></li>
 <li><a href="#_container_labels_labels">3.1.12. Container Labels: labels</a></li>
 <li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.13. Specifying Capabilities via Protocol Extensions</a></li>
+<li><a href="#_android_skins">3.1.14. Android skins</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -2911,6 +2912,36 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_android_skins"><a class="anchor" href="#_android_skins"></a>3.1.14. Android skins</h4>
+<div class="paragraph">
+<p>For <a href="#_android">Android</a> containers there is an option to select emulator skin. List of available skins is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>skin | WxH | density
+QVGA | 240x320 | 120
+WQVGA400 | 240x400 | 120
+WQVGA432 | 240x432 | 120
+HVGA | 320x480 | 160
+WVGA800 | 480x800 | 240
+WVGA854 | 480x854 | 240
+WSVGA | 1024x600 | 160
+WXGA720 | 720x1280 | 320
+WXGA800 | 1280x800 | 160
+WXGA800-7in | 800x1280 | 213</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For specifying exact skin you need to set <strong>env</strong> optional parameter by capabilities:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: array, format: &lt;key&gt;=&lt;value&gt;</div>
+<div class="content">
+<pre>env: ["SKIN=WXGA720"]</pre>
+</div>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_using_selenoid_without_docker"><a class="anchor" href="#_using_selenoid_without_docker"></a>3.2. Using Selenoid without Docker</h3>
@@ -4228,7 +4259,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-08-18 13:20:59 UTC
+Last updated 2018-08-20 12:26:49 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
