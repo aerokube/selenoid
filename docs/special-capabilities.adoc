@@ -196,27 +196,33 @@ Selenoid is using `selenoid:options` key to read protocol extension capabilities
 {"browserName": "firefox", "version": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}
 ----
 
-=== Android skins
+=== Changing Android Skins
 
-For <<Android>> containers there is an option to select emulator skin. List of available skins is:
+For <<Android>> containers you can select emulator skin with capabilities. List of available skins:
 
-----
-skin | WxH | density
-QVGA | 240x320 | 120
-WQVGA400 | 240x400 | 120
-WQVGA432 | 240x432 | 120
-HVGA | 320x480 | 160
-WVGA800 | 480x800 | 240
-WVGA854 | 480x854 | 240
-WSVGA | 1024x600 | 160
-WXGA720 | 720x1280 | 320
-WXGA800 | 1280x800 | 160
-WXGA800-7in | 800x1280 | 213
-----
+.Available Android Skins
+|===
+| Skin | Screen Resolution | DPI
 
-For specifying exact skin you need to set *env* optional parameter by capabilities:
+| QVGA | 240x320 | 120
+| WQVGA400 | 240x400 | 120
+| WQVGA432 | 240x432 | 120
+| HVGA | 320x480 | 160
+| WVGA800 | 480x800 | 240
+| WVGA854 | 480x854 | 240
+| WSVGA | 1024x600 | 160
+| WXGA720 | 720x1280 | 320
+| WXGA800 | 1280x800 | 160
+| WXGA800-7in | 800x1280 | 213
+|===
 
-.Type: array, format: <key>=<value>
-----
+To select a skin - set one more environment variable using *env* capability:
+
+```
 env: ["SKIN=WXGA720"]
-----
+```
+
+You can also pass desired screen resolution as follows:
+```
+env: ["SKIN=720x1280"]
+```
