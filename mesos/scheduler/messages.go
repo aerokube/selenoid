@@ -1,6 +1,5 @@
 package scheduler
 
-//Универсальная структура для хранения  ID
 type ID struct {
 	Value string `json:"value"`
 }
@@ -12,7 +11,6 @@ type Docker struct {
 	PortMappings *[]PortMappings `json:"port_mappings"`
 }
 
-//Структура для хранения данных о контейнере
 type Container struct {
 	Type   string `json:"type"`
 	Docker Docker `json:"docker"`
@@ -25,7 +23,6 @@ type PortMappings struct {
 	Name          string `json:"name"`
 }
 
-//Резервируемые ресурсы
 type Resource struct {
 	Name   string  `json:"name"`
 	Ranges *Ranges `json:"ranges,omitempty"`
@@ -47,7 +44,6 @@ type Range struct {
 	End   int `json:"end"`
 }
 
-//Структура для хранения таски запуска
 type Launch struct {
 	TaskInfos []TaskInfo `json:"task_infos"`
 }
