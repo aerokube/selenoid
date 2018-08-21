@@ -16,11 +16,13 @@ type Caps struct {
 	Platform              string                 `json:"platform"`
 	W3CPlatform           string                 `json:"platformName"`
 	ScreenResolution      string                 `json:"screenResolution"`
+	Skin                  string                 `json:"skin"`
 	VNC                   bool                   `json:"enableVNC"`
 	Video                 bool                   `json:"enableVideo"`
 	VideoName             string                 `json:"videoName"`
 	VideoScreenSize       string                 `json:"videoScreenSize"`
 	VideoFrameRate        uint16                 `json:"videoFrameRate"`
+	VideoCodec            string                 `json:"videoCodec"`
 	LogName               string                 `json:"logName"`
 	TestName              string                 `json:"name"`
 	TimeZone              string                 `json:"timeZone"`

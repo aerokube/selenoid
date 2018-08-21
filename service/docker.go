@@ -260,6 +260,12 @@ func getEnv(service ServiceBase, caps session.Caps) []string {
 		fmt.Sprintf("SCREEN_RESOLUTION=%s", caps.ScreenResolution),
 		fmt.Sprintf("ENABLE_VNC=%v", caps.VNC),
 	}
+	if caps.Skin != "" {
+		env = append(env, fmt.Sprintf("SKIN=%s", caps.Skin))
+	}
+	if caps.VideoCodec != "" {
+		env = append(env, fmt.Sprintf("CODEC=%s", caps.VideoCodec))
+	}
 	env = append(env, service.Service.Env...)
 	env = append(env, caps.Env...)
 	return env
