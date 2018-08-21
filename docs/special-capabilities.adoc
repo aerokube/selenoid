@@ -37,7 +37,7 @@ You should manually resize window to desired width and height.
 You need to use `setSize` method instead.
 ====
 
-=== Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate
+=== Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate, videoCodec
 
 NOTE: This feature requires some preparation. Please refer to <<Video Recording>> section for more details.
 
@@ -74,6 +74,19 @@ videoScreenSize: "1024x768"
 ----
 videoFrameRate: 24
 ----
+
+* By default Selenoid is using `libx264` codec for video output. If this codec is consuming too much CPU, you can change it using `videoCodec` capability:
++
+.Type: string
+----
+videoCodec: "mpeg4"
+----
++
+To obtain the full list of https://stackoverflow.com/questions/3377300/what-are-all-codecs-and-formats-supported-by-ffmpeg[supported values]:
++
+```
+$ docker run -it --rm --entrypoint /usr/bin/ffmpeg selenoid/video-recorder -codecs
+```
 
 === Saving Session Logs: logName
 
@@ -180,23 +193,7 @@ labels: {"environment": "testing", "build-number": "14353"}
 
 Labels from this capability override labels from browsers configuration file. When `name` capability is specified - it is automatically added as a label to container.
 
-=== Specifying Capabilities via Protocol Extensions
-
-Some Selenium clients allow passing only a limited number of capabilities specified in https://w3c.github.io/webdriver/webdriver-spec.html[WebDriver specification]. For such cases Selenoid supports reading capabilities using https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions[WebDriver protocol extensions] feature. The following two examples deliver the same result. Usually capabilities are passed like this:
-
-.Passing Capabilities as Usually
-----
-{"browserName": "firefox", "version": "57.0", "screenResolution": "1280x1024x24"}
-----
-
-Selenoid is using `selenoid:options` key to read protocol extension capabilities:
-
-.Passing Capabilities using Protocol Extensions
-----
-{"browserName": "firefox", "version": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}
-----
-
-=== Changing Android Skins
+=== Android Skin: skin
 
 For <<Android>> containers you can select emulator skin with capabilities. List of available skins:
 
@@ -216,13 +213,32 @@ For <<Android>> containers you can select emulator skin with capabilities. List 
 | WXGA800-7in | 800x1280 | 213
 |===
 
-To select a skin - set one more environment variable using *env* capability:
+To select a skin - set `skin` capability:
 
-```
-env: ["SKIN=WXGA720"]
-```
+.Type: string, format: <desired-skin>
+----
+skin: "WXGA720"
+----
 
 You can also pass desired screen resolution as follows:
-```
-env: ["SKIN=720x1280"]
-```
+
+.Type: string, format: <desired-screen-resolution>
+----
+skin: "720x1280"
+----
+
+=== Specifying Capabilities via Protocol Extensions
+
+Some Selenium clients allow passing only a limited number of capabilities specified in https://w3c.github.io/webdriver/webdriver-spec.html[WebDriver specification]. For such cases Selenoid supports reading capabilities using https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions[WebDriver protocol extensions] feature. The following two examples deliver the same result. Usually capabilities are passed like this:
+
+.Passing Capabilities as Usually
+----
+{"browserName": "firefox", "version": "57.0", "screenResolution": "1280x1024x24"}
+----
+
+Selenoid is using `selenoid:options` key to read protocol extension capabilities:
+
+.Passing Capabilities using Protocol Extensions
+----
+{"browserName": "firefox", "version": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}
+----
