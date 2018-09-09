@@ -59,6 +59,8 @@ The following statuses are available:
 | FAILED_TO_TERMINATE_PROCESS | An error occurred while terminating driver process 
 | INIT | Server is starting 
 | LOG_ERROR | An error occurred when post-processing session logs 
+| NEW_REQUEST | New user request arrived and was placed to queue
+| NEW_REQUEST_ACCEPTED | Started processing new user request
 | PROCESS_STARTED | Driver process successfully started 
 | PROXY_TO | Starting to proxy requests to running container or driver process 
 | REMOVING_CONTAINER | Docker container with browser or video recorder is being removed
