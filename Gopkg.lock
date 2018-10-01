@@ -17,7 +17,7 @@
   branch = "master"
   name = "github.com/aerokube/util"
   packages = [".","docker"]
-  revision = "78436541227f568704800278e78f52274fa3bfce"
+  revision = "3a9b3f70da093da58ac7c05341b1367aa986759d"
 
 [[projects]]
   name = "github.com/aws/aws-sdk-go"
@@ -33,7 +33,7 @@
 [[projects]]
   name = "github.com/docker/docker"
   packages = ["api","api/types","api/types/blkiodev","api/types/container","api/types/events","api/types/filters","api/types/image","api/types/mount","api/types/network","api/types/registry","api/types/strslice","api/types/swarm","api/types/swarm/runtime","api/types/time","api/types/versions","api/types/volume","client","errdefs","pkg/stdcopy"]
-  revision = "1ef1cc8388165b2b848f9b3f53ec91c87de09f63"
+  revision = "deac65c929504acd7de6567d0422ead7e87441ac"
 
 [[projects]]
   name = "github.com/docker/go-connections"
