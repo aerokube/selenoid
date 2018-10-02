@@ -1,7 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	. "github.com/aandryashin/matchers"
+	"github.com/aerokube/selenoid/config"
+	"github.com/aerokube/selenoid/service"
+	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/util"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
+	"golang.org/x/net/websocket"
+	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -9,13 +20,6 @@ import (
 	"sync"
 	"testing"
 	"time"
-
-	. "github.com/aandryashin/matchers"
-	"github.com/aerokube/selenoid/config"
-	"github.com/aerokube/selenoid/service"
-	"github.com/aerokube/selenoid/session"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 )
 
 var (
@@ -37,6 +41,7 @@ func updateMux(mux http.Handler) {
 	mockServer = httptest.NewServer(mux)
 	os.Setenv("DOCKER_HOST", "tcp://"+hostPort(mockServer.URL))
 	os.Setenv("DOCKER_API_VERSION", "1.29")
+	cli, _ = client.NewEnvClient()
 }
 
 func testMux() http.Handler {
@@ -67,7 +72,19 @@ func testMux() http.Handler {
 			w.WriteHeader(http.StatusNoContent)
 		},
 	))
-	mux.HandleFunc("/v1.29/containers/e90e34656806", http.HandlerFunc(
+	mux.HandleFunc("/v1.29/containers/e90e34656806/logs", http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+			w.Header().Add("Transfer-Encoding", "chunked")
+			w.WriteHeader(http.StatusOK)
+			const streamTypeStderr = 2
+			header := []byte{streamTypeStderr, 0, 0, 0, 0, 0, 0, 9}
+			w.Write(header)
+			data := []byte("test-data")
+			w.Write(data)
+		},
+	))
+	mux.HandleFunc("/v%s/containers/e90e34656806", http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNoContent)
 		},
@@ -85,6 +102,12 @@ func testMux() http.Handler {
 			  "NetworkSettings": {
 			    "Ports": {
 					"4444/tcp": [
+						{
+						"HostIp": "0.0.0.0",
+						"HostPort": "%s"
+						}
+					],
+					"8080/tcp": [
 						{
 						"HostIp": "0.0.0.0",
 						"HostPort": "%s"
@@ -123,7 +146,7 @@ func testMux() http.Handler {
 			  "State": {},
 			  "Mounts": []
 			}
-			`, p, p, p)
+			`, p, p, p, p)
 			w.Write([]byte(output))
 		},
 	))
@@ -161,6 +184,7 @@ func testConfig(env *service.Environment) *config.Config {
 				Port:    p,
 				Volumes: []string{"/test:/test"},
 				Labels:  map[string]string{"key": "value"},
+				Sysctl:  map[string]string{"sysctl net.ipv4.tcp_timestamps": "2"},
 			},
 		},
 	}
@@ -238,9 +262,11 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 		Video:                 true,
 		VideoScreenSize:       "1024x768",
 		VideoFrameRate:        25,
-		HostsEntries:          "example.com:192.168.0.1,test.com:192.168.0.2",
-		Labels:                "label1:some-value,label2",
-		ApplicationContainers: "one,two",
+		Env:                   []string{"LANG=ru_RU.UTF-8", "LANGUAGE=ru:en"},
+		HostsEntries:          []string{"example.com:192.168.0.1", "test.com:192.168.0.2"},
+		DNSServers:          []string{"192.168.0.1", "192.168.0.2"},
+		Labels:                map[string]string{"label1": "some-value", "label2": ""},
+		ApplicationContainers: []string{"one", "two"},
 		TimeZone:              "Europe/Moscow",
 		ContainerHostname:     "some-hostname",
 		TestName:              "my-cool-test",
@@ -296,4 +322,63 @@ func TestFindDriver(t *testing.T) {
 	starter, success := manager.Find(caps, 42)
 	AssertThat(t, success, Is{true})
 	AssertThat(t, starter, Not{nil})
+}
+
+func TestGetVNC(t *testing.T) {
+
+	srv := httptest.NewServer(handler())
+	defer srv.Close()
+
+	testTcpServer := testTCPServer("test-data")
+	sessions.Put("test-session", &session.Session{
+		VNC: testTcpServer.Addr().String(),
+	})
+	defer sessions.Remove("test-session")
+
+	u := fmt.Sprintf("ws://%s/vnc/test-session", util.HostPort(srv.URL))
+	AssertThat(t, readDataFromWebSocket(t, u), EqualTo{"test-data"})
+}
+
+func testTCPServer(data string) net.Listener {
+	l, _ := net.Listen("tcp", "127.0.0.1:0")
+	go func() {
+		for {
+			conn, err := l.Accept()
+			if err != nil {
+				continue
+			}
+			io.WriteString(conn, data)
+			conn.Close()
+			return
+		}
+	}()
+	return l
+}
+
+func readDataFromWebSocket(t *testing.T, wsURL string) string {
+	ws, err := websocket.Dial(wsURL, "", "http://localhost")
+	AssertThat(t, err, Is{nil})
+
+	var msg = make([]byte, 512)
+	_, err = ws.Read(msg)
+	msg = bytes.Trim(msg, "\x00")
+	//AssertThat(t, err, Is{nil})
+	return string(msg)
+}
+
+func TestGetLogs(t *testing.T) {
+
+	srv := httptest.NewServer(handler())
+	defer srv.Close()
+
+	sessions.Put("test-session", &session.Session{
+		Container: &session.Container{
+			ID:        "e90e34656806",
+			IPAddress: "127.0.0.1",
+		},
+	})
+	defer sessions.Remove("test-session")
+
+	u := fmt.Sprintf("ws://%s/logs/test-session", util.HostPort(srv.URL))
+	AssertThat(t, readDataFromWebSocket(t, u), EqualTo{"test-data"})
 }

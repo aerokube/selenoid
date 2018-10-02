@@ -2,11 +2,11 @@ package protect
 
 import (
 	"log"
+	"math"
 	"net/http"
 	"time"
 
-	"github.com/aerokube/selenoid/util"
-	"math"
+	"github.com/aerokube/util"
 )
 
 // Queue - struct to hold a number of sessions
@@ -16,6 +16,24 @@ type Queue struct {
 	queued   chan struct{}
 	pending  chan struct{}
 	used     chan struct{}
+}
+
+// Try - when X-Selenoid-No-Wait header is set
+// reply to client immediately if queue is full
+func (q *Queue) Try(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		_, noWait := r.Header["X-Selenoid-No-Wait"]
+		select {
+		case q.limit <- struct{}{}:
+			<-q.limit
+		default:
+			if noWait {
+				util.JsonError(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
+				return
+			}
+		}
+		next.ServeHTTP(w, r)
+	}
 }
 
 // Check - if queue disabled
@@ -28,7 +46,7 @@ func (q *Queue) Check(next http.HandlerFunc) http.HandlerFunc {
 			if q.disabled {
 				user, remote := util.RequestInfo(r)
 				log.Printf("[-] [QUEUE_IS_FULL] [%s] [%s]", user, remote)
-				http.Error(w, "Queue is full, see other", http.StatusSeeOther)
+				util.JsonError(w, "Queue Is Full", http.StatusTooManyRequests)
 				return
 			}
 		}

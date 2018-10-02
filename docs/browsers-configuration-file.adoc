@@ -120,6 +120,7 @@ Selenoid proxies connections to either Selenium server or standalone driver bina
     "env" : ["TZ=Europe/Moscow", "ONE_MORE_VARIABLE=itsValue"],
     "hosts" : ["one.example.com:192.168.0.1", "two.example.com:192.168.0.2"],
     "labels" : {"component": "frontend", "project": "my-project"},
+    "sysctl" : {"net.ipv4.tcp_timestamps": "2", "kern.maxprocperuid": "1000"},
     "shmSize" : 268435456,
 },
 ----
@@ -144,6 +145,8 @@ We recommend to use our https://github.com/aerokube/cm[configuration tool] to av
 * *hosts* (_optional_) - This field allows to add custom `/etc/hosts` entries to running container. Specified as an array of `hostname:ip` pairs.
 
 * *labels* (_optional_) - This field allows to add custom labels to running container. Specified as an object of `"key": "value"` pairs.
+
+* *sysctl* (_optional_) - This field allows to adjust kernel parameters of running container. Specified as an object of `"key": "value"` pairs.
 
 * *shmSize* (_optional_) - Use it to override shared memory size for browser container.
 
