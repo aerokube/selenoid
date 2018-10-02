@@ -75,18 +75,18 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 	if !ok {
 		return nil, false
 	}
-	if m.Environment.MesosMasterUrl != "" || m.Environment.Zookeeper != "" {
-		log.Printf("[%d] [USING_MESOS] [%s-%s]\n", requestId, browserName, version)
-		return &Mesos{
-			ServiceBase: serviceBase,
-			Environment: *m.Environment,
-			Caps:        caps,
-			Client:      m.Client,
-			LogConfig:   m.Config.ContainerLogs,
-		}, true
-	} else {
-		switch service.Image.(type) {
-		case string:
+	switch service.Image.(type) {
+	case string:
+		if m.Environment.MesosMasterUrl != "" || m.Environment.Zookeeper != "" {
+			log.Printf("[%d] [USING_MESOS] [%s-%s]\n", requestId, browserName, version)
+			return &Mesos{
+				ServiceBase: serviceBase,
+				Environment: *m.Environment,
+				Caps:        caps,
+				Client:      m.Client,
+				LogConfig:   m.Config.ContainerLogs,
+			}, true
+		} else {
 			if m.Client == nil {
 				return nil, false
 			}
@@ -97,10 +97,10 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 				Caps:        caps,
 				Client:      m.Client,
 				LogConfig:   m.Config.ContainerLogs}, true
-		case []interface{}:
-			log.Printf("[%d] [USING_DRIVER] [%s] [%s]", requestId, browserName, version)
-			return &Driver{ServiceBase: serviceBase, Environment: *m.Environment, Caps: caps}, true
 		}
+	case []interface{}:
+		log.Printf("[%d] [USING_DRIVER] [%s] [%s]", requestId, browserName, version)
+		return &Driver{ServiceBase: serviceBase, Environment: *m.Environment, Caps: caps}, true
 	}
 	return nil, false
 }
