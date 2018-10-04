@@ -75,16 +75,23 @@ type Container struct {
 
 // Session - holds session info
 type Session struct {
-	Quota      string
-	Caps       Caps
-	URL        *url.URL
-	Container  *Container
+	Quota     string
+	Caps      Caps
+	URL       *url.URL
+	Container *Container
+	HostPort  HostPort
+	Cancel    func()
+	Timeout   time.Duration
+	TimeoutCh chan struct{}
+	Lock      sync.Mutex
+}
+
+// HostPort - hold host-port values for all forwarded ports
+type HostPort struct {
+	Selenium   string
 	Fileserver string
+	Clipboard  string
 	VNC        string
-	Cancel     func()
-	Timeout    time.Duration
-	TimeoutCh  chan struct{}
-	Lock       sync.Mutex
 }
 
 // Map - session uuid to sessions mapping

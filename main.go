@@ -331,7 +331,8 @@ func handler() http.Handler {
 	root.Handle("/vnc/", websocket.Handler(vnc))
 	root.HandleFunc(logsPath, logs)
 	root.HandleFunc(videoPath, video)
-	root.HandleFunc("/download/", fileDownload)
+	root.HandleFunc("/download/", reverseProxy(func(sess *session.Session) string { return sess.HostPort.Fileserver }, "DOWNLOADING_FILE"))
+	root.HandleFunc("/clipboard/", reverseProxy(func(sess *session.Session) string { return sess.HostPort.Clipboard }, "CLIPBOARD"))
 	if enableFileUpload {
 		root.HandleFunc("/file", fileUpload)
 	}

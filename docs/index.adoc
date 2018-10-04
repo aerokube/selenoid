@@ -41,6 +41,7 @@ include::selenoid-without-docker.adoc[leveloffset=+1]
 include::usage-statistics.adoc[leveloffset=+1]
 include::file-upload.adoc[leveloffset=+1]
 include::file-download.adoc[leveloffset=+1]
+include::clipboard.adoc[leveloffset=+1]
 
 include::contributing.adoc[]
 
