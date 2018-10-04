@@ -694,3 +694,33 @@ func TestFileDownloadMissingSession(t *testing.T) {
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusNotFound})
 }
+
+func TestClipboard(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	rsp, err := http.Get(With(srv.URL).Path(fmt.Sprintf("/clipboard/%s", sess["sessionId"])))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+	data, err := ioutil.ReadAll(rsp.Body)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, string(data), EqualTo{"test-clipboard-value"})
+
+	rsp, err = http.Post(With(srv.URL).Path(fmt.Sprintf("/clipboard/%s", sess["sessionId"])), "text/plain", bytes.NewReader([]byte("any-data")))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
+func TestClipboardMissingSession(t *testing.T) {
+	rsp, err := http.Get(With(srv.URL).Path("/clipboard/missing-session"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusNotFound})
+}

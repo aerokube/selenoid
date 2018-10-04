@@ -264,13 +264,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sess := &session.Session{
-		Quota:      user,
-		Caps:       browser.Caps,
-		URL:        u,
-		Container:  startedService.Container,
-		Fileserver: startedService.FileserverHostPort,
-		VNC:        startedService.VNCHostPort,
-		Timeout:    sessionTimeout,
+		Quota:     user,
+		Caps:      browser.Caps,
+		URL:       u,
+		Container: startedService.Container,
+		HostPort:  startedService.HostPort,
+		Timeout:   sessionTimeout,
 		TimeoutCh: onTimeout(sessionTimeout, func() {
 			request{r}.session(s.ID).Delete(requestId)
 		})}
@@ -447,22 +446,24 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 	go (<-done)()
 }
 
-func fileDownload(w http.ResponseWriter, r *http.Request) {
-	requestId := serial()
-	sid, remainingPath := splitRequestPath(r.URL.Path)
-	sess, ok := sessions.Get(sid)
-	if ok {
-		(&httputil.ReverseProxy{
-			Director: func(r *http.Request) {
-				r.URL.Scheme = "http"
-				r.URL.Host = sess.Fileserver
-				r.URL.Path = remainingPath
-				log.Printf("[%d] [DOWNLOADING_FILE] [%s] [%s]", requestId, sid, remainingPath)
-			},
-		}).ServeHTTP(w, r)
-	} else {
-		util.JsonError(w, fmt.Sprintf("Unknown session %s", sid), http.StatusNotFound)
-		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
+func reverseProxy(hostFn func(sess *session.Session) string, status string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		requestId := serial()
+		sid, remainingPath := splitRequestPath(r.URL.Path)
+		sess, ok := sessions.Get(sid)
+		if ok {
+			(&httputil.ReverseProxy{
+				Director: func(r *http.Request) {
+					r.URL.Scheme = "http"
+					r.URL.Host = hostFn(sess)
+					r.URL.Path = remainingPath
+					log.Printf("[%d] [%s] [%s] [%s]", requestId, status, sid, remainingPath)
+				},
+			}).ServeHTTP(w, r)
+		} else {
+			util.JsonError(w, fmt.Sprintf("Unknown session %s", sid), http.StatusNotFound)
+			log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
+		}
 	}
 }
 
@@ -529,10 +530,11 @@ func vnc(wsconn *websocket.Conn) {
 	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
 	sess, ok := sessions.Get(sid)
 	if ok {
-		if sess.VNC != "" {
+		vncHostPort := sess.HostPort.VNC
+		if vncHostPort != "" {
 			log.Printf("[%d] [VNC_ENABLED] [%s]", requestId, sid)
 			var d net.Dialer
-			conn, err := d.DialContext(wsconn.Request().Context(), "tcp", sess.VNC)
+			conn, err := d.DialContext(wsconn.Request().Context(), "tcp", vncHostPort)
 			if err != nil {
 				log.Printf("[%d] [VNC_ERROR] [%v]", requestId, err)
 				return

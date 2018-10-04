@@ -114,6 +114,12 @@ func testMux() http.Handler {
 						"HostPort": "%s"
 						}
 					],
+					"9090/tcp": [
+						{
+						"HostIp": "0.0.0.0",
+						"HostPort": "%s"
+						}
+					],
 					"5900/tcp": [
 						{
 						"HostIp": "0.0.0.0",
@@ -147,7 +153,7 @@ func testMux() http.Handler {
 			  "State": {},
 			  "Mounts": []
 			}
-			`, p, p, p, p)
+			`, p, p, p, p, p)
 			w.Write([]byte(output))
 		},
 	))
@@ -248,7 +254,7 @@ func testDocker(t *testing.T, env *service.Environment, cfg *config.Config) {
 	AssertThat(t, startedService.Url, Not{nil})
 	AssertThat(t, startedService.Container, Not{nil})
 	AssertThat(t, startedService.Container.ID, EqualTo{"e90e34656806"})
-	AssertThat(t, startedService.VNCHostPort, EqualTo{"127.0.0.1:5900"})
+	AssertThat(t, startedService.HostPort.VNC, EqualTo{"127.0.0.1:5900"})
 	AssertThat(t, startedService.Cancel, Not{nil})
 	startedService.Cancel()
 }
@@ -337,7 +343,9 @@ func TestGetVNC(t *testing.T) {
 
 	testTcpServer := testTCPServer("test-data")
 	sessions.Put("test-session", &session.Session{
-		VNC: testTcpServer.Addr().String(),
+		HostPort: session.HostPort{
+			VNC: testTcpServer.Addr().String(),
+		},
 	})
 	defer sessions.Remove("test-session")
 

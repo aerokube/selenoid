@@ -1,0 +1,19 @@
+== Accessing Clipboard
+
+NOTE: Clipboard is accessible only when browser session is running.
+
+Sometimes you may need to interact with the clipboard to check that your application copy-paste feature works. Selenoid has a dedicated API to interact with the clipboard. To use it:
+ 
+. Start a new session, for example with ID `f2bcd32b-d932-4cdc-a639-687ab8e4f840`.
+. To get clipboard value send the following HTTP request:
++
+```
+$ curl http://selenoid-host.example.com:4444/clipboard/f2bcd32b-d932-4cdc-a639-687ab8e4f840
+
+some-clipboard-value
+```
+. To update clipboard value:
++
+```
+$ curl -X POST --data 'some-clipboard-value' http://seleonid-host.example.com:4444/clipboard/f2bcd32b-d932-4cdc-a639-687ab8e4f840
+```

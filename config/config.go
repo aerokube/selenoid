@@ -169,7 +169,7 @@ func (config *Config) State(sessions *session.Map, limit, queued, pending int) *
 		}
 		v.Count++
 		vnc := false
-		if session.VNC != "" {
+		if session.HostPort.VNC != "" {
 			vnc = true
 		}
 		ctr := session.Container
