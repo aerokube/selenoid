@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-10-01</span>
+<span id="revdate">2018-10-04</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -627,6 +627,7 @@ table.CodeRay td.code>pre{padding:0}
 </li>
 <li><a href="#_file_upload">3.4. File Upload</a></li>
 <li><a href="#_accessing_files_downloaded_with_browser">3.5. Accessing Files Downloaded with Browser</a></li>
+<li><a href="#_accessing_clipboard">3.6. Accessing Clipboard</a></li>
 </ul>
 </li>
 <li><a href="#_contributing_development">4. Contributing &amp; Development</a>
@@ -3322,6 +3323,49 @@ one_min.selenoid_example_com.httpjson_selenoid.total</code></pre>
 <p>In order for this feature to work an HTTP file server should be listening inside browser container on port <code>8080</code>. Download directory inside container to be used in tests is usually <code>~/Downloads</code>.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_accessing_clipboard"><a class="anchor" href="#_accessing_clipboard"></a>3.6. Accessing Clipboard</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Clipboard is accessible only when browser session is running.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Sometimes you may need to interact with the clipboard to check that your application copy-paste feature works. Selenoid has a dedicated API to interact with the clipboard. To use it:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Start a new session, for example with ID <code>f2bcd32b-d932-4cdc-a639-687ab8e4f840</code>.</p>
+</li>
+<li>
+<p>To get clipboard value send the following HTTP request:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>$ curl http://selenoid-host.example.com:4444/clipboard/f2bcd32b-d932-4cdc-a639-687ab8e4f840
+
+some-clipboard-value</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>To update clipboard value:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>$ curl -X POST --data 'some-clipboard-value' http://seleonid-host.example.com:4444/clipboard/f2bcd32b-d932-4cdc-a639-687ab8e4f840</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -4364,7 +4408,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-10-01 03:31:21 UTC
+Last updated 2018-10-04 10:02:29 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
