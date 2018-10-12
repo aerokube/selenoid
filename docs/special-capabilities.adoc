@@ -118,12 +118,12 @@ The main application of this capability - is debugging tests in the UI which is 
 
 Sometimes you may want to change idle timeout for selected browser session. To achieve this - pass the following capability:
 
-.Type: int
+.Type: string
 ----
-sessionTimeout: 30
+sessionTimeout: 30m
 ----
 
-Timeout is always specified in seconds, should be positive and can be no more than the value set by `-max-timeout` flag.
+Timeout is specified Golang duration format e.g. `30m` or `10s` or `1h5m` and can be no more than the value set by `-max-timeout` flag.
 
 === Per-session Time Zone: timeZone
 

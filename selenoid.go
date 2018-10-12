@@ -135,7 +135,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	browser.Caps.ProcessExtensionCapabilities()
 	sessionTimeout, err := getSessionTimeout(browser.Caps.SessionTimeout, maxTimeout, timeout)
 	if err != nil {
-		log.Printf("[%d] [BAD_SESSION_TIMEOUT] [%ds]", requestId, browser.Caps.SessionTimeout)
+		log.Printf("[%d] [BAD_SESSION_TIMEOUT] [%s]", requestId, browser.Caps.SessionTimeout)
 		util.JsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
@@ -367,13 +367,14 @@ func getVideoScreenSize(videoScreenSize string, screenResolution string) (string
 	return shortenScreenResolution(screenResolution), nil
 }
 
-func getSessionTimeout(sessionTimeout uint32, maxTimeout time.Duration, defaultTimeout time.Duration) (time.Duration, error) {
-	if sessionTimeout > 0 {
-		std := time.Duration(sessionTimeout) * time.Second
-		if std <= maxTimeout {
-			return std, nil
-		} else {
-			return 0, fmt.Errorf("Invalid sessionTimeout capability: should be <= %s", maxTimeout)
+func getSessionTimeout(sessionTimeout string, maxTimeout time.Duration, defaultTimeout time.Duration) (time.Duration, error) {
+	if sessionTimeout != "" {
+		st, err := time.ParseDuration(sessionTimeout)
+		if err != nil {
+			return 0, fmt.Errorf("Invalid sessionTimeout capability: %v", err)
+		}
+		if st <= maxTimeout {
+			return st, nil
 		}
 	}
 	return defaultTimeout, nil
