@@ -8,16 +8,13 @@ services:
   - docker
 
 script:
+  - export GO111MODULE="on"
   - go test -tags 's3' -v -race -coverprofile=coverage.txt -covermode=atomic -coverpkg github.com/aerokube/selenoid,github.com/aerokube/selenoid/session,github.com/aerokube/selenoid/config,github.com/aerokube/selenoid/protect,github.com/aerokube/selenoid/service,github.com/aerokube/selenoid/upload
   - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-X main.buildStamp=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.gitRevision=`git describe --tags || git rev-parse HEAD` -s -w"
   - gox -os "linux darwin windows" -arch "amd64" -osarch="windows/386" -output "dist/{{.Dir}}_{{.OS}}_{{.Arch}}" -ldflags "-X main.buildStamp=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.gitRevision=`git describe --tags || git rev-parse HEAD` -s -w"
 
-before_install:
-  - go get -u github.com/golang/dep/cmd/dep
-
 install: 
   - go get -u github.com/mitchellh/gox # cross compile
-  - dep ensure
 
 deploy:
   - provider: releases
