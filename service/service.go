@@ -14,18 +14,19 @@ import (
 
 // Environment - all settings that influence browser startup
 type Environment struct {
-	IP                  string
-	InDocker            bool
-	CPU                 int64
-	Memory              int64
-	Network             string
-	Hostname            string
-	StartupTimeout      time.Duration
-	CaptureDriverLogs   bool
-	VideoOutputDir      string
-	VideoContainerImage string
-	LogOutputDir        string
-	Privileged          bool
+	IP                   string
+	InDocker             bool
+	CPU                  int64
+	Memory               int64
+	Network              string
+	Hostname             string
+	StartupTimeout       time.Duration
+	SessionDeleteTimeout time.Duration
+	CaptureDriverLogs    bool
+	VideoOutputDir       string
+	VideoContainerImage  string
+	LogOutputDir         string
+	Privileged           bool
 }
 
 const (

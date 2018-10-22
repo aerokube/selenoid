@@ -177,16 +177,17 @@ func init() {
 	upload.Init()
 
 	environment := service.Environment{
-		InDocker:            inDocker,
-		CPU:                 int64(cpu),
-		Memory:              int64(mem),
-		Network:             containerNetwork,
-		StartupTimeout:      serviceStartupTimeout,
-		CaptureDriverLogs:   captureDriverLogs,
-		VideoOutputDir:      videoOutputDir,
-		VideoContainerImage: videoRecorderImage,
-		LogOutputDir:        logOutputDir,
-		Privileged:          !disablePrivileged,
+		InDocker:             inDocker,
+		CPU:                  int64(cpu),
+		Memory:               int64(mem),
+		Network:              containerNetwork,
+		StartupTimeout:       serviceStartupTimeout,
+		SessionDeleteTimeout: sessionDeleteTimeout,
+		CaptureDriverLogs:    captureDriverLogs,
+		VideoOutputDir:       videoOutputDir,
+		VideoContainerImage:  videoRecorderImage,
+		LogOutputDir:         logOutputDir,
+		Privileged:           !disablePrivileged,
 	}
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}
