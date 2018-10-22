@@ -146,7 +146,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	err = wait(u.String(), d.StartupTimeout)
 	if err != nil {
 		if videoContainerId != "" {
-			stopVideoContainer(ctx, cl, requestId, videoContainerId)
+			stopVideoContainer(ctx, cl, requestId, videoContainerId, d.Environment)
 		}
 		removeContainer(ctx, cl, requestId, browserContainerId)
 		return nil, fmt.Errorf("wait: %v", err)
@@ -162,7 +162,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		HostPort: hostPort,
 		Cancel: func() {
 			if videoContainerId != "" {
-				stopVideoContainer(ctx, cl, requestId, videoContainerId)
+				stopVideoContainer(ctx, cl, requestId, videoContainerId, d.Environment)
 			}
 			defer removeContainer(ctx, cl, requestId, browserContainerId)
 			if d.LogOutputDir != "" {
@@ -437,7 +437,7 @@ func getVideoOutputDir(env Environment) string {
 	return env.VideoOutputDir
 }
 
-func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint64, containerId string) {
+func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint64, containerId string, env Environment) {
 	log.Printf("[%d] [STOPPING_VIDEO_CONTAINER] [%s]", requestId, containerId)
 	err := cli.ContainerKill(ctx, containerId, "TERM")
 	if err != nil {
@@ -448,6 +448,13 @@ func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint6
 	select {
 	case <-notRunning:
 	case <-doesNotExist:
+	case <-time.After(env.SessionDeleteTimeout):
+		err = cli.ContainerRemove(ctx, containerId, types.ContainerRemoveOptions{Force: true})
+		if err != nil {
+			log.Printf("[%d] [FAILED_TO_KILL_VIDEO_CONTAINER] [%s] [%v]", requestId, containerId, err)
+		}
+		log.Printf("[%d] [KILLED_VIDEO_CONTAINER] [%s] [%v]", requestId, containerId, err)
+		return
 	}
 	log.Printf("[%d] [STOPPED_VIDEO_CONTAINER] [%s]", requestId, containerId)
 }
