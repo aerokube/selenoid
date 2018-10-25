@@ -615,7 +615,8 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_custom_dns_servers_dnsservers">3.1.11. Custom DNS Servers: dnsServers</a></li>
 <li><a href="#_container_labels_labels">3.1.12. Container Labels: labels</a></li>
 <li><a href="#_android_skin_skin">3.1.13. Android Skin: skin</a></li>
-<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.14. Specifying Capabilities via Protocol Extensions</a></li>
+<li><a href="#_s3_key_pattern_s3keypattern">3.1.14. S3 Key Pattern: s3KeyPattern</a></li>
+<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.15. Specifying Capabilities via Protocol Extensions</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -2181,7 +2182,7 @@ If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags th
 </tbody>
 </table>
 <div class="paragraph">
-<p>For example, when launching Selenoid with <code>-s3-key-pattern $browserName/$sessionId/log.txt</code> files will be accessible as <code>firefox/0ee0b48b-e29b-6749-b4f1-2277b8f8d6c5/log.txt</code>.</p>
+<p>For example, when launching Selenoid with <code>-s3-key-pattern $browserName/$sessionId/log.txt</code> files will be accessible as <code>firefox/0ee0b48b-e29b-6749-b4f1-2277b8f8d6c5/log.txt</code>. You can also override key pattern for every session with <code>s3KeyPattern</code> capability.</p>
 </div>
 <div class="sect3">
 <h4 id="_s3_cli_flags"><a class="anchor" href="#_s3_cli_flags"></a>2.9.1. S3 CLI Flags</h4>
@@ -3017,7 +3018,22 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.14. Specifying Capabilities via Protocol Extensions</h4>
+<h4 id="_s3_key_pattern_s3keypattern"><a class="anchor" href="#_s3_key_pattern_s3keypattern"></a>3.1.14. S3 Key Pattern: s3KeyPattern</h4>
+<div class="paragraph">
+<p>This capability allows to override S3 key pattern (specified by <code>-s3-key-pattern</code> flag) used when uploading files to S3.</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>s3KeyPattern: "$quota/$fileType$fileExtension"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The same key placeholders are supported. Please refer to <a href="#_uploading_files_to_s3">Uploading Files To S3</a> section for more details.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.15. Specifying Capabilities via Protocol Extensions</h4>
 <div class="paragraph">
 <p>Some Selenium clients allow passing only a limited number of capabilities specified in <a href="https://w3c.github.io/webdriver/webdriver-spec.html">WebDriver specification</a>. For such cases Selenoid supports reading capabilities using <a href="https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions">WebDriver protocol extensions</a> feature. The following two examples deliver the same result. Usually capabilities are passed like this:</p>
 </div>
@@ -4422,7 +4438,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-10-25 09:38:10 UTC
+Last updated 2018-10-25 17:32:04 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
