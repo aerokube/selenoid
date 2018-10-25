@@ -227,6 +227,17 @@ You can also pass desired screen resolution as follows:
 skin: "720x1280"
 ----
 
+=== S3 Key Pattern: s3KeyPattern
+
+This capability allows to override S3 key pattern (specified by `-s3-key-pattern` flag) used when uploading files to S3.  
+
+.Type: string
+----
+s3KeyPattern: "$quota/$fileType$fileExtension"
+----
+
+The same key placeholders are supported. Please refer to <<Uploading Files To S3>> section for more details.
+
 === Specifying Capabilities via Protocol Extensions
 
 Some Selenium clients allow passing only a limited number of capabilities specified in https://w3c.github.io/webdriver/webdriver-spec.html[WebDriver specification]. For such cases Selenoid supports reading capabilities using https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions[WebDriver protocol extensions] feature. The following two examples deliver the same result. Usually capabilities are passed like this:
