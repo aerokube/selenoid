@@ -33,6 +33,7 @@ type Caps struct {
 	DNSServers            []string          `json:"dnsServers"`
 	Labels                map[string]string `json:"labels"`
 	SessionTimeout        string            `json:"sessionTimeout"`
+	S3KeyPattern          string            `json:"s3KeyPattern"`
 	ExtensionCapabilities *Caps             `json:"selenoid:options"`
 }
 

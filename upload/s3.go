@@ -91,8 +91,12 @@ func (s3 *S3Uploader) Upload(input *UploadRequest) error {
 
 func GetS3Key(keyPattern string, input *UploadRequest) string {
 	sess := input.Session
+	pt := keyPattern
+	if sess.Caps.S3KeyPattern != "" {
+		pt = sess.Caps.S3KeyPattern
+	}
 	filename := input.Filename
-	key := strings.Replace(keyPattern, "$fileName", strings.ToLower(filepath.Base(filename)), -1)
+	key := strings.Replace(pt, "$fileName", strings.ToLower(filepath.Base(filename)), -1)
 	key = strings.Replace(key, "$fileExtension", strings.ToLower(filepath.Ext(filename)), -1)
 	key = strings.Replace(key, "$browserName", strings.ToLower(sess.Caps.Name), -1)
 	key = strings.Replace(key, "$browserVersion", strings.ToLower(sess.Caps.Version), -1)
