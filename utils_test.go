@@ -146,8 +146,9 @@ func TestProcessExtensionCapabilities(t *testing.T) {
 		"selenoid:options": {
 			"name": "ExampleTestName",
 			"enableVNC": true,
-			"enableVideo": "true",
-			"videoFrameRate": 24
+			"videoFrameRate": 24,
+			"env": ["LANG=de_DE.UTF-8"],
+			"labels": {"key": "value"}
 		}
 	}`
 	var caps session.Caps
@@ -161,7 +162,8 @@ func TestProcessExtensionCapabilities(t *testing.T) {
 	AssertThat(t, caps.Name, EqualTo{"firefox"})
 	AssertThat(t, caps.Version, EqualTo{"57.0"})
 	AssertThat(t, caps.TestName, EqualTo{"ExampleTestName"})
-	AssertThat(t, caps.VNC, EqualTo{true})    //Correct type
-	AssertThat(t, caps.Video, EqualTo{false}) //Wrong type in JSON
+	AssertThat(t, caps.VNC, EqualTo{true})
 	AssertThat(t, caps.VideoFrameRate, EqualTo{uint16(24)})
+	AssertThat(t, caps.Env, EqualTo{[]string{"LANG=de_DE.UTF-8"}})
+	AssertThat(t, caps.Labels, EqualTo{map[string]string{"key": "value"}})
 }

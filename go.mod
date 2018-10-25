@@ -17,6 +17,7 @@ require (
 	github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.6.2 // indirect
+	github.com/imdario/mergo v0.3.6
 	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
@@ -30,5 +31,6 @@ require (
 	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
 	google.golang.org/grpc v1.15.0 // indirect
 	gopkg.in/ini.v1 v1.39.0 // indirect
+	gopkg.in/yaml.v2 v2.2.1 // indirect
 	gotest.tools v2.1.0+incompatible // indirect
 )

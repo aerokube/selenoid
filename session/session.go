@@ -1,39 +1,39 @@
 package session
 
 import (
+	"github.com/imdario/mergo"
 	"net/url"
-	"reflect"
 	"sync"
 	"time"
 )
 
 // Caps - user capabilities
 type Caps struct {
-	Name                  string                 `json:"browserName"`
-	DeviceName            string                 `json:"deviceName"`
-	Version               string                 `json:"version"`
-	W3CVersion            string                 `json:"browserVersion"`
-	Platform              string                 `json:"platform"`
-	W3CPlatform           string                 `json:"platformName"`
-	ScreenResolution      string                 `json:"screenResolution"`
-	Skin                  string                 `json:"skin"`
-	VNC                   bool                   `json:"enableVNC"`
-	Video                 bool                   `json:"enableVideo"`
-	VideoName             string                 `json:"videoName"`
-	VideoScreenSize       string                 `json:"videoScreenSize"`
-	VideoFrameRate        uint16                 `json:"videoFrameRate"`
-	VideoCodec            string                 `json:"videoCodec"`
-	LogName               string                 `json:"logName"`
-	TestName              string                 `json:"name"`
-	TimeZone              string                 `json:"timeZone"`
-	ContainerHostname     string                 `json:"containerHostname"`
-	Env                   []string               `json:"env"`
-	ApplicationContainers []string               `json:"applicationContainers"`
-	HostsEntries          []string               `json:"hostsEntries"`
-	DNSServers            []string               `json:"dnsServers"`
-	Labels                map[string]string      `json:"labels"`
-	SessionTimeout        string                 `json:"sessionTimeout"`
-	ExtensionCapabilities map[string]interface{} `json:"selenoid:options"`
+	Name                  string            `json:"browserName"`
+	DeviceName            string            `json:"deviceName"`
+	Version               string            `json:"version"`
+	W3CVersion            string            `json:"browserVersion"`
+	Platform              string            `json:"platform"`
+	W3CPlatform           string            `json:"platformName"`
+	ScreenResolution      string            `json:"screenResolution"`
+	Skin                  string            `json:"skin"`
+	VNC                   bool              `json:"enableVNC"`
+	Video                 bool              `json:"enableVideo"`
+	VideoName             string            `json:"videoName"`
+	VideoScreenSize       string            `json:"videoScreenSize"`
+	VideoFrameRate        uint16            `json:"videoFrameRate"`
+	VideoCodec            string            `json:"videoCodec"`
+	LogName               string            `json:"logName"`
+	TestName              string            `json:"name"`
+	TimeZone              string            `json:"timeZone"`
+	ContainerHostname     string            `json:"containerHostname"`
+	Env                   []string          `json:"env"`
+	ApplicationContainers []string          `json:"applicationContainers"`
+	HostsEntries          []string          `json:"hostsEntries"`
+	DNSServers            []string          `json:"dnsServers"`
+	Labels                map[string]string `json:"labels"`
+	SessionTimeout        string            `json:"sessionTimeout"`
+	ExtensionCapabilities *Caps             `json:"selenoid:options"`
 }
 
 func (c *Caps) ProcessExtensionCapabilities() {
@@ -43,27 +43,9 @@ func (c *Caps) ProcessExtensionCapabilities() {
 	if c.W3CPlatform != "" {
 		c.Platform = c.W3CPlatform
 	}
-	if len(c.ExtensionCapabilities) > 0 {
-		s := reflect.ValueOf(c).Elem()
 
-		tagToFieldMap := make(map[string]reflect.StructField)
-
-		for i := 0; i < s.NumField(); i++ {
-			field := s.Type().Field(i)
-			tag := field.Tag.Get("json")
-			tagToFieldMap[tag] = field
-		}
-
-		//NOTE: entries from the first maps have less priority than then next ones
-		nestedMaps := []map[string]interface{}{c.ExtensionCapabilities}
-		for _, nm := range nestedMaps {
-			for k, v := range nm {
-				value := reflect.ValueOf(v)
-				if field, ok := tagToFieldMap[k]; ok && value.Type().ConvertibleTo(field.Type) {
-					s.FieldByName(field.Name).Set(value.Convert(field.Type))
-				}
-			}
-		}
+	if c.ExtensionCapabilities != nil {
+		mergo.Merge(c, *c.ExtensionCapabilities, mergo.WithOverride) //We probably need to handle returned error
 	}
 }
 
