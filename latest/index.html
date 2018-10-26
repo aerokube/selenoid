@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-10-25</span>
+<span id="revdate">2018-10-26</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -3309,7 +3309,51 @@ one_min.selenoid_example_com.httpjson_selenoid.total</code></pre>
 <div class="sect2">
 <h3 id="_file_upload"><a class="anchor" href="#_file_upload"></a>3.4. File Upload</h3>
 <div class="paragraph">
-<p>Some tests require to upload files. This feature is supported in WebDriver protocol by sending zipped file contents to <code>/file</code> handle. However not all driver binaries support this feature. For example this is not implemented in <a href="http://github.com/mozilla/geckodriver">Geckodriver</a> or <a href="https://github.com/SeleniumHQ/selenium/tree/master/cpp/iedriver">IEDriver</a>. When proxying requests <strong>directly</strong> to these drivers (i.e. when not using Docker) you need to start Selenoid with <code>-enable-file-upload</code> flag. In that case Selenoid will provide required API to tests. Firefox container images already include this parameter where needed.</p>
+<p>Some tests require to upload files. This feature works out of the box in the majority of Selenium clients. A typical Java code snippet look like the following:</p>
+</div>
+<div class="listingblock">
+<div class="title">Uploading files with Java</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="comment">// Find file input element</span>
+WebElement input = driver.findElement(By.cssSelector(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>));
+
+<span class="comment">// Make sure element is visible</span>
+((JavascriptExecutor) driver).executeScript(<span class="string"><span class="delimiter">&quot;</span><span class="content">arguments[0].style.display = 'block';</span><span class="delimiter">&quot;</span></span>, input);
+
+<span class="comment">// Configure your client to upload local files to remote Selenium instance</span>
+driver.setFileDetector(<span class="keyword">new</span> LocalFileDetector());
+
+<span class="comment">// Specify you local file path here (not path inside browser container!)</span>
+input.sendKeys(<span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">&quot;</span></span>);</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Uploading files with Python</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python"><span class="keyword">from</span> <span class="include">selenium.webdriver.remote.file_detector</span> <span class="keyword">import</span> <span class="include">LocalFileDetector</span>
+
+<span class="comment"># ...</span>
+
+input = driver.find_element_by_css_selector(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>)
+driver.execute_script(<span class="string"><span class="delimiter">&quot;</span><span class="content">arguments[0].style.display = 'block';</span><span class="delimiter">&quot;</span></span>, <span class="predefined">input</span>)
+driver.file_detector = LocalFileDetector()
+<span class="predefined">input</span>.send_keys(<span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">&quot;</span></span>)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Read the following note if you are using Selenoid <strong>without Docker</strong>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This feature is supported in WebDriver protocol by sending zipped file contents to <code>/file</code> handle. However not all driver binaries support this feature. For example this is not implemented in <a href="http://github.com/mozilla/geckodriver">Geckodriver</a> or <a href="https://github.com/SeleniumHQ/selenium/tree/master/cpp/iedriver">IEDriver</a>. When proxying requests <strong>directly</strong> to these drivers (i.e. when <strong>not using Docker</strong>) you need to start Selenoid with <code>-enable-file-upload</code> flag. In that case Selenoid will provide required API to tests. Firefox container images already include this parameter where needed.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect2">
@@ -4438,7 +4482,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-10-25 17:32:04 UTC
+Last updated 2018-10-26 03:42:34 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
