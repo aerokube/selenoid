@@ -2,25 +2,23 @@
 
 To build Selenoid:
 
-. Install https://golang.org/doc/install[Golang]
+. Install https://golang.org/doc/install[Golang] 1.11 and above.
 
 . Setup `$GOPATH` https://github.com/golang/go/wiki/GOPATH[properly]
 
-. Get Selenoid source:
+. Clone Selenoid source:
 
-    $ go get -d github.com/aerokube/selenoid
+    $ git clone https://github.com/aerokube/selenoid.git
 
 . Go to project directory:
 
-    $ cd $GOPATH/src/github.com/aerokube/selenoid 
+    $ cd selenoid 
     
-. Checkout dependencies
-
-    $ go get -u github.com/golang/dep/cmd/dep && dep ensure
-
 . Build source:
 
     $ go build
++
+This will also fetch build dependencies.
 
 . Run Selenoid:
 
