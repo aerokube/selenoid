@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-10-30</span>
+<span id="revdate">2018-10-31</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -3340,6 +3340,14 @@ driver.file_detector = LocalFileDetector()
 <span class="predefined">input</span>.send_keys(<span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">&quot;</span></span>)</code></pre>
 </div>
 </div>
+<div class="listingblock">
+<div class="title">Uploading files with Webdriver.io</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript"><span class="keyword">var</span> filePath = path.join(<span class="string"><span class="delimiter">'</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">'</span></span>);
+browser.uploadFile(filePath);
+browser.chooseFile(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>, filePath);</code></pre>
+</div>
+</div>
 <div class="paragraph">
 <p>Read the following note if you are using Selenoid <strong>without Docker</strong>.</p>
 </div>
@@ -4484,7 +4492,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-10-30 09:42:12 UTC
+Last updated 2018-10-31 07:50:40 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
