@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func init() {
@@ -104,6 +105,7 @@ func GetS3Key(keyPattern string, input *UploadRequest) string {
 	key = strings.Replace(key, "$quota", strings.ToLower(sess.Quota), -1)
 	key = strings.Replace(key, "$sessionId", strings.ToLower(input.SessionId), -1)
 	key = strings.Replace(key, "$fileType", strings.ToLower(input.Type), -1)
+	key = strings.Replace(key, "$date", time.Now().Format("2006-01-02"), -1)
 	key = strings.Replace(key, " ", "-", -1)
 	return key
 }

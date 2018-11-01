@@ -18,6 +18,7 @@ By default uploaded file name is preserved, i.e. S3 path is `/<session-id>.log` 
 
 | $browserName | Replaced by Selenium browser name capability value
 | $browserVersion | Replaced by Selenium browser version capability value
+| $date | Replaced by current date, e.g. `2018-11-01`
 | $fileName | Replaced by source file name 
 | $fileExtension | Replaced by source file extension 
 | $fileType | Replaced by `log` for log files and `video` for video files
