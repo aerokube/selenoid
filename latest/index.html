@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-11-01</span>
+<span id="revdate">2018-11-06</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -2188,6 +2188,9 @@ If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags th
 <div class="paragraph">
 <p>For example, when launching Selenoid with <code>-s3-key-pattern $browserName/$sessionId/log.txt</code> files will be accessible as <code>firefox/0ee0b48b-e29b-6749-b4f1-2277b8f8d6c5/log.txt</code>. You can also override key pattern for every session with <code>s3KeyPattern</code> capability.</p>
 </div>
+<div class="paragraph">
+<p>Sometimes you may want to upload only video files or files matching some complicated pattern or to not upload some files. To achieve this use <code>-s3-include-files</code> and <code>-s3-exclude-files</code> flags. These flags accept <a href="https://en.wikipedia.org/wiki/Glob_(programming)">globs</a> such as <code>*.mp4</code>.</p>
+</div>
 <div class="sect3">
 <h4 id="_s3_cli_flags"><a class="anchor" href="#_s3_cli_flags"></a>2.9.1. S3 CLI Flags</h4>
 <div class="paragraph">
@@ -2201,6 +2204,10 @@ If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags th
     S3 bucket name
 -s3-endpoint string
     S3 endpoint URL
+-s3-exclude-files string
+    Pattern used to match and exclude files
+-s3-include-files string
+    Pattern used to match and include files
 -s3-keep-files
     Do not remove uploaded files
 -s3-key-pattern string
@@ -4496,7 +4503,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-11-01 08:38:07 UTC
+Last updated 2018-11-06 12:29:09 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
