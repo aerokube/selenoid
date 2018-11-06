@@ -27,6 +27,8 @@ func init() {
 	flag.StringVar(&(s3.KeyPattern), "s3-key-pattern", "$fileName", "S3 bucket name")
 	flag.BoolVar(&(s3.ReducedRedundancy), "s3-reduced-redundancy", false, "Use reduced redundancy storage class")
 	flag.BoolVar(&(s3.KeepFiles), "s3-keep-files", false, "Do not remove uploaded files")
+	flag.StringVar(&(s3.IncludeFiles), "s3-include-files", "", "Pattern used to match and include files")
+	flag.StringVar(&(s3.ExcludeFiles), "s3-exclude-files", "", "Pattern used to match and exclude files")
 	uploader = s3
 }
 
@@ -39,6 +41,8 @@ type S3Uploader struct {
 	KeyPattern        string
 	ReducedRedundancy bool
 	KeepFiles         bool
+	IncludeFiles      string
+	ExcludeFiles      string
 
 	manager *s3manager.Uploader
 }
@@ -64,6 +68,14 @@ func (s3 *S3Uploader) Init() {
 func (s3 *S3Uploader) Upload(input *UploadRequest) error {
 	if s3.manager != nil {
 		filename := input.Filename
+		fileMatches, err := FileMatches(s3.IncludeFiles, s3.ExcludeFiles, filename)
+		if err != nil {
+			return fmt.Errorf("invalid pattern: %v", err)
+		}
+		if !fileMatches {
+			log.Printf("[%d] [SKIPPING_FILE] [%s] [Does not match specified patterns]", input.RequestId, input.Filename)
+			return nil
+		}
 		key := GetS3Key(s3.KeyPattern, input)
 		file, err := os.Open(filename)
 		defer file.Close()
@@ -88,6 +100,26 @@ func (s3 *S3Uploader) Upload(input *UploadRequest) error {
 		return nil
 	}
 	return errors.New("S3 uploader is not initialized")
+}
+
+func FileMatches(includedFiles string, excludedFiles string, filename string) (bool, error) {
+	fileIncluded := true
+	if includedFiles != "" {
+		fi, err := filepath.Match(includedFiles, filepath.Base(filename))
+		if err != nil {
+			return false, fmt.Errorf("failed to match included file: %v", err)
+		}
+		fileIncluded = fi
+	}
+	fileExcluded := false
+	if excludedFiles != "" {
+		fe, err := filepath.Match(excludedFiles, filepath.Base(filename))
+		if err != nil {
+			return false, fmt.Errorf("failed to match excluded file: %v", err)
+		}
+		fileExcluded = fe
+	}
+	return fileIncluded && !fileExcluded, nil
 }
 
 func GetS3Key(keyPattern string, input *UploadRequest) string {

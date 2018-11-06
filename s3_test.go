@@ -90,3 +90,33 @@ func TestGetKey(t *testing.T) {
 	key = upload.GetS3Key(testPattern, input)
 	AssertThat(t, key, EqualTo{"some-user/log.txt"})
 }
+
+func TestFileMatches(t *testing.T) {
+	matches, err := upload.FileMatches("", "", "any-file-name")
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, matches, Is{true})
+
+	matches, err = upload.FileMatches("[", "", "/path/to/file.mp4")
+	AssertThat(t, err, Not{nil})
+	AssertThat(t, matches, Is{false})
+
+	matches, err = upload.FileMatches("", "[", "/path/to/file.mp4")
+	AssertThat(t, err, Not{nil})
+	AssertThat(t, matches, Is{false})
+
+	matches, err = upload.FileMatches("*.mp4", "", "/path/to/file.mp4")
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, matches, Is{true})
+
+	matches, err = upload.FileMatches("*.mp4", "", "/path/to/file.log")
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, matches, Is{false})
+
+	matches, err = upload.FileMatches("*.mp4", "", "/path/to/file.log")
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, matches, Is{false})
+
+	matches, err = upload.FileMatches("", "*.log", "/path/to/file.log")
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, matches, Is{false})
+}
