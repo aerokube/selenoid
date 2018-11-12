@@ -8,16 +8,16 @@ import (
 )
 
 type UploadRequest struct {
-	Filename string
+	Filename  string
 	RequestId uint64
 	SessionId string
-	Session *session.Session
-	Type string
+	Session   *session.Session
+	Type      string
 }
 
 type Uploader interface {
 	Init()
-	Upload(input *UploadRequest) error
+	Upload(input *UploadRequest) (bool, error)
 }
 
 var (
@@ -34,12 +34,14 @@ func Upload(input *UploadRequest) {
 	if uploader != nil {
 		go func() {
 			s := time.Now()
-			err := uploader.Upload(input)
+			uploaded, err := uploader.Upload(input)
 			if err != nil {
 				log.Printf("[%d] [UPLOADING_FILE] [%s] [Failed to upload: %v]", input.RequestId, input.Filename, err)
 				return
 			}
-			log.Printf("[%d] [UPLOADED_FILE] [%s] [%.2fs]", input.RequestId, input.Filename, util.SecondsSince(s))
+			if uploaded {
+				log.Printf("[%d] [UPLOADED_FILE] [%s] [%.2fs]", input.RequestId, input.Filename, util.SecondsSince(s))
+			}
 		}()
 	}
 }
