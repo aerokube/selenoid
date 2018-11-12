@@ -60,27 +60,27 @@ func (s3 *S3Uploader) Init() {
 		if err != nil {
 			log.Fatalf("[-] [INIT] [Failed to initialize S3 support: %v]", err)
 		}
-		log.Printf("[-] [INIT] [Initialized S3 support: endpoint = %s, region = %s, bucketName = %s, accessKey = %s, keyPattern = %s]", s3.Endpoint, s3.Region, s3.BucketName, s3.AccessKey, s3.KeyPattern)
+		log.Printf("[-] [INIT] [Initialized S3 support: endpoint = %s, region = %s, bucketName = %s, accessKey = %s, keyPattern = %s, includeFiles = %s, excludeFiles = %s]", s3.Endpoint, s3.Region, s3.BucketName, s3.AccessKey, s3.KeyPattern, s3.IncludeFiles, s3.ExcludeFiles)
 		s3.manager = s3manager.NewUploader(sess)
 	}
 }
 
-func (s3 *S3Uploader) Upload(input *UploadRequest) error {
+func (s3 *S3Uploader) Upload(input *UploadRequest) (bool, error) {
 	if s3.manager != nil {
 		filename := input.Filename
 		fileMatches, err := FileMatches(s3.IncludeFiles, s3.ExcludeFiles, filename)
 		if err != nil {
-			return fmt.Errorf("invalid pattern: %v", err)
+			return false, fmt.Errorf("invalid pattern: %v", err)
 		}
 		if !fileMatches {
 			log.Printf("[%d] [SKIPPING_FILE] [%s] [Does not match specified patterns]", input.RequestId, input.Filename)
-			return nil
+			return false, nil
 		}
 		key := GetS3Key(s3.KeyPattern, input)
 		file, err := os.Open(filename)
 		defer file.Close()
 		if err != nil {
-			return fmt.Errorf("failed to open file %s: %v", filename, err)
+			return false, fmt.Errorf("failed to open file %s: %v", filename, err)
 		}
 		uploadInput := &s3manager.UploadInput{
 			Bucket: aws.String(s3.BucketName),
@@ -92,14 +92,14 @@ func (s3 *S3Uploader) Upload(input *UploadRequest) error {
 		}
 		_, err = s3.manager.Upload(uploadInput)
 		if err != nil {
-			return fmt.Errorf("failed to S3 upload %s as %s: %v", filename, key, err)
+			return false, fmt.Errorf("failed to S3 upload %s as %s: %v", filename, key, err)
 		}
 		if !s3.KeepFiles && os.Remove(filename) != nil {
-			return fmt.Errorf("failed to remove uploaded file %s: %v", filename, err)
+			return true, fmt.Errorf("failed to remove uploaded file %s: %v", filename, err)
 		}
-		return nil
+		return true, nil
 	}
-	return errors.New("S3 uploader is not initialized")
+	return false, errors.New("S3 uploader is not initialized")
 }
 
 func FileMatches(includedFiles string, excludedFiles string, filename string) (bool, error) {

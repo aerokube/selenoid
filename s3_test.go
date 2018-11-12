@@ -69,8 +69,9 @@ func TestS3Uploader(t *testing.T) {
 		Type:      "log",
 		RequestId: 4342,
 	}
-	err := uploader.Upload(input)
+	uploaded, err := uploader.Upload(input)
 	AssertThat(t, err, Is{nil})
+	AssertThat(t, uploaded, Is{true})
 }
 
 func TestGetKey(t *testing.T) {
