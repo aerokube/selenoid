@@ -61,6 +61,7 @@ The following statuses are available:
 | INIT | Server is starting 
 | KILLED_VIDEO_CONTAINER | Waiting for video container to stop timed out and it was killed 
 | LOG_ERROR | An error occurred when post-processing session logs 
+| METADATA | Metadata processing messages 
 | NEW_REQUEST | New user request arrived and was placed to queue
 | NEW_REQUEST_ACCEPTED | Started processing new user request
 | PROCESS_STARTED | Driver process successfully started 

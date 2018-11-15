@@ -59,13 +59,12 @@ func (q *Queue) Protect(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, remote := util.RequestInfo(r)
 		log.Printf("[-] [NEW_REQUEST] [%s] [%s]", user, remote)
-		cn := w.(http.CloseNotifier)
 		s := time.Now()
 		go func() {
 			q.queued <- struct{}{}
 		}()
 		select {
-		case <-cn.CloseNotify():
+		case <-r.Context().Done():
 			<-q.queued
 			log.Printf("[-] [CLIENT_DISCONNECTED] [%s] [%s] [%s]", user, remote, time.Since(s))
 			return

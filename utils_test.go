@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/aerokube/selenoid/protect"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -166,4 +168,42 @@ func TestProcessExtensionCapabilities(t *testing.T) {
 	AssertThat(t, caps.VideoFrameRate, EqualTo{uint16(24)})
 	AssertThat(t, caps.Env, EqualTo{[]string{"LANG=de_DE.UTF-8"}})
 	AssertThat(t, caps.Labels, EqualTo{map[string]string{"key": "value"}})
+}
+
+func TestSumUsedTotalGreaterThanPending(t *testing.T) {
+	queue := protect.New(2, false)
+
+	hf := func(_ http.ResponseWriter, _ *http.Request) {
+		time.Sleep(50 * time.Millisecond)
+	}
+	queuedHandlerFunc := queue.Try(queue.Check(queue.Protect(hf)))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", queuedHandlerFunc)
+
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+	u := srv.URL + "/"
+
+	_, err := http.Get(u)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, queue.Pending(), EqualTo{1})
+	queue.Create()
+	AssertThat(t, queue.Pending(), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{1})
+
+	_, err = http.Get(u)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, queue.Pending(), EqualTo{1})
+	queue.Create()
+	AssertThat(t, queue.Pending(), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{2})
+
+	req, _ := http.NewRequest(http.MethodGet, u, nil)
+	ctx, _ := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	req = req.WithContext(ctx)
+
+	_, err = http.DefaultClient.Do(req)
+	AssertThat(t, err, Not{nil})
+	AssertThat(t, queue.Pending(), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{2})
 }

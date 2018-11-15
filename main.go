@@ -25,7 +25,6 @@ import (
 	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
-	"github.com/aerokube/selenoid/upload"
 	"github.com/aerokube/util"
 	"github.com/aerokube/util/docker"
 	"github.com/docker/docker/client"
@@ -174,8 +173,6 @@ func init() {
 		log.Printf("[-] [INIT] [Logs Dir: %s]", logOutputDir)
 	}
 
-	upload.Init()
-
 	environment := service.Environment{
 		InDocker:             inDocker,
 		CPU:                  int64(cpu),
@@ -191,6 +188,9 @@ func init() {
 	}
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}
+		if logOutputDir != "" && captureDriverLogs {
+			log.Fatalf("[-] [INIT] [In drivers mode only one of -capture-driver-logs and -log-output-dir flags is allowed]")
+		}
 		return
 	}
 	dockerHost := os.Getenv("DOCKER_HOST")

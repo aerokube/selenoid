@@ -5,6 +5,7 @@ package upload
 import (
 	"flag"
 	"fmt"
+	"github.com/aerokube/selenoid/event"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	awssession "github.com/aws/aws-sdk-go/aws/session"
@@ -29,7 +30,7 @@ func init() {
 	flag.BoolVar(&(s3.KeepFiles), "s3-keep-files", false, "Do not remove uploaded files")
 	flag.StringVar(&(s3.IncludeFiles), "s3-include-files", "", "Pattern used to match and include files")
 	flag.StringVar(&(s3.ExcludeFiles), "s3-exclude-files", "", "Pattern used to match and exclude files")
-	uploader = s3
+	AddUploader(s3)
 }
 
 type S3Uploader struct {
@@ -65,18 +66,18 @@ func (s3 *S3Uploader) Init() {
 	}
 }
 
-func (s3 *S3Uploader) Upload(input *UploadRequest) (bool, error) {
+func (s3 *S3Uploader) Upload(createdFile event.CreatedFile) (bool, error) {
 	if s3.manager != nil {
-		filename := input.Filename
+		filename := createdFile.Name
 		fileMatches, err := FileMatches(s3.IncludeFiles, s3.ExcludeFiles, filename)
 		if err != nil {
 			return false, fmt.Errorf("invalid pattern: %v", err)
 		}
 		if !fileMatches {
-			log.Printf("[%d] [SKIPPING_FILE] [%s] [Does not match specified patterns]", input.RequestId, input.Filename)
+			log.Printf("[%d] [SKIPPING_FILE] [%s] [Does not match specified patterns]", createdFile.RequestId, createdFile.Name)
 			return false, nil
 		}
-		key := GetS3Key(s3.KeyPattern, input)
+		key := GetS3Key(s3.KeyPattern, createdFile)
 		file, err := os.Open(filename)
 		defer file.Close()
 		if err != nil {
@@ -122,21 +123,21 @@ func FileMatches(includedFiles string, excludedFiles string, filename string) (b
 	return fileIncluded && !fileExcluded, nil
 }
 
-func GetS3Key(keyPattern string, input *UploadRequest) string {
-	sess := input.Session
+func GetS3Key(keyPattern string, createdFile event.CreatedFile) string {
+	sess := createdFile.Session
 	pt := keyPattern
 	if sess.Caps.S3KeyPattern != "" {
 		pt = sess.Caps.S3KeyPattern
 	}
-	filename := input.Filename
+	filename := createdFile.Name
 	key := strings.Replace(pt, "$fileName", strings.ToLower(filepath.Base(filename)), -1)
 	key = strings.Replace(key, "$fileExtension", strings.ToLower(filepath.Ext(filename)), -1)
 	key = strings.Replace(key, "$browserName", strings.ToLower(sess.Caps.Name), -1)
 	key = strings.Replace(key, "$browserVersion", strings.ToLower(sess.Caps.Version), -1)
 	key = strings.Replace(key, "$platformName", strings.ToLower(sess.Caps.Platform), -1)
 	key = strings.Replace(key, "$quota", strings.ToLower(sess.Quota), -1)
-	key = strings.Replace(key, "$sessionId", strings.ToLower(input.SessionId), -1)
-	key = strings.Replace(key, "$fileType", strings.ToLower(input.Type), -1)
+	key = strings.Replace(key, "$sessionId", strings.ToLower(createdFile.SessionId), -1)
+	key = strings.Replace(key, "$fileType", strings.ToLower(createdFile.Type), -1)
 	key = strings.Replace(key, "$date", time.Now().Format("2006-01-02"), -1)
 	key = strings.Replace(key, " ", "-", -1)
 	return key

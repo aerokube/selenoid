@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 	. "github.com/aandryashin/matchers"
+	"github.com/aerokube/selenoid/event"
 	"github.com/aerokube/selenoid/session"
 	"github.com/aerokube/selenoid/upload"
 	"io/ioutil"
@@ -62,12 +63,14 @@ func TestS3Uploader(t *testing.T) {
 	}
 	uploader.Init()
 	f, _ := ioutil.TempFile("", "some-file")
-	input := &upload.UploadRequest{
-		Filename:  f.Name(),
-		SessionId: "some-session-id",
-		Session:   testSession,
-		Type:      "log",
-		RequestId: 4342,
+	input := event.CreatedFile{
+		Event: event.Event{
+			RequestId: 4342,
+			SessionId: "some-session-id",
+			Session:   testSession,
+		},
+		Name: f.Name(),
+		Type: "log",
 	}
 	uploaded, err := uploader.Upload(input)
 	AssertThat(t, err, Is{nil})
@@ -76,12 +79,15 @@ func TestS3Uploader(t *testing.T) {
 
 func TestGetKey(t *testing.T) {
 	const testPattern = "$quota/$sessionId_$browserName_$browserVersion_$platformName/$fileType$fileExtension"
-	input := &upload.UploadRequest{
-		Filename:  "/path/to/some-file.txt",
-		SessionId: "some-session-id",
-		Session:   testSession,
-		Type:      "log",
-		RequestId: 12345,
+	input := event.CreatedFile{
+		Event: event.Event{
+			SessionId: "some-session-id",
+			Session:   testSession,
+			RequestId: 12345,
+		},
+
+		Name: "/path/to/some-file.txt",
+		Type: "log",
 	}
 
 	key := upload.GetS3Key(testPattern, input)
