@@ -25,7 +25,6 @@ import (
 	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
-	"github.com/aerokube/selenoid/upload"
 	"github.com/aerokube/util"
 	"github.com/aerokube/util/docker"
 	"github.com/docker/docker/client"
@@ -173,8 +172,6 @@ func init() {
 		}
 		log.Printf("[-] [INIT] [Logs Dir: %s]", logOutputDir)
 	}
-
-	upload.Init()
 
 	environment := service.Environment{
 		InDocker:             inDocker,

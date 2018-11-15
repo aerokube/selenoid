@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/aerokube/selenoid/event"
 	"io"
 	"io/ioutil"
 	"log"
@@ -24,7 +25,6 @@ import (
 	"time"
 
 	"github.com/aerokube/selenoid/session"
-	"github.com/aerokube/selenoid/upload"
 	"github.com/aerokube/util"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -272,9 +272,16 @@ func create(w http.ResponseWriter, r *http.Request) {
 		Timeout:   sessionTimeout,
 		TimeoutCh: onTimeout(sessionTimeout, func() {
 			request{r}.session(s.ID).Delete(requestId)
-		})}
+		}),
+		Started: time.Now()}
 	cancelAndRenameFiles := func() {
 		cancel()
+		e := event.Event{
+			RequestId: requestId,
+			SessionId: s.ID,
+			Session:   sess,
+		}
+		event.SessionStopped(event.StoppedSession{e})
 		if browser.Caps.Video && !disableDocker {
 			oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
 			if finalVideoName == "" {
@@ -285,14 +292,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Printf("[%d] [VIDEO_ERROR] [%s]", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldVideoName, newVideoName, err))
 			} else {
-				input := &upload.UploadRequest{
-					RequestId: requestId,
-					Filename:  newVideoName,
-					SessionId: s.ID,
-					Session:   sess,
-					Type:      "video",
+				createdFile := event.CreatedFile{
+					Event: e,
+					Name:  newVideoName,
+					Type:  "video",
 				}
-				upload.Upload(input)
+				event.FileCreated(createdFile)
 			}
 		}
 		if logOutputDir != "" {
@@ -307,14 +312,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Printf("[%d] [LOG_ERROR] [%s]", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldLogName, newLogName, err))
 			} else {
-				input := &upload.UploadRequest{
-					RequestId: requestId,
-					Filename:  newLogName,
-					SessionId: s.ID,
-					Session:   sess,
-					Type:      "log",
+				createdFile := event.CreatedFile{
+					Event: e,
+					Name:  newLogName,
+					Type:  "log",
 				}
-				upload.Upload(input)
+				event.FileCreated(createdFile)
 			}
 		}
 	}

@@ -1,0 +1,21 @@
+== Saving Session Metadata
+
+IMPORTANT: This feature only becomes available when Selenoid is compiled with `metadata` build tag (missing by default).
+
+Selenoid can save session metadata to a separate JSON file. Main use case is to somehow post-process session logs, e.g. send them to map-reduce cluster. No additional configuration is needed to enable this feature. When enabled and `-log-output-dir` flag is set - Selenoid will automatically save JSON files `<log-output-dir>/<session-id>.json` with the following content:
+
+.Example metadata JSON file
+[source,javascript]
+----
+{
+    "id": "62a4d82d-edf6-43d5-886f-895b77ff23b7",
+    "capabilities": {
+        "browserName": "chrome",
+        "version": "70.0",
+        "name": "MyCoolTest",
+        "screenResolution": "1920x1080x24"
+    },
+    "started": "2018-11-15T16:23:12.440916+03:00",
+    "finished": "2018-11-15T16:23:12.480928+03:00"
+}
+----

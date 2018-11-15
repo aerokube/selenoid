@@ -9,32 +9,32 @@ import (
 
 // Caps - user capabilities
 type Caps struct {
-	Name                  string            `json:"browserName"`
-	DeviceName            string            `json:"deviceName"`
-	Version               string            `json:"version"`
-	W3CVersion            string            `json:"browserVersion"`
-	Platform              string            `json:"platform"`
-	W3CPlatform           string            `json:"platformName"`
-	ScreenResolution      string            `json:"screenResolution"`
-	Skin                  string            `json:"skin"`
-	VNC                   bool              `json:"enableVNC"`
-	Video                 bool              `json:"enableVideo"`
-	VideoName             string            `json:"videoName"`
-	VideoScreenSize       string            `json:"videoScreenSize"`
-	VideoFrameRate        uint16            `json:"videoFrameRate"`
-	VideoCodec            string            `json:"videoCodec"`
-	LogName               string            `json:"logName"`
-	TestName              string            `json:"name"`
-	TimeZone              string            `json:"timeZone"`
-	ContainerHostname     string            `json:"containerHostname"`
-	Env                   []string          `json:"env"`
-	ApplicationContainers []string          `json:"applicationContainers"`
-	HostsEntries          []string          `json:"hostsEntries"`
-	DNSServers            []string          `json:"dnsServers"`
-	Labels                map[string]string `json:"labels"`
-	SessionTimeout        string            `json:"sessionTimeout"`
-	S3KeyPattern          string            `json:"s3KeyPattern"`
-	ExtensionCapabilities *Caps             `json:"selenoid:options"`
+	Name                  string            `json:"browserName,omitempty"`
+	DeviceName            string            `json:"deviceName,omitempty"`
+	Version               string            `json:"version,omitempty"`
+	W3CVersion            string            `json:"browserVersion,omitempty"`
+	Platform              string            `json:"platform,omitempty"`
+	W3CPlatform           string            `json:"platformName,omitempty"`
+	ScreenResolution      string            `json:"screenResolution,omitempty"`
+	Skin                  string            `json:"skin,omitempty"`
+	VNC                   bool              `json:"enableVNC,omitempty"`
+	Video                 bool              `json:"enableVideo,omitempty"`
+	VideoName             string            `json:"videoName,omitempty"`
+	VideoScreenSize       string            `json:"videoScreenSize,omitempty"`
+	VideoFrameRate        uint16            `json:"videoFrameRate,omitempty"`
+	VideoCodec            string            `json:"videoCodec,omitempty"`
+	LogName               string            `json:"logName,omitempty"`
+	TestName              string            `json:"name,omitempty"`
+	TimeZone              string            `json:"timeZone,omitempty"`
+	ContainerHostname     string            `json:"containerHostname,omitempty"`
+	Env                   []string          `json:"env,omitempty"`
+	ApplicationContainers []string          `json:"applicationContainers,omitempty"`
+	HostsEntries          []string          `json:"hostsEntries,omitempty"`
+	DNSServers            []string          `json:"dnsServers,omitempty"`
+	Labels                map[string]string `json:"labels,omitempty"`
+	SessionTimeout        string            `json:"sessionTimeout,omitempty"`
+	S3KeyPattern          string            `json:"s3KeyPattern,omitempty"`
+	ExtensionCapabilities *Caps             `json:"selenoid:options,omitempty"`
 }
 
 func (c *Caps) ProcessExtensionCapabilities() {
@@ -66,6 +66,7 @@ type Session struct {
 	Cancel    func()
 	Timeout   time.Duration
 	TimeoutCh chan struct{}
+	Started   time.Time
 	Lock      sync.Mutex
 }
 
@@ -124,4 +125,12 @@ func (m *Map) Len() int {
 	m.l.RLock()
 	defer m.l.RUnlock()
 	return len(m.m)
+}
+
+// Metadata - session metadata saved to file
+type Metadata struct {
+	ID           string    `json:"id"`
+	Capabilities Caps      `json:"capabilities"`
+	Started      time.Time `json:"started"`
+	Finished     time.Time `json:"finished"`
 }
