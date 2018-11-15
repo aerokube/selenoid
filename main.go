@@ -191,6 +191,9 @@ func init() {
 	}
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}
+		if logOutputDir != "" && captureDriverLogs {
+			log.Fatalf("[-] [INIT] [In drivers mode only one of -capture-driver-logs and -log-output-dir flags is allowed]")
+		}
 		return
 	}
 	dockerHost := os.Getenv("DOCKER_HOST")
