@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-11-12</span>
+<span id="revdate">2018-11-15</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -593,9 +593,10 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_s3_cli_flags">2.9.1. S3 CLI Flags</a></li>
 </ul>
 </li>
-<li><a href="#_selenoid_with_docker_compose">2.10. Selenoid with Docker Compose</a></li>
-<li><a href="#_log_files">2.11. Log Files</a></li>
-<li><a href="#_selenoid_cli_flags">2.12. Selenoid CLI Flags</a></li>
+<li><a href="#_saving_session_metadata">2.10. Saving Session Metadata</a></li>
+<li><a href="#_selenoid_with_docker_compose">2.11. Selenoid with Docker Compose</a></li>
+<li><a href="#_log_files">2.12. Log Files</a></li>
+<li><a href="#_selenoid_cli_flags">2.13. Selenoid CLI Flags</a></li>
 </ul>
 </li>
 <li><a href="#_advanced_features">3. Advanced Features</a>
@@ -2223,7 +2224,41 @@ If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags th
 </div>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.10. Selenoid with Docker Compose</h3>
+<h3 id="_saving_session_metadata"><a class="anchor" href="#_saving_session_metadata"></a>2.10. Saving Session Metadata</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This feature only becomes available when Selenoid is compiled with <code>metadata</code> build tag (missing by default).
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid can save session metadata to a separate JSON file. Main use case is to somehow post-process session logs, e.g. send them to map-reduce cluster. No additional configuration is needed to enable this feature. When enabled and <code>-log-output-dir</code> flag is set - Selenoid will automatically save JSON files <code>&lt;log-output-dir&gt;/&lt;session-id&gt;.json</code> with the following content:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example metadata JSON file</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript">{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">62a4d82d-edf6-43d5-886f-895b77ff23b7</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">capabilities</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">browserName</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">chrome</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">70.0</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">MyCoolTest</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">screenResolution</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1920x1080x24</span><span class="delimiter">&quot;</span></span>
+    },
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">started</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2018-11-15T16:23:12.440916+03:00</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">finished</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2018-11-15T16:23:12.480928+03:00</span><span class="delimiter">&quot;</span></span>
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.11. Selenoid with Docker Compose</h3>
 <div class="paragraph">
 <p>To avoid network problems between browser drivers inside containers and Selenoid when using <a href="https://docs.docker.com/compose/">Docker Compose</a> for combining with another services (such as UI or ggr) you need to enable <strong>bridge</strong> network mode for all services:</p>
 </div>
@@ -2250,7 +2285,7 @@ If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags th
 </div>
 </div>
 <div class="sect2">
-<h3 id="_log_files"><a class="anchor" href="#_log_files"></a>2.11. Log Files</h3>
+<h3 id="_log_files"><a class="anchor" href="#_log_files"></a>2.12. Log Files</h3>
 <div class="paragraph">
 <p>A typical log file looks like the following:</p>
 </div>
@@ -2443,6 +2478,10 @@ If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags th
 <td class="tableblock halign-left valign-top"><p class="tableblock">An error occurred when post-processing session logs</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">METADATA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Metadata processing messages</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">NEW_REQUEST</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">New user request arrived and was placed to queue</p></td>
 </tr>
@@ -2550,7 +2589,7 @@ If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags th
 </table>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.12. Selenoid CLI Flags</h3>
+<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.13. Selenoid CLI Flags</h3>
 <div class="paragraph">
 <p>The following flags are supported by <code>selenoid</code> command:</p>
 </div>
@@ -4503,7 +4542,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-11-12 09:43:57 UTC
+Last updated 2018-11-15 18:24:07 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
