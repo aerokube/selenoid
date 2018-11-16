@@ -4,7 +4,6 @@ import (
 	"github.com/aerokube/selenoid/event"
 	"github.com/aerokube/util"
 	"log"
-	"sync"
 	"time"
 )
 
@@ -18,7 +17,14 @@ type Uploader interface {
 
 type Upload struct {
 	uploaders []Uploader
-	lock      sync.Mutex
+}
+
+func Init() {
+	if upl != nil {
+		for _, upl := range upl.uploaders {
+			event.InitIfNeeded(upl)
+		}
+	}
 }
 
 func AddUploader(u Uploader) {
@@ -26,9 +32,6 @@ func AddUploader(u Uploader) {
 		upl = &Upload{}
 		event.AddFileCreatedListener(upl)
 	}
-	upl.lock.Lock()
-	defer upl.lock.Unlock()
-	event.InitIfNeeded(u)
 	upl.uploaders = append(upl.uploaders, u)
 }
 
