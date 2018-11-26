@@ -1,0 +1,58 @@
+== Uploading Files To S3
+
+IMPORTANT: This feature only becomes available when Selenoid is compiled with `s3` build tag (missing by default).
+
+Selenoid can upload recorded video and log files for every running session to S3-compatible storage.
+
+To enable this feature you need to specify S3 access information as follows:
+
+    $ ./selenoid -s3-endpoint https://s3.us-east-2.amazonaws.com -s3-region us-east-2 -s3-bucket-name my-bucket -s3-access-key <your-access-key> -s3-secret-key <your-secret-key>
+
+NOTE: If you omit `-s3-access-key` and `-s3-secret-key` flags then environment variables and shared credentials file are automatically tried as a fallback. 
+
+By default uploaded file name is preserved, i.e. S3 path is `/<session-id>.log` or `/myCustomVideo.mp4`. You can optionally provide your custom key pattern using `-s3-key-pattern` flag and a set of placeholders:
+
+.S3 Key Placeholders
+|===
+| Placeholder | Meaning 
+
+| $browserName | Replaced by Selenium browser name capability value
+| $browserVersion | Replaced by Selenium browser version capability value
+| $date | Replaced by current date, e.g. `2018-11-01`
+| $fileName | Replaced by source file name 
+| $fileExtension | Replaced by source file extension 
+| $fileType | Replaced by `log` for log files and `video` for video files
+| $platformName | Replaced by Selenium platform capability value
+| $quota | Replaced by quota name (usually coming from Ggr)
+| $sessionId | Replaced by Selenium session ID
+|===
+
+For example, when launching Selenoid with `-s3-key-pattern $browserName/$sessionId/log.txt` files will be accessible as `firefox/0ee0b48b-e29b-6749-b4f1-2277b8f8d6c5/log.txt`. You can also override key pattern for every session with `s3KeyPattern` capability.
+
+Sometimes you may want to upload only video files or files matching some complicated pattern or to not upload some files. To achieve this use `-s3-include-files` and `-s3-exclude-files` flags. These flags accept https://en.wikipedia.org/wiki/Glob_(programming)[globs] such as `*.mp4`.
+
+=== S3 CLI Flags
+The following flags are supported by `selenoid` command when compiled with S3 support:
+
+```
+-s3-access-key string
+    S3 access key
+-s3-bucket-name string
+    S3 bucket name
+-s3-endpoint string
+    S3 endpoint URL
+-s3-exclude-files string
+    Pattern used to match and exclude files
+-s3-include-files string
+    Pattern used to match and include files    
+-s3-keep-files
+    Do not remove uploaded files
+-s3-key-pattern string
+    S3 bucket name (default "$fileName")
+-s3-reduced-redundancy
+    Use reduced redundancy storage class
+-s3-region string
+    S3 region
+-s3-secret-key string
+    S3 secret key
+```

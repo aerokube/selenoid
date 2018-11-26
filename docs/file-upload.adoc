@@ -1,3 +1,44 @@
 == File Upload
 
-Some tests require to upload files. This feature is supported in WebDriver protocol by sending zipped file contents to `/file` handle. However not all driver binaries support this feature. For example this is not implemented in http://github.com/mozilla/geckodriver[Geckodriver] or https://github.com/SeleniumHQ/selenium/tree/master/cpp/iedriver[IEDriver]. When proxying requests **directly** to these drivers (i.e. when not using Docker) you need to start Selenoid with `-enable-file-upload` flag. In that case Selenoid will provide required API to tests. Firefox container images already include this parameter where needed.  
+Some tests require to upload files. This feature works out of the box in the majority of Selenium clients. A typical Java code snippet look like the following:
+
+.Uploading files with Java
+[source,java]
+----
+// Find file input element
+WebElement input = driver.findElement(By.cssSelector("input[type='file']"));
+
+// Make sure element is visible
+((JavascriptExecutor) driver).executeScript("arguments[0].style.display = 'block';", input);
+
+// Configure your client to upload local files to remote Selenium instance
+driver.setFileDetector(new LocalFileDetector());
+
+// Specify you local file path here (not path inside browser container!)
+input.sendKeys("/path/to/file/on/machine/which/runs/tests");
+----
+
+.Uploading files with Python
+[source,python]
+----
+from selenium.webdriver.remote.file_detector import LocalFileDetector
+
+# ...
+
+input = driver.find_element_by_css_selector("input[type='file']")
+driver.execute_script("arguments[0].style.display = 'block';", input)
+driver.file_detector = LocalFileDetector()
+input.send_keys("/path/to/file/on/machine/which/runs/tests")
+----
+
+.Uploading files with Webdriver.io
+[source,javascript]
+----
+var filePath = path.join('/path/to/file/on/machine/which/runs/tests');
+browser.uploadFile(filePath);
+browser.chooseFile("input[type='file']", filePath);
+----
+
+Read the following note if you are using Selenoid **without Docker**.
+
+NOTE: This feature is supported in WebDriver protocol by sending zipped file contents to `/file` handle. However not all driver binaries support this feature. For example this is not implemented in http://github.com/mozilla/geckodriver[Geckodriver] or https://github.com/SeleniumHQ/selenium/tree/master/cpp/iedriver[IEDriver]. When proxying requests **directly** to these drivers (i.e. when **not using Docker**) you need to start Selenoid with `-enable-file-upload` flag. In that case Selenoid will provide required API to tests. Firefox container images already include this parameter where needed.  

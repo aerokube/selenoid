@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/aerokube/selenoid/protect"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -46,8 +48,11 @@ func (m *HTTPTest) StartWithCancel() (*service.StartedService, error) {
 		m.Action(s)
 	}
 	ss := service.StartedService{
-		Url:                u,
-		FileserverHostPort: u.Host,
+		Url: u,
+		HostPort: session.HostPort{
+			Fileserver: u.Host,
+			Clipboard:  u.Host,
+		},
 		Cancel: func() {
 			log.Println("Stopping HTTPTest Service...")
 			s.Close()
@@ -129,6 +134,10 @@ func Selenium() http.Handler {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("test-data"))
 	})
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("test-clipboard-value"))
+	})
 	return mux
 }
 
@@ -139,8 +148,9 @@ func TestProcessExtensionCapabilities(t *testing.T) {
 		"selenoid:options": {
 			"name": "ExampleTestName",
 			"enableVNC": true,
-			"enableVideo": "true",
-			"videoFrameRate": 24
+			"videoFrameRate": 24,
+			"env": ["LANG=de_DE.UTF-8"],
+			"labels": {"key": "value"}
 		}
 	}`
 	var caps session.Caps
@@ -154,7 +164,46 @@ func TestProcessExtensionCapabilities(t *testing.T) {
 	AssertThat(t, caps.Name, EqualTo{"firefox"})
 	AssertThat(t, caps.Version, EqualTo{"57.0"})
 	AssertThat(t, caps.TestName, EqualTo{"ExampleTestName"})
-	AssertThat(t, caps.VNC, EqualTo{true})    //Correct type
-	AssertThat(t, caps.Video, EqualTo{false}) //Wrong type in JSON
+	AssertThat(t, caps.VNC, EqualTo{true})
 	AssertThat(t, caps.VideoFrameRate, EqualTo{uint16(24)})
+	AssertThat(t, caps.Env, EqualTo{[]string{"LANG=de_DE.UTF-8"}})
+	AssertThat(t, caps.Labels, EqualTo{map[string]string{"key": "value"}})
+}
+
+func TestSumUsedTotalGreaterThanPending(t *testing.T) {
+	queue := protect.New(2, false)
+
+	hf := func(_ http.ResponseWriter, _ *http.Request) {
+		time.Sleep(50 * time.Millisecond)
+	}
+	queuedHandlerFunc := queue.Try(queue.Check(queue.Protect(hf)))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", queuedHandlerFunc)
+
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+	u := srv.URL + "/"
+
+	_, err := http.Get(u)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, queue.Pending(), EqualTo{1})
+	queue.Create()
+	AssertThat(t, queue.Pending(), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{1})
+
+	_, err = http.Get(u)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, queue.Pending(), EqualTo{1})
+	queue.Create()
+	AssertThat(t, queue.Pending(), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{2})
+
+	req, _ := http.NewRequest(http.MethodGet, u, nil)
+	ctx, _ := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	req = req.WithContext(ctx)
+
+	_, err = http.DefaultClient.Do(req)
+	AssertThat(t, err, Not{nil})
+	AssertThat(t, queue.Pending(), EqualTo{0})
+	AssertThat(t, queue.Used(), EqualTo{2})
 }

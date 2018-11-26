@@ -1,6 +1,5 @@
 .idea
 *.iml
 selenoid
-vendor/*/
 coverage.*
 .DS_Store

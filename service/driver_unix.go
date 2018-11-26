@@ -8,5 +8,7 @@ import (
 )
 
 func stopProc(cmd *exec.Cmd) error {
-	return cmd.Process.Signal(syscall.SIGINT)
+		exitCode := cmd.Process.Signal(syscall.SIGINT)
+		cmd.Wait()
+		return exitCode
 }

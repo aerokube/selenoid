@@ -29,6 +29,7 @@ var (
 func init() {
 	enableFileUpload = true
 	videoOutputDir, _ = ioutil.TempDir("", "selenoid-test")
+	logOutputDir, _ = ioutil.TempDir("", "selenoid-test")
 	gitRevision = "test-revision"
 	srv = httptest.NewServer(handler())
 }
@@ -89,18 +90,18 @@ func TestGetShortScreenResolution(t *testing.T) {
 	AssertThat(t, res, EqualTo{"1024x768x24"})
 }
 
+func TestTooBigSessionTimeoutCapability(t *testing.T) {
+	testBadSessionTimeoutCapability(t, "1h1m")
+}
+
 func TestInvalidSessionTimeoutCapability(t *testing.T) {
-	testBadSessionTimeoutCapability(t, 3601)
+	testBadSessionTimeoutCapability(t, "wrong-value")
 }
 
-func TestNegativeSessionTimeoutCapability(t *testing.T) {
-	testBadSessionTimeoutCapability(t, -1)
-}
-
-func testBadSessionTimeoutCapability(t *testing.T, timeoutValue int) {
+func testBadSessionTimeoutCapability(t *testing.T, timeoutValue string) {
 	manager = &BrowserNotFound{}
 
-	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(fmt.Sprintf(`{"desiredCapabilities":{"sessionTimeout":%d}}`, timeoutValue))))
+	rsp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(fmt.Sprintf(`{"desiredCapabilities":{"sessionTimeout":"%s"}}`, timeoutValue))))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusBadRequest})
 
@@ -194,7 +195,7 @@ func TestSessionCreated(t *testing.T) {
 	manager = &HTTPTest{Handler: Selenium()}
 	timeout = 5 * time.Second
 
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities": {"enableVideo": true, "enableVNC": true, "sessionTimeout": 3}}`)))
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities": {"enableVideo": true, "enableVNC": true, "sessionTimeout": "3s"}}`)))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
@@ -361,7 +362,7 @@ func TestSessionDeleted(t *testing.T) {
 		Cancel:  ch,
 	}
 
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities": {"enableVideo": true}}`)))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
@@ -607,7 +608,29 @@ func TestPing(t *testing.T) {
 	AssertThat(t, version, EqualTo{"test-revision"})
 }
 
-func TestServeAndDeleteFile(t *testing.T) {
+func TestStatus(t *testing.T) {
+	rsp, err := http.Get(With(srv.URL).Path("/wd/hub/status"))
+
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+	AssertThat(t, rsp.Body, Is{Not{nil}})
+
+	var data map[string]interface{}
+	bt, readErr := ioutil.ReadAll(rsp.Body)
+	AssertThat(t, readErr, Is{nil})
+	jsonErr := json.Unmarshal(bt, &data)
+	AssertThat(t, jsonErr, Is{nil})
+	value, hasValue := data["value"]
+	AssertThat(t, hasValue, Is{true})
+	valueMap := value.(map[string]interface{})
+	ready, hasReady := valueMap["ready"]
+	AssertThat(t, hasReady, Is{true})
+	AssertThat(t, ready, Is{true})
+	_, hasMessage := valueMap["message"]
+	AssertThat(t, hasMessage, Is{true})
+}
+
+func TestServeAndDeleteVideoFile(t *testing.T) {
 	fileName := "testfile"
 	filePath := filepath.Join(videoOutputDir, fileName)
 	ioutil.WriteFile(filePath, []byte("test-data"), 0644)
@@ -622,6 +645,25 @@ func TestServeAndDeleteFile(t *testing.T) {
 	AssertThat(t, rsp, Code{http.StatusOK})
 
 	//Deleting already deleted file
+	rsp, err = http.DefaultClient.Do(deleteReq)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusNotFound})
+}
+
+func TestServeAndDeleteLogFile(t *testing.T) {
+	fileName := "logfile.log"
+	filePath := filepath.Join(logOutputDir, fileName)
+	ioutil.WriteFile(filePath, []byte("test-data"), 0644)
+
+	rsp, err := http.Get(With(srv.URL).Path("/logs/logfile.log"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
+	deleteReq, _ := http.NewRequest(http.MethodDelete, With(srv.URL).Path("/logs/logfile.log"), nil)
+	rsp, err = http.DefaultClient.Do(deleteReq)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
 	rsp, err = http.DefaultClient.Do(deleteReq)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusNotFound})
@@ -649,6 +691,36 @@ func TestFileDownload(t *testing.T) {
 
 func TestFileDownloadMissingSession(t *testing.T) {
 	rsp, err := http.Get(With(srv.URL).Path("/download/missing-session/testfile"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusNotFound})
+}
+
+func TestClipboard(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	rsp, err := http.Get(With(srv.URL).Path(fmt.Sprintf("/clipboard/%s", sess["sessionId"])))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+	data, err := ioutil.ReadAll(rsp.Body)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, string(data), EqualTo{"test-clipboard-value"})
+
+	rsp, err = http.Post(With(srv.URL).Path(fmt.Sprintf("/clipboard/%s", sess["sessionId"])), "text/plain", bytes.NewReader([]byte("any-data")))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
+func TestClipboardMissingSession(t *testing.T) {
+	rsp, err := http.Get(With(srv.URL).Path("/clipboard/missing-session"))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusNotFound})
 }

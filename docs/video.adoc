@@ -15,11 +15,11 @@ To use this feature you should:
 . Pull video recorder image once:
 +
 ```
-$ docker pull selenoid/video-recorder
+$ docker pull selenoid/video-recorder:latest-release
 ```
 
 . When running Selenoid **in Docker container**:
-.. Mount from host a directory (e.g. `~/.aerokube/selenoid/video`) to store video files to `/opt/selenoid/video`.
+.. Mount a directory from the host machine (e.g. `~/.aerokube/selenoid/video`) to store video files to `/opt/selenoid/video`.
 .. Pass an additional `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable with absolute path to video directory on host machine. This is required because video recorder container, automatically created by Selenoid should save video to host machine video storage directory.
 . When running Selenoid **as a binary** - videos will be stored in `video` directory inside current working directory. 
 +
@@ -69,7 +69,7 @@ You can access recorded video files using the following URL:
 http://selenoid-host.example.com:4444/video/<filename>.mp4
 ----
 
-NOTE: Direct link will works only after session has finished because Selenoid renames temporary filename to `<session-id>.mp4` (by default) at the session close.
+NOTE: Direct link will work only after session has finished because Selenoid renames temporary filename to `<session-id>.mp4` (by default) at the session close.
 
 To see all available files use:
 
@@ -83,12 +83,18 @@ http://selenoid-host.example.com:4444/video/
 Selenoid intentionally has no built-in logic to automatically remove old video files. To limit storage space consumption you have two alternatives:
 
 . Schedule scripts automatically removing files older than desired date and time. An example command under Unix operating systems can look like:
-
-    $ find /path/to/video/dir -mindepth 1 -maxdepth 1 -mmin +120 -name '*.mp4' | xargs rm -rf
++
+.Shell Command to Remove Old Video Files
+----
+$ find /path/to/video/dir -mindepth 1 -maxdepth 1 -mmin +120 -name '*.mp4' | xargs rm -rf
+----
 
 +
 Notice `-mmin +120` argument meaning to only process files older than 2 hours (120 minutes).
 
 . Send video removal requests (e.g. from passed test cases). Just use `DELETE` HTTP method and Selenoid video URL:
-
-    $ curl -X DELETE http://selenoid-host.example.com:4444/video/<filename>.mp4
++
+.Deleting Video File via HTTP API
+----
+$ curl -X DELETE http://selenoid-host.example.com:4444/video/<filename>.mp4
+----

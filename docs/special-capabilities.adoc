@@ -37,9 +37,9 @@ You should manually resize window to desired width and height.
 You need to use `setSize` method instead.
 ====
 
-=== Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate
+=== Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate, videoCodec
 
-NOTE: This feature requires some preparation. Please refer to <<Video Recording>> section for details.
+NOTE: This feature requires some preparation. Please refer to <<Video Recording>> section for more details.
 
 To enable video recording for session, add:
 
@@ -48,7 +48,7 @@ To enable video recording for session, add:
 enableVideo: true
 ----
 
-* By default files are named `<session-id>.mp4` where `<session-id>` is a unique identifier of Selenium session.
+* By default saved video files are named `<session-id>.mp4` where `<session-id>` is a unique identifier of Selenium session.
 To provide custom video name specify:
 +
 .Type: string
@@ -75,6 +75,33 @@ videoScreenSize: "1024x768"
 videoFrameRate: 24
 ----
 
+* By default Selenoid is using `libx264` codec for video output. If this codec is consuming too much CPU, you can change it using `videoCodec` capability:
++
+.Type: string
+----
+videoCodec: "mpeg4"
+----
++
+To obtain the full list of https://stackoverflow.com/questions/3377300/what-are-all-codecs-and-formats-supported-by-ffmpeg[supported values]:
++
+```
+$ docker run -it --rm --entrypoint /usr/bin/ffmpeg selenoid/video-recorder -codecs
+```
+
+=== Saving Session Logs: logName
+
+NOTE: This feature requires some preparation. Please refer to <<Saving Session Logs>> section for more details.
+
+By default saved log files are named `<session-id>.log` where `<session-id>` is a unique identifier of Selenium session.
+To provide custom log file name specify:
+
+.Type: string
+----
+logName: "my-cool-log.log"
+----
+
+WARNING: It is important to add `log` file extension.
+
 === Custom Test Name: name
 
 For debugging purposes it is often useful to give a distinct name to every test case.
@@ -91,12 +118,12 @@ The main application of this capability - is debugging tests in the UI which is 
 
 Sometimes you may want to change idle timeout for selected browser session. To achieve this - pass the following capability:
 
-.Type: int
+.Type: string
 ----
-sessionTimeout: 30
+sessionTimeout: 30m
 ----
 
-Timeout is always specified in seconds, should be positive and can be no more than the value set by `-max-timeout` flag.
+Timeout is specified Golang duration format e.g. `30m` or `10s` or `1h5m` and can be no more than the value set by `-max-timeout` flag.
 
 === Per-session Time Zone: timeZone
 
@@ -165,6 +192,51 @@ labels: {"environment": "testing", "build-number": "14353"}
 ----
 
 Labels from this capability override labels from browsers configuration file. When `name` capability is specified - it is automatically added as a label to container.
+
+=== Android Skin: skin
+
+For <<Android>> containers you can select emulator skin with capabilities. List of available skins:
+
+.Available Android Skins
+|===
+| Skin | Screen Resolution | DPI
+
+| QVGA | 240x320 | 120
+| WQVGA400 | 240x400 | 120
+| WQVGA432 | 240x432 | 120
+| HVGA | 320x480 | 160
+| WVGA800 | 480x800 | 240
+| WVGA854 | 480x854 | 240
+| WSVGA | 1024x600 | 160
+| WXGA720 | 720x1280 | 320
+| WXGA800 | 1280x800 | 160
+| WXGA800-7in | 800x1280 | 213
+|===
+
+To select a skin - set `skin` capability:
+
+.Type: string, format: <desired-skin>
+----
+skin: "WXGA720"
+----
+
+You can also pass desired screen resolution as follows:
+
+.Type: string, format: <desired-screen-resolution>
+----
+skin: "720x1280"
+----
+
+=== S3 Key Pattern: s3KeyPattern
+
+This capability allows to override S3 key pattern (specified by `-s3-key-pattern` flag) used when uploading files to S3.  
+
+.Type: string
+----
+s3KeyPattern: "$quota/$fileType$fileExtension"
+----
+
+The same key placeholders are supported. Please refer to <<Uploading Files To S3>> section for more details.
 
 === Specifying Capabilities via Protocol Extensions
 

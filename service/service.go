@@ -14,17 +14,19 @@ import (
 
 // Environment - all settings that influence browser startup
 type Environment struct {
-	IP                  string
-	InDocker            bool
-	CPU                 int64
-	Memory              int64
-	Network             string
-	Hostname            string
-	StartupTimeout      time.Duration
-	CaptureDriverLogs   bool
-	VideoOutputDir      string
-	VideoContainerImage string
-	Privileged          bool
+	IP                   string
+	InDocker             bool
+	CPU                  int64
+	Memory               int64
+	Network              string
+	Hostname             string
+	StartupTimeout       time.Duration
+	SessionDeleteTimeout time.Duration
+	CaptureDriverLogs    bool
+	VideoOutputDir       string
+	VideoContainerImage  string
+	LogOutputDir         string
+	Privileged           bool
 	MesosMasterUrl      string
 	Zookeeper           string
 }
@@ -41,11 +43,10 @@ type ServiceBase struct {
 
 // StartedService - all started service properties
 type StartedService struct {
-	Url                *url.URL
-	Container          *session.Container
-	FileserverHostPort string
-	VNCHostPort        string
-	Cancel             func()
+	Url       *url.URL
+	Container *session.Container
+	HostPort  session.HostPort
+	Cancel    func()
 }
 
 // Starter - interface to create session with cancellation ability
@@ -67,7 +68,7 @@ type DefaultManager struct {
 
 // Find - default implementation Manager interface
 func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, bool) {
-	browserName := caps.Name
+	browserName := browser(caps)
 	version := caps.Version
 	log.Printf("[%d] [LOCATING_SERVICE] [%s] [%s]", requestId, browserName, version)
 	service, version, ok := m.Config.Find(browserName, version)
@@ -103,6 +104,14 @@ func (m *DefaultManager) Find(caps session.Caps, requestId uint64) (Starter, boo
 		return &Driver{ServiceBase: serviceBase, Environment: *m.Environment, Caps: caps}, true
 	}
 	return nil, false
+}
+
+func browser(caps session.Caps) string {
+	browserName := caps.Name
+	if browserName != "" {
+		return browserName
+	}
+	return caps.DeviceName
 }
 
 func wait(u string, t time.Duration) error {

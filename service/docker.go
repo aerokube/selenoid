@@ -16,8 +16,10 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/strslice"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -26,6 +28,7 @@ const (
 	overrideVideoOutputDir = "OVERRIDE_VIDEO_OUTPUT_DIR"
 	vncPort                = "5900"
 	fileserverPort         = "8080"
+	clipboardPort          = "9090"
 )
 
 // Docker - docker container manager
@@ -40,6 +43,7 @@ type Docker struct {
 type portConfig struct {
 	SeleniumPort   nat.Port
 	FileserverPort nat.Port
+	ClipboardPort  nat.Port
 	VNCPort        nat.Port
 	PortBindings   nat.PortMap
 	ExposedPorts   map[nat.Port]struct{}
@@ -53,6 +57,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	}
 	selenium := portConfig.SeleniumPort
 	fileserver := portConfig.FileserverPort
+	clipboard := portConfig.ClipboardPort
 	vnc := portConfig.VNCPort
 	requestId := d.RequestId
 	image := d.Service.Image
@@ -120,8 +125,15 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		removeContainer(ctx, cl, requestId, browserContainerId)
 		return nil, fmt.Errorf("no bindings available for %v", selenium)
 	}
-	seleniumHostPort, vncHostPort, fileserverHostPort := getHostPort(d.Environment, d.Service, d.Caps, stat, selenium, vnc, fileserver)
-	u := &url.URL{Scheme: "http", Host: seleniumHostPort, Path: d.Service.Path}
+	servicePort := d.Service.Port
+	pc := map[string]nat.Port{
+		servicePort:    selenium,
+		vncPort:        vnc,
+		fileserverPort: fileserver,
+		clipboardPort:  clipboard,
+	}
+	hostPort := getHostPort(d.Environment, servicePort, d.Caps, stat, pc)
+	u := &url.URL{Scheme: "http", Host: hostPort.Selenium, Path: d.Service.Path}
 
 	if d.Video {
 		videoContainerId, err = startVideoContainer(ctx, cl, requestId, stat, d.Environment, d.ServiceBase, d.Caps)
@@ -133,6 +145,9 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	serviceStartTime := time.Now()
 	err = wait(u.String(), d.StartupTimeout)
 	if err != nil {
+		if videoContainerId != "" {
+			stopVideoContainer(ctx, cl, requestId, videoContainerId, d.Environment)
+		}
 		removeContainer(ctx, cl, requestId, browserContainerId)
 		return nil, fmt.Errorf("wait: %v", err)
 	}
@@ -144,13 +159,35 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			ID:        browserContainerId,
 			IPAddress: getContainerIP(d.Environment.Network, stat),
 		},
-		FileserverHostPort: fileserverHostPort,
-		VNCHostPort:        vncHostPort,
+		HostPort: hostPort,
 		Cancel: func() {
 			if videoContainerId != "" {
-				stopVideoContainer(ctx, cl, requestId, videoContainerId)
+				stopVideoContainer(ctx, cl, requestId, videoContainerId, d.Environment)
 			}
-			removeContainer(ctx, cl, requestId, browserContainerId)
+			defer removeContainer(ctx, cl, requestId, browserContainerId)
+			if d.LogOutputDir != "" {
+				r, err := d.Client.ContainerLogs(ctx, browserContainerId, types.ContainerLogsOptions{
+					Timestamps: true,
+					ShowStdout: true,
+					ShowStderr: true,
+				})
+				if err != nil {
+					log.Printf("[%d] [FAILED_TO_COPY_LOGS] [%s] [Failed to capture container logs: %v]", requestId, browserContainerId, err)
+					return
+				}
+				defer r.Close()
+				filename := filepath.Join(d.LogOutputDir, d.LogName)
+				f, err := os.Create(filename)
+				if err != nil {
+					log.Printf("[%d] [FAILED_TO_COPY_LOGS] [%s] [Failed to create log file %s: %v]", requestId, browserContainerId, filename, err)
+					return
+				}
+				defer f.Close()
+				_, err = stdcopy.StdCopy(f, f, r)
+				if err != nil {
+					log.Printf("[%d] [FAILED_TO_COPY_LOGS] [%s] [Failed to copy data to log file %s: %v]", requestId, browserContainerId, filename, err)
+				}
+			}
 		},
 	}
 	return &s, nil
@@ -165,6 +202,10 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 	if err != nil {
 		return nil, fmt.Errorf("new fileserver port: %v", err)
 	}
+	clipboard, err := nat.NewPort("tcp", clipboardPort)
+	if err != nil {
+		return nil, fmt.Errorf("new clipboard port: %v", err)
+	}
 	exposedPorts := map[nat.Port]struct{}{selenium: {}, fileserver: {}}
 	var vnc nat.Port
 	if caps.VNC {
@@ -178,6 +219,7 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 	if env.IP != "" || !env.InDocker {
 		portBindings[selenium] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
 		portBindings[fileserver] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
+		portBindings[clipboard] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
 		if caps.VNC {
 			portBindings[vnc] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
 		}
@@ -185,6 +227,7 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 	return &portConfig{
 		SeleniumPort:   selenium,
 		FileserverPort: fileserver,
+		ClipboardPort:  clipboard,
 		VNCPort:        vnc,
 		PortBindings:   portBindings,
 		ExposedPorts:   exposedPorts}, nil
@@ -203,7 +246,7 @@ func getLogConfig(logConfig ctr.LogConfig, caps session.Caps) ctr.LogConfig {
 		}
 		_, ok = logConfig.Config[labels]
 		if len(caps.Labels) > 0 && !ok {
-			joinedLabels := []string{}
+			var joinedLabels []string
 			for k, v := range caps.Labels {
 				joinedLabels = append(joinedLabels, fmt.Sprintf("%s=%s", k, v))
 			}
@@ -231,6 +274,12 @@ func getEnv(service ServiceBase, caps session.Caps) []string {
 		fmt.Sprintf("TZ=%s", getTimeZone(service, caps)),
 		fmt.Sprintf("SCREEN_RESOLUTION=%s", caps.ScreenResolution),
 		fmt.Sprintf("ENABLE_VNC=%v", caps.VNC),
+	}
+	if caps.Skin != "" {
+		env = append(env, fmt.Sprintf("SKIN=%s", caps.Skin))
+	}
+	if caps.VideoCodec != "" {
+		env = append(env, fmt.Sprintf("CODEC=%s", caps.VideoCodec))
 	}
 	env = append(env, service.Service.Env...)
 	env = append(env, caps.Env...)
@@ -275,31 +324,37 @@ func getLabels(service *config.Browser, caps session.Caps) map[string]string {
 	return labels
 }
 
-func getHostPort(env Environment, service *config.Browser, caps session.Caps, stat types.ContainerJSON, selenium nat.Port, vnc nat.Port, fileserver nat.Port) (string, string, string) {
-	seleniumHostPort, vncHostPort, fileserverHostPort := "", "", ""
+func getHostPort(env Environment, servicePort string, caps session.Caps, stat types.ContainerJSON, pc map[string]nat.Port) session.HostPort {
+	fn := func(containerPort string, port nat.Port) string {
+		return ""
+	}
 	if env.IP == "" {
 		if env.InDocker {
 			containerIP := getContainerIP(env.Network, stat)
-			seleniumHostPort = net.JoinHostPort(containerIP, service.Port)
-			fileserverHostPort = net.JoinHostPort(containerIP, fileserverPort)
-			if caps.VNC {
-				vncHostPort = net.JoinHostPort(containerIP, vncPort)
+			fn = func(containerPort string, port nat.Port) string {
+				return net.JoinHostPort(containerIP, containerPort)
 			}
 		} else {
-			seleniumHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[selenium][0].HostPort)
-			fileserverHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[fileserver][0].HostPort)
-			if caps.VNC {
-				vncHostPort = net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[vnc][0].HostPort)
+			fn = func(containerPort string, port nat.Port) string {
+				return net.JoinHostPort("127.0.0.1", stat.NetworkSettings.Ports[port][0].HostPort)
 			}
 		}
 	} else {
-		seleniumHostPort = net.JoinHostPort(env.IP, stat.NetworkSettings.Ports[selenium][0].HostPort)
-		fileserverHostPort = net.JoinHostPort(env.IP, stat.NetworkSettings.Ports[fileserver][0].HostPort)
-		if caps.VNC {
-			vncHostPort = net.JoinHostPort(env.IP, stat.NetworkSettings.Ports[vnc][0].HostPort)
+		fn = func(containerPort string, port nat.Port) string {
+			return net.JoinHostPort(env.IP, stat.NetworkSettings.Ports[port][0].HostPort)
 		}
 	}
-	return seleniumHostPort, vncHostPort, fileserverHostPort
+	hp := session.HostPort{
+		Selenium:   fn(servicePort, pc[servicePort]),
+		Fileserver: fn(fileserverPort, pc[fileserverPort]),
+		Clipboard:  fn(clipboardPort, pc[clipboardPort]),
+	}
+
+	if caps.VNC {
+		hp.VNC = fn(vncPort, pc[vncPort])
+	}
+
+	return hp
 }
 
 func getContainerIP(networkName string, stat types.ContainerJSON) string {
@@ -308,7 +363,7 @@ func getContainerIP(networkName string, stat types.ContainerJSON) string {
 		return stat.NetworkSettings.IPAddress
 	}
 	if len(ns.Networks) > 0 {
-		possibleAddresses := []string{}
+		var possibleAddresses []string
 		for name, nt := range ns.Networks {
 			if nt.IPAddress != "" {
 				if name == networkName {
@@ -382,11 +437,23 @@ func getVideoOutputDir(env Environment) string {
 	return env.VideoOutputDir
 }
 
-func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint64, containerId string) {
+func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint64, containerId string, env Environment) {
 	log.Printf("[%d] [STOPPING_VIDEO_CONTAINER] [%s]", requestId, containerId)
 	err := cli.ContainerKill(ctx, containerId, "TERM")
 	if err != nil {
 		log.Printf("[%d] [FAILED_TO_STOP_VIDEO_CONTAINER] [%s] [%v]", requestId, containerId, err)
+		return
+	}
+	notRunning, doesNotExist := cli.ContainerWait(ctx, containerId, ctr.WaitConditionNotRunning)
+	select {
+	case <-notRunning:
+	case <-doesNotExist:
+	case <-time.After(env.SessionDeleteTimeout):
+		err = cli.ContainerRemove(ctx, containerId, types.ContainerRemoveOptions{Force: true})
+		if err != nil {
+			log.Printf("[%d] [FAILED_TO_KILL_VIDEO_CONTAINER] [%s] [%v]", requestId, containerId, err)
+		}
+		log.Printf("[%d] [KILLED_VIDEO_CONTAINER] [%s] [%v]", requestId, containerId, err)
 		return
 	}
 	log.Printf("[%d] [STOPPED_VIDEO_CONTAINER] [%s]", requestId, containerId)

@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/aerokube/selenoid/event"
 	"io"
 	"io/ioutil"
 	"log"
@@ -134,7 +135,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	browser.Caps.ProcessExtensionCapabilities()
 	sessionTimeout, err := getSessionTimeout(browser.Caps.SessionTimeout, maxTimeout, timeout)
 	if err != nil {
-		log.Printf("[%d] [BAD_SESSION_TIMEOUT] [%ds]", requestId, browser.Caps.SessionTimeout)
+		log.Printf("[%d] [BAD_SESSION_TIMEOUT] [%s]", requestId, browser.Caps.SessionTimeout)
 		util.JsonError(w, err.Error(), http.StatusBadRequest)
 		queue.Drop()
 		return
@@ -156,8 +157,12 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	browser.Caps.VideoScreenSize = videoScreenSize
 	finalVideoName := browser.Caps.VideoName
-	if browser.Caps.Video {
-		browser.Caps.VideoName = getVideoFileName(videoOutputDir)
+	if browser.Caps.Video && !disableDocker {
+		browser.Caps.VideoName = getTemporaryFileName(videoOutputDir, videoFileExtension)
+	}
+	finalLogName := browser.Caps.LogName
+	if logOutputDir != "" {
+		browser.Caps.LogName = getTemporaryFileName(logOutputDir, logFileExtension)
 	}
 	starter, ok := manager.Find(browser.Caps, requestId)
 	if !ok {
@@ -258,9 +263,26 @@ func create(w http.ResponseWriter, r *http.Request) {
 		cancel()
 		return
 	}
-	cancelAndRenameVideo := func() {
+	sess := &session.Session{
+		Quota:     user,
+		Caps:      browser.Caps,
+		URL:       u,
+		Container: startedService.Container,
+		HostPort:  startedService.HostPort,
+		Timeout:   sessionTimeout,
+		TimeoutCh: onTimeout(sessionTimeout, func() {
+			request{r}.session(s.ID).Delete(requestId)
+		}),
+		Started: time.Now()}
+	cancelAndRenameFiles := func() {
 		cancel()
-		if browser.Caps.Video {
+		e := event.Event{
+			RequestId: requestId,
+			SessionId: s.ID,
+			Session:   sess,
+		}
+		event.SessionStopped(event.StoppedSession{e})
+		if browser.Caps.Video && !disableDocker {
 			oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
 			if finalVideoName == "" {
 				finalVideoName = s.ID + videoFileExtension
@@ -269,26 +291,46 @@ func create(w http.ResponseWriter, r *http.Request) {
 			err := os.Rename(oldVideoName, newVideoName)
 			if err != nil {
 				log.Printf("[%d] [VIDEO_ERROR] [%s]", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldVideoName, newVideoName, err))
+			} else {
+				createdFile := event.CreatedFile{
+					Event: e,
+					Name:  newVideoName,
+					Type:  "video",
+				}
+				event.FileCreated(createdFile)
+			}
+		}
+		if logOutputDir != "" {
+			//The following logic will fail if -capture-driver-logs is enabled and a session is requested in driver mode.
+			//Specifying both -log-output-dir and -capture-driver-logs in that case is considered a misconfiguration.
+			oldLogName := filepath.Join(logOutputDir, browser.Caps.LogName)
+			if finalLogName == "" {
+				finalLogName = s.ID + logFileExtension
+			}
+			newLogName := filepath.Join(logOutputDir, finalLogName)
+			err := os.Rename(oldLogName, newLogName)
+			if err != nil {
+				log.Printf("[%d] [LOG_ERROR] [%s]", requestId, fmt.Sprintf("Failed to rename %s to %s: %v", oldLogName, newLogName, err))
+			} else {
+				createdFile := event.CreatedFile{
+					Event: e,
+					Name:  newLogName,
+					Type:  "log",
+				}
+				event.FileCreated(createdFile)
 			}
 		}
 	}
-	sessions.Put(s.ID, &session.Session{
-		Quota:      user,
-		Caps:       browser.Caps,
-		URL:        u,
-		Container:  startedService.Container,
-		Fileserver: startedService.FileserverHostPort,
-		VNC:        startedService.VNCHostPort,
-		Cancel:     cancelAndRenameVideo,
-		Timeout:    sessionTimeout,
-		TimeoutCh: onTimeout(sessionTimeout, func() {
-			request{r}.session(s.ID).Delete(requestId)
-		})})
+	sess.Cancel = cancelAndRenameFiles
+	sessions.Put(s.ID, sess)
 	queue.Create()
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%d] [%.2fs]", requestId, s.ID, i, util.SecondsSince(sessionStartTime))
 }
 
-const videoFileExtension = ".mp4"
+const (
+	videoFileExtension = ".mp4"
+	logFileExtension   = ".log"
+)
 
 var (
 	fullFormat  = regexp.MustCompile(`^([0-9]+x[0-9]+)x(8|16|24)$`)
@@ -328,23 +370,24 @@ func getVideoScreenSize(videoScreenSize string, screenResolution string) (string
 	return shortenScreenResolution(screenResolution), nil
 }
 
-func getSessionTimeout(sessionTimeout uint32, maxTimeout time.Duration, defaultTimeout time.Duration) (time.Duration, error) {
-	if sessionTimeout > 0 {
-		std := time.Duration(sessionTimeout) * time.Second
-		if std <= maxTimeout {
-			return std, nil
-		} else {
-			return 0, fmt.Errorf("Invalid sessionTimeout capability: should be <= %s", maxTimeout)
+func getSessionTimeout(sessionTimeout string, maxTimeout time.Duration, defaultTimeout time.Duration) (time.Duration, error) {
+	if sessionTimeout != "" {
+		st, err := time.ParseDuration(sessionTimeout)
+		if err != nil {
+			return 0, fmt.Errorf("Invalid sessionTimeout capability: %v", err)
+		}
+		if st <= maxTimeout {
+			return st, nil
 		}
 	}
 	return defaultTimeout, nil
 }
 
-func getVideoFileName(videoOutputDir string) string {
+func getTemporaryFileName(dir string, extension string) string {
 	filename := ""
 	for {
-		filename = generateRandomFileName()
-		_, err := os.Stat(filepath.Join(videoOutputDir, filename))
+		filename = generateRandomFileName(extension)
+		_, err := os.Stat(filepath.Join(dir, filename))
 		if err != nil {
 			break
 		}
@@ -352,10 +395,10 @@ func getVideoFileName(videoOutputDir string) string {
 	return filename
 }
 
-func generateRandomFileName() string {
+func generateRandomFileName(extension string) string {
 	randBytes := make([]byte, 16)
 	rand.Read(randBytes)
-	return "selenoid" + hex.EncodeToString(randBytes) + videoFileExtension
+	return "selenoid" + hex.EncodeToString(randBytes) + extension
 }
 
 func proxy(w http.ResponseWriter, r *http.Request) {
@@ -400,29 +443,31 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 					r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
 					return
 				}
-				r.URL.Path = "/error"
+				r.URL.Path = errorPath
 			},
 		}).ServeHTTP(w, r)
 	}(w, r)
 	go (<-done)()
 }
 
-func fileDownload(w http.ResponseWriter, r *http.Request) {
-	requestId := serial()
-	sid, remainingPath := splitRequestPath(r.URL.Path)
-	sess, ok := sessions.Get(sid)
-	if ok {
-		(&httputil.ReverseProxy{
-			Director: func(r *http.Request) {
-				r.URL.Scheme = "http"
-				r.URL.Host = sess.Fileserver
-				r.URL.Path = remainingPath
-				log.Printf("[%d] [DOWNLOADING_FILE] [%s] [%s]", requestId, sid, remainingPath)
-			},
-		}).ServeHTTP(w, r)
-	} else {
-		util.JsonError(w, fmt.Sprintf("Unknown session %s", sid), http.StatusNotFound)
-		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
+func reverseProxy(hostFn func(sess *session.Session) string, status string) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		requestId := serial()
+		sid, remainingPath := splitRequestPath(r.URL.Path)
+		sess, ok := sessions.Get(sid)
+		if ok {
+			(&httputil.ReverseProxy{
+				Director: func(r *http.Request) {
+					r.URL.Scheme = "http"
+					r.URL.Host = hostFn(sess)
+					r.URL.Path = remainingPath
+					log.Printf("[%d] [%s] [%s] [%s]", requestId, status, sid, remainingPath)
+				},
+			}).ServeHTTP(w, r)
+		} else {
+			util.JsonError(w, fmt.Sprintf("Unknown session %s", sid), http.StatusNotFound)
+			log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
+		}
 	}
 }
 
@@ -489,10 +534,11 @@ func vnc(wsconn *websocket.Conn) {
 	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
 	sess, ok := sessions.Get(sid)
 	if ok {
-		if sess.VNC != "" {
+		vncHostPort := sess.HostPort.VNC
+		if vncHostPort != "" {
 			log.Printf("[%d] [VNC_ENABLED] [%s]", requestId, sid)
 			var d net.Dialer
-			conn, err := d.DialContext(wsconn.Request().Context(), "tcp", sess.VNC)
+			conn, err := d.DialContext(wsconn.Request().Context(), "tcp", vncHostPort)
 			if err != nil {
 				log.Printf("[%d] [VNC_ERROR] [%v]", requestId, err)
 				return
@@ -514,7 +560,21 @@ func vnc(wsconn *websocket.Conn) {
 	}
 }
 
-func logs(wsconn *websocket.Conn) {
+func logs(w http.ResponseWriter, r *http.Request) {
+	fileNameOrSessionID := strings.TrimPrefix(r.URL.Path, logsPath)
+	if logOutputDir != "" && (fileNameOrSessionID == "" || strings.HasSuffix(fileNameOrSessionID, logFileExtension)) {
+		if r.Method == http.MethodDelete {
+			deleteFileIfExists(w, r, logOutputDir, logsPath, "DELETED_LOG_FILE")
+			return
+		}
+		fileServer := http.StripPrefix(logsPath, http.FileServer(http.Dir(logOutputDir)))
+		fileServer.ServeHTTP(w, r)
+		return
+	}
+	websocket.Handler(streamLogs).ServeHTTP(w, r)
+}
+
+func streamLogs(wsconn *websocket.Conn) {
 	defer wsconn.Close()
 	requestId := serial()
 	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
@@ -537,6 +597,18 @@ func logs(wsconn *websocket.Conn) {
 	} else {
 		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
 	}
+}
+
+func status(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	ready := limit > sessions.Len()
+	json.NewEncoder(w).Encode(
+		map[string]interface{}{
+			"value": map[string]interface{}{
+				"message": fmt.Sprintf("Selenoid %s built at %s", gitRevision, buildStamp),
+				"ready":   ready,
+			},
+		})
 }
 
 func onTimeout(t time.Duration, f func()) chan struct{} {

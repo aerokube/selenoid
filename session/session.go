@@ -1,60 +1,52 @@
 package session
 
 import (
+	"github.com/imdario/mergo"
 	"net/url"
-	"reflect"
 	"sync"
 	"time"
 )
 
 // Caps - user capabilities
 type Caps struct {
-	Name                  string                 `json:"browserName"`
-	Version               string                 `json:"version"`
-	W3CVersion            string                 `json:"browserVersion"`
-	ScreenResolution      string                 `json:"screenResolution"`
-	VNC                   bool                   `json:"enableVNC"`
-	Video                 bool                   `json:"enableVideo"`
-	VideoName             string                 `json:"videoName"`
-	VideoScreenSize       string                 `json:"videoScreenSize"`
-	VideoFrameRate        uint16                 `json:"videoFrameRate"`
-	TestName              string                 `json:"name"`
-	TimeZone              string                 `json:"timeZone"`
-	ContainerHostname     string                 `json:"containerHostname"`
-	Env                   []string               `json:"env"`
-	ApplicationContainers []string               `json:"applicationContainers"`
-	HostsEntries          []string               `json:"hostsEntries"`
-	DNSServers            []string               `json:"dnsServers"`
-	Labels                map[string]string      `json:"labels"`
-	SessionTimeout        uint32                 `json:"sessionTimeout"`
-	ExtensionCapabilities map[string]interface{} `json:"selenoid:options"`
+	Name                  string            `json:"browserName,omitempty"`
+	DeviceName            string            `json:"deviceName,omitempty"`
+	Version               string            `json:"version,omitempty"`
+	W3CVersion            string            `json:"browserVersion,omitempty"`
+	Platform              string            `json:"platform,omitempty"`
+	W3CPlatform           string            `json:"platformName,omitempty"`
+	ScreenResolution      string            `json:"screenResolution,omitempty"`
+	Skin                  string            `json:"skin,omitempty"`
+	VNC                   bool              `json:"enableVNC,omitempty"`
+	Video                 bool              `json:"enableVideo,omitempty"`
+	VideoName             string            `json:"videoName,omitempty"`
+	VideoScreenSize       string            `json:"videoScreenSize,omitempty"`
+	VideoFrameRate        uint16            `json:"videoFrameRate,omitempty"`
+	VideoCodec            string            `json:"videoCodec,omitempty"`
+	LogName               string            `json:"logName,omitempty"`
+	TestName              string            `json:"name,omitempty"`
+	TimeZone              string            `json:"timeZone,omitempty"`
+	ContainerHostname     string            `json:"containerHostname,omitempty"`
+	Env                   []string          `json:"env,omitempty"`
+	ApplicationContainers []string          `json:"applicationContainers,omitempty"`
+	HostsEntries          []string          `json:"hostsEntries,omitempty"`
+	DNSServers            []string          `json:"dnsServers,omitempty"`
+	Labels                map[string]string `json:"labels,omitempty"`
+	SessionTimeout        string            `json:"sessionTimeout,omitempty"`
+	S3KeyPattern          string            `json:"s3KeyPattern,omitempty"`
+	ExtensionCapabilities *Caps             `json:"selenoid:options,omitempty"`
 }
 
 func (c *Caps) ProcessExtensionCapabilities() {
 	if c.W3CVersion != "" {
 		c.Version = c.W3CVersion
 	}
-	if len(c.ExtensionCapabilities) > 0 {
-		s := reflect.ValueOf(c).Elem()
+	if c.W3CPlatform != "" {
+		c.Platform = c.W3CPlatform
+	}
 
-		tagToFieldMap := make(map[string]reflect.StructField)
-
-		for i := 0; i < s.NumField(); i++ {
-			field := s.Type().Field(i)
-			tag := field.Tag.Get("json")
-			tagToFieldMap[tag] = field
-		}
-
-		//NOTE: entries from the first maps have less priority than then next ones
-		nestedMaps := []map[string]interface{}{c.ExtensionCapabilities}
-		for _, nm := range nestedMaps {
-			for k, v := range nm {
-				value := reflect.ValueOf(v)
-				if field, ok := tagToFieldMap[k]; ok && value.Type().ConvertibleTo(field.Type) {
-					s.FieldByName(field.Name).Set(value.Convert(field.Type))
-				}
-			}
-		}
+	if c.ExtensionCapabilities != nil {
+		mergo.Merge(c, *c.ExtensionCapabilities, mergo.WithOverride) //We probably need to handle returned error
 	}
 }
 
@@ -66,16 +58,24 @@ type Container struct {
 
 // Session - holds session info
 type Session struct {
-	Quota      string
-	Caps       Caps
-	URL        *url.URL
-	Container  *Container
+	Quota     string
+	Caps      Caps
+	URL       *url.URL
+	Container *Container
+	HostPort  HostPort
+	Cancel    func()
+	Timeout   time.Duration
+	TimeoutCh chan struct{}
+	Started   time.Time
+	Lock      sync.Mutex
+}
+
+// HostPort - hold host-port values for all forwarded ports
+type HostPort struct {
+	Selenium   string
 	Fileserver string
+	Clipboard  string
 	VNC        string
-	Cancel     func()
-	Timeout    time.Duration
-	TimeoutCh  chan struct{}
-	Lock       sync.Mutex
 }
 
 // Map - session uuid to sessions mapping
@@ -118,4 +118,19 @@ func (m *Map) Each(fn func(k string, v *Session)) {
 	for k, v := range m.m {
 		fn(k, v)
 	}
+}
+
+// Len - get total number of sessions
+func (m *Map) Len() int {
+	m.l.RLock()
+	defer m.l.RUnlock()
+	return len(m.m)
+}
+
+// Metadata - session metadata saved to file
+type Metadata struct {
+	ID           string    `json:"id"`
+	Capabilities Caps      `json:"capabilities"`
+	Started      time.Time `json:"started"`
+	Finished     time.Time `json:"finished"`
 }
