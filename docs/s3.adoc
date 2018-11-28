@@ -43,6 +43,8 @@ The following flags are supported by `selenoid` command when compiled with S3 su
     S3 endpoint URL
 -s3-exclude-files string
     Pattern used to match and exclude files
+-s3-force-path-style
+    Force path-style addressing for file upload
 -s3-include-files string
     Pattern used to match and include files    
 -s3-keep-files

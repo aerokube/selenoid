@@ -30,6 +30,7 @@ func init() {
 	flag.BoolVar(&(s3.KeepFiles), "s3-keep-files", false, "Do not remove uploaded files")
 	flag.StringVar(&(s3.IncludeFiles), "s3-include-files", "", "Pattern used to match and include files")
 	flag.StringVar(&(s3.ExcludeFiles), "s3-exclude-files", "", "Pattern used to match and exclude files")
+	flag.BoolVar(&(s3.ForcePathStyle), "s3-force-path-style", false, "Force path-style addressing for file upload")
 	AddUploader(s3)
 }
 
@@ -44,6 +45,7 @@ type S3Uploader struct {
 	KeepFiles         bool
 	IncludeFiles      string
 	ExcludeFiles      string
+	ForcePathStyle    bool
 
 	manager *s3manager.Uploader
 }
@@ -51,8 +53,9 @@ type S3Uploader struct {
 func (s3 *S3Uploader) Init() {
 	if s3.Endpoint != "" {
 		config := &aws.Config{
-			Endpoint: aws.String(s3.Endpoint),
-			Region:   aws.String(s3.Region),
+			Endpoint:         aws.String(s3.Endpoint),
+			Region:           aws.String(s3.Region),
+			S3ForcePathStyle: aws.Bool(s3.ForcePathStyle),
 		}
 		if s3.AccessKey != "" && s3.SecretKey != "" {
 			config.Credentials = credentials.NewStaticCredentials(s3.AccessKey, s3.SecretKey, "")
@@ -61,7 +64,7 @@ func (s3 *S3Uploader) Init() {
 		if err != nil {
 			log.Fatalf("[-] [INIT] [Failed to initialize S3 support: %v]", err)
 		}
-		log.Printf("[-] [INIT] [Initialized S3 support: endpoint = %s, region = %s, bucketName = %s, accessKey = %s, keyPattern = %s, includeFiles = %s, excludeFiles = %s]", s3.Endpoint, s3.Region, s3.BucketName, s3.AccessKey, s3.KeyPattern, s3.IncludeFiles, s3.ExcludeFiles)
+		log.Printf("[-] [INIT] [Initialized S3 support: endpoint = %s, region = %s, bucketName = %s, accessKey = %s, keyPattern = %s, includeFiles = %s, excludeFiles = %s, forcePathStyle = %s]", s3.Endpoint, s3.Region, s3.BucketName, s3.AccessKey, s3.KeyPattern, s3.IncludeFiles, s3.ExcludeFiles, s3.ForcePathStyle)
 		s3.manager = s3manager.NewUploader(sess)
 	}
 }
