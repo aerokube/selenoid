@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/pkg/errors"
 	"log"
+	"mime"
 	"os"
 	"path/filepath"
 	"strings"
@@ -90,6 +91,10 @@ func (s3 *S3Uploader) Upload(createdFile event.CreatedFile) (bool, error) {
 			Bucket: aws.String(s3.BucketName),
 			Key:    aws.String(key),
 			Body:   file,
+		}
+		contentType := mime.TypeByExtension(filepath.Ext(filename))
+		if contentType != "" {
+			uploadInput.ContentType = aws.String(contentType)
 		}
 		if s3.ReducedRedundancy {
 			uploadInput.StorageClass = aws.String("REDUCED_REDUNDANCY")
