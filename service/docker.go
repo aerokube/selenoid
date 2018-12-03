@@ -206,7 +206,7 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 	if err != nil {
 		return nil, fmt.Errorf("new clipboard port: %v", err)
 	}
-	exposedPorts := map[nat.Port]struct{}{selenium: {}, fileserver: {}}
+	exposedPorts := map[nat.Port]struct{}{selenium: {}, fileserver: {}, clipboard: {}}
 	var vnc nat.Port
 	if caps.VNC {
 		vnc, err = nat.NewPort("tcp", vncPort)
