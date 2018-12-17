@@ -196,6 +196,7 @@ func init() {
 		MesosMasterUrl:      mesosMasterURL,
 		Zookeeper:           zookeeper,
 	}
+
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}
 		if logOutputDir != "" && captureDriverLogs {

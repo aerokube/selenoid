@@ -17,9 +17,6 @@ import (
 
 	"encoding/json"
 	"path/filepath"
-
-	. "github.com/aandryashin/matchers"
-	. "github.com/aandryashin/matchers/httpresp"
 )
 
 var (

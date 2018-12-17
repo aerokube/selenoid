@@ -32,7 +32,7 @@ type Task struct {
 }
 
 type DockerInfo struct {
-	Id string
+	Id              string
 	NetworkSettings struct {
 		Ports struct {
 			ContainerPort []struct {

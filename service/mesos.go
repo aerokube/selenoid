@@ -59,7 +59,7 @@ func (m *Mesos) StartWithCancel() (*StartedService, error) {
 		},
 	}
 	if m.Caps.VNC {
-		s.VNCHostPort = container.NetworkSettings.Ports.VncPort[0].HostPort
+		s.HostPort = session.HostPort{VNC: container.NetworkSettings.Ports.VncPort[0].HostPort}
 	}
 	return &s, nil
 }

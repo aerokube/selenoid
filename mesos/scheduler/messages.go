@@ -1,5 +1,6 @@
 package scheduler
 
+//Structure to keep ID
 type ID struct {
 	Value string `json:"value"`
 }
@@ -11,6 +12,7 @@ type Docker struct {
 	PortMappings *[]PortMappings `json:"port_mappings"`
 }
 
+//Structure to keep container data
 type Container struct {
 	Type   string `json:"type"`
 	Docker Docker `json:"docker"`
@@ -23,6 +25,7 @@ type PortMappings struct {
 	Name          string `json:"name"`
 }
 
+//Reserved resources
 type Resource struct {
 	Name   string  `json:"name"`
 	Ranges *Ranges `json:"ranges,omitempty"`
@@ -44,6 +47,7 @@ type Range struct {
 	End   int `json:"end"`
 }
 
+//Structure to keep information about framework task
 type Launch struct {
 	TaskInfos []TaskInfo `json:"task_infos"`
 }

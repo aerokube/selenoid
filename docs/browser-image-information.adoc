@@ -113,7 +113,8 @@ WARNING: Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 | selenoid/chrome:67.0 | selenoid/vnc:chrome_67.0 | 2.39 | 67.0.3396.62
 | selenoid/chrome:68.0 | selenoid/vnc:chrome_68.0 | 2.41 | 68.0.3440.106
 | selenoid/chrome:69.0 | selenoid/vnc:chrome_69.0 | 2.42 | 69.0.3497.100
-| selenoid/chrome:70.0 | selenoid/vnc:chrome_70.0 | 2.43 | 70.0.3538.67
+| selenoid/chrome:70.0 | selenoid/vnc:chrome_70.0 | 2.44 | 70.0.3538.110
+| selenoid/chrome:71.0 | selenoid/vnc:chrome_71.0 | 2.44 | 71.0.3578.80
 |===
 
 [NOTE]
@@ -168,6 +169,7 @@ We do not consider these images really stable. Many of base operations like work
 | selenoid/opera:54.0 | selenoid/vnc:opera_54.0 | 2.37 | 54.0.2952.46
 | selenoid/opera:55.0 | selenoid/vnc:opera_55.0 | 2.37 | 55.0.2994.37
 | selenoid/opera:56.0 | selenoid/vnc:opera_56.0 | 2.40 | 56.0.3051.31
+| selenoid/opera:57.0 | selenoid/vnc:opera_57.0 | 2.41 | 57.0.3098.76
 |===
 
 [NOTE]
