@@ -403,51 +403,51 @@ func generateRandomFileName(extension string) string {
 
 func proxy(w http.ResponseWriter, r *http.Request) {
 	done := make(chan func())
-	go func(w http.ResponseWriter, r *http.Request) {
-		cancel := func() {}
-		defer func() {
-			done <- cancel
-		}()
-		(&httputil.ReverseProxy{
-			Director: func(r *http.Request) {
-				requestId := serial()
-				fragments := strings.Split(r.URL.Path, slash)
-				id := fragments[2]
-				sess, ok := sessions.Get(id)
-				if ok {
-					sess.Lock.Lock()
-					defer sess.Lock.Unlock()
-					select {
-					case <-sess.TimeoutCh:
-					default:
-						close(sess.TimeoutCh)
-					}
-					if r.Method == http.MethodDelete && len(fragments) == 3 {
-						if enableFileUpload {
-							os.RemoveAll(filepath.Join(os.TempDir(), id))
-						}
-						cancel = sess.Cancel
-						sessions.Remove(id)
-						queue.Release()
-						log.Printf("[%d] [SESSION_DELETED] [%s]", requestId, id)
-					} else {
-						sess.TimeoutCh = onTimeout(sess.Timeout, func() {
-							request{r}.session(id).Delete(requestId)
-						})
-						if len(fragments) == 4 && fragments[len(fragments)-1] == "file" && enableFileUpload {
-							r.Header.Set("X-Selenoid-File", filepath.Join(os.TempDir(), id))
-							r.URL.Path = "/file"
-							return
-						}
-					}
-					r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
-					return
+	go func() {
+		(<-done)()
+	}()
+	cancel := func() {}
+	defer func() {
+		done <- cancel
+	}()
+	(&httputil.ReverseProxy{
+		Director: func(r *http.Request) {
+			requestId := serial()
+			fragments := strings.Split(r.URL.Path, slash)
+			id := fragments[2]
+			sess, ok := sessions.Get(id)
+			if ok {
+				sess.Lock.Lock()
+				defer sess.Lock.Unlock()
+				select {
+				case <-sess.TimeoutCh:
+				default:
+					close(sess.TimeoutCh)
 				}
-				r.URL.Path = errorPath
-			},
-		}).ServeHTTP(w, r)
-	}(w, r)
-	go (<-done)()
+				if r.Method == http.MethodDelete && len(fragments) == 3 {
+					if enableFileUpload {
+						os.RemoveAll(filepath.Join(os.TempDir(), id))
+					}
+					cancel = sess.Cancel
+					sessions.Remove(id)
+					queue.Release()
+					log.Printf("[%d] [SESSION_DELETED] [%s]", requestId, id)
+				} else {
+					sess.TimeoutCh = onTimeout(sess.Timeout, func() {
+						request{r}.session(id).Delete(requestId)
+					})
+					if len(fragments) == 4 && fragments[len(fragments)-1] == "file" && enableFileUpload {
+						r.Header.Set("X-Selenoid-File", filepath.Join(os.TempDir(), id))
+						r.URL.Path = "/file"
+						return
+					}
+				}
+				r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
+				return
+			}
+			r.URL.Path = errorPath
+		},
+	}).ServeHTTP(w, r)
 }
 
 func reverseProxy(hostFn func(sess *session.Session) string, status string) func(http.ResponseWriter, *http.Request) {
