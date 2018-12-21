@@ -354,6 +354,23 @@ func TestProxySession(t *testing.T) {
 	queue.Release()
 }
 
+func TestProxySessionPanicOnAbortHandler(t *testing.T) {
+
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	req, _ := http.NewRequest(http.MethodGet, With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/url?abort-handler=true", sess["sessionId"])), nil)
+	resp, err = http.DefaultClient.Do(req)
+	AssertThat(t, err, Not{nil})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
 func TestSessionDeleted(t *testing.T) {
 	canceled := false
 	ch := make(chan bool)
