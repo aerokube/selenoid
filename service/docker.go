@@ -115,6 +115,16 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		return nil, fmt.Errorf("start container: %v", err)
 	}
 	log.Printf("[%d] [CONTAINER_STARTED] [%s] [%s] [%.2fs]", requestId, image, browserContainerId, util.SecondsSince(browserContainerStartTime))
+
+	if len(d.AdditionalNetworks) > 0 {
+		for _, networkName := range d.AdditionalNetworks {
+			err = cl.NetworkConnect(ctx, networkName, browserContainerId, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to connect container %s to network %s: %v", browserContainerId, networkName, err)
+			}
+		}
+	}
+
 	stat, err := cl.ContainerInspect(ctx, browserContainerId)
 	if err != nil {
 		removeContainer(ctx, cl, requestId, browserContainerId)
