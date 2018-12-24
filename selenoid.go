@@ -410,9 +410,9 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		done <- cancel
 	}()
+	requestId := serial()
 	(&httputil.ReverseProxy{
 		Director: func(r *http.Request) {
-			requestId := serial()
 			fragments := strings.Split(r.URL.Path, slash)
 			id := fragments[2]
 			sess, ok := sessions.Get(id)
@@ -447,7 +447,16 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 			}
 			r.URL.Path = errorPath
 		},
+		ErrorHandler: defaultErrorHandler(requestId),
 	}).ServeHTTP(w, r)
+}
+
+func defaultErrorHandler(requestId uint64) func(http.ResponseWriter, *http.Request, error) {
+	return func(w http.ResponseWriter, r *http.Request, err error) {
+		user, remote := util.RequestInfo(r)
+		log.Printf("[%d] [CLIENT_DISCONNECTED] [%s] [%s] [Error: %v]", requestId, user, remote, err)
+		w.WriteHeader(http.StatusBadGateway)
+	}
 }
 
 func reverseProxy(hostFn func(sess *session.Session) string, status string) func(http.ResponseWriter, *http.Request) {
@@ -463,6 +472,7 @@ func reverseProxy(hostFn func(sess *session.Session) string, status string) func
 					r.URL.Path = remainingPath
 					log.Printf("[%d] [%s] [%s] [%s]", requestId, status, sid, remainingPath)
 				},
+				ErrorHandler: defaultErrorHandler(requestId),
 			}).ServeHTTP(w, r)
 		} else {
 			util.JsonError(w, fmt.Sprintf("Unknown session %s", sid), http.StatusNotFound)

@@ -182,6 +182,15 @@ By default Selenoid browser containers are using global DNS settings of Docker d
 dnsServers: ["192.168.0.1", "192.168.0.2"]
 ----
 
+=== More Docker Networks: additionalNetworks
+
+By default Selenoid browser containers are started in Docker network specified by `-container-network` flag. If you tested application is running in another network you may need to connect browser container to this network:
+
+.Type: array, format: <network-name>
+----
+additionalNetworks: ["my-custom-net-1", "my-custom-net-2"]
+----
+
 === Container Labels: labels
 
 In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs. 
