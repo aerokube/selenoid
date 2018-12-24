@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2018-12-23</span>
+<span id="revdate">2018-12-24</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -614,10 +614,11 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_links_to_application_containers_applicationcontainers">3.1.9. Links to Application Containers: applicationContainers</a></li>
 <li><a href="#_hosts_entries_hostsentries">3.1.10. Hosts Entries: hostsEntries</a></li>
 <li><a href="#_custom_dns_servers_dnsservers">3.1.11. Custom DNS Servers: dnsServers</a></li>
-<li><a href="#_container_labels_labels">3.1.12. Container Labels: labels</a></li>
-<li><a href="#_android_skin_skin">3.1.13. Android Skin: skin</a></li>
-<li><a href="#_s3_key_pattern_s3keypattern">3.1.14. S3 Key Pattern: s3KeyPattern</a></li>
-<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.15. Specifying Capabilities via Protocol Extensions</a></li>
+<li><a href="#_more_docker_networks_additionalnetworks">3.1.12. More Docker Networks: additionalNetworks</a></li>
+<li><a href="#_container_labels_labels">3.1.13. Container Labels: labels</a></li>
+<li><a href="#_android_skin_skin">3.1.14. Android Skin: skin</a></li>
+<li><a href="#_s3_key_pattern_s3keypattern">3.1.15. S3 Key Pattern: s3KeyPattern</a></li>
+<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.16. Specifying Capabilities via Protocol Extensions</a></li>
 </ul>
 </li>
 <li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
@@ -2964,7 +2965,19 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_container_labels_labels"><a class="anchor" href="#_container_labels_labels"></a>3.1.12. Container Labels: labels</h4>
+<h4 id="_more_docker_networks_additionalnetworks"><a class="anchor" href="#_more_docker_networks_additionalnetworks"></a>3.1.12. More Docker Networks: additionalNetworks</h4>
+<div class="paragraph">
+<p>By default Selenoid browser containers are started in Docker network specified by <code>-container-network</code> flag. If you tested application is running in another network you may need to connect browser container to this network:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: array, format: &lt;network-name&gt;</div>
+<div class="content">
+<pre>additionalNetworks: ["my-custom-net-1", "my-custom-net-2"]</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_container_labels_labels"><a class="anchor" href="#_container_labels_labels"></a>3.1.13. Container Labels: labels</h4>
 <div class="paragraph">
 <p>In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs.</p>
 </div>
@@ -2979,7 +2992,7 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_android_skin_skin"><a class="anchor" href="#_android_skin_skin"></a>3.1.13. Android Skin: skin</h4>
+<h4 id="_android_skin_skin"><a class="anchor" href="#_android_skin_skin"></a>3.1.14. Android Skin: skin</h4>
 <div class="paragraph">
 <p>For <a href="#_android">Android</a> containers you can select emulator skin with capabilities. List of available skins:</p>
 </div>
@@ -3070,7 +3083,7 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_s3_key_pattern_s3keypattern"><a class="anchor" href="#_s3_key_pattern_s3keypattern"></a>3.1.14. S3 Key Pattern: s3KeyPattern</h4>
+<h4 id="_s3_key_pattern_s3keypattern"><a class="anchor" href="#_s3_key_pattern_s3keypattern"></a>3.1.15. S3 Key Pattern: s3KeyPattern</h4>
 <div class="paragraph">
 <p>This capability allows to override S3 key pattern (specified by <code>-s3-key-pattern</code> flag) used when uploading files to S3.</p>
 </div>
@@ -3085,7 +3098,7 @@ Thus entries from capabilities override entries from configuration file if some 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.15. Specifying Capabilities via Protocol Extensions</h4>
+<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.16. Specifying Capabilities via Protocol Extensions</h4>
 <div class="paragraph">
 <p>Some Selenium clients allow passing only a limited number of capabilities specified in <a href="https://w3c.github.io/webdriver/webdriver-spec.html">WebDriver specification</a>. For such cases Selenoid supports reading capabilities using <a href="https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions">WebDriver protocol extensions</a> feature. The following two examples deliver the same result. Usually capabilities are passed like this:</p>
 </div>
@@ -4563,7 +4576,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2018-12-23 16:50:08 UTC
+Last updated 2018-12-24 11:46:39 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
