@@ -379,6 +379,7 @@ func getSessionTimeout(sessionTimeout string, maxTimeout time.Duration, defaultT
 		if st <= maxTimeout {
 			return st, nil
 		}
+		return maxTimeout, nil
 	}
 	return defaultTimeout, nil
 }
