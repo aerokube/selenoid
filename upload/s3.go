@@ -141,13 +141,13 @@ func GetS3Key(keyPattern string, createdFile event.CreatedFile) string {
 		pt = sess.Caps.S3KeyPattern
 	}
 	filename := createdFile.Name
-	key := strings.Replace(pt, "$fileName", strings.ToLower(filepath.Base(filename)), -1)
+	key := strings.Replace(pt, "$fileName", filepath.Base(filename), -1)
 	key = strings.Replace(key, "$fileExtension", strings.ToLower(filepath.Ext(filename)), -1)
 	key = strings.Replace(key, "$browserName", strings.ToLower(sess.Caps.Name), -1)
 	key = strings.Replace(key, "$browserVersion", strings.ToLower(sess.Caps.Version), -1)
 	key = strings.Replace(key, "$platformName", strings.ToLower(sess.Caps.Platform), -1)
 	key = strings.Replace(key, "$quota", strings.ToLower(sess.Quota), -1)
-	key = strings.Replace(key, "$sessionId", strings.ToLower(createdFile.SessionId), -1)
+	key = strings.Replace(key, "$sessionId", createdFile.SessionId, -1)
 	key = strings.Replace(key, "$fileType", strings.ToLower(createdFile.Type), -1)
 	key = strings.Replace(key, "$date", time.Now().Format("2006-01-02"), -1)
 	key = strings.Replace(key, " ", "-", -1)

@@ -81,21 +81,25 @@ func TestGetKey(t *testing.T) {
 	const testPattern = "$quota/$sessionId_$browserName_$browserVersion_$platformName/$fileType$fileExtension"
 	input := event.CreatedFile{
 		Event: event.Event{
-			SessionId: "some-session-id",
+			SessionId: "some-Session-id",
 			Session:   testSession,
 			RequestId: 12345,
 		},
 
-		Name: "/path/to/some-file.txt",
+		Name: "/path/to/Some-File.txt",
 		Type: "log",
 	}
 
 	key := upload.GetS3Key(testPattern, input)
-	AssertThat(t, key, EqualTo{"some-user/some-session-id_internet-explorer_11_windows/log.txt"})
+	AssertThat(t, key, EqualTo{"some-user/some-Session-id_internet-explorer_11_windows/log.txt"})
 
 	input.Session.Caps.S3KeyPattern = "$quota/$fileType$fileExtension"
 	key = upload.GetS3Key(testPattern, input)
 	AssertThat(t, key, EqualTo{"some-user/log.txt"})
+
+	input.Session.Caps.S3KeyPattern = "$fileName"
+	key = upload.GetS3Key(testPattern, input)
+	AssertThat(t, key, EqualTo{"Some-File.txt"})
 }
 
 func TestFileMatches(t *testing.T) {
