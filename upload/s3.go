@@ -103,8 +103,11 @@ func (s3 *S3Uploader) Upload(createdFile event.CreatedFile) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("failed to S3 upload %s as %s: %v", filename, key, err)
 		}
-		if !s3.KeepFiles && os.Remove(filename) != nil {
-			return true, fmt.Errorf("failed to remove uploaded file %s: %v", filename, err)
+		if !s3.KeepFiles {
+			err := os.Remove(filename)
+			if err != nil {
+				return true, fmt.Errorf("failed to remove uploaded file %s: %v", filename, err)
+			}
 		}
 		return true, nil
 	}
