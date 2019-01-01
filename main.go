@@ -21,6 +21,7 @@ import (
 
 	"path/filepath"
 
+	ggr "github.com/aerokube/ggr/config"
 	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
@@ -83,6 +84,7 @@ var (
 	videoOutputDir           string
 	videoRecorderImage       string
 	logOutputDir             string
+	ggrHost                  *ggr.Host
 	conf                     *config.Config
 	queue                    *protect.Queue
 	manager                  service.Manager
@@ -131,6 +133,9 @@ func init() {
 	hostname, err = os.Hostname()
 	if err != nil {
 		log.Fatalf("[-] [INIT] [%s: %v]", os.Args[0], err)
+	}
+	if ggrHostEnv := os.Getenv("GGR_HOST"); ggrHostEnv != "" {
+		ggrHost = parseGgrHost(ggrHostEnv)
 	}
 	queue = protect.New(limit, disableQueue)
 	conf = config.NewConfig()
@@ -221,6 +226,23 @@ func init() {
 		log.Fatalf("[-] [INIT] [New docker client: %v]", err)
 	}
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
+}
+
+func parseGgrHost(s string) *ggr.Host {
+	h, p, err := net.SplitHostPort(s)
+	if err != nil {
+		log.Fatalf("[-] [INIT] [Invalid Ggr host: %v]", err)
+	}
+	ggrPort, err := strconv.Atoi(p)
+	if err != nil {
+		log.Fatalf("[-] [INIT] [Invalid Ggr host: %v]", err)
+	}
+	host := &ggr.Host{
+		Name: h,
+		Port: ggrPort,
+	}
+	log.Printf("[-] [INIT] [Will prefix all session IDs with a hash-sum: %s]", host.Sum())
+	return host
 }
 
 func cancelOnSignal() {
