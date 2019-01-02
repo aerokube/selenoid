@@ -276,16 +276,17 @@ func create(w http.ResponseWriter, r *http.Request) {
 		Started: time.Now()}
 	cancelAndRenameFiles := func() {
 		cancel()
+		sessionId := preprocessSessionId(s.ID)
 		e := event.Event{
 			RequestId: requestId,
-			SessionId: s.ID,
+			SessionId: sessionId,
 			Session:   sess,
 		}
 		event.SessionStopped(event.StoppedSession{e})
 		if browser.Caps.Video && !disableDocker {
 			oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
 			if finalVideoName == "" {
-				finalVideoName = s.ID + videoFileExtension
+				finalVideoName = sessionId + videoFileExtension
 			}
 			newVideoName := filepath.Join(videoOutputDir, finalVideoName)
 			err := os.Rename(oldVideoName, newVideoName)
@@ -305,7 +306,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			//Specifying both -log-output-dir and -capture-driver-logs in that case is considered a misconfiguration.
 			oldLogName := filepath.Join(logOutputDir, browser.Caps.LogName)
 			if finalLogName == "" {
-				finalLogName = s.ID + logFileExtension
+				finalLogName = sessionId + logFileExtension
 			}
 			newLogName := filepath.Join(logOutputDir, finalLogName)
 			err := os.Rename(oldLogName, newLogName)
@@ -325,6 +326,13 @@ func create(w http.ResponseWriter, r *http.Request) {
 	sessions.Put(s.ID, sess)
 	queue.Create()
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%d] [%.2fs]", requestId, s.ID, i, util.SecondsSince(sessionStartTime))
+}
+
+func preprocessSessionId(sid string) string {
+	if ggrHost != nil {
+		return ggrHost.Sum() + sid
+	}
+	return sid
 }
 
 const (

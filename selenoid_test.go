@@ -20,6 +20,7 @@ import (
 
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
+	ggr "github.com/aerokube/ggr/config"
 )
 
 var (
@@ -31,6 +32,10 @@ func init() {
 	videoOutputDir, _ = ioutil.TempDir("", "selenoid-test")
 	logOutputDir, _ = ioutil.TempDir("", "selenoid-test")
 	gitRevision = "test-revision"
+	ggrHost = &ggr.Host{
+		Name: "some-host.example.com",
+		Port: 4444,
+	}
 	srv = httptest.NewServer(handler())
 }
 
@@ -740,4 +745,10 @@ func TestClipboardMissingSession(t *testing.T) {
 	rsp, err := http.Get(With(srv.URL).Path("/clipboard/missing-session"))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusNotFound})
+}
+
+func TestParseGgrHost(t *testing.T) {
+	h := parseGgrHost("some-host.example.com:4444")
+	AssertThat(t, h.Name, EqualTo{"some-host.example.com"})
+	AssertThat(t, h.Port, EqualTo{4444})
 }
