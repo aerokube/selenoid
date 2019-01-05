@@ -529,7 +529,7 @@ table.CodeRay td.code>pre{padding:0}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2019-01-02</span>
+<span id="revdate">2019-01-05</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -606,7 +606,7 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_live_browser_screen_enablevnc">3.1.1. Live Browser Screen: enableVNC</a></li>
 <li><a href="#_custom_screen_resolution_screenresolution">3.1.2. Custom Screen Resolution: screenResolution</a></li>
 <li><a href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate_videocodec">3.1.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate, videoCodec</a></li>
-<li><a href="#_saving_session_logs_logname">3.1.4. Saving Session Logs: logName</a></li>
+<li><a href="#_saving_session_logs_enablelog_logname">3.1.4. Saving Session Logs: enableLog, logName</a></li>
 <li><a href="#_custom_test_name_name">3.1.5. Custom Test Name: name</a></li>
 <li><a href="#_custom_session_timeout_sessiontimeout">3.1.6. Custom Session Timeout: sessionTimeout</a></li>
 <li><a href="#_per_session_time_zone_timezone">3.1.7. Per-session Time Zone: timeZone</a></li>
@@ -2621,13 +2621,15 @@ This feature only becomes available when Selenoid is compiled with <code>metadat
 -log-conf string
     Container logging configuration file (default "config/container-logs.json")
 -log-output-dir string
-    Directory to save session log to (default "log")
+    Directory to save session log to
 -max-timeout duration
     Maximum valid session idle timeout in time.Duration format (default 1h0m0s)
 -mem value
     Containers memory limit e.g. 128m or 1g
 -retry-count int
     New session attempts retry count (default 1)
+-save-all-logs
+    Whether to save all logs without considering capabilities
 -service-startup-timeout duration
     Service startup timeout in time.Duration format (default 30s)
 -session-attempt-timeout duration
@@ -2822,7 +2824,7 @@ resolution is less than actual, screen on video will be trimmed starting from to
 </div>
 </div>
 <div class="sect3">
-<h4 id="_saving_session_logs_logname"><a class="anchor" href="#_saving_session_logs_logname"></a>3.1.4. Saving Session Logs: logName</h4>
+<h4 id="_saving_session_logs_enablelog_logname"><a class="anchor" href="#_saving_session_logs_enablelog_logname"></a>3.1.4. Saving Session Logs: enableLog, logName</h4>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -2834,6 +2836,18 @@ This feature requires some preparation. Please refer to <a href="#_saving_sessio
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>To enable saving logs for a session, add:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: boolean</div>
+<div class="content">
+<pre>enableLog: true</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you wish to automatically save logs for all sessions, you can enable this behavior globally with Selenoid <code>-save-all-logs</code> flag.</p>
 </div>
 <div class="paragraph">
 <p>By default saved log files are named <code>&lt;session-id&gt;.log</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
@@ -4576,7 +4590,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-01-02 10:19:33 UTC
+Last updated 2019-01-05 12:19:03 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
