@@ -161,7 +161,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		browser.Caps.VideoName = getTemporaryFileName(videoOutputDir, videoFileExtension)
 	}
 	finalLogName := browser.Caps.LogName
-	if logOutputDir != "" {
+	if logOutputDir != "" && (saveAllLogs || browser.Caps.Log) {
 		browser.Caps.LogName = getTemporaryFileName(logOutputDir, logFileExtension)
 	}
 	starter, ok := manager.Find(browser.Caps, requestId)
@@ -301,7 +301,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 				event.FileCreated(createdFile)
 			}
 		}
-		if logOutputDir != "" {
+		if logOutputDir != "" && (saveAllLogs || browser.Caps.Log) {
 			//The following logic will fail if -capture-driver-logs is enabled and a session is requested in driver mode.
 			//Specifying both -log-output-dir and -capture-driver-logs in that case is considered a misconfiguration.
 			oldLogName := filepath.Join(logOutputDir, browser.Caps.LogName)

@@ -54,7 +54,7 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 	if d.CaptureDriverLogs {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-	} else if d.LogOutputDir != "" {
+	} else if d.LogOutputDir != "" && (d.SaveAllLogs || d.Log) {
 		filename := filepath.Join(d.LogOutputDir, d.LogName)
 		f, err := os.Create(filename)
 		if err != nil {

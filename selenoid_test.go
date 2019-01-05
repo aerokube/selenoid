@@ -31,6 +31,7 @@ func init() {
 	enableFileUpload = true
 	videoOutputDir, _ = ioutil.TempDir("", "selenoid-test")
 	logOutputDir, _ = ioutil.TempDir("", "selenoid-test")
+	saveAllLogs = true
 	gitRevision = "test-revision"
 	ggrHost = &ggr.Host{
 		Name: "some-host.example.com",

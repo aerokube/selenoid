@@ -278,6 +278,7 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 		VideoScreenSize:       "1024x768",
 		VideoFrameRate:        25,
 		VideoCodec:            "libx264",
+		Log:                   true,
 		LogName:               "testfile",
 		Env:                   []string{"LANG=ru_RU.UTF-8", "LANGUAGE=ru:en"},
 		HostsEntries:          []string{"example.com:192.168.0.1", "test.com:192.168.0.2"},

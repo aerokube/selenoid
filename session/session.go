@@ -19,6 +19,7 @@ type Caps struct {
 	Skin                  string            `json:"skin,omitempty"`
 	VNC                   bool              `json:"enableVNC,omitempty"`
 	Video                 bool              `json:"enableVideo,omitempty"`
+	Log                   bool              `json:"enableLog,omitempty"`
 	VideoName             string            `json:"videoName,omitempty"`
 	VideoScreenSize       string            `json:"videoScreenSize,omitempty"`
 	VideoFrameRate        uint16            `json:"videoFrameRate,omitempty"`

@@ -84,6 +84,7 @@ var (
 	videoOutputDir           string
 	videoRecorderImage       string
 	logOutputDir             string
+	saveAllLogs              bool
 	ggrHost                  *ggr.Host
 	conf                     *config.Config
 	queue                    *protect.Queue
@@ -122,6 +123,7 @@ func init() {
 	flag.StringVar(&videoOutputDir, "video-output-dir", "video", "Directory to save recorded video to")
 	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder:latest-release", "Image to use as video recorder")
 	flag.StringVar(&logOutputDir, "log-output-dir", "", "Directory to save session log to")
+	flag.BoolVar(&saveAllLogs, "save-all-logs", false, "Whether to save all logs without considering capabilities")
 	flag.Parse()
 
 	if version {
@@ -177,6 +179,9 @@ func init() {
 			log.Fatalf("[-] [INIT] [Failed to create log output dir %s: %v]", logOutputDir, err)
 		}
 		log.Printf("[-] [INIT] [Logs Dir: %s]", logOutputDir)
+		if saveAllLogs {
+			log.Printf("[-] [INIT] [Saving all logs]")
+		}
 	}
 
 	upload.Init()
@@ -192,6 +197,7 @@ func init() {
 		VideoOutputDir:       videoOutputDir,
 		VideoContainerImage:  videoRecorderImage,
 		LogOutputDir:         logOutputDir,
+		SaveAllLogs:          saveAllLogs,
 		Privileged:           !disablePrivileged,
 	}
 	if disableDocker {
