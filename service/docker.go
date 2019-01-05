@@ -175,7 +175,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 				stopVideoContainer(ctx, cl, requestId, videoContainerId, d.Environment)
 			}
 			defer removeContainer(ctx, cl, requestId, browserContainerId)
-			if d.LogOutputDir != "" {
+			if d.LogOutputDir != "" && (d.SaveAllLogs || d.Log) {
 				r, err := d.Client.ContainerLogs(ctx, browserContainerId, types.ContainerLogsOptions{
 					Timestamps: true,
 					ShowStdout: true,
