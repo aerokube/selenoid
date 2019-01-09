@@ -78,6 +78,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		},
 		ExtraHosts: getExtraHosts(d.Service, d.Caps),
 	}
+	hostConfig.PublishAllPorts = d.Service.PublishAllPorts
 	if len(d.Caps.DNSServers) > 0 {
 		hostConfig.DNS = d.Caps.DNSServers
 	}
