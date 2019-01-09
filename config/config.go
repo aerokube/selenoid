@@ -60,6 +60,7 @@ type Browser struct {
 	ShmSize int64             `json:"shmSize,omitempty"`
 	Labels  map[string]string `json:"labels,omitempty"`
 	Sysctl  map[string]string `json:"sysctl,omitempty"`
+	PublishAllPorts bool	  `json:"publishAllPorts,omitempty"`
 }
 
 // Versions configuration
