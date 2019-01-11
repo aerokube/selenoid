@@ -157,6 +157,11 @@ func testMux() http.Handler {
 			w.Write([]byte(output))
 		},
 	))
+	mux.HandleFunc("/v1.29/networks/net-1/connect", http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		},
+	))
 	return mux
 }
 
@@ -273,12 +278,14 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 		VideoScreenSize:       "1024x768",
 		VideoFrameRate:        25,
 		VideoCodec:            "libx264",
+		Log:                   true,
 		LogName:               "testfile",
 		Env:                   []string{"LANG=ru_RU.UTF-8", "LANGUAGE=ru:en"},
 		HostsEntries:          []string{"example.com:192.168.0.1", "test.com:192.168.0.2"},
 		DNSServers:            []string{"192.168.0.1", "192.168.0.2"},
 		Labels:                map[string]string{"label1": "some-value", "label2": ""},
 		ApplicationContainers: []string{"one", "two"},
+		AdditionalNetworks:    []string{"net-1"},
 		TimeZone:              "Europe/Moscow",
 		ContainerHostname:     "some-hostname",
 		TestName:              "my-cool-test",

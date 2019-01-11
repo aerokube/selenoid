@@ -65,7 +65,7 @@ func (s3 *S3Uploader) Init() {
 		if err != nil {
 			log.Fatalf("[-] [INIT] [Failed to initialize S3 support: %v]", err)
 		}
-		log.Printf("[-] [INIT] [Initialized S3 support: endpoint = %s, region = %s, bucketName = %s, accessKey = %s, keyPattern = %s, includeFiles = %s, excludeFiles = %s, forcePathStyle = %s]", s3.Endpoint, s3.Region, s3.BucketName, s3.AccessKey, s3.KeyPattern, s3.IncludeFiles, s3.ExcludeFiles, s3.ForcePathStyle)
+		log.Printf("[-] [INIT] [Initialized S3 support: endpoint = %s, region = %s, bucketName = %s, accessKey = %s, keyPattern = %s, includeFiles = %s, excludeFiles = %s, forcePathStyle = %t]", s3.Endpoint, s3.Region, s3.BucketName, s3.AccessKey, s3.KeyPattern, s3.IncludeFiles, s3.ExcludeFiles, s3.ForcePathStyle)
 		s3.manager = s3manager.NewUploader(sess)
 	}
 }
@@ -103,8 +103,11 @@ func (s3 *S3Uploader) Upload(createdFile event.CreatedFile) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("failed to S3 upload %s as %s: %v", filename, key, err)
 		}
-		if !s3.KeepFiles && os.Remove(filename) != nil {
-			return true, fmt.Errorf("failed to remove uploaded file %s: %v", filename, err)
+		if !s3.KeepFiles {
+			err := os.Remove(filename)
+			if err != nil {
+				return true, fmt.Errorf("failed to remove uploaded file %s: %v", filename, err)
+			}
 		}
 		return true, nil
 	}
@@ -138,13 +141,13 @@ func GetS3Key(keyPattern string, createdFile event.CreatedFile) string {
 		pt = sess.Caps.S3KeyPattern
 	}
 	filename := createdFile.Name
-	key := strings.Replace(pt, "$fileName", strings.ToLower(filepath.Base(filename)), -1)
+	key := strings.Replace(pt, "$fileName", filepath.Base(filename), -1)
 	key = strings.Replace(key, "$fileExtension", strings.ToLower(filepath.Ext(filename)), -1)
 	key = strings.Replace(key, "$browserName", strings.ToLower(sess.Caps.Name), -1)
 	key = strings.Replace(key, "$browserVersion", strings.ToLower(sess.Caps.Version), -1)
 	key = strings.Replace(key, "$platformName", strings.ToLower(sess.Caps.Platform), -1)
 	key = strings.Replace(key, "$quota", strings.ToLower(sess.Quota), -1)
-	key = strings.Replace(key, "$sessionId", strings.ToLower(createdFile.SessionId), -1)
+	key = strings.Replace(key, "$sessionId", createdFile.SessionId, -1)
 	key = strings.Replace(key, "$fileType", strings.ToLower(createdFile.Type), -1)
 	key = strings.Replace(key, "$date", time.Now().Format("2006-01-02"), -1)
 	key = strings.Replace(key, " ", "-", -1)

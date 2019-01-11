@@ -21,6 +21,7 @@ import (
 
 	"path/filepath"
 
+	ggr "github.com/aerokube/ggr/config"
 	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/mesos/scheduler"
 	"github.com/aerokube/selenoid/protect"
@@ -84,6 +85,8 @@ var (
 	videoOutputDir           string
 	videoRecorderImage       string
 	logOutputDir             string
+	saveAllLogs              bool
+	ggrHost                  *ggr.Host
 	conf                     *config.Config
 	queue                    *protect.Queue
 	manager                  service.Manager
@@ -123,6 +126,7 @@ func init() {
 	flag.StringVar(&videoOutputDir, "video-output-dir", "video", "Directory to save recorded video to")
 	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder:latest-release", "Image to use as video recorder")
 	flag.StringVar(&logOutputDir, "log-output-dir", "", "Directory to save session log to")
+	flag.BoolVar(&saveAllLogs, "save-all-logs", false, "Whether to save all logs without considering capabilities")
 	flag.StringVar(&mesosMasterURL, "mesos", "", "URL to mesos master")
 	flag.StringVar(&zookeeper, "zk", "", "URL to zookeeper cluster")
 	flag.Parse()
@@ -136,6 +140,9 @@ func init() {
 	hostname, err = os.Hostname()
 	if err != nil {
 		log.Fatalf("[-] [INIT] [%s: %v]", os.Args[0], err)
+	}
+	if ggrHostEnv := os.Getenv("GGR_HOST"); ggrHostEnv != "" {
+		ggrHost = parseGgrHost(ggrHostEnv)
 	}
 	queue = protect.New(limit, disableQueue)
 	conf = config.NewConfig()
@@ -177,6 +184,9 @@ func init() {
 			log.Fatalf("[-] [INIT] [Failed to create log output dir %s: %v]", logOutputDir, err)
 		}
 		log.Printf("[-] [INIT] [Logs Dir: %s]", logOutputDir)
+		if saveAllLogs {
+			log.Printf("[-] [INIT] [Saving all logs]")
+		}
 	}
 
 	upload.Init()
@@ -192,6 +202,7 @@ func init() {
 		VideoOutputDir:       videoOutputDir,
 		VideoContainerImage:  videoRecorderImage,
 		LogOutputDir:         logOutputDir,
+		SaveAllLogs:          saveAllLogs,
 		Privileged:           !disablePrivileged,
 		MesosMasterUrl:      mesosMasterURL,
 		Zookeeper:           zookeeper,
@@ -235,6 +246,23 @@ func init() {
 		go scheduler.Run(mesosMasterURL, zookeeper, float64(cpu), float64(mem))
 	}
 
+}
+
+func parseGgrHost(s string) *ggr.Host {
+	h, p, err := net.SplitHostPort(s)
+	if err != nil {
+		log.Fatalf("[-] [INIT] [Invalid Ggr host: %v]", err)
+	}
+	ggrPort, err := strconv.Atoi(p)
+	if err != nil {
+		log.Fatalf("[-] [INIT] [Invalid Ggr host: %v]", err)
+	}
+	host := &ggr.Host{
+		Name: h,
+		Port: ggrPort,
+	}
+	log.Printf("[-] [INIT] [Will prefix all session IDs with a hash-sum: %s]", host.Sum())
+	return host
 }
 
 func cancelOnSignal() {

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -119,6 +120,13 @@ func Selenium() http.Handler {
 		lock.RUnlock()
 		if !ok {
 			http.Error(w, "Session not found", http.StatusNotFound)
+			return
+		}
+		if r.FormValue("abort-handler") != "" {
+			out := "this call was relayed by the reverse proxy"
+			// Setting wrong Content-Length leads to abort handler error
+			w.Header().Add("Content-Length", strconv.Itoa(2*len(out)))
+			fmt.Fprintln(w, out)
 			return
 		}
 		d, _ := time.ParseDuration(r.FormValue("timeout"))

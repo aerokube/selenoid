@@ -4,6 +4,7 @@ require (
 	cloud.google.com/go v0.34.0 // indirect
 	github.com/Microsoft/go-winio v0.4.11 // indirect
 	github.com/aandryashin/matchers v0.0.0-20161126170413-435295ea180e
+	github.com/aerokube/ggr v0.0.0-20181215175518-4a2e23fa1769
 	github.com/aerokube/util v0.0.0-20181109152531-929c045711cf
 	github.com/aws/aws-sdk-go v1.16.7
 	github.com/docker/distribution v2.7.0+incompatible // indirect

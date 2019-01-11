@@ -78,6 +78,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		},
 		ExtraHosts: getExtraHosts(d.Service, d.Caps),
 	}
+	hostConfig.PublishAllPorts = d.Service.PublishAllPorts
 	if len(d.Caps.DNSServers) > 0 {
 		hostConfig.DNS = d.Caps.DNSServers
 	}
@@ -115,6 +116,16 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		return nil, fmt.Errorf("start container: %v", err)
 	}
 	log.Printf("[%d] [CONTAINER_STARTED] [%s] [%s] [%.2fs]", requestId, image, browserContainerId, util.SecondsSince(browserContainerStartTime))
+
+	if len(d.AdditionalNetworks) > 0 {
+		for _, networkName := range d.AdditionalNetworks {
+			err = cl.NetworkConnect(ctx, networkName, browserContainerId, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to connect container %s to network %s: %v", browserContainerId, networkName, err)
+			}
+		}
+	}
+
 	stat, err := cl.ContainerInspect(ctx, browserContainerId)
 	if err != nil {
 		removeContainer(ctx, cl, requestId, browserContainerId)
@@ -165,7 +176,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 				stopVideoContainer(ctx, cl, requestId, videoContainerId, d.Environment)
 			}
 			defer removeContainer(ctx, cl, requestId, browserContainerId)
-			if d.LogOutputDir != "" {
+			if d.LogOutputDir != "" && (d.SaveAllLogs || d.Log) {
 				r, err := d.Client.ContainerLogs(ctx, browserContainerId, types.ContainerLogsOptions{
 					Timestamps: true,
 					ShowStdout: true,

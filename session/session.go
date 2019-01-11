@@ -19,6 +19,7 @@ type Caps struct {
 	Skin                  string            `json:"skin,omitempty"`
 	VNC                   bool              `json:"enableVNC,omitempty"`
 	Video                 bool              `json:"enableVideo,omitempty"`
+	Log                   bool              `json:"enableLog,omitempty"`
 	VideoName             string            `json:"videoName,omitempty"`
 	VideoScreenSize       string            `json:"videoScreenSize,omitempty"`
 	VideoFrameRate        uint16            `json:"videoFrameRate,omitempty"`
@@ -29,6 +30,7 @@ type Caps struct {
 	ContainerHostname     string            `json:"containerHostname,omitempty"`
 	Env                   []string          `json:"env,omitempty"`
 	ApplicationContainers []string          `json:"applicationContainers,omitempty"`
+	AdditionalNetworks    []string          `json:"additionalNetworks,omitempty"`
 	HostsEntries          []string          `json:"hostsEntries,omitempty"`
 	DNSServers            []string          `json:"dnsServers,omitempty"`
 	Labels                map[string]string `json:"labels,omitempty"`

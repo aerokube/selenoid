@@ -26,6 +26,7 @@ type Environment struct {
 	VideoOutputDir       string
 	VideoContainerImage  string
 	LogOutputDir         string
+	SaveAllLogs          bool
 	Privileged           bool
 	MesosMasterUrl       string
 	Zookeeper            string
