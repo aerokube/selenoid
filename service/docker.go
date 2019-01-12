@@ -27,6 +27,7 @@ const (
 	sysAdmin               = "SYS_ADMIN"
 	overrideVideoOutputDir = "OVERRIDE_VIDEO_OUTPUT_DIR"
 	vncPort                = "5900"
+	devtoolsPort           = "7070"
 	fileserverPort         = "8080"
 	clipboardPort          = "9090"
 )
@@ -44,6 +45,7 @@ type portConfig struct {
 	SeleniumPort   nat.Port
 	FileserverPort nat.Port
 	ClipboardPort  nat.Port
+	DevtoolsPort   nat.Port
 	VNCPort        nat.Port
 	PortBindings   nat.PortMap
 	ExposedPorts   map[nat.Port]struct{}
@@ -59,6 +61,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	fileserver := portConfig.FileserverPort
 	clipboard := portConfig.ClipboardPort
 	vnc := portConfig.VNCPort
+	devtools := portConfig.DevtoolsPort
 	requestId := d.RequestId
 	image := d.Service.Image
 	ctx := context.Background()
@@ -140,6 +143,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	pc := map[string]nat.Port{
 		servicePort:    selenium,
 		vncPort:        vnc,
+		devtoolsPort:   devtools,
 		fileserverPort: fileserver,
 		clipboardPort:  clipboard,
 	}
@@ -226,11 +230,18 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 		}
 		exposedPorts[vnc] = struct{}{}
 	}
+	devtools, err := nat.NewPort("tcp", devtoolsPort)
+	if err != nil {
+		return nil, fmt.Errorf("new devtools port: %v", err)
+	}
+	exposedPorts[devtools] = struct{}{}
+
 	portBindings := nat.PortMap{}
 	if env.IP != "" || !env.InDocker {
 		portBindings[selenium] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
 		portBindings[fileserver] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
 		portBindings[clipboard] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
+		portBindings[devtools] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
 		if caps.VNC {
 			portBindings[vnc] = []nat.PortBinding{{HostIP: "0.0.0.0"}}
 		}
@@ -240,6 +251,7 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 		FileserverPort: fileserver,
 		ClipboardPort:  clipboard,
 		VNCPort:        vnc,
+		DevtoolsPort:   devtools,
 		PortBindings:   portBindings,
 		ExposedPorts:   exposedPorts}, nil
 }
@@ -359,6 +371,7 @@ func getHostPort(env Environment, servicePort string, caps session.Caps, stat ty
 		Selenium:   fn(servicePort, pc[servicePort]),
 		Fileserver: fn(fileserverPort, pc[fileserverPort]),
 		Clipboard:  fn(clipboardPort, pc[clipboardPort]),
+		Devtools:   fn(devtoolsPort, pc[devtoolsPort]),
 	}
 
 	if caps.VNC {
