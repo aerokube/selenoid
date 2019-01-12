@@ -631,6 +631,7 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_file_upload">3.4. File Upload</a></li>
 <li><a href="#_accessing_files_downloaded_with_browser">3.5. Accessing Files Downloaded with Browser</a></li>
 <li><a href="#_accessing_clipboard">3.6. Accessing Clipboard</a></li>
+<li><a href="#_accessing_browser_developer_tools">3.7. Accessing Browser Developer Tools</a></li>
 </ul>
 </li>
 <li><a href="#_contributing_development">4. Contributing &amp; Development</a>
@@ -2449,6 +2450,22 @@ This feature only becomes available when Selenoid is compiled with <code>metadat
 <td class="tableblock halign-left valign-top"><p class="tableblock">Video file was deleted by user</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DEVTOOLS_CLIENT_DISCONNECTED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User devtools client disconnected</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DEVTOOLS_DISABLED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An attempt to access browser devtools when it is not enabled with capability</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DEVTOOLS_ERROR</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An error occurred when trying to send devtools traffic</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">DEVTOOLS_SESSION_CLOSED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sending devtools traffic was stopped</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">DOWNLOADING_FILE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">User requested to download file from browser container</p></td>
 </tr>
@@ -2569,6 +2586,10 @@ This feature only becomes available when Selenoid is compiled with <code>metadat
 <td class="tableblock halign-left valign-top"><p class="tableblock">An error occurred when post-processing recorded video</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VNC_CLIENT_DISCONNECTED</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">User VNC client disconnected</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">VNC_ENABLED</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">User requested VNC traffic</p></td>
 </tr>
@@ -2579,10 +2600,6 @@ This feature only becomes available when Selenoid is compiled with <code>metadat
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">VNC_SESSION_CLOSED</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Sending VNC traffic was stopped</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">VNC_CLIENT_DISCONNECTED</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">User VNC client disconnected</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">VNC_NOT_ENABLED</p></td>
@@ -3519,6 +3536,29 @@ some-clipboard-value</code></pre>
 </div>
 </li>
 </ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_accessing_browser_developer_tools"><a class="anchor" href="#_accessing_browser_developer_tools"></a>3.7. Accessing Browser Developer Tools</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Currently only <a href="https://chromedevtools.github.io/devtools-protocol/">Chrome Developer Tools</a> are supported.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid is proxying Chrome Developer Tools websocket to browser container. Just use the following URL to access this websocket:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>ws://selenoid.example.com:4444/devtools/&lt;session-id&gt;</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -4590,7 +4630,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-01-12 12:55:04 UTC
+Last updated 2019-01-12 13:11:09 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
