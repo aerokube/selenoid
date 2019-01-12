@@ -588,15 +588,9 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_deleting_log_files">2.8.2. Deleting Log Files</a></li>
 </ul>
 </li>
-<li><a href="#_uploading_files_to_s3">2.9. Uploading Files To S3</a>
-<ul class="sectlevel3">
-<li><a href="#_s3_cli_flags">2.9.1. S3 CLI Flags</a></li>
-</ul>
-</li>
-<li><a href="#_saving_session_metadata">2.10. Saving Session Metadata</a></li>
-<li><a href="#_selenoid_with_docker_compose">2.11. Selenoid with Docker Compose</a></li>
-<li><a href="#_log_files">2.12. Log Files</a></li>
-<li><a href="#_selenoid_cli_flags">2.13. Selenoid CLI Flags</a></li>
+<li><a href="#_selenoid_with_docker_compose">2.9. Selenoid with Docker Compose</a></li>
+<li><a href="#_log_files">2.10. Log Files</a></li>
+<li><a href="#_selenoid_cli_flags">2.11. Selenoid CLI Flags</a></li>
 </ul>
 </li>
 <li><a href="#_advanced_features">3. Advanced Features</a>
@@ -632,6 +626,12 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_accessing_files_downloaded_with_browser">3.5. Accessing Files Downloaded with Browser</a></li>
 <li><a href="#_accessing_clipboard">3.6. Accessing Clipboard</a></li>
 <li><a href="#_accessing_browser_developer_tools">3.7. Accessing Browser Developer Tools</a></li>
+<li><a href="#_uploading_files_to_s3">3.8. Uploading Files To S3</a>
+<ul class="sectlevel3">
+<li><a href="#_s3_cli_flags">3.8.1. S3 CLI Flags</a></li>
+</ul>
+</li>
+<li><a href="#_saving_session_metadata">3.9. Saving Session Metadata</a></li>
 </ul>
 </li>
 <li><a href="#_contributing_development">4. Contributing &amp; Development</a>
@@ -1040,12 +1040,6 @@ $ docker run -e DOCKER_API_VERSION=1.32 &lt;rest-of-args&gt; aerokube/selenoid:s
 </ol>
 </div>
 <div class="paragraph">
-<p><strong>Can&#8217;t open Selenoid video with Firefox</strong></p>
-</div>
-<div class="paragraph">
-<p>This is because we are using H264 codec which is not supported in Firefox for licensing reasons. Should work like a charm in Google Chrome or VLC player.</p>
-</div>
-<div class="paragraph">
 <p><strong>Can&#8217;t get VNC feature to work: Disconnected</strong></p>
 </div>
 <div class="paragraph">
@@ -1066,12 +1060,6 @@ $ docker run -e DOCKER_API_VERSION=1.32 &lt;rest-of-args&gt; aerokube/selenoid:s
 </div>
 <div class="paragraph">
 <p>You are using <code>driver.close()</code> instead of <code>driver.quit()</code> and just closed the last browser tab instead of removing the session.</p>
-</div>
-<div class="paragraph">
-<p><strong>Can&#8217;t maximize browser window</strong></p>
-</div>
-<div class="paragraph">
-<p>This is because of missing window manager in browser images. Should be fixed soon.</p>
 </div>
 <div class="paragraph">
 <p><strong>Can Selenoid pull browser images automatically?</strong></p>
@@ -2098,188 +2086,28 @@ Direct link will work only after session has finished because Selenoid renames t
 </div>
 </div>
 <div class="sect2">
-<h3 id="_uploading_files_to_s3"><a class="anchor" href="#_uploading_files_to_s3"></a>2.9. Uploading Files To S3</h3>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-This feature only becomes available when Selenoid is compiled with <code>s3</code> build tag (missing by default).
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Selenoid can upload recorded video and log files for every running session to S3-compatible storage.</p>
-</div>
-<div class="paragraph">
-<p>To enable this feature you need to specify S3 access information as follows:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ ./selenoid -s3-endpoint https://s3.us-east-2.amazonaws.com -s3-region us-east-2 -s3-bucket-name my-bucket -s3-access-key &lt;your-access-key&gt; -s3-secret-key &lt;your-secret-key&gt;</pre>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags then environment variables and shared credentials file are automatically tried as a fallback.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>By default uploaded file name is preserved, i.e. S3 path is <code>/&lt;session-id&gt;.log</code> or <code>/myCustomVideo.mp4</code>. You can optionally provide your custom key pattern using <code>-s3-key-pattern</code> flag and a set of placeholders:</p>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 1. S3 Key Placeholders</caption>
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Placeholder</th>
-<th class="tableblock halign-left valign-top">Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$browserName</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium browser name capability value</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$browserVersion</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium browser version capability value</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$date</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by current date, e.g. <code>2018-11-01</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$fileName</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by source file name</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$fileExtension</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by source file extension</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$fileType</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by <code>log</code> for log files and <code>video</code> for video files</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$platformName</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium platform capability value</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$quota</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by quota name (usually coming from Ggr)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$sessionId</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium session ID</p></td>
-</tr>
-</tbody>
-</table>
-<div class="paragraph">
-<p>For example, when launching Selenoid with <code>-s3-key-pattern $browserName/$sessionId/log.txt</code> files will be accessible as <code>firefox/0ee0b48b-e29b-6749-b4f1-2277b8f8d6c5/log.txt</code>. You can also override key pattern for every session with <code>s3KeyPattern</code> capability.</p>
-</div>
-<div class="paragraph">
-<p>Sometimes you may want to upload only video files or files matching some complicated pattern or to not upload some files. To achieve this use <code>-s3-include-files</code> and <code>-s3-exclude-files</code> flags. These flags accept <a href="https://en.wikipedia.org/wiki/Glob_(programming)">globs</a> such as <code>*.mp4</code>.</p>
-</div>
-<div class="sect3">
-<h4 id="_s3_cli_flags"><a class="anchor" href="#_s3_cli_flags"></a>2.9.1. S3 CLI Flags</h4>
-<div class="paragraph">
-<p>The following flags are supported by <code>selenoid</code> command when compiled with S3 support:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>-s3-access-key string
-    S3 access key
--s3-bucket-name string
-    S3 bucket name
--s3-endpoint string
-    S3 endpoint URL
--s3-exclude-files string
-    Pattern used to match and exclude files
--s3-force-path-style
-    Force path-style addressing for file upload
--s3-include-files string
-    Pattern used to match and include files
--s3-keep-files
-    Do not remove uploaded files
--s3-key-pattern string
-    S3 bucket name (default "$fileName")
--s3-reduced-redundancy
-    Use reduced redundancy storage class
--s3-region string
-    S3 region
--s3-secret-key string
-    S3 secret key</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_saving_session_metadata"><a class="anchor" href="#_saving_session_metadata"></a>2.10. Saving Session Metadata</h3>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-This feature only becomes available when Selenoid is compiled with <code>metadata</code> build tag (missing by default).
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Selenoid can save session metadata to a separate JSON file. Main use case is to somehow post-process session logs, e.g. send them to map-reduce cluster. No additional configuration is needed to enable this feature. When enabled and <code>-log-output-dir</code> flag is set - Selenoid will automatically save JSON files <code>&lt;log-output-dir&gt;/&lt;session-id&gt;.json</code> with the following content:</p>
-</div>
-<div class="listingblock">
-<div class="title">Example metadata JSON file</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="javascript">{
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">62a4d82d-edf6-43d5-886f-895b77ff23b7</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">capabilities</span><span class="delimiter">&quot;</span></span>: {
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">browserName</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">chrome</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">70.0</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">MyCoolTest</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">screenResolution</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1920x1080x24</span><span class="delimiter">&quot;</span></span>
-    },
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">started</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2018-11-15T16:23:12.440916+03:00</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">finished</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2018-11-15T16:23:12.480928+03:00</span><span class="delimiter">&quot;</span></span>
-}</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.11. Selenoid with Docker Compose</h3>
+<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.9. Selenoid with Docker Compose</h3>
 <div class="paragraph">
 <p>To avoid network problems between browser drivers inside containers and Selenoid when using <a href="https://docs.docker.com/compose/">Docker Compose</a> for combining with another services (such as UI or ggr) you need to enable <strong>bridge</strong> network mode for all services:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="yaml"><span class="key">version</span>: <span class="string"><span class="content">'3'</span></span>
+<span class="key">networks</span>:
+  <span class="key">selenoid</span>:
 <span class="key">services</span>:
   <span class="key">selenoid</span>:
-    <span class="key">network_mode</span>: <span class="string"><span class="content">bridge</span></span>
+    <span class="key">networks</span>:
+      <span class="key">elk</span>: <span class="string"><span class="content">null</span></span>
     <span class="key">image</span>: <span class="string"><span class="content">aerokube/selenoid:latest-release</span></span>
     <span class="key">volumes</span>:
       - <span class="string"><span class="delimiter">&quot;</span><span class="content">$PWD:/etc/selenoid</span><span class="delimiter">&quot;</span></span>
       - <span class="string"><span class="delimiter">&quot;</span><span class="content">/var/run/docker.sock:/var/run/docker.sock</span><span class="delimiter">&quot;</span></span>
       - <span class="string"><span class="delimiter">&quot;</span><span class="content">$PWD:/opt/selenoid/video</span><span class="delimiter">&quot;</span></span>
+      - <span class="string"><span class="delimiter">&quot;</span><span class="content">$PWD:/opt/selenoid/logs</span><span class="delimiter">&quot;</span></span>
     <span class="key">environment</span>:
       - <span class="string"><span class="content">OVERRIDE_VIDEO_OUTPUT_DIR=$PWD</span></span>
-    <span class="key">command</span>: <span class="string"><span class="content">[&quot;-conf&quot;, &quot;/etc/selenoid/browsers.json&quot;, &quot;-video-output-dir&quot;, &quot;/opt/selenoid/video&quot;]</span></span>
+    <span class="key">command</span>: <span class="string"><span class="content">[&quot;-conf&quot;, &quot;/etc/selenoid/browsers.json&quot;, &quot;-video-output-dir&quot;, &quot;/opt/selenoid/video&quot;, &quot;-video-output-dir&quot;, &quot;/opt/selenoid/logs&quot;, &quot;-container-network&quot;, &quot;selenoid&quot;]</span></span>
     <span class="key">ports</span>:
       - <span class="string"><span class="delimiter">&quot;</span><span class="content">4444:4444</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
@@ -2289,7 +2117,7 @@ This feature only becomes available when Selenoid is compiled with <code>metadat
 </div>
 </div>
 <div class="sect2">
-<h3 id="_log_files"><a class="anchor" href="#_log_files"></a>2.12. Log Files</h3>
+<h3 id="_log_files"><a class="anchor" href="#_log_files"></a>2.10. Log Files</h3>
 <div class="paragraph">
 <p>A typical log file looks like the following:</p>
 </div>
@@ -2314,7 +2142,7 @@ This feature only becomes available when Selenoid is compiled with <code>metadat
 <p>Every line contains:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 2. Log entry contents</caption>
+<caption class="title">Table 1. Log entry contents</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -2369,7 +2197,7 @@ This feature only becomes available when Selenoid is compiled with <code>metadat
 <p>The following statuses are available:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 3. Log entry statuses</caption>
+<caption class="title">Table 2. Log entry statuses</caption>
 <colgroup>
 <col style="width: 50%;">
 <col style="width: 50%;">
@@ -2609,7 +2437,7 @@ This feature only becomes available when Selenoid is compiled with <code>metadat
 </table>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.13. Selenoid CLI Flags</h3>
+<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.11. Selenoid CLI Flags</h3>
 <div class="paragraph">
 <p>The following flags are supported by <code>selenoid</code> command:</p>
 </div>
@@ -3028,7 +2856,7 @@ Thus entries from capabilities override entries from configuration file if some 
 <p>For <a href="#_android">Android</a> containers you can select emulator skin with capabilities. List of available skins:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 4. Available Android Skins</caption>
+<caption class="title">Table 3. Available Android Skins</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -3558,6 +3386,170 @@ Currently only <a href="https://chromedevtools.github.io/devtools-protocol/">Chr
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code>ws://selenoid.example.com:4444/devtools/&lt;session-id&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_uploading_files_to_s3"><a class="anchor" href="#_uploading_files_to_s3"></a>3.8. Uploading Files To S3</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This feature only becomes available when Selenoid is compiled with <code>s3</code> build tag (missing by default).
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid can upload recorded video and log files for every running session to S3-compatible storage.</p>
+</div>
+<div class="paragraph">
+<p>To enable this feature you need to specify S3 access information as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./selenoid -s3-endpoint https://s3.us-east-2.amazonaws.com -s3-region us-east-2 -s3-bucket-name my-bucket -s3-access-key &lt;your-access-key&gt; -s3-secret-key &lt;your-secret-key&gt;</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags then environment variables and shared credentials file are automatically tried as a fallback.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>By default uploaded file name is preserved, i.e. S3 path is <code>/&lt;session-id&gt;.log</code> or <code>/myCustomVideo.mp4</code>. You can optionally provide your custom key pattern using <code>-s3-key-pattern</code> flag and a set of placeholders:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 4. S3 Key Placeholders</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Placeholder</th>
+<th class="tableblock halign-left valign-top">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$browserName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium browser name capability value</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$browserVersion</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium browser version capability value</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$date</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by current date, e.g. <code>2018-11-01</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$fileName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by source file name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$fileExtension</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by source file extension</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$fileType</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by <code>log</code> for log files and <code>video</code> for video files</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$platformName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium platform capability value</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$quota</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by quota name (usually coming from Ggr)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$sessionId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium session ID</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>For example, when launching Selenoid with <code>-s3-key-pattern $browserName/$sessionId/log.txt</code> files will be accessible as <code>firefox/0ee0b48b-e29b-6749-b4f1-2277b8f8d6c5/log.txt</code>. You can also override key pattern for every session with <code>s3KeyPattern</code> capability.</p>
+</div>
+<div class="paragraph">
+<p>Sometimes you may want to upload only video files or files matching some complicated pattern or to not upload some files. To achieve this use <code>-s3-include-files</code> and <code>-s3-exclude-files</code> flags. These flags accept <a href="https://en.wikipedia.org/wiki/Glob_(programming)">globs</a> such as <code>*.mp4</code>.</p>
+</div>
+<div class="sect3">
+<h4 id="_s3_cli_flags"><a class="anchor" href="#_s3_cli_flags"></a>3.8.1. S3 CLI Flags</h4>
+<div class="paragraph">
+<p>The following flags are supported by <code>selenoid</code> command when compiled with S3 support:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>-s3-access-key string
+    S3 access key
+-s3-bucket-name string
+    S3 bucket name
+-s3-endpoint string
+    S3 endpoint URL
+-s3-exclude-files string
+    Pattern used to match and exclude files
+-s3-force-path-style
+    Force path-style addressing for file upload
+-s3-include-files string
+    Pattern used to match and include files
+-s3-keep-files
+    Do not remove uploaded files
+-s3-key-pattern string
+    S3 bucket name (default "$fileName")
+-s3-reduced-redundancy
+    Use reduced redundancy storage class
+-s3-region string
+    S3 region
+-s3-secret-key string
+    S3 secret key</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_saving_session_metadata"><a class="anchor" href="#_saving_session_metadata"></a>3.9. Saving Session Metadata</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This feature only becomes available when Selenoid is compiled with <code>metadata</code> build tag (missing by default).
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid can save session metadata to a separate JSON file. Main use case is to somehow post-process session logs, e.g. send them to map-reduce cluster. No additional configuration is needed to enable this feature. When enabled and <code>-log-output-dir</code> flag is set - Selenoid will automatically save JSON files <code>&lt;log-output-dir&gt;/&lt;session-id&gt;.json</code> with the following content:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example metadata JSON file</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript">{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">62a4d82d-edf6-43d5-886f-895b77ff23b7</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">capabilities</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">browserName</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">chrome</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">70.0</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">MyCoolTest</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">screenResolution</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1920x1080x24</span><span class="delimiter">&quot;</span></span>
+    },
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">started</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2018-11-15T16:23:12.440916+03:00</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">finished</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2018-11-15T16:23:12.480928+03:00</span><span class="delimiter">&quot;</span></span>
+}</code></pre>
 </div>
 </div>
 </div>
@@ -4630,7 +4622,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-01-12 13:11:09 UTC
+Last updated 2019-01-12 15:21:50 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
