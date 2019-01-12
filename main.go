@@ -284,11 +284,18 @@ func onSIGHUP(fn func()) {
 	}()
 }
 
-func mux() http.Handler {
+var seleniumPaths = struct {
+	CreateSession, ProxySession string
+}{
+	CreateSession: "/session",
+	ProxySession:  "/session/",
+}
+
+func selenium() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/session", queue.Try(queue.Check(queue.Protect(post(create)))))
-	mux.HandleFunc("/session/", proxy)
-	mux.HandleFunc("/status", status)
+	mux.HandleFunc(seleniumPaths.CreateSession, queue.Try(queue.Check(queue.Protect(post(create)))))
+	mux.HandleFunc(seleniumPaths.ProxySession, proxy)
+	mux.HandleFunc(paths.Status, status)
 	return mux
 }
 
@@ -314,10 +321,10 @@ func ping(w http.ResponseWriter, _ *http.Request) {
 
 func video(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodDelete {
-		deleteFileIfExists(w, r, videoOutputDir, videoPath, "DELETED_VIDEO_FILE")
+		deleteFileIfExists(w, r, videoOutputDir, paths.Video, "DELETED_VIDEO_FILE")
 		return
 	}
-	fileServer := http.StripPrefix(videoPath, http.FileServer(http.Dir(videoOutputDir)))
+	fileServer := http.StripPrefix(paths.Video, http.FileServer(http.Dir(videoOutputDir)))
 	fileServer.ServeHTTP(w, r)
 }
 
@@ -337,36 +344,47 @@ func deleteFileIfExists(w http.ResponseWriter, r *http.Request, dir string, pref
 	log.Printf("[%d] [%s] [%s]", serial(), status, fileName)
 }
 
-const (
-	videoPath = "/video/"
-	logsPath  = "/logs/"
-	errorPath = "/error"
-)
+var paths = struct {
+	Video, VNC, Logs, Devtools, Download, Clipboard, File, Ping, Status, Error, WdHub string
+}{
+	Video:     "/video/",
+	VNC:       "/vnc/",
+	Logs:      "/logs/",
+	Devtools:  "/devtools/",
+	Download:  "/download/",
+	Clipboard: "/clipboard/",
+	Status:    "/status",
+	File:      "/file",
+	Ping:      "/ping",
+	Error:     "/error",
+	WdHub:     "/wd/hub",
+}
 
 func handler() http.Handler {
 	root := http.NewServeMux()
-	root.HandleFunc("/wd/hub/", func(w http.ResponseWriter, r *http.Request) {
+	root.HandleFunc(paths.WdHub+"/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		r.URL.Scheme = "http"
 		r.URL.Host = (&request{r}).localaddr()
-		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/wd/hub")
-		mux().ServeHTTP(w, r)
+		r.URL.Path = strings.TrimPrefix(r.URL.Path, paths.WdHub)
+		selenium().ServeHTTP(w, r)
 	})
-	root.HandleFunc(errorPath, func(w http.ResponseWriter, r *http.Request) {
+	root.HandleFunc(paths.Error, func(w http.ResponseWriter, r *http.Request) {
 		util.JsonError(w, "Session timed out or not found", http.StatusNotFound)
 	})
-	root.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+	root.HandleFunc(paths.Status, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
 	})
-	root.HandleFunc("/ping", ping)
-	root.Handle("/vnc/", websocket.Handler(vnc))
-	root.HandleFunc(logsPath, logs)
-	root.HandleFunc(videoPath, video)
-	root.HandleFunc("/download/", reverseProxy(func(sess *session.Session) string { return sess.HostPort.Fileserver }, "DOWNLOADING_FILE"))
-	root.HandleFunc("/clipboard/", reverseProxy(func(sess *session.Session) string { return sess.HostPort.Clipboard }, "CLIPBOARD"))
+	root.HandleFunc(paths.Ping, ping)
+	root.Handle(paths.VNC, websocket.Handler(vnc))
+	root.Handle(paths.Devtools, websocket.Server{Handler: devtools})
+	root.HandleFunc(paths.Logs, logs)
+	root.HandleFunc(paths.Video, video)
+	root.HandleFunc(paths.Download, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Fileserver }, "DOWNLOADING_FILE"))
+	root.HandleFunc(paths.Clipboard, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Clipboard }, "CLIPBOARD"))
 	if enableFileUpload {
-		root.HandleFunc("/file", fileUpload)
+		root.HandleFunc(paths.File, fileUpload)
 	}
 	return root
 }

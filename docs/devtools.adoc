@@ -1,0 +1,9 @@
+== Accessing Browser Developer Tools
+
+NOTE: Currently only https://chromedevtools.github.io/devtools-protocol/[Chrome Developer Tools] are supported.
+
+Selenoid is proxying Chrome Developer Tools websocket to browser container. Just use the following URL to access this websocket:
+
+```
+ws://selenoid.example.com:4444/devtools/<session-id>
+```

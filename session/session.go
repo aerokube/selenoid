@@ -78,6 +78,7 @@ type HostPort struct {
 	Fileserver string
 	Clipboard  string
 	VNC        string
+	Devtools   string
 }
 
 // Map - session uuid to sessions mapping

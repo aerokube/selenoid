@@ -454,7 +454,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
 				return
 			}
-			r.URL.Path = errorPath
+			r.URL.Path = paths.Error
 		},
 		ErrorHandler: defaultErrorHandler(requestId),
 	}).ServeHTTP(w, r)
@@ -580,13 +580,13 @@ func vnc(wsconn *websocket.Conn) {
 }
 
 func logs(w http.ResponseWriter, r *http.Request) {
-	fileNameOrSessionID := strings.TrimPrefix(r.URL.Path, logsPath)
+	fileNameOrSessionID := strings.TrimPrefix(r.URL.Path, paths.Logs)
 	if logOutputDir != "" && (fileNameOrSessionID == "" || strings.HasSuffix(fileNameOrSessionID, logFileExtension)) {
 		if r.Method == http.MethodDelete {
-			deleteFileIfExists(w, r, logOutputDir, logsPath, "DELETED_LOG_FILE")
+			deleteFileIfExists(w, r, logOutputDir, paths.Logs, "DELETED_LOG_FILE")
 			return
 		}
-		fileServer := http.StripPrefix(logsPath, http.FileServer(http.Dir(logOutputDir)))
+		fileServer := http.StripPrefix(paths.Logs, http.FileServer(http.Dir(logOutputDir)))
 		fileServer.ServeHTTP(w, r)
 		return
 	}
@@ -628,6 +628,33 @@ func status(w http.ResponseWriter, _ *http.Request) {
 				"ready":   ready,
 			},
 		})
+}
+
+func devtools(wsconn *websocket.Conn) {
+	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
+	sess, ok := sessions.Get(sid)
+	requestId := serial()
+	if ok {
+		origin := "http://localhost/"
+		u := fmt.Sprintf("ws://%s/", sess.HostPort.Devtools)
+		conn, err := websocket.Dial(u, "", origin)
+		if err != nil {
+			log.Printf("[%d] [DEVTOOLS_ERROR] [%v]", requestId, err)
+			return
+		}
+		log.Printf("[%d] [DEVTOOLS] [%s]", requestId, sid)
+		defer conn.Close()
+		wsconn.PayloadType = websocket.BinaryFrame
+		go func() {
+			io.Copy(wsconn, conn)
+			wsconn.Close()
+			log.Printf("[%d] [DEVTOOLS_SESSION_CLOSED] [%s]", requestId, sid)
+		}()
+		io.Copy(conn, wsconn)
+		log.Printf("[%d] [DEVTOOLS_CLIENT_DISCONNECTED] [%s]", requestId, sid)
+	} else {
+		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
+	}
 }
 
 func onTimeout(t time.Duration, f func()) chan struct{} {
