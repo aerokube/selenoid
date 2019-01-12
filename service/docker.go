@@ -26,11 +26,16 @@ import (
 const (
 	sysAdmin               = "SYS_ADMIN"
 	overrideVideoOutputDir = "OVERRIDE_VIDEO_OUTPUT_DIR"
-	vncPort                = "5900"
-	devtoolsPort           = "7070"
-	fileserverPort         = "8080"
-	clipboardPort          = "9090"
 )
+
+var ports = struct {
+	VNC, Devtools, Fileserver, Clipboard string
+}{
+	VNC:        "5900",
+	Devtools:   "7070",
+	Fileserver: "8080",
+	Clipboard:  "9090",
+}
 
 // Docker - docker container manager
 type Docker struct {
@@ -141,11 +146,11 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	}
 	servicePort := d.Service.Port
 	pc := map[string]nat.Port{
-		servicePort:    selenium,
-		vncPort:        vnc,
-		devtoolsPort:   devtools,
-		fileserverPort: fileserver,
-		clipboardPort:  clipboard,
+		servicePort:      selenium,
+		ports.VNC:        vnc,
+		ports.Devtools:   devtools,
+		ports.Fileserver: fileserver,
+		ports.Clipboard:  clipboard,
 	}
 	hostPort := getHostPort(d.Environment, servicePort, d.Caps, stat, pc)
 	u := &url.URL{Scheme: "http", Host: hostPort.Selenium, Path: d.Service.Path}
@@ -213,24 +218,24 @@ func getPortConfig(service *config.Browser, caps session.Caps, env Environment) 
 	if err != nil {
 		return nil, fmt.Errorf("new selenium port: %v", err)
 	}
-	fileserver, err := nat.NewPort("tcp", fileserverPort)
+	fileserver, err := nat.NewPort("tcp", ports.Fileserver)
 	if err != nil {
 		return nil, fmt.Errorf("new fileserver port: %v", err)
 	}
-	clipboard, err := nat.NewPort("tcp", clipboardPort)
+	clipboard, err := nat.NewPort("tcp", ports.Clipboard)
 	if err != nil {
 		return nil, fmt.Errorf("new clipboard port: %v", err)
 	}
 	exposedPorts := map[nat.Port]struct{}{selenium: {}, fileserver: {}, clipboard: {}}
 	var vnc nat.Port
 	if caps.VNC {
-		vnc, err = nat.NewPort("tcp", vncPort)
+		vnc, err = nat.NewPort("tcp", ports.VNC)
 		if err != nil {
 			return nil, fmt.Errorf("new vnc port: %v", err)
 		}
 		exposedPorts[vnc] = struct{}{}
 	}
-	devtools, err := nat.NewPort("tcp", devtoolsPort)
+	devtools, err := nat.NewPort("tcp", ports.Devtools)
 	if err != nil {
 		return nil, fmt.Errorf("new devtools port: %v", err)
 	}
@@ -369,13 +374,13 @@ func getHostPort(env Environment, servicePort string, caps session.Caps, stat ty
 	}
 	hp := session.HostPort{
 		Selenium:   fn(servicePort, pc[servicePort]),
-		Fileserver: fn(fileserverPort, pc[fileserverPort]),
-		Clipboard:  fn(clipboardPort, pc[clipboardPort]),
-		Devtools:   fn(devtoolsPort, pc[devtoolsPort]),
+		Fileserver: fn(ports.Fileserver, pc[ports.Fileserver]),
+		Clipboard:  fn(ports.Clipboard, pc[ports.Clipboard]),
+		Devtools:   fn(ports.Devtools, pc[ports.Devtools]),
 	}
 
 	if caps.VNC {
-		hp.VNC = fn(vncPort, pc[vncPort])
+		hp.VNC = fn(ports.VNC, pc[ports.VNC])
 	}
 
 	return hp
