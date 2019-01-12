@@ -5,17 +5,21 @@ To avoid network problems between browser drivers inside containers and Selenoid
 [source,yaml]
 ----
 version: '3'
+networks:
+  selenoid:
 services:
   selenoid:
-    network_mode: bridge
+    networks:
+      elk: null
     image: aerokube/selenoid:latest-release
     volumes:
       - "$PWD:/etc/selenoid"
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "$PWD:/opt/selenoid/video"
+      - "$PWD:/opt/selenoid/logs"
     environment:
       - OVERRIDE_VIDEO_OUTPUT_DIR=$PWD
-    command: ["-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video"]        
+    command: ["-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video", "-video-output-dir", "/opt/selenoid/logs", "-container-network", "selenoid"]        
     ports:
       - "4444:4444"     
 ----
