@@ -102,12 +102,12 @@ func (config *Config) Load(browsers, containerLogs string) error {
 		return fmt.Errorf("browsers config: %v", err)
 	}
 	log.Printf("[-] [INIT] [Loaded configuration from %s]", browsers)
-	var cl *container.LogConfig
-	err = loadJSON(containerLogs, &cl)
-	if err != nil {
-		log.Printf("[-] [INIT] [Using default containers log configuration because of: %v]", err)
-		cl = &container.LogConfig{}
-	} else {
+	cl := &container.LogConfig{}
+	if containerLogs != "" {
+		err = loadJSON(containerLogs, cl)
+		if err != nil {
+			return fmt.Errorf("log config: %v", err)
+		}
 		log.Printf("[-] [INIT] [Loaded log configuration from %s]", containerLogs)
 	}
 	config.lock.Lock()
