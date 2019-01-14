@@ -12,6 +12,8 @@ import (
 	"github.com/aerokube/selenoid/session"
 )
 
+const testLogConf = "config/container-logs.json"
+
 func configfile(s string) string {
 	tmp, err := ioutil.TempFile("", "config")
 	if err != nil {
@@ -32,7 +34,7 @@ func TestConfig(t *testing.T) {
 	confFile := configfile(`{}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	err := conf.Load(confFile, logConfPath)
+	err := conf.Load(confFile, testLogConf)
 	AssertThat(t, err, Is{nil})
 }
 
@@ -40,15 +42,23 @@ func TestConfigError(t *testing.T) {
 	confFile := configfile(`{}`)
 	os.Remove(confFile)
 	conf := config.NewConfig()
-	err := conf.Load(confFile, logConfPath)
+	err := conf.Load(confFile, testLogConf)
 	AssertThat(t, err.Error(), EqualTo{fmt.Sprintf("browsers config: read error: open %s: no such file or directory", confFile)})
+}
+
+func TestLogConfigError(t *testing.T) {
+	confFile := configfile(`{}`)
+	defer os.Remove(confFile)
+	conf := config.NewConfig()
+	err := conf.Load(confFile, "some-missing-file")
+	AssertThat(t, err, Not{nil})
 }
 
 func TestConfigParseError(t *testing.T) {
 	confFile := configfile(`{`)
 	defer os.Remove(confFile)
 	var conf config.Config
-	err := conf.Load(confFile, logConfPath)
+	err := conf.Load(confFile, testLogConf)
 	AssertThat(t, err.Error(), EqualTo{"browsers config: parse error: unexpected end of JSON input"})
 }
 
@@ -56,7 +66,7 @@ func TestConfigEmptyState(t *testing.T) {
 	confFile := configfile(`{}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	state := conf.State(session.NewMap(), 0, 0, 0)
 	AssertThat(t, state.Total, EqualTo{0})
@@ -69,7 +79,7 @@ func TestConfigNonEmptyState(t *testing.T) {
 	confFile := configfile(`{}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	sessions := session.NewMap()
 	sessions.Put("0", &session.Session{Caps: session.Caps{Name: "firefox", Version: "49.0"}, Quota: "unknown"})
@@ -85,7 +95,7 @@ func TestConfigEmptyVersions(t *testing.T) {
 	confFile := configfile(`{"firefox":{}}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	sessions := session.NewMap()
 	sessions.Put("0", &session.Session{Caps: session.Caps{Name: "firefox", Version: "49.0"}, Quota: "unknown"})
@@ -101,7 +111,7 @@ func TestConfigNonEmptyVersions(t *testing.T) {
 	confFile := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{}}}}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	sessions := session.NewMap()
 	sessions.Put("0", &session.Session{Caps: session.Caps{Name: "firefox", Version: "49.0"}, Quota: "unknown"})
@@ -117,7 +127,7 @@ func TestConfigFindMissingBrowser(t *testing.T) {
 	confFile := configfile(`{}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	_, _, ok := conf.Find("firefox", "")
 	AssertThat(t, ok, Is{false})
@@ -127,7 +137,7 @@ func TestConfigFindDefaultVersionError(t *testing.T) {
 	confFile := configfile(`{"firefox":{"default":""}}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	_, _, ok := conf.Find("firefox", "")
 	AssertThat(t, ok, Is{false})
@@ -137,7 +147,7 @@ func TestConfigFindDefaultVersion(t *testing.T) {
 	confFile := configfile(`{"firefox":{"default":"49.0"}}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	_, v, ok := conf.Find("firefox", "")
 	AssertThat(t, ok, Is{false})
@@ -148,7 +158,7 @@ func TestConfigFindFoundByEmptyPrefix(t *testing.T) {
 	confFile := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{}}}}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	_, v, ok := conf.Find("firefox", "")
 	AssertThat(t, ok, Is{true})
@@ -159,7 +169,7 @@ func TestConfigFindFoundByPrefix(t *testing.T) {
 	confFile := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{}}}}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	_, v, ok := conf.Find("firefox", "49")
 	AssertThat(t, ok, Is{true})
@@ -170,7 +180,7 @@ func TestConfigFindFoundByMatch(t *testing.T) {
 	confFile := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{}}}}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	_, v, ok := conf.Find("firefox", "49.0")
 	AssertThat(t, ok, Is{true})
@@ -181,7 +191,7 @@ func TestConfigFindImage(t *testing.T) {
 	confFile := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{"image":"image","port":"5555", "path":"/"}}}}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 
 	b, v, ok := conf.Find("firefox", "49.0")
 	AssertThat(t, ok, Is{true})
@@ -198,10 +208,10 @@ func TestConfigConcurrentLoad(t *testing.T) {
 
 	done := make(chan struct{})
 	go func() {
-		conf.Load(confFile, logConfPath)
+		conf.Load(confFile, testLogConf)
 		done <- struct{}{}
 	}()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 	<-done
 }
 
@@ -209,7 +219,7 @@ func TestConfigConcurrentLoadAndRead(t *testing.T) {
 	confFile := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{"image":"image","port":"5555", "path":"/", "tmpfs": {"/tmp":"size=64k"}}}}}`)
 	defer os.Remove(confFile)
 	conf := config.NewConfig()
-	err := conf.Load(confFile, logConfPath)
+	err := conf.Load(confFile, testLogConf)
 	if err != nil {
 		t.Error(err)
 	}
@@ -218,7 +228,7 @@ func TestConfigConcurrentLoadAndRead(t *testing.T) {
 		browser, _, _ := conf.Find("firefox", "")
 		done <- browser.Tmpfs["/tmp"]
 	}()
-	conf.Load(confFile, logConfPath)
+	conf.Load(confFile, testLogConf)
 	<-done
 }
 
@@ -226,7 +236,7 @@ func TestConfigConcurrentRead(t *testing.T) {
 	confFile := configfile(`{"firefox":{"default":"49.0","versions":{"49.0":{"image":"image","port":"5555", "path":"/", "tmpfs": {"/tmp":"size=64k"}}}}}`)
 	defer os.Remove(confFile)
 	var conf config.Config
-	err := conf.Load(confFile, logConfPath)
+	err := conf.Load(confFile, testLogConf)
 	if err != nil {
 		t.Error(err)
 	}

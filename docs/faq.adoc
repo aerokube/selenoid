@@ -78,10 +78,6 @@ When running Selenoid as Docker container video feature can be not working (beca
 . You are passing an `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable pointing to a directory on the `host machine` where video files are actually stored
 . When passing custom arguments to Selenoid container (such as `-limit` or `-timeout`) you also have to pass `-video-output-dir /opt/selenoid/video` and mount host machine video dir to `/opt/selenoid/video`
     
-**Can't open Selenoid video with Firefox**
-
-This is because we are using H264 codec which is not supported in Firefox for licensing reasons. Should work like a charm in Google Chrome or VLC player.
-
 **Can't get VNC feature to work: Disconnected**
 
 Please check the following:
@@ -92,10 +88,6 @@ Please check the following:
 **Seeing black screen with a cross in VNC window**
 
 You are using `driver.close()` instead of `driver.quit()` and just closed the last browser tab instead of removing the session.
-
-**Can't maximize browser window**
-
-This is because of missing window manager in browser images. Should be fixed soon.
 
 **Can Selenoid pull browser images automatically?**
 

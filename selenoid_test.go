@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/mafredri/cdp"
+	"github.com/mafredri/cdp/rpcc"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -746,6 +748,32 @@ func TestClipboardMissingSession(t *testing.T) {
 	rsp, err := http.Get(With(srv.URL).Path("/clipboard/missing-session"))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusNotFound})
+}
+
+func TestDevtools(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	u := fmt.Sprintf("ws://%s/devtools/%s", srv.Listener.Addr().String(), sess["sessionId"])
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+
+	conn, err := rpcc.DialContext(ctx, u)
+	AssertThat(t, err, Is{nil})
+	defer conn.Close()
+
+	c := cdp.NewClient(conn)
+	err = c.Page.Enable(ctx)
+	AssertThat(t, err, Is{nil})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
 }
 
 func TestParseGgrHost(t *testing.T) {
