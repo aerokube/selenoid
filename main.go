@@ -129,7 +129,7 @@ func init() {
 
 	var cpuCores = runtime.NumCPU()
 	if cpu == 0 && limit > cpuCores {
-		cpu = cpuLimit((float64(limit) / float64(cpuCores)) * 1000000000)
+		cpu = cpuLimit(float64(cpuCores) / float64(limit) * 1000000000)
 	}
 
 	if version {
