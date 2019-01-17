@@ -126,6 +126,11 @@ func init() {
 	flag.BoolVar(&saveAllLogs, "save-all-logs", false, "Whether to save all logs without considering capabilities")
 	flag.Parse()
 
+	var cpuCores = runtime.NumCPU()
+	if cpu == 0 && limit > cpuCores {
+		cpu = cpuLimit((float64(limit) / float64(cpuCores)) * 1000000000)
+	}
+
 	if version {
 		showVersion()
 		os.Exit(0)
