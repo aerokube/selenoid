@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/aerokube/selenoid/event"
 	"io"
 	"io/ioutil"
 	"log"
@@ -24,11 +23,17 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aerokube/selenoid/event"
+
 	"github.com/aerokube/selenoid/session"
 	"github.com/aerokube/util"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/pkg/stdcopy"
 	"golang.org/x/net/websocket"
+
+	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 const slash = "/"
@@ -268,6 +273,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		Caps:      browser.Caps,
 		URL:       u,
 		Container: startedService.Container,
+		Pod:       startedService.Pod,
 		HostPort:  startedService.HostPort,
 		Timeout:   sessionTimeout,
 		TimeoutCh: onTimeout(sessionTimeout, func() {
@@ -613,6 +619,38 @@ func streamLogs(wsconn *websocket.Conn) {
 		wsconn.PayloadType = websocket.BinaryFrame
 		stdcopy.StdCopy(wsconn, wsconn, r)
 		log.Printf("[%d] [CONTAINER_LOGS_DISCONNECTED] [%s]", requestId, sid)
+	} else if ok && sess.Pod != nil {
+		log.Printf("[%d] [POD_LOGS] [%s]", requestId, sess.Pod.Name)
+		config, err := rest.InClusterConfig()
+		if err != nil {
+			log.Printf("[%d] [KUBERNETES_CONFIG_ERROR] [%v]", requestId, err)
+			return
+		}
+		client, err := kubernetes.NewForConfig(config)
+		if err != nil {
+			log.Printf("[%d] [KUBERNETES_CLIENT_ERROR] [%v]", requestId, err)
+			return
+		}
+		req := client.CoreV1().Pods(nameSpace).GetLogs(sess.Pod.Name, &apiv1.PodLogOptions{
+			Container:  sess.Pod.ContainerName,
+			Follow:     true,
+			Previous:   false,
+			Timestamps: false,
+		}).Context(wsconn.Request().Context())
+		r, err := req.Stream()
+		if err != nil {
+			log.Printf("[%d] [POD_LOGS_ERROR] [%s] [%v]", requestId, sess.Pod.Name, err)
+			return
+		}
+		defer r.Close()
+		wsconn.PayloadType = websocket.BinaryFrame
+		go func() {
+			io.Copy(wsconn, r)
+			wsconn.Close()
+			log.Printf("[%d] [POD_LOGS_CLOSED] [%s] [%s]", requestId, sess.Pod.Name, sid)
+		}()
+		io.Copy(wsconn, r)
+		log.Printf("[%d] [POD_LOGS_DISCONNECTED] [%s] [%s]", requestId, sess.Pod.Name, sid)
 	} else {
 		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
 	}

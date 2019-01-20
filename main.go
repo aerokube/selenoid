@@ -90,6 +90,8 @@ var (
 	queue                    *protect.Queue
 	manager                  service.Manager
 	cli                      *client.Client
+	nameSpace                string
+	enableKubernetesSupport  bool
 
 	startTime = time.Now()
 
@@ -124,6 +126,8 @@ func init() {
 	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder:latest-release", "Image to use as video recorder")
 	flag.StringVar(&logOutputDir, "log-output-dir", "", "Directory to save session log to")
 	flag.BoolVar(&saveAllLogs, "save-all-logs", false, "Whether to save all logs without considering capabilities")
+	flag.StringVar(&nameSpace, "namespace", "default", "Kubernetes namespace for browsers")
+	flag.BoolVar(&enableKubernetesSupport, "enable-kubernetes-support", false, "Enable kubernetes support")
 	flag.Parse()
 
 	if version {
@@ -199,6 +203,8 @@ func init() {
 		LogOutputDir:         logOutputDir,
 		SaveAllLogs:          saveAllLogs,
 		Privileged:           !disablePrivileged,
+		NameSpace:            nameSpace,
+		InKubernetes:         enableKubernetesSupport,
 	}
 	if disableDocker {
 		manager = &service.DefaultManager{Environment: &environment, Config: conf}
@@ -217,20 +223,24 @@ func init() {
 	}
 	ip, _, _ := net.SplitHostPort(u.Host)
 	environment.IP = ip
-	cli, err = docker.CreateCompatibleDockerClient(
-		func(specifiedApiVersion string) {
-			log.Printf("[-] [INIT] [Using Docker API version: %s]", specifiedApiVersion)
-		},
-		func(determinedApiVersion string) {
-			log.Printf("[-] [INIT] [Your Docker API version is %s]", determinedApiVersion)
-		},
-		func(defaultApiVersion string) {
-			log.Printf("[-] [INIT] [Did not manage to determine your Docker API version - using default version: %s]", defaultApiVersion)
-		},
-	)
-	if err != nil {
-		log.Fatalf("[-] [INIT] [New docker client: %v]", err)
-	}
+	if enableKubernetesSupport {
+		log.Println("[-] [INIT] [Selenoid is running with kubernetes support]")
+	} else {
+		cli, err = docker.CreateCompatibleDockerClient(
+			func(specifiedApiVersion string) {
+				log.Printf("[-] [INIT] [Using Docker API version: %s]", specifiedApiVersion)
+			},
+			func(determinedApiVersion string) {
+				log.Printf("[-] [INIT] [Your Docker API version is %s]", determinedApiVersion)
+			},
+			func(defaultApiVersion string) {
+				log.Printf("[-] [INIT] [Did not manage to determine your Docker API version - using default version: %s]", defaultApiVersion)
+			},
+		)
+		if err != nil {
+			log.Fatalf("[-] [INIT] [New docker client: %v]", err)
+		}
+    }
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
 }
 

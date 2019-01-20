@@ -1,10 +1,11 @@
 package session
 
 import (
-	"github.com/imdario/mergo"
 	"net/url"
 	"sync"
 	"time"
+
+	"github.com/imdario/mergo"
 )
 
 // Caps - user capabilities
@@ -58,12 +59,20 @@ type Container struct {
 	IPAddress string `json:"ip"`
 }
 
+type Pod struct {
+	ID            string `json:"id"`
+	IPAddress     string `json:"ip"`
+	Name          string `json:"podname"`
+	ContainerName string `json:"containername"`
+}
+
 // Session - holds session info
 type Session struct {
 	Quota     string
 	Caps      Caps
 	URL       *url.URL
 	Container *Container
+	Pod       *Pod
 	HostPort  HostPort
 	Cancel    func()
 	Timeout   time.Duration
