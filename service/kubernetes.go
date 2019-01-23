@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/session"
 	"github.com/aerokube/util"
 	apiv1 "k8s.io/api/core/v1"
@@ -21,10 +22,11 @@ import (
 )
 
 const (
-	selenium   int32 = 4444
-	fileserver int32 = 8080
-	clipboard  int32 = 9090
-	vnc        int32 = 5900
+	selenium         int32  = 4444
+	fileserver       int32  = 8080
+	clipboard        int32  = 9090
+	vnc              int32  = 5900
+	sizeLimitDefault string = "256Mi"
 )
 
 // Kubernetes pod
@@ -47,7 +49,7 @@ func (k *Kubernetes) StartWithCancel() (*StartedService, error) {
 		return nil, fmt.Errorf("cluster config: %v", err)
 	}
 
-	requestId := k.RequestId
+	requestID := k.requestId
 	image := k.Service.Image.(string)
 	ns := k.Environment.NameSpace
 	container := parceImageName(image)
@@ -56,9 +58,7 @@ func (k *Kubernetes) StartWithCancel() (*StartedService, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: container,
 			Namespace:    ns,
-			Labels: map[string]string{
-				"app": "selenoid-browser",
-			},
+			Labels:       getLabels(k.Service, k.Caps),
 		},
 		Spec: apiv1.PodSpec{
 			Containers: []apiv1.Container{
@@ -74,33 +74,44 @@ func (k *Kubernetes) StartWithCancel() (*StartedService, error) {
 					Ports:     getContainerPort(),
 				},
 			},
+			Volumes: []apiv1.Volume{
+				{
+					Name: "dshm",
+					VolumeSource: apiv1.VolumeSource{
+						EmptyDir: &apiv1.EmptyDirVolumeSource{
+							Medium:    apiv1.StorageMediumMemory,
+							SizeLimit: getEmptyDirSizeLimit(k.Service),
+						},
+					},
+				},
+			},
 		},
 	}
 
 	podStartTime := time.Now()
-	log.Printf("[%d] [CREATING_POD] [%s] [%s]", requestId, image, ns)
+	log.Printf("[%d] [CREATING_POD] [%s] [%s]", requestID, image, ns)
 
 	podClient, err := client.CoreV1().Pods(ns).Create(v1Pod)
 	pod := podClient.GetName()
 	if err != nil {
-		deletePod(pod, ns, client, requestId)
+		deletePod(pod, ns, client, requestID)
 		return nil, fmt.Errorf("start pod: %v", err)
 	}
 
 	if err := waitForPodToBeReady(client, podClient, ns, pod, k.StartupTimeout); err != nil {
-		deletePod(pod, ns, client, requestId)
+		deletePod(pod, ns, client, requestID)
 		return nil, fmt.Errorf("status pod: %v", err)
 	}
 
-	log.Printf("[%d] [POD_CREATED] [%s] [%s] [%.2fs]", requestId, pod, image, util.SecondsSince(podStartTime))
+	log.Printf("[%d] [POD_CREATED] [%s] [%s] [%.2fs]", requestID, pod, image, util.SecondsSince(podStartTime))
 
-	podIP := getHostIp(pod, ns, client)
+	podIP := getHostIP(pod, ns, client)
 	hostPort := buildHostPort(podIP, k.Caps)
 
 	u := &url.URL{Scheme: "http", Host: hostPort.Selenium}
 
 	if err := wait(u.String(), k.StartupTimeout); err != nil {
-		deletePod(pod, ns, client, requestId)
+		deletePod(pod, ns, client, requestID)
 	}
 
 	s := StartedService{
@@ -118,14 +129,14 @@ func (k *Kubernetes) StartWithCancel() (*StartedService, error) {
 			VNC:        hostPort.VNC,
 		},
 		Cancel: func() {
-			defer deletePod(pod, ns, client, requestId)
+			defer deletePod(pod, ns, client, requestID)
 		},
 	}
 	return &s, nil
 }
 
-func deletePod(name string, ns string, client *kubernetes.Clientset, requestId uint64) {
-	log.Printf("[%d] [DELETING_POD] [%s] [%s]", requestId, name, ns)
+func deletePod(name string, ns string, client *kubernetes.Clientset, requestID uint64) {
+	log.Printf("[%d] [DELETING_POD] [%s] [%s]", requestID, name, ns)
 	deletePolicy := metav1.DeletePropagationForeground
 	err := client.CoreV1().Pods(ns).Delete(name, &metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
@@ -134,7 +145,7 @@ func deletePod(name string, ns string, client *kubernetes.Clientset, requestId u
 		fmt.Errorf("delete pod: %v", err)
 		return
 	}
-	log.Printf("[%d] [POD_DELETED] [%s] [%s]", requestId, name, ns)
+	log.Printf("[%d] [POD_DELETED] [%s] [%s]", requestID, name, ns)
 }
 
 func parceImageName(image string) (container string) {
@@ -146,7 +157,7 @@ func parceImageName(image string) (container string) {
 	return container
 }
 
-func getHostIp(name string, ns string, client *kubernetes.Clientset) string {
+func getHostIP(name string, ns string, client *kubernetes.Clientset) string {
 	ip := ""
 	pods, err := client.CoreV1().Pods(ns).List(metav1.ListOptions{})
 	if err != nil {
@@ -230,10 +241,10 @@ func getEnvVars(service ServiceBase, caps session.Caps) []apiv1.EnvVar {
 func getResourses(service ServiceBase) apiv1.ResourceRequirements {
 	res := apiv1.ResourceRequirements{}
 	req := service.Service.Requirements
-	if len(req.Limits) > 0 {
+	if len(req.Limits) != 0 {
 		res.Limits = getLimits(req.Limits)
 	}
-	if len(req.Requests) > 0 {
+	if len(req.Requests) != 0 {
 		res.Requests = getLimits(req.Requests)
 	}
 	return res
@@ -250,6 +261,23 @@ func getLimits(req map[string]string) apiv1.ResourceList {
 	return res
 }
 
+func getEmptyDirSizeLimit(service *config.Browser) *resource.Quantity {
+	shm := resource.Quantity{}
+	const unit = 1024
+	if service.ShmSize < unit {
+		shm = resource.MustParse(sizeLimitDefault)
+	} else {
+		div, exp := int64(unit), 0
+		for n := service.ShmSize / unit; n >= unit; n /= unit {
+			div *= unit
+			exp++
+		}
+		shmSize := fmt.Sprintf("%.0f%ci", float64(service.ShmSize)/float64(div), "KMGTPE"[exp])
+		shm = resource.MustParse(shmSize)
+	}
+	return &shm
+}
+
 func getContainerPort() []apiv1.ContainerPort {
 	cp := []apiv1.ContainerPort{}
 	fn := func(p apiv1.ContainerPort) {
@@ -260,4 +288,17 @@ func getContainerPort() []apiv1.ContainerPort {
 	fn(apiv1.ContainerPort{Name: "clipboard", ContainerPort: clipboard})
 	fn(apiv1.ContainerPort{Name: "vnc", ContainerPort: vnc})
 	return cp
+}
+
+func int64ToHuman(b int64) string {
+	const unit = 1024
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.0f%ci", float64(b)/float64(div), "KMGTPE"[exp])
 }
