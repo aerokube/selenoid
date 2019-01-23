@@ -49,7 +49,7 @@ func (k *Kubernetes) StartWithCancel() (*StartedService, error) {
 		return nil, fmt.Errorf("cluster config: %v", err)
 	}
 
-	requestID := k.requestId
+	requestID := k.RequestId
 	image := k.Service.Image.(string)
 	ns := k.Environment.NameSpace
 	container := parceImageName(image)
