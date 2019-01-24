@@ -72,6 +72,12 @@ func (k *Kubernetes) StartWithCancel() (*StartedService, error) {
 
 					Resources: getResourses(k.ServiceBase),
 					Ports:     getContainerPort(),
+					VolumeMounts: []apiv1.VolumeMount{
+						{
+							Name:      "dshm",
+							MountPath: "/dev/shm",
+						},
+					},
 				},
 			},
 			Volumes: []apiv1.Volume{
