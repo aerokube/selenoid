@@ -209,7 +209,7 @@ func waitForPodToBeReady(client *kubernetes.Clientset, pod *apiv1.Pod, ns, name 
 				if resp.Status.Phase != apiv1.PodPending {
 					w.Stop()
 				}
-			case <-time.After(10 * time.Second):
+			case <-time.After(timeout):
 				w.Stop()
 			}
 		}
