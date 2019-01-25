@@ -173,11 +173,18 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	}
 	log.Printf("[%d] [SERVICE_STARTED] [%s] [%s] [%.2fs]", requestId, image, browserContainerId, util.SecondsSince(serviceStartTime))
 	log.Printf("[%d] [PROXY_TO] [%s] [%s]", requestId, browserContainerId, u.String())
+
+	var publishedPortsInfo map[string]string
+	if d.Service.PublishAllPorts {
+		publishedPortsInfo = getContainerPorts(d.Environment.Network, stat)
+	}
+
 	s := StartedService{
 		Url: u,
 		Container: &session.Container{
 			ID:        browserContainerId,
 			IPAddress: getContainerIP(d.Environment.Network, stat),
+			Ports:     publishedPortsInfo,
 		},
 		HostPort: hostPort,
 		Cancel: func() {
@@ -385,6 +392,19 @@ func getHostPort(env Environment, servicePort string, caps session.Caps, stat ty
 	}
 
 	return hp
+}
+
+func getContainerPorts(networkName string, stat types.ContainerJSON) map[string]string {
+	ns := stat.NetworkSettings
+
+	var exposedPorts = make(map[string]string)
+
+	if len(ns.Ports) > 0 {
+		for port, portBindings := range ns.Ports {
+			exposedPorts[port.Port()] = portBindings[0].HostPort
+		}
+	}
+	return exposedPorts
 }
 
 func getContainerIP(networkName string, stat types.ContainerJSON) string {
