@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/aerokube/selenoid/config"
@@ -91,6 +92,8 @@ func (k *Kubernetes) StartWithCancel() (*StartedService, error) {
 					},
 				},
 			},
+			HostAliases:   getHostAliases(k.Service),
+			RestartPolicy: apiv1.RestartPolicyNever,
 		},
 	}
 
@@ -267,6 +270,20 @@ func getLimits(req map[string]string) apiv1.ResourceList {
 	return res
 }
 
+func getHostAliases(service *config.Browser) []apiv1.HostAlias {
+	aliases := []apiv1.HostAlias{}
+	fn := func(a apiv1.HostAlias) {
+		aliases = append(aliases, a)
+	}
+	hosts := service.Hosts
+	if len(hosts) > 0 {
+		for _, host := range hosts {
+			fn(spitHostAlias(host))
+		}
+	}
+	return aliases
+}
+
 func getEmptyDirSizeLimit(service *config.Browser) *resource.Quantity {
 	shm := resource.Quantity{}
 	const unit = 1024
@@ -307,4 +324,12 @@ func int64ToHuman(b int64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.0f%ci", float64(b)/float64(div), "KMGTPE"[exp])
+}
+
+func spitHostAlias(alias string) apiv1.HostAlias {
+	hostAlias := strings.Split(alias, ":")
+	return apiv1.HostAlias{
+		IP:        hostAlias[1],
+		Hostnames: []string{hostAlias[0]},
+	}
 }
