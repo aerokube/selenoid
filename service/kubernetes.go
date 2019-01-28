@@ -27,6 +27,7 @@ const (
 	fileserver       int32  = 8080
 	clipboard        int32  = 9090
 	vnc              int32  = 5900
+	devtools         int32  = 7070
 	sizeLimitDefault string = "256Mi"
 )
 
@@ -136,6 +137,7 @@ func (k *Kubernetes) StartWithCancel() (*StartedService, error) {
 			Fileserver: hostPort.Fileserver,
 			Clipboard:  hostPort.Clipboard,
 			VNC:        hostPort.VNC,
+			Devtools:   hostPort.Devtools,
 		},
 		Cancel: func() {
 			defer deletePod(pod, ns, client, requestID)
@@ -189,6 +191,7 @@ func buildHostPort(ip string, caps session.Caps) session.HostPort {
 		Selenium:   fn(ip, selenium),
 		Fileserver: fn(ip, fileserver),
 		Clipboard:  fn(ip, clipboard),
+		Devtools:   fn(ip, devtools),
 	}
 
 	if caps.VNC {
@@ -310,6 +313,7 @@ func getContainerPort() []apiv1.ContainerPort {
 	fn(apiv1.ContainerPort{Name: "fileserver", ContainerPort: fileserver})
 	fn(apiv1.ContainerPort{Name: "clipboard", ContainerPort: clipboard})
 	fn(apiv1.ContainerPort{Name: "vnc", ContainerPort: vnc})
+	fn(apiv1.ContainerPort{Name: "devtools", ContainerPort: devtools})
 	return cp
 }
 
