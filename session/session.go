@@ -55,8 +55,9 @@ func (c *Caps) ProcessExtensionCapabilities() {
 
 // Container - container information
 type Container struct {
-	ID        string `json:"id"`
-	IPAddress string `json:"ip"`
+	ID        string            `json:"id"`
+	IPAddress string            `json:"ip"`
+	Ports     map[string]string `json:"exposedPorts,omitempty"`
 }
 
 type Pod struct {
