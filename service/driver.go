@@ -88,8 +88,8 @@ func (d *Driver) stopProcess(cmd *exec.Cmd) {
 		log.Printf("[%d] [FAILED_TO_TERMINATE_PROCESS] [%d] [%v]", d.RequestId, cmd.Process.Pid, err)
 		return
 	}
-	if !d.CaptureDriverLogs && d.LogOutputDir != "" {
-		cmd.Stdout.(*os.File).Close()
+	if stdout, ok := cmd.Stdout.(*os.File); ok && !d.CaptureDriverLogs && d.LogOutputDir != "" {
+		stdout.Close()
 	}
 	log.Printf("[%d] [TERMINATED_PROCESS] [%d] [%.2fs]", d.RequestId, cmd.Process.Pid, util.SecondsSince(s))
 }
