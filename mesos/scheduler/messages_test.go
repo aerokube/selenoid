@@ -1,7 +1,6 @@
 package scheduler
 
 import (
-	. "github.com/aandryashin/matchers"
 	"testing"
 )
 
@@ -11,6 +10,7 @@ var (
 	offerID              []ID
 	UUID                 string
 	agentID              ID
+	role                 string
 	tasks                []Task
 	goodRange            Range
 	containerPortMapping PortMappings
@@ -23,6 +23,7 @@ func init() {
 	taskID = ID{"taskID_1"}
 	offerID = []ID{{"offerID_1"}, {"offerID_2"}}
 	UUID = "123456ID"
+	role = "test-role"
 	agentID = ID{"agentID_1"}
 	goodRange = Range{8000, 8010}
 	initVncPortMapping()
@@ -118,11 +119,13 @@ func TestNewSubscribedMessage(t *testing.T) {
 			FrameworkInfo{
 				user,
 				name,
+				frameworkID,
+				role,
 			},
 		},
 	}
 
-	actualSubscribeMessage := newSubscribedMessage(user, name)
+	actualSubscribeMessage := newSubscribedMessage(user, name, frameworkID, role)
 	AssertThat(t, expectSubscribedMessage, EqualTo{actualSubscribeMessage})
 }
 

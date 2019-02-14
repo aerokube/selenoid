@@ -93,6 +93,7 @@ var (
 	cli                      *client.Client
 	mesosMasterURL           string
 	zookeeper                string
+	role                     string
 
 	startTime = time.Now()
 
@@ -129,6 +130,7 @@ func init() {
 	flag.BoolVar(&saveAllLogs, "save-all-logs", false, "Whether to save all logs without considering capabilities")
 	flag.StringVar(&mesosMasterURL, "mesos", "", "URL to mesos master")
 	flag.StringVar(&zookeeper, "zk", "", "URL to zookeeper cluster")
+	flag.StringVar(&role, "role", "", "role to run Framework in Mesos cluster")
 	flag.Parse()
 
 	if version {
@@ -204,8 +206,9 @@ func init() {
 		LogOutputDir:         logOutputDir,
 		SaveAllLogs:          saveAllLogs,
 		Privileged:           !disablePrivileged,
-		MesosMasterUrl:      mesosMasterURL,
-		Zookeeper:           zookeeper,
+		MesosMasterUrl:       mesosMasterURL,
+		Zookeeper:            zookeeper,
+		Role:                 role,
 	}
 
 	if disableDocker {
@@ -243,7 +246,7 @@ func init() {
 
 	if mesosMasterURL != "" {
 		log.Printf("[TRY TO REGISTER ON MESOS MASTER] [%s]", mesosMasterURL)
-		go scheduler.Run(mesosMasterURL, zookeeper, float64(cpu), float64(mem))
+		go scheduler.Run(mesosMasterURL, zookeeper, float64(cpu), float64(mem), role)
 	}
 
 }

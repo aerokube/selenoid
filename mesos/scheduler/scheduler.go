@@ -100,12 +100,15 @@ type Info struct {
 	AgentHost     string
 }
 
-func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
+func Run(URL string, zookeeperUrl string, cpu float64, mem float64, role string) {
 	if zookeeperUrl != "" {
 		zookeeper.Zk = &zookeeper.Zoo{
 			Url: zookeeperUrl,
 		}
 		zookeeper.Create()
+	}
+	if role == "" {
+		role = "*"
 	}
 	schedulerUrl := createSchedulerUrl(URL)
 	log.Printf("[-] [MESOS_URL_DETECTED] [%s]", schedulerUrl)
@@ -117,7 +120,7 @@ func Run(URL string, zookeeperUrl string, cpu float64, mem float64) {
 	if zookeeperUrl != "" && zookeeper.GetFrameworkInfo() != nil {
 		frameworkId = zookeeper.GetFrameworkInfo()[0]
 	}
-	body, _ := json.Marshal(newSubscribedMessage("root", "Selenoid", ID{frameworkId}))
+	body, _ := json.Marshal(newSubscribedMessage("root", "Selenoid", ID{frameworkId}, role))
 	resp, err := http.Post(Sched.Url, "application/json", bytes.NewReader(body))
 	if err != nil {
 		log.Fatal(err)

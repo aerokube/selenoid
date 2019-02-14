@@ -30,6 +30,7 @@ type Environment struct {
 	Privileged           bool
 	MesosMasterUrl       string
 	Zookeeper            string
+	Role                 string
 }
 
 const (

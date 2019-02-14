@@ -94,6 +94,7 @@ type FrameworkInfo struct {
 	User        string `json:"user"`
 	Name        string `json:"name"`
 	FrameworkId ID     `json:"framework_id,omitempty"`
+	Role        string `json:"role"`
 }
 
 type Subscribe struct {
@@ -267,13 +268,14 @@ func getUniqueOfferIds(resources []ResourcesForOneTask) []ID {
 	return set
 }
 
-func newSubscribedMessage(user string, name string, frameworkId ID) SubscribeMessage {
+func newSubscribedMessage(user string, name string, frameworkId ID, role string) SubscribeMessage {
 	subscribedMessage := SubscribeMessage{
 		Type: "SUBSCRIBE",
 		Subscribe: Subscribe{
 			FrameworkInfo{
 				User: user,
 				Name: name,
+				Role: role,
 			},
 		},
 	}
