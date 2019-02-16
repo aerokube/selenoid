@@ -282,11 +282,11 @@ func create(w http.ResponseWriter, r *http.Request) {
 			SessionId: sessionId,
 			Session:   sess,
 		}
-		event.SessionStopped(event.StoppedSession{e})
 		if browser.Caps.Video && !disableDocker {
 			oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
 			if finalVideoName == "" {
 				finalVideoName = sessionId + videoFileExtension
+				e.Session.Caps.VideoName = finalVideoName
 			}
 			newVideoName := filepath.Join(videoOutputDir, finalVideoName)
 			err := os.Rename(oldVideoName, newVideoName)
@@ -307,6 +307,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 			oldLogName := filepath.Join(logOutputDir, browser.Caps.LogName)
 			if finalLogName == "" {
 				finalLogName = sessionId + logFileExtension
+				e.Session.Caps.LogName = finalLogName
 			}
 			newLogName := filepath.Join(logOutputDir, finalLogName)
 			err := os.Rename(oldLogName, newLogName)
@@ -321,6 +322,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 				event.FileCreated(createdFile)
 			}
 		}
+		event.SessionStopped(event.StoppedSession{e})
 	}
 	sess.Cancel = cancelAndRenameFiles
 	sessions.Put(s.ID, sess)
