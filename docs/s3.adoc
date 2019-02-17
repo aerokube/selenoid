@@ -1,6 +1,12 @@
 == Uploading Files To S3
 
-IMPORTANT: This feature only becomes available when Selenoid is compiled with `s3` build tag (missing by default).
+[IMPORTANT]
+====
+This feature only becomes available when Selenoid is compiled with `s3` build tag (missing by default) as follows:
+
+    $ go build -tags s3
+
+====
 
 Selenoid can upload recorded video and log files for every running session to S3-compatible storage.
 
