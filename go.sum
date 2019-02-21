@@ -21,7 +21,7 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/docker/distribution v2.7.0-rc.0.0.20181024170156-93e082742a00+incompatible h1:YOfVNTgst//UrD5ZhDfbY0+GTSWjXfXOYLYHhw0kMpo=
 github.com/docker/distribution v2.7.0-rc.0.0.20181024170156-93e082742a00+incompatible/go.mod h1:J2gT2udsDAN96Uj4KfcMRqY0/ypR+oyYUYmja8H+y+w=
-github.com/docker/docker v0.7.3-0.20181109141713-1e7c43dfae3f h1:DEwzvuWWkXXJ1O12FoL5Tw/hzFuxGXuyncEA/BaxBRQ=
+github.com/docker/docker v0.7.3-0.20181109141713-1e7c43dfae3f h1:eQmVOY2I0OnpVWKgtFMG3hPP+/tRZD7Ri60c0fdpV/s=
 github.com/docker/docker v0.7.3-0.20181109141713-1e7c43dfae3f/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
 github.com/docker/go-connections v0.3.0 h1:3lOnM9cSzgGwx8VfK/NGOW5fLQ0GjIlCkaktF+n1M6o=
 github.com/docker/go-connections v0.3.0/go.mod h1:Gbd7IOopHjR8Iph03tsViu4nIes5XhDvyHbTtUxmeec=
