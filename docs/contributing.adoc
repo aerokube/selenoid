@@ -2,7 +2,7 @@
 
 To build Selenoid:
 
-. Install https://golang.org/doc/install[Golang] 1.11 and above.
+. Install https://golang.org/doc/install[Golang] 1.11.4 and above.
 
 . Setup `$GOPATH` https://github.com/golang/go/wiki/GOPATH[properly]
 
