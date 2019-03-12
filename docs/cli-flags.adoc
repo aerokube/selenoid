@@ -19,12 +19,14 @@ The following flags are supported by `selenoid` command:
     Disable wait queue
 -enable-file-upload
     File upload support
+-graceful-period duration
+    graceful shutdown period in time.Duration format, e.g. 300s or 500ms (default 5m0s)
 -limit int
     Simultaneous container runs (default 5)
 -listen string
     Network address to accept connections (default ":4444")
 -log-conf string
-    Container logging configuration file (default "config/container-logs.json")
+    Container logging configuration file
 -log-output-dir string
     Directory to save session log to
 -max-timeout duration
@@ -67,3 +69,30 @@ When using Selenoid inside Docker container these flags are passed like the foll
     -conf /etc/selenoid/browsers.json -limit 10 -video-output-dir /opt/selenoid/video/
 ----
 
+=== S3 CLI Flags
+The following flags are supported by `selenoid` command when compiled with S3 support:
+
+```
+-s3-access-key string
+    S3 access key
+-s3-bucket-name string
+    S3 bucket name
+-s3-endpoint string
+    S3 endpoint URL
+-s3-exclude-files string
+    Pattern used to match and exclude files
+-s3-force-path-style
+    Force path-style addressing for file upload
+-s3-include-files string
+    Pattern used to match and include files    
+-s3-keep-files
+    Do not remove uploaded files
+-s3-key-pattern string
+    S3 bucket name (default "$fileName")
+-s3-reduced-redundancy
+    Use reduced redundancy storage class
+-s3-region string
+    S3 region
+-s3-secret-key string
+    S3 secret key
+```

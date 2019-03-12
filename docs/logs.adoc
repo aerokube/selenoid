@@ -1,5 +1,10 @@
 == Saving Session Logs
 
+[NOTE]
+====
+An additional `enableLog` capability should be added to tests. See <<Special Capabilities>> section for more details.
+====
+
 Selenoid can save log files for every running session to a separate file. By default log files are saved as `<session-id>.log` but you can alter file name via `logName` capability.
 
 To enable this feature you only need to add `-log-output-dir </path/to/some/dir>` flag to Selenoid:

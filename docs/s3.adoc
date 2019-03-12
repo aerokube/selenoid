@@ -36,31 +36,3 @@ By default uploaded file name is preserved, i.e. S3 path is `/<session-id>.log` 
 For example, when launching Selenoid with `-s3-key-pattern $browserName/$sessionId/log.txt` files will be accessible as `firefox/0ee0b48b-e29b-6749-b4f1-2277b8f8d6c5/log.txt`. You can also override key pattern for every session with `s3KeyPattern` capability.
 
 Sometimes you may want to upload only video files or files matching some complicated pattern or to not upload some files. To achieve this use `-s3-include-files` and `-s3-exclude-files` flags. These flags accept https://en.wikipedia.org/wiki/Glob_(programming)[globs] such as `*.mp4`.
-
-=== S3 CLI Flags
-The following flags are supported by `selenoid` command when compiled with S3 support:
-
-```
--s3-access-key string
-    S3 access key
--s3-bucket-name string
-    S3 bucket name
--s3-endpoint string
-    S3 endpoint URL
--s3-exclude-files string
-    Pattern used to match and exclude files
--s3-force-path-style
-    Force path-style addressing for file upload
--s3-include-files string
-    Pattern used to match and include files    
--s3-keep-files
-    Do not remove uploaded files
--s3-key-pattern string
-    S3 bucket name (default "$fileName")
--s3-reduced-redundancy
-    Use reduced redundancy storage class
--s3-region string
-    S3 region
--s3-secret-key string
-    S3 secret key
-```
