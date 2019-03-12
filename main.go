@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"log"
@@ -73,6 +74,7 @@ var (
 	newSessionAttemptTimeout time.Duration
 	sessionDeleteTimeout     time.Duration
 	serviceStartupTimeout    time.Duration
+	gracefulPeriod           time.Duration
 	limit                    int
 	retryCount               int
 	containerNetwork         string
@@ -124,6 +126,7 @@ func init() {
 	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder:latest-release", "Image to use as video recorder")
 	flag.StringVar(&logOutputDir, "log-output-dir", "", "Directory to save session log to")
 	flag.BoolVar(&saveAllLogs, "save-all-logs", false, "Whether to save all logs without considering capabilities")
+	flag.DurationVar(&gracefulPeriod, "graceful-period", 300*time.Second, "graceful shutdown period in time.Duration format, e.g. 300s or 500ms")
 	flag.Parse()
 
 	if version {
@@ -151,7 +154,6 @@ func init() {
 			log.Printf("[-] [INIT] [%s: %v]", os.Args[0], err)
 		}
 	})
-	cancelOnSignal()
 	inDocker := false
 	_, err = os.Stat("/.dockerenv")
 	if err == nil {
@@ -249,28 +251,6 @@ func parseGgrHost(s string) *ggr.Host {
 	}
 	log.Printf("[-] [INIT] [Will prefix all session IDs with a hash-sum: %s]", host.Sum())
 	return host
-}
-
-func cancelOnSignal() {
-	sig := make(chan os.Signal)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-sig
-		log.Println("[-] [-] [SHUTTING_DOWN] [-] [-] [-] [-] [-] [-] [-]")
-		sessions.Each(func(k string, s *session.Session) {
-			if enableFileUpload {
-				os.RemoveAll(path.Join(os.TempDir(), k))
-			}
-			s.Cancel()
-		})
-		if !disableDocker {
-			err := cli.Close()
-			if err != nil {
-				log.Fatalf("[-] [SHUTTING_DOWN] [Error closing docker client: %v]", err)
-			}
-		}
-		os.Exit(0)
-	}()
 }
 
 func onSIGHUP(fn func()) {
@@ -397,5 +377,42 @@ func showVersion() {
 func main() {
 	log.Printf("[-] [INIT] [Timezone: %s]", time.Local)
 	log.Printf("[-] [INIT] [Listening on %s]", listen)
-	log.Fatal(http.ListenAndServe(listen, handler()))
+
+	stop := make(chan os.Signal)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	server := &http.Server{
+		Addr:    listen,
+		Handler: handler(),
+	}
+	e := make(chan error)
+	go func() {
+		e <- server.ListenAndServe()
+	}()
+	select {
+	case err := <-e:
+		log.Fatalf("[-] [INIT] [Failed to start: %v]", err)
+	case <-stop:
+	}
+
+	log.Printf("[-] [SHUTTING_DOWN] [%s]", gracefulPeriod)
+	ctx, cancel := context.WithTimeout(context.Background(), gracefulPeriod)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("[-] [SHUTTING_DOWN] [Failed to shut down: %v]", err)
+	}
+
+	sessions.Each(func(k string, s *session.Session) {
+		if enableFileUpload {
+			os.RemoveAll(path.Join(os.TempDir(), k))
+		}
+		s.Cancel()
+	})
+
+	if !disableDocker {
+		err := cli.Close()
+		if err != nil {
+			log.Fatalf("[-] [SHUTTING_DOWN] [Error closing Docker client: %v]", err)
+		}
+	}
 }
