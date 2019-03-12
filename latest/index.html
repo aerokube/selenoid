@@ -555,88 +555,92 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_browser_images">1.4. Browser Images</a></li>
 </ul>
 </li>
-<li><a href="#_configuration">2. Configuration</a>
+<li><a href="#_main_features">2. Main Features</a>
 <ul class="sectlevel2">
-<li><a href="#_recommended_docker_settings">2.1. Recommended Docker Settings</a></li>
-<li><a href="#_browsers_configuration_file">2.2. Browsers Configuration File</a>
+<li><a href="#_video_recording">2.1. Video Recording</a>
 <ul class="sectlevel3">
-<li><a href="#_browser_name_and_version">2.2.1. Browser Name and Version</a></li>
-<li><a href="#_image">2.2.2. Image</a></li>
-<li><a href="#_other_optional_fields">2.2.3. Other Optional Fields</a></li>
-<li><a href="#_syncing_browser_images_from_existing_file">2.2.4. Syncing Browser Images from Existing File</a></li>
+<li><a href="#_on_windows">2.1.1. On Windows</a></li>
+<li><a href="#_downloading_video_files_from_selenoid">2.1.2. Downloading Video Files from Selenoid</a></li>
+<li><a href="#_deleting_video_files">2.1.3. Deleting Video Files</a></li>
 </ul>
 </li>
-<li><a href="#_logging_configuration_file">2.3. Logging Configuration File</a></li>
-<li><a href="#_reloading_configuration">2.4. Reloading Configuration</a></li>
-<li><a href="#_updating_browsers">2.5. Updating Browsers</a>
+<li><a href="#_saving_session_logs">2.2. Saving Session Logs</a>
 <ul class="sectlevel3">
-<li><a href="#_the_short_way">2.5.1. The Short Way</a></li>
-<li><a href="#_a_bit_longer_way">2.5.2. A Bit Longer Way</a></li>
+<li><a href="#_downloading_log_files_from_selenoid">2.2.1. Downloading Log Files from Selenoid</a></li>
+<li><a href="#_deleting_log_files">2.2.2. Deleting Log Files</a></li>
 </ul>
 </li>
-<li><a href="#_setting_timezone">2.6. Setting Timezone</a></li>
-<li><a href="#_video_recording">2.7. Video Recording</a>
+<li><a href="#_uploading_files_to_browser">2.3. Uploading Files To Browser</a></li>
+<li><a href="#_accessing_files_downloaded_with_browser">2.4. Accessing Files Downloaded with Browser</a></li>
+<li><a href="#_accessing_clipboard">2.5. Accessing Clipboard</a></li>
+<li><a href="#_accessing_browser_developer_tools">2.6. Accessing Browser Developer Tools</a></li>
+<li><a href="#_special_capabilities">2.7. Special Capabilities</a>
 <ul class="sectlevel3">
-<li><a href="#_on_windows">2.7.1. On Windows</a></li>
-<li><a href="#_downloading_video_files_from_selenoid">2.7.2. Downloading Video Files from Selenoid</a></li>
-<li><a href="#_deleting_video_files">2.7.3. Deleting Video Files</a></li>
+<li><a href="#_live_browser_screen_enablevnc">2.7.1. Live Browser Screen: enableVNC</a></li>
+<li><a href="#_custom_screen_resolution_screenresolution">2.7.2. Custom Screen Resolution: screenResolution</a></li>
+<li><a href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate_videocodec">2.7.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate, videoCodec</a></li>
+<li><a href="#_saving_session_logs_enablelog_logname">2.7.4. Saving Session Logs: enableLog, logName</a></li>
+<li><a href="#_custom_test_name_name">2.7.5. Custom Test Name: name</a></li>
+<li><a href="#_custom_session_timeout_sessiontimeout">2.7.6. Custom Session Timeout: sessionTimeout</a></li>
+<li><a href="#_per_session_time_zone_timezone">2.7.7. Per-session Time Zone: timeZone</a></li>
+<li><a href="#_per_session_environment_variables_env">2.7.8. Per-session Environment Variables: env</a></li>
+<li><a href="#_links_to_application_containers_applicationcontainers">2.7.9. Links to Application Containers: applicationContainers</a></li>
+<li><a href="#_hosts_entries_hostsentries">2.7.10. Hosts Entries: hostsEntries</a></li>
+<li><a href="#_custom_dns_servers_dnsservers">2.7.11. Custom DNS Servers: dnsServers</a></li>
+<li><a href="#_more_docker_networks_additionalnetworks">2.7.12. More Docker Networks: additionalNetworks</a></li>
+<li><a href="#_container_labels_labels">2.7.13. Container Labels: labels</a></li>
+<li><a href="#_android_skin_skin">2.7.14. Android Skin: skin</a></li>
+<li><a href="#_s3_key_pattern_s3keypattern">2.7.15. S3 Key Pattern: s3KeyPattern</a></li>
+<li><a href="#_specifying_capabilities_via_protocol_extensions">2.7.16. Specifying Capabilities via Protocol Extensions</a></li>
 </ul>
 </li>
-<li><a href="#_saving_session_logs">2.8. Saving Session Logs</a>
-<ul class="sectlevel3">
-<li><a href="#_downloading_log_files_from_selenoid">2.8.1. Downloading Log Files from Selenoid</a></li>
-<li><a href="#_deleting_log_files">2.8.2. Deleting Log Files</a></li>
-</ul>
-</li>
-<li><a href="#_selenoid_with_docker_compose">2.9. Selenoid with Docker Compose</a></li>
-<li><a href="#_log_files">2.10. Log Files</a></li>
-<li><a href="#_selenoid_cli_flags">2.11. Selenoid CLI Flags</a></li>
 </ul>
 </li>
 <li><a href="#_advanced_features">3. Advanced Features</a>
 <ul class="sectlevel2">
-<li><a href="#_special_capabilities">3.1. Special Capabilities</a>
+<li><a href="#_usage_statistics">3.1. Usage Statistics</a>
 <ul class="sectlevel3">
-<li><a href="#_live_browser_screen_enablevnc">3.1.1. Live Browser Screen: enableVNC</a></li>
-<li><a href="#_custom_screen_resolution_screenresolution">3.1.2. Custom Screen Resolution: screenResolution</a></li>
-<li><a href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate_videocodec">3.1.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate, videoCodec</a></li>
-<li><a href="#_saving_session_logs_enablelog_logname">3.1.4. Saving Session Logs: enableLog, logName</a></li>
-<li><a href="#_custom_test_name_name">3.1.5. Custom Test Name: name</a></li>
-<li><a href="#_custom_session_timeout_sessiontimeout">3.1.6. Custom Session Timeout: sessionTimeout</a></li>
-<li><a href="#_per_session_time_zone_timezone">3.1.7. Per-session Time Zone: timeZone</a></li>
-<li><a href="#_per_session_environment_variables_env">3.1.8. Per-session Environment Variables: env</a></li>
-<li><a href="#_links_to_application_containers_applicationcontainers">3.1.9. Links to Application Containers: applicationContainers</a></li>
-<li><a href="#_hosts_entries_hostsentries">3.1.10. Hosts Entries: hostsEntries</a></li>
-<li><a href="#_custom_dns_servers_dnsservers">3.1.11. Custom DNS Servers: dnsServers</a></li>
-<li><a href="#_more_docker_networks_additionalnetworks">3.1.12. More Docker Networks: additionalNetworks</a></li>
-<li><a href="#_container_labels_labels">3.1.13. Container Labels: labels</a></li>
-<li><a href="#_android_skin_skin">3.1.14. Android Skin: skin</a></li>
-<li><a href="#_s3_key_pattern_s3keypattern">3.1.15. S3 Key Pattern: s3KeyPattern</a></li>
-<li><a href="#_specifying_capabilities_via_protocol_extensions">3.1.16. Specifying Capabilities via Protocol Extensions</a></li>
+<li><a href="#_what_statistics_mean">3.1.1. What Statistics Mean</a></li>
+<li><a href="#_sending_statistics_to_external_systems">3.1.2. Sending Statistics to External Systems</a></li>
 </ul>
 </li>
-<li><a href="#_using_selenoid_without_docker">3.2. Using Selenoid without Docker</a></li>
-<li><a href="#_usage_statistics">3.3. Usage Statistics</a>
-<ul class="sectlevel3">
-<li><a href="#_what_statistics_mean">3.3.1. What Statistics Mean</a></li>
-<li><a href="#_sending_statistics_to_external_systems">3.3.2. Sending Statistics to External Systems</a></li>
+<li><a href="#_uploading_files_to_s3">3.2. Uploading Files To S3</a></li>
+<li><a href="#_saving_session_metadata">3.3. Saving Session Metadata</a></li>
+<li><a href="#_using_selenoid_without_docker">3.4. Using Selenoid without Docker</a></li>
 </ul>
 </li>
-<li><a href="#_file_upload">3.4. File Upload</a></li>
-<li><a href="#_accessing_files_downloaded_with_browser">3.5. Accessing Files Downloaded with Browser</a></li>
-<li><a href="#_accessing_clipboard">3.6. Accessing Clipboard</a></li>
-<li><a href="#_accessing_browser_developer_tools">3.7. Accessing Browser Developer Tools</a></li>
-<li><a href="#_uploading_files_to_s3">3.8. Uploading Files To S3</a>
-<ul class="sectlevel3">
-<li><a href="#_s3_cli_flags">3.8.1. S3 CLI Flags</a></li>
-</ul>
-</li>
-<li><a href="#_saving_session_metadata">3.9. Saving Session Metadata</a></li>
-</ul>
-</li>
-<li><a href="#_contributing_development">4. Contributing &amp; Development</a>
+<li><a href="#_configuration">4. Configuration</a>
 <ul class="sectlevel2">
-<li><a href="#_documentation">4.1. Documentation</a></li>
+<li><a href="#_recommended_docker_settings">4.1. Recommended Docker Settings</a></li>
+<li><a href="#_browsers_configuration_file">4.2. Browsers Configuration File</a>
+<ul class="sectlevel3">
+<li><a href="#_browser_name_and_version">4.2.1. Browser Name and Version</a></li>
+<li><a href="#_image">4.2.2. Image</a></li>
+<li><a href="#_other_optional_fields">4.2.3. Other Optional Fields</a></li>
+<li><a href="#_syncing_browser_images_from_existing_file">4.2.4. Syncing Browser Images from Existing File</a></li>
+</ul>
+</li>
+<li><a href="#_logging_configuration_file">4.3. Logging Configuration File</a></li>
+<li><a href="#_reloading_configuration">4.4. Reloading Configuration</a></li>
+<li><a href="#_updating_browsers">4.5. Updating Browsers</a>
+<ul class="sectlevel3">
+<li><a href="#_the_short_way">4.5.1. The Short Way</a></li>
+<li><a href="#_a_bit_longer_way">4.5.2. A Bit Longer Way</a></li>
+</ul>
+</li>
+<li><a href="#_setting_timezone">4.6. Setting Timezone</a></li>
+<li><a href="#_selenoid_with_docker_compose">4.7. Selenoid with Docker Compose</a></li>
+<li><a href="#_log_files">4.8. Log Files</a></li>
+<li><a href="#_selenoid_cli_flags">4.9. Selenoid CLI Flags</a>
+<ul class="sectlevel3">
+<li><a href="#_s3_cli_flags">4.9.1. S3 CLI Flags</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_contributing_development">5. Contributing &amp; Development</a>
+<ul class="sectlevel2">
+<li><a href="#_documentation">5.1. Documentation</a></li>
 </ul>
 </li>
 <li><a href="#_browser_image_information">Appendix A: Browser Image information</a>
@@ -1160,9 +1164,6 @@ aerokube/selenoid:latest-release</pre>
 <li>
 <p><a href="https://hub.docker.com/r/selenoid/opera/">Opera</a></p>
 </li>
-<li>
-<p><a href="https://hub.docker.com/r/selenoid/phantomjs/">PhantomJS</a></p>
-</li>
 </ul>
 </div>
 <div class="paragraph">
@@ -1210,10 +1211,1318 @@ Feel free to create issues or request images for new versions.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_configuration"><a class="anchor" href="#_configuration"></a>2. Configuration</h2>
+<h2 id="_main_features"><a class="anchor" href="#_main_features"></a>2. Main Features</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_recommended_docker_settings"><a class="anchor" href="#_recommended_docker_settings"></a>2.1. Recommended Docker Settings</h3>
+<h3 id="_video_recording"><a class="anchor" href="#_video_recording"></a>2.1. Video Recording</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>This feature only works when browsers are run in containers.</p>
+</li>
+<li>
+<p>Video can be recorded with both vnc or non-vnc browser images.</p>
+</li>
+<li>
+<p>An additional <code>enableVideo</code> capability should be added to tests. See <a href="#_special_capabilities">Special Capabilities</a> section for more details.</p>
+</li>
+</ol>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid can capture browser screen and save it to <a href="https://en.wikipedia.org/wiki/MPEG-4">MPEG-4</a> video file using <a href="https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC">H264</a> codec.
+Video recording works by attaching a separate container with <a href="https://www.ffmpeg.org/">video capturing software</a> to running browser container.</p>
+</div>
+<div class="paragraph">
+<p>To use this feature you should:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Pull video recorder image once:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>$ docker pull selenoid/video-recorder:latest-release</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>When running Selenoid <strong>in Docker container</strong>:</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Mount a directory from the host machine (e.g. <code>~/.aerokube/selenoid/video</code>) to store video files to <code>/opt/selenoid/video</code>.</p>
+</li>
+<li>
+<p>Pass an additional <code>OVERRIDE_VIDEO_OUTPUT_DIR</code> environment variable with absolute path to video directory on host machine. This is required because video recorder container, automatically created by Selenoid should save video to host machine video storage directory.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>When running Selenoid <strong>as a binary</strong> - videos will be stored in <code>video</code> directory inside current working directory.</p>
+<div class="listingblock">
+<div class="title">Example Docker Command</div>
+<div class="content">
+<pre>$ docker run -d
+--name selenoid                                 \
+-p 4444:4444                                    \
+-v /var/run/docker.sock:/var/run/docker.sock    \
+-v `pwd`/config/:/etc/selenoid/:ro              \
+-v `pwd`/video/:/opt/selenoid/video/            \
+-e OVERRIDE_VIDEO_OUTPUT_DIR=`pwd`/video/       \
+aerokube/selenoid:latest-release</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+All these actions are automatically done when starting Selenoid via <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> <code>selenoid start</code> command.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_on_windows"><a class="anchor" href="#_on_windows"></a>2.1.1. On Windows</h4>
+<div class="paragraph">
+<p>With absolute path your command will look like:</p>
+</div>
+<div class="listingblock">
+<div class="title">Windows PowerShell</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">&gt; docker volume create selenoid-videos
+&gt; $current = $PWD -replace &quot;\\&quot;, &quot;/&quot; -replace &quot;C&quot;, &quot;c&quot;    <i class="conum" data-value="1"></i><b>(1)</b>
+&gt; docker run -d                                         `
+--name selenoid                                         `
+-p 4444:4444                                            `
+-v //var/run/docker.sock:/var/run/docker.sock           `
+-v ${current}/config/:/etc/selenoid/:ro                 `
+-v /c/selenoid/video/:/opt/selenoid/video/              ` <i class="conum" data-value="2"></i><b>(2)</b>
+-e OVERRIDE_VIDEO_OUTPUT_DIR=/c/selenoid/video/         ` <i class="conum" data-value="3"></i><b>(3)</b>
+aerokube/selenoid:latest-release</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Simple macros to get $PWD with compatible form assumed your directory located on <code>C:</code> drive</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Should be absolute path in compatible form</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Should be same as in (2)</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_downloading_video_files_from_selenoid"><a class="anchor" href="#_downloading_video_files_from_selenoid"></a>2.1.2. Downloading Video Files from Selenoid</h4>
+<div class="paragraph">
+<p>You can access recorded video files using the following URL:</p>
+</div>
+<div class="listingblock">
+<div class="title">Direct Link to File</div>
+<div class="content">
+<pre>http://selenoid-host.example.com:4444/video/&lt;filename&gt;.mp4</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Direct link will work only after session has finished because Selenoid renames temporary filename to <code>&lt;session-id&gt;.mp4</code> (by default) at the session close.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To see all available files use:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing All Video Files</div>
+<div class="content">
+<pre>http://selenoid-host.example.com:4444/video/</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_deleting_video_files"><a class="anchor" href="#_deleting_video_files"></a>2.1.3. Deleting Video Files</h4>
+<div class="paragraph">
+<p>Selenoid intentionally has no built-in logic to automatically remove old video files. To limit storage space consumption you have two alternatives:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Schedule scripts automatically removing files older than desired date and time. An example command under Unix operating systems can look like:</p>
+<div class="listingblock">
+<div class="title">Shell Command to Remove Old Video Files</div>
+<div class="content">
+<pre>$ find /path/to/video/dir -mindepth 1 -maxdepth 1 -mmin +120 -name '*.mp4' | xargs rm -rf</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice <code>-mmin +120</code> argument meaning to only process files older than 2 hours (120 minutes).</p>
+</div>
+</li>
+<li>
+<p>Send video removal requests (e.g. from passed test cases). Just use <code>DELETE</code> HTTP method and Selenoid video URL:</p>
+<div class="listingblock">
+<div class="title">Deleting Video File via HTTP API</div>
+<div class="content">
+<pre>$ curl -X DELETE http://selenoid-host.example.com:4444/video/&lt;filename&gt;.mp4</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_saving_session_logs"><a class="anchor" href="#_saving_session_logs"></a>2.2. Saving Session Logs</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>An additional <code>enableLog</code> capability should be added to tests. See <a href="#_special_capabilities">Special Capabilities</a> section for more details.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid can save log files for every running session to a separate file. By default log files are saved as <code>&lt;session-id&gt;.log</code> but you can alter file name via <code>logName</code> capability.</p>
+</div>
+<div class="paragraph">
+<p>To enable this feature you only need to add <code>-log-output-dir &lt;/path/to/some/dir&gt;</code> flag to Selenoid:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./selenoid -log-output-dir /path/to/some/dir</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When running Selenoid <strong>in Docker container</strong> - don&#8217;t forget to mount logs directory from the host machine:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example Docker Command</div>
+<div class="content">
+<pre>$ docker run -d
+--name selenoid                                 \
+-p 4444:4444                                    \
+-v /var/run/docker.sock:/var/run/docker.sock    \
+-v `pwd`/config/:/etc/selenoid/:ro              \
+-v `pwd`/logs/:/opt/selenoid/logs/              \
+aerokube/selenoid:latest-release -log-output-dir /opt/selenoid/logs</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+This feature is automatically enabled when starting Selenoid via <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> <code>selenoid start</code> command.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_downloading_log_files_from_selenoid"><a class="anchor" href="#_downloading_log_files_from_selenoid"></a>2.2.1. Downloading Log Files from Selenoid</h4>
+<div class="paragraph">
+<p>You can access saved log files using the following URL:</p>
+</div>
+<div class="listingblock">
+<div class="title">Direct Link to Log File</div>
+<div class="content">
+<pre>http://selenoid-host.example.com:4444/logs/&lt;filename&gt;.log</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Direct link will work only after session has finished because Selenoid renames temporary filename to <code>&lt;session-id&gt;.log</code> (by default) at the session close.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To see all available files use:</p>
+</div>
+<div class="listingblock">
+<div class="title">Listing All Log Files</div>
+<div class="content">
+<pre>http://selenoid-host.example.com:4444/logs/</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_deleting_log_files"><a class="anchor" href="#_deleting_log_files"></a>2.2.2. Deleting Log Files</h4>
+<div class="paragraph">
+<p>Similarly to video files it&#8217;s up to you when to delete old log files. Either remove log files from the directory using a scheduled job or send log removal requests:</p>
+</div>
+<div class="listingblock">
+<div class="title">Deleting Log File via HTTP API</div>
+<div class="content">
+<pre>$ curl -X DELETE http://selenoid-host.example.com:4444/logs/&lt;filename&gt;.log</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_uploading_files_to_browser"><a class="anchor" href="#_uploading_files_to_browser"></a>2.3. Uploading Files To Browser</h3>
+<div class="paragraph">
+<p>Some tests require to upload files. This feature works out of the box in the majority of Selenium clients. A typical Java code snippet look like the following:</p>
+</div>
+<div class="listingblock">
+<div class="title">Uploading files with Java</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="comment">// Find file input element</span>
+WebElement input = driver.findElement(By.cssSelector(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>));
+
+<span class="comment">// Make sure element is visible</span>
+((JavascriptExecutor) driver).executeScript(<span class="string"><span class="delimiter">&quot;</span><span class="content">arguments[0].style.display = 'block';</span><span class="delimiter">&quot;</span></span>, input);
+
+<span class="comment">// Configure your client to upload local files to remote Selenium instance</span>
+driver.setFileDetector(<span class="keyword">new</span> LocalFileDetector());
+
+<span class="comment">// Specify you local file path here (not path inside browser container!)</span>
+input.sendKeys(<span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">&quot;</span></span>);</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Uploading files with Python</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="python"><span class="keyword">from</span> <span class="include">selenium.webdriver.remote.file_detector</span> <span class="keyword">import</span> <span class="include">LocalFileDetector</span>
+
+<span class="comment"># ...</span>
+
+input = driver.find_element_by_css_selector(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>)
+driver.execute_script(<span class="string"><span class="delimiter">&quot;</span><span class="content">arguments[0].style.display = 'block';</span><span class="delimiter">&quot;</span></span>, <span class="predefined">input</span>)
+driver.file_detector = LocalFileDetector()
+<span class="predefined">input</span>.send_keys(<span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">&quot;</span></span>)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Uploading files with Webdriver.io</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript"><span class="keyword">var</span> filePath = path.join(<span class="string"><span class="delimiter">'</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">'</span></span>);
+browser.uploadFile(filePath);
+browser.chooseFile(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>, filePath);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Read the following note if you are using Selenoid <strong>without Docker</strong>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This feature is supported in WebDriver protocol by sending zipped file contents to <code>/file</code> handle. However not all driver binaries support this feature. For example this is not implemented in <a href="http://github.com/mozilla/geckodriver">Geckodriver</a> or <a href="https://github.com/SeleniumHQ/selenium/tree/master/cpp/iedriver">IEDriver</a>. When proxying requests <strong>directly</strong> to these drivers (i.e. when <strong>not using Docker</strong>) you need to start Selenoid with <code>-enable-file-upload</code> flag. In that case Selenoid will provide required API to tests. Firefox container images already include this parameter where needed.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_accessing_files_downloaded_with_browser"><a class="anchor" href="#_accessing_files_downloaded_with_browser"></a>2.4. Accessing Files Downloaded with Browser</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>This feature only works when browsers are run in containers.</p>
+</li>
+<li>
+<p>Files are accessible only when browser session is running.</p>
+</li>
+</ol>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Your tests may need to download files with browsers. To analyze these files a common requirement is then to somehow extract downloaded files from browser containers. A possible solution can be dealing with container volumes. But Selenoid provides a <code>/download</code> API and dramatically simplifies downloading files. Having a running session <code>f2bcd32b-d932-4cdc-a639-687ab8e4f840</code> you can access all downloaded files using an URL:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>http://selenoid-host.example.com:4444/download/f2bcd32b-d932-4cdc-a639-687ab8e4f840/myfile.txt</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order for this feature to work an HTTP file server should be listening inside browser container on port <code>8080</code>. Download directory inside container to be used in tests is usually <code>~/Downloads</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_accessing_clipboard"><a class="anchor" href="#_accessing_clipboard"></a>2.5. Accessing Clipboard</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Clipboard is accessible only when browser session is running.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Sometimes you may need to interact with the clipboard to check that your application copy-paste feature works. Selenoid has a dedicated API to interact with the clipboard. To use it:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Start a new session, for example with ID <code>f2bcd32b-d932-4cdc-a639-687ab8e4f840</code>.</p>
+</li>
+<li>
+<p>To get clipboard value send the following HTTP request:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>$ curl http://selenoid-host.example.com:4444/clipboard/f2bcd32b-d932-4cdc-a639-687ab8e4f840
+
+some-clipboard-value</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>To update clipboard value:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>$ curl -X POST --data 'some-clipboard-value' http://seleonid-host.example.com:4444/clipboard/f2bcd32b-d932-4cdc-a639-687ab8e4f840</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_accessing_browser_developer_tools"><a class="anchor" href="#_accessing_browser_developer_tools"></a>2.6. Accessing Browser Developer Tools</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Currently only <a href="https://chromedevtools.github.io/devtools-protocol/">Chrome Developer Tools</a> are supported.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid is proxying Chrome Developer Tools websocket to browser container. Just use the following URL to access this websocket:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>ws://selenoid.example.com:4444/devtools/&lt;session-id&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_special_capabilities"><a class="anchor" href="#_special_capabilities"></a>2.7. Special Capabilities</h3>
+<div class="paragraph">
+<p>Selenoid can improve some automation aspects with custom capabilities.
+You can pass it in tests to enable/disable some features.</p>
+</div>
+<div class="sect3">
+<h4 id="_live_browser_screen_enablevnc"><a class="anchor" href="#_live_browser_screen_enablevnc"></a>2.7.1. Live Browser Screen: enableVNC</h4>
+<div class="paragraph">
+<p>Selenoid supports showing browser screen during test execution.
+This works with containers having <a href="https://en.wikipedia.org/wiki/Virtual_Network_Computing">VNC</a> server installed (VNC column of <a href="#_browser_image_information">Browser Image information</a>).
+To see browser screen:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: boolean</div>
+<div class="content">
+<pre>enableVNC: true</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then launch <a href="http://aerokube.com/selenoid-ui/latest/">Selenoid UI</a> to see the screen.</p>
+</div>
+<div class="paragraph">
+<p>This works by proxying VNC port from started container to <code><a href="http://localhost:4444/vnc/&lt;session-id&gt" class="bare">http://localhost:4444/vnc/&lt;session-id&gt</a>;</code> to WebSocket, where <code>&lt;session-id&gt;</code> is Selenium session ID.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_custom_screen_resolution_screenresolution"><a class="anchor" href="#_custom_screen_resolution_screenresolution"></a>2.7.2. Custom Screen Resolution: screenResolution</h4>
+<div class="paragraph">
+<p>Selenoid allows you to set custom screen resolution in containers being run:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string, format: &lt;width&gt;x&lt;height&gt;x&lt;colors-depth&gt;</div>
+<div class="content">
+<pre>screenResolution: "1280x1024x24"</pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>This capability sets only screen resolution - not browser window size.
+Most of browsers have some default window size value this is why your screenshot size can be smaller than screen resolution specified in capability.
+You should manually resize window to desired width and height.</p>
+</li>
+<li>
+<p>So far as our containers run headless browsers in Xvfb without installed window manager <code>maximize</code> operation does not work.
+You need to use <code>setSize</code> method instead.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_video_recording_enablevideo_videoname_videoscreensize_videoframerate_videocodec"><a class="anchor" href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate_videocodec"></a>2.7.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate, videoCodec</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This feature requires some preparation. Please refer to <a href="#_video_recording">Video Recording</a> section for more details.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To enable video recording for session, add:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: boolean</div>
+<div class="content">
+<pre>enableVideo: true</pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>By default saved video files are named <code>&lt;session-id&gt;.mp4</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
+To provide custom video name specify:</p>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>videoName: "my-cool-video.mp4"</pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+It is important to add <code>mp4</code> file extension.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>By default the entire screen picture is being recorded.
+Specifying <code>screenResolution</code> capability changes recorded video size (width and height) accordingly.
+You can override video screen size by passing a capability. In case of <code>videoScreenSize</code>
+resolution is less than actual, screen on video will be trimmed starting from top-left corner:</p>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>videoScreenSize: "1024x768"</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Default video frame rate is <code>12</code> frames per second. Specifying <code>videoFrameRate</code> capability changes this value:</p>
+<div class="listingblock">
+<div class="title">Type: int</div>
+<div class="content">
+<pre>videoFrameRate: 24</pre>
+</div>
+</div>
+</li>
+<li>
+<p>By default Selenoid is using <code>libx264</code> codec for video output. If this codec is consuming too much CPU, you can change it using <code>videoCodec</code> capability:</p>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>videoCodec: "mpeg4"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To obtain the full list of <a href="https://stackoverflow.com/questions/3377300/what-are-all-codecs-and-formats-supported-by-ffmpeg">supported values</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>$ docker run -it --rm --entrypoint /usr/bin/ffmpeg selenoid/video-recorder -codecs</code></pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_saving_session_logs_enablelog_logname"><a class="anchor" href="#_saving_session_logs_enablelog_logname"></a>2.7.4. Saving Session Logs: enableLog, logName</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This feature requires some preparation. Please refer to <a href="#_saving_session_logs">Saving Session Logs</a> section for more details.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To enable saving logs for a session, add:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: boolean</div>
+<div class="content">
+<pre>enableLog: true</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you wish to automatically save logs for all sessions, you can enable this behavior globally with Selenoid <code>-save-all-logs</code> flag.</p>
+</div>
+<div class="paragraph">
+<p>By default saved log files are named <code>&lt;session-id&gt;.log</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
+To provide custom log file name specify:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>logName: "my-cool-log.log"</pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+It is important to add <code>log</code> file extension.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_custom_test_name_name"><a class="anchor" href="#_custom_test_name_name"></a>2.7.5. Custom Test Name: name</h4>
+<div class="paragraph">
+<p>For debugging purposes it is often useful to give a distinct name to every test case.
+When working with Selenoid you can set test case name by passing the following capability:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>name: "myCoolTestName"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The main application of this capability - is debugging tests in the UI which is showing specified name for every running session.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_custom_session_timeout_sessiontimeout"><a class="anchor" href="#_custom_session_timeout_sessiontimeout"></a>2.7.6. Custom Session Timeout: sessionTimeout</h4>
+<div class="paragraph">
+<p>Sometimes you may want to change idle timeout for selected browser session. To achieve this - pass the following capability:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>sessionTimeout: 30m</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Timeout is specified Golang duration format e.g. <code>30m</code> or <code>10s</code> or <code>1h5m</code> and can be no more than the value set by <code>-max-timeout</code> flag.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_per_session_time_zone_timezone"><a class="anchor" href="#_per_session_time_zone_timezone"></a>2.7.7. Per-session Time Zone: timeZone</h4>
+<div class="paragraph">
+<p>Some tests require particular time zone to be set in operating system.
+To achieve this with Selenoid use:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>timeZone: "Europe/Moscow"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can find most of available time zones <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">here</a>.
+Without this capability launched browser containers will have the same timezone as Selenoid one.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_per_session_environment_variables_env"><a class="anchor" href="#_per_session_environment_variables_env"></a>2.7.8. Per-session Environment Variables: env</h4>
+<div class="paragraph">
+<p>Sometimes you may want to set some environment variables for every test case (for example to test with different default locales). To achieve this pass one more capability:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: array, format: &lt;key&gt;=&lt;value&gt;</div>
+<div class="content">
+<pre>env: ["LANG=ru_RU.UTF-8", "LANGUAGE=ru:en", "LC_ALL=ru_RU.UTF-8"]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Environment variables from this capability are appended to variables from configuration file.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_links_to_application_containers_applicationcontainers"><a class="anchor" href="#_links_to_application_containers_applicationcontainers"></a>2.7.9. Links to Application Containers: applicationContainers</h4>
+<div class="paragraph">
+<p>Sometimes you may need to link browser container to application container running on the same host machine.
+This allows you to use cool URLs like <code><a href="http://my-cool-app/" class="bare">http://my-cool-app/</a></code> in tests.
+To achieve this simply pass information about one or more desired links via capability:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: array, format: &lt;container-name&gt;[:alias]</div>
+<div class="content">
+<pre>applicationContainers: ["spring-application-main:my-cool-app", "spring-application-gateway"]</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_hosts_entries_hostsentries"><a class="anchor" href="#_hosts_entries_hostsentries"></a>2.7.10. Hosts Entries: hostsEntries</h4>
+<div class="paragraph">
+<p>Although you can configure a separate list of <code>/etc/hosts</code> entries for every browser image in <a href="#_browsers_configuration_file">Browsers Configuration File</a>
+sometimes you may need to add more entries for particular test cases. This can be easily achieved with:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: array, format: &lt;hostname&gt;:&lt;ip-address&gt;</div>
+<div class="content">
+<pre>hostsEntries: ["example.com:192.168.0.1", "test.com:192.168.0.2"]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Entries will be inserted to <code>/etc/hosts</code> before entries from browsers configuration file.
+Thus entries from capabilities override entries from configuration file if some hosts are equal.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_custom_dns_servers_dnsservers"><a class="anchor" href="#_custom_dns_servers_dnsservers"></a>2.7.11. Custom DNS Servers: dnsServers</h4>
+<div class="paragraph">
+<p>By default Selenoid browser containers are using global DNS settings of Docker daemon. Sometimes you may need to override used DNS servers list for particular test cases. This can be easily achieved with:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: array, format: &lt;dns-ip-address&gt;</div>
+<div class="content">
+<pre>dnsServers: ["192.168.0.1", "192.168.0.2"]</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_more_docker_networks_additionalnetworks"><a class="anchor" href="#_more_docker_networks_additionalnetworks"></a>2.7.12. More Docker Networks: additionalNetworks</h4>
+<div class="paragraph">
+<p>By default Selenoid browser containers are started in Docker network specified by <code>-container-network</code> flag. If you tested application is running in another network you may need to connect browser container to this network:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: array, format: &lt;network-name&gt;</div>
+<div class="content">
+<pre>additionalNetworks: ["my-custom-net-1", "my-custom-net-2"]</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_container_labels_labels"><a class="anchor" href="#_container_labels_labels"></a>2.7.13. Container Labels: labels</h4>
+<div class="paragraph">
+<p>In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs.</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: map, format: "&lt;key&gt;": "&lt;value&gt;"</div>
+<div class="content">
+<pre>labels: {"environment": "testing", "build-number": "14353"}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Labels from this capability override labels from browsers configuration file. When <code>name</code> capability is specified - it is automatically added as a label to container.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_android_skin_skin"><a class="anchor" href="#_android_skin_skin"></a>2.7.14. Android Skin: skin</h4>
+<div class="paragraph">
+<p>For <a href="#_android">Android</a> containers you can select emulator skin with capabilities. List of available skins:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Available Android Skins</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Skin</th>
+<th class="tableblock halign-left valign-top">Screen Resolution</th>
+<th class="tableblock halign-left valign-top">DPI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">QVGA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">240x320</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WQVGA400</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">240x400</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WQVGA432</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">240x432</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HVGA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">320x480</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">160</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WVGA800</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">480x800</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">240</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WVGA854</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">480x854</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">240</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WSVGA</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1024x600</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">160</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WXGA720</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">720x1280</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">320</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WXGA800</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1280x800</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">160</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WXGA800-7in</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">800x1280</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">213</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>To select a skin - set <code>skin</code> capability:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string, format: &lt;desired-skin&gt;</div>
+<div class="content">
+<pre>skin: "WXGA720"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also pass desired screen resolution as follows:</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string, format: &lt;desired-screen-resolution&gt;</div>
+<div class="content">
+<pre>skin: "720x1280"</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_s3_key_pattern_s3keypattern"><a class="anchor" href="#_s3_key_pattern_s3keypattern"></a>2.7.15. S3 Key Pattern: s3KeyPattern</h4>
+<div class="paragraph">
+<p>This capability allows to override S3 key pattern (specified by <code>-s3-key-pattern</code> flag) used when uploading files to S3.</p>
+</div>
+<div class="listingblock">
+<div class="title">Type: string</div>
+<div class="content">
+<pre>s3KeyPattern: "$quota/$fileType$fileExtension"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The same key placeholders are supported. Please refer to <a href="#_uploading_files_to_s3">Uploading Files To S3</a> section for more details.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>2.7.16. Specifying Capabilities via Protocol Extensions</h4>
+<div class="paragraph">
+<p>Some Selenium clients allow passing only a limited number of capabilities specified in <a href="https://w3c.github.io/webdriver/webdriver-spec.html">WebDriver specification</a>. For such cases Selenoid supports reading capabilities using <a href="https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions">WebDriver protocol extensions</a> feature. The following two examples deliver the same result. Usually capabilities are passed like this:</p>
+</div>
+<div class="listingblock">
+<div class="title">Passing Capabilities as Usually</div>
+<div class="content">
+<pre>{"browserName": "firefox", "version": "57.0", "screenResolution": "1280x1024x24"}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Selenoid is using <code>selenoid:options</code> key to read protocol extension capabilities:</p>
+</div>
+<div class="listingblock">
+<div class="title">Passing Capabilities using Protocol Extensions</div>
+<div class="content">
+<pre>{"browserName": "firefox", "version": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_advanced_features"><a class="anchor" href="#_advanced_features"></a>3. Advanced Features</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_usage_statistics"><a class="anchor" href="#_usage_statistics"></a>3.1. Usage Statistics</h3>
+<div class="paragraph">
+<p>Selenoid calculates usage statistics that can be accessed with HTTP request:</p>
+</div>
+<div class="listingblock">
+<div class="title">Request</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$ curl http://localhost:4444/status</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Result</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript">{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">total</span><span class="delimiter">&quot;</span></span>: <span class="integer">80</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">used</span><span class="delimiter">&quot;</span></span>: <span class="integer">10</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">queued</span><span class="delimiter">&quot;</span></span>: <span class="integer">0</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">pending</span><span class="delimiter">&quot;</span></span>: <span class="integer">1</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">browsers</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">firefox</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">46.0</span><span class="delimiter">&quot;</span></span>: {
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">user1</span><span class="delimiter">&quot;</span></span>: {
+            <span class="key"><span class="delimiter">&quot;</span><span class="content">count</span><span class="delimiter">&quot;</span></span>:<span class="integer">1</span>,
+            <span class="key"><span class="delimiter">&quot;</span><span class="content">sessions</span><span class="delimiter">&quot;</span></span>:[
+                {
+                    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">a7a2b801-21db-4dae-a99b-4cbc0b81de96</span><span class="delimiter">&quot;</span></span>,
+                    <span class="key"><span class="delimiter">&quot;</span><span class="content">vnc</span><span class="delimiter">&quot;</span></span>: <span class="predefined-constant">false</span>,
+                    <span class="key"><span class="delimiter">&quot;</span><span class="content">screen</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1920x1080x24</span><span class="delimiter">&quot;</span></span>
+                 }
+            ]
+          },
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">user2</span><span class="delimiter">&quot;</span></span>: {
+            <span class="key"><span class="delimiter">&quot;</span><span class="content">count</span><span class="delimiter">&quot;</span></span>:<span class="integer">6</span>,
+            <span class="key"><span class="delimiter">&quot;</span><span class="content">sessions</span><span class="delimiter">&quot;</span></span>:[
+                <span class="comment">//...</span>
+            ]
+          },
+        },
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">48.0</span><span class="delimiter">&quot;</span></span>: {
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">user2</span><span class="delimiter">&quot;</span></span>: {
+            <span class="key"><span class="delimiter">&quot;</span><span class="content">count</span><span class="delimiter">&quot;</span></span>:<span class="integer">3</span>,
+            <span class="key"><span class="delimiter">&quot;</span><span class="content">sessions</span><span class="delimiter">&quot;</span></span>:[
+                <span class="comment">//...</span>
+            ]
+          }
+        }
+      }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Users are extracted from basic HTTP authentication headers.</p>
+</div>
+<div class="sect3">
+<h4 id="_what_statistics_mean"><a class="anchor" href="#_what_statistics_mean"></a>3.1.1. What Statistics Mean</h4>
+<div class="paragraph">
+<p>A typical session lifecycle looks like the following:</p>
+</div>
+<div class="paragraph">
+<div class="title">Typical Session Lifecycle</div>
+<p><span class="image"><img src="img/lifecycle.png" alt="lifecycle"></span></p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>A new session request arrives to Selenoid.</p>
+</li>
+<li>
+<p>Selenoid <code>-limit</code> flag specifies how many sessions can be created simultaneously. It is shown as <code>total</code> in statistics. When requests reach the limit - subsequent requests are placed in queue. <code>Queued</code> requests just block and continue to wait.</p>
+</li>
+<li>
+<p>When there is a free slot for request Selenoid decides whether a Docker container or standalone driver process should be created. All requests during startup are marked as <code>pending</code>. Before proceeding to next step Selenoid waits for required port to be open. This is done by sending HEAD requests to the port.</p>
+</li>
+<li>
+<p>When a container or driver is started (ping is successful) Selenoid does a new session request just in the same way as standard Selenium client.</p>
+</li>
+<li>
+<p>Depending on what is returned as response on the previous step session is marked as <code>created</code> or <code>failed</code>. Created and running sessions are also included to <code>used</code> value.</p>
+</li>
+<li>
+<p>When a session is created Selenoid just proxies the rest of session requests to the same container or driver.</p>
+</li>
+<li>
+<p>New session request can fail because of Selenium errors or issues with container \ driver startup. In that case an error is returned to user.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_sending_statistics_to_external_systems"><a class="anchor" href="#_sending_statistics_to_external_systems"></a>3.1.2. Sending Statistics to External Systems</h4>
+<div class="paragraph">
+<p>To send Selenoid statistics described in previous section you can use <a href="https://github.com/influxdata/telegraf">Telegraf</a>. For example to send status to <a href="https://github.com/graphite-project">Graphite</a>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Pull latest Telegraf Docker container:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code># docker pull telegraf:alpine</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Generate configuration file:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash"># mkdir -p /etc/telegraf
+# docker run --rm telegraf:alpine   \
+    --input-filter httpjson         \
+    --output-filter graphite config &gt; /etc/telegraf/telegraf.conf</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Edit file like the following:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="go">[agent]
+interval = <span class="string"><span class="delimiter">&quot;</span><span class="content">10s</span><span class="delimiter">&quot;</span></span> <i class="conum" data-value="1"></i><b>(1)</b>
+
+[[outputs.graphite]]
+servers = [<span class="string"><span class="delimiter">&quot;</span><span class="content">my-graphite-host.example.com:2024</span><span class="delimiter">&quot;</span></span>] <i class="conum" data-value="2"></i><b>(2)</b>
+prefix = <span class="string"><span class="delimiter">&quot;</span><span class="content">one_min</span><span class="delimiter">&quot;</span></span> <i class="conum" data-value="3"></i><b>(3)</b>
+template = <span class="string"><span class="delimiter">&quot;</span><span class="content">host.measurement.field</span><span class="delimiter">&quot;</span></span>
+
+[[inputs.httpjson]]
+name = <span class="string"><span class="delimiter">&quot;</span><span class="content">selenoid</span><span class="delimiter">&quot;</span></span>
+servers = [
+<span class="string"><span class="delimiter">&quot;</span><span class="content">http://localhost:4444/status</span><span class="delimiter">&quot;</span></span> <i class="conum" data-value="4"></i><b>(4)</b>
+]</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>adjust interval if needed</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>adjust host and port</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>something before hostname, can be blank</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>this is localhost only if Telegraf is run on Selenoid host</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Start Telegraf container:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash"># docker run --net host -d  \
+    --name telegraf         \
+    -v /etc/telegraf:/etc   \
+    telegraf:alpine --config /etc/telegraf.conf</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Metrics will be sent to <em>my-graphite-host.example.com:2024</em>. Metric names will be like the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>one_min.selenoid_example_com.httpjson_selenoid.pending
+one_min.selenoid_example_com.httpjson_selenoid.queued
+one_min.selenoid_example_com.httpjson_selenoid.total</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>telegraf+influxdb+graphana</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_uploading_files_to_s3"><a class="anchor" href="#_uploading_files_to_s3"></a>3.2. Uploading Files To S3</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>This feature only becomes available when Selenoid is compiled with <code>s3</code> build tag (missing by default) as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ go build -tags s3</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid can upload recorded video and log files for every running session to S3-compatible storage.</p>
+</div>
+<div class="paragraph">
+<p>To enable this feature you need to specify S3 access information as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./selenoid -s3-endpoint https://s3.us-east-2.amazonaws.com -s3-region us-east-2 -s3-bucket-name my-bucket -s3-access-key &lt;your-access-key&gt; -s3-secret-key &lt;your-secret-key&gt;</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags then environment variables and shared credentials file are automatically tried as a fallback.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>By default uploaded file name is preserved, i.e. S3 path is <code>/&lt;session-id&gt;.log</code> or <code>/myCustomVideo.mp4</code>. You can optionally provide your custom key pattern using <code>-s3-key-pattern</code> flag and a set of placeholders:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. S3 Key Placeholders</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Placeholder</th>
+<th class="tableblock halign-left valign-top">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$browserName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium browser name capability value</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$browserVersion</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium browser version capability value</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$date</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by current date, e.g. <code>2018-11-01</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$fileName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by source file name</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$fileExtension</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by source file extension</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$fileType</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by <code>log</code> for log files and <code>video</code> for video files</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$platformName</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium platform capability value</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$quota</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by quota name (usually coming from Ggr)</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">$sessionId</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium session ID</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>For example, when launching Selenoid with <code>-s3-key-pattern $browserName/$sessionId/log.txt</code> files will be accessible as <code>firefox/0ee0b48b-e29b-6749-b4f1-2277b8f8d6c5/log.txt</code>. You can also override key pattern for every session with <code>s3KeyPattern</code> capability.</p>
+</div>
+<div class="paragraph">
+<p>Sometimes you may want to upload only video files or files matching some complicated pattern or to not upload some files. To achieve this use <code>-s3-include-files</code> and <code>-s3-exclude-files</code> flags. These flags accept <a href="https://en.wikipedia.org/wiki/Glob_(programming)">globs</a> such as <code>*.mp4</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_saving_session_metadata"><a class="anchor" href="#_saving_session_metadata"></a>3.3. Saving Session Metadata</h3>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+This feature only becomes available when Selenoid is compiled with <code>metadata</code> build tag (missing by default).
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Selenoid can save session metadata to a separate JSON file. Main use case is to somehow post-process session logs, e.g. send them to map-reduce cluster. No additional configuration is needed to enable this feature. When enabled and <code>-log-output-dir</code> flag is set - Selenoid will automatically save JSON files <code>&lt;log-output-dir&gt;/&lt;session-id&gt;.json</code> with the following content:</p>
+</div>
+<div class="listingblock">
+<div class="title">Example metadata JSON file</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript">{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">62a4d82d-edf6-43d5-886f-895b77ff23b7</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">capabilities</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">browserName</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">chrome</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">70.0</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">MyCoolTest</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">screenResolution</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1920x1080x24</span><span class="delimiter">&quot;</span></span>
+    },
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">started</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2018-11-15T16:23:12.440916+03:00</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">finished</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2018-11-15T16:23:12.480928+03:00</span><span class="delimiter">&quot;</span></span>
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_selenoid_without_docker"><a class="anchor" href="#_using_selenoid_without_docker"></a>3.4. Using Selenoid without Docker</h3>
+<div class="paragraph">
+<p>Selenoid is using containers to start browsers. However cases exist when running browser in container is not possible. For example on Windows you have Internet Explorer which can not be run inside container. Selenoid can be used as a lightweight Selenium server replacement to run IE, Firefox or Chrome on Windows. For example to use Selenoid with IE:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Download latest <a href="http://www.seleniumhq.org/download/">IEDriverServer</a> archive and unpack it to some directory (<code><code>C:\</code></code> in this example).</p>
+</li>
+<li>
+<p>Download latest <a href="https://github.com/aerokube/selenoid/releases/latest">Selenoid</a> binary.</p>
+</li>
+<li>
+<p>Create <code><code>browsers.json</code></code> configuration file:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">internet explorer</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">default</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">11</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">versions</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">11</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">image</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">C:</span><span class="char">\\</span><span class="content">IEDriverServer.exe</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">--log-level=DEBUG</span><span class="delimiter">&quot;</span></span>]
+      }
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice that backslashes in Windows paths should be escaped as <code><code>\\</code></code>.
+In this example we define a browser with name <code><code>internet explorer</code></code>  and version <code><code>11</code></code>.</p>
+</div>
+</li>
+<li>
+<p>Start Selenoid:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>./selenoid_win_amd64.exe -conf ./browsers.json -disable-docker</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run your tests against ...</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>http://localhost:4444/wd/hub</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>... with the following capabilities:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>browserName = internet explorer
+version = 11</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>To start <a href="https://www.google.com/chrome/">Chrome</a> instead just download <a href="https://sites.google.com/a/chromium.org/chromedriver/">Chromedriver</a> binary and modify <code><code>browsers.json</code></code> accordingly.</p>
+</li>
+<li>
+<p>By default Selenoid does not process launched driver logs. Launch Selenoid with <code>-capture-driver-logs</code> flag to append driver logs for every session to main log.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration"><a class="anchor" href="#_configuration"></a>4. Configuration</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_recommended_docker_settings"><a class="anchor" href="#_recommended_docker_settings"></a>4.1. Recommended Docker Settings</h3>
 <div class="ulist">
 <ul>
 <li>
@@ -1293,7 +2602,7 @@ eth0      Link encap:Ethernet  HWaddr 00:25:90:eb:fb:3e</pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_browsers_configuration_file"><a class="anchor" href="#_browsers_configuration_file"></a>2.2. Browsers Configuration File</h3>
+<h3 id="_browsers_configuration_file"><a class="anchor" href="#_browsers_configuration_file"></a>4.2. Browsers Configuration File</h3>
 <div class="paragraph">
 <p>Selenoid requires a simple JSON configuration file of the following format:</p>
 </div>
@@ -1400,7 +2709,7 @@ eth0      Link encap:Ethernet  HWaddr 00:25:90:eb:fb:3e</pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_browser_name_and_version"><a class="anchor" href="#_browser_name_and_version"></a>2.2.1. Browser Name and Version</h4>
+<h4 id="_browser_name_and_version"><a class="anchor" href="#_browser_name_and_version"></a>4.2.1. Browser Name and Version</h4>
 <div class="paragraph">
 <p>Browser name and version are just strings that are matched against Selenium desired capabilities:</p>
 </div>
@@ -1444,7 +2753,7 @@ That means version string in JSON should start with version string from capabili
 </div>
 </div>
 <div class="sect3">
-<h4 id="_image"><a class="anchor" href="#_image"></a>2.2.2. Image</h4>
+<h4 id="_image"><a class="anchor" href="#_image"></a>4.2.2. Image</h4>
 <div class="paragraph">
 <p>Image by default is a string with container specification in Docker format (<code>hub.example.com/project/image:tag</code>).</p>
 </div>
@@ -1487,7 +2796,7 @@ That means version string in JSON should start with version string from capabili
 </div>
 </div>
 <div class="sect3">
-<h4 id="_other_optional_fields"><a class="anchor" href="#_other_optional_fields"></a>2.2.3. Other Optional Fields</h4>
+<h4 id="_other_optional_fields"><a class="anchor" href="#_other_optional_fields"></a>4.2.3. Other Optional Fields</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="javascript"><span class="string"><span class="delimiter">&quot;</span><span class="content">46.0</span><span class="delimiter">&quot;</span></span>: {
@@ -1544,7 +2853,7 @@ We recommend to use our <a href="https://github.com/aerokube/cm">configuration t
 </div>
 </div>
 <div class="sect3">
-<h4 id="_syncing_browser_images_from_existing_file"><a class="anchor" href="#_syncing_browser_images_from_existing_file"></a>2.2.4. Syncing Browser Images from Existing File</h4>
+<h4 id="_syncing_browser_images_from_existing_file"><a class="anchor" href="#_syncing_browser_images_from_existing_file"></a>4.2.4. Syncing Browser Images from Existing File</h4>
 <div class="paragraph">
 <p>In some usage scenarios you may want to store browsers configuration file under version control and initialize Selenoid from this file. For example this is true if you wish to have consistently reproducing infrastructure and using such tools as <a href="https://aws.amazon.com/cloudformation/">Amazon Cloud Formation</a>. In order to pull browser images do the following:</p>
 </div>
@@ -1580,7 +2889,7 @@ What to do if Docker Registry is inaccessible? So for maintenance reasons it is 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_logging_configuration_file"><a class="anchor" href="#_logging_configuration_file"></a>2.3. Logging Configuration File</h3>
+<h3 id="_logging_configuration_file"><a class="anchor" href="#_logging_configuration_file"></a>4.3. Logging Configuration File</h3>
 <div class="paragraph">
 <p>By default Docker container logs are saved to host machine hard drive. When using Selenoid for local development that&#8217;s ok.
 But in big Selenium cluster you may want to send logs to some centralized storage like <a href="https://www.elastic.co/products/logstash">Logstash</a>
@@ -1657,7 +2966,7 @@ containers with browsers. Configuration file has the following format:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_reloading_configuration"><a class="anchor" href="#_reloading_configuration"></a>2.4. Reloading Configuration</h3>
+<h3 id="_reloading_configuration"><a class="anchor" href="#_reloading_configuration"></a>4.4. Reloading Configuration</h3>
 <div class="paragraph">
 <p>To reload configuration without restart send SIGHUP:</p>
 </div>
@@ -1703,7 +3012,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_updating_browsers"><a class="anchor" href="#_updating_browsers"></a>2.5. Updating Browsers</h3>
+<h3 id="_updating_browsers"><a class="anchor" href="#_updating_browsers"></a>4.5. Updating Browsers</h3>
 <div class="paragraph">
 <p>One of the most frequent Selenoid maintenance tasks is updating browser versions. To modify the list of available browsers you need to:</p>
 </div>
@@ -1726,7 +3035,7 @@ Use only one of these commands.
 </ol>
 </div>
 <div class="sect3">
-<h4 id="_the_short_way"><a class="anchor" href="#_the_short_way"></a>2.5.1. The Short Way</h4>
+<h4 id="_the_short_way"><a class="anchor" href="#_the_short_way"></a>4.5.1. The Short Way</h4>
 <div class="paragraph">
 <p>This approach is mainly convenient for <strong>personal usage</strong> because Selenoid is restarted i.e. any running browser sessions are interrupted. Just type one <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> command:</p>
 </div>
@@ -1761,7 +3070,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_a_bit_longer_way"><a class="anchor" href="#_a_bit_longer_way"></a>2.5.2. A Bit Longer Way</h4>
+<h4 id="_a_bit_longer_way"><a class="anchor" href="#_a_bit_longer_way"></a>4.5.2. A Bit Longer Way</h4>
 <div class="paragraph">
 <p>We recommend to use this approach on <strong>production clusters</strong> because Selenoid configuration is reloaded without restart.</p>
 </div>
@@ -1795,7 +3104,7 @@ Use only one of these commands.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_setting_timezone"><a class="anchor" href="#_setting_timezone"></a>2.6. Setting Timezone</h3>
+<h3 id="_setting_timezone"><a class="anchor" href="#_setting_timezone"></a>4.6. Setting Timezone</h3>
 <div class="paragraph">
 <p>When used in Docker container Selenoid will have timezone set to <strong>UTC</strong>.
 To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
@@ -1812,281 +3121,7 @@ To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_video_recording"><a class="anchor" href="#_video_recording"></a>2.7. Video Recording</h3>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>This feature only works when browsers are run in containers.</p>
-</li>
-<li>
-<p>Video can be recorded with both vnc or non-vnc browser images.</p>
-</li>
-<li>
-<p>An additional <code>enableVideo</code> capability should be added to tests. See <a href="#_special_capabilities">Special Capabilities</a> section for more details.</p>
-</li>
-</ol>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Selenoid can capture browser screen and save it to <a href="https://en.wikipedia.org/wiki/MPEG-4">MPEG-4</a> video file using <a href="https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC">H264</a> codec.
-Video recording works by attaching a separate container with <a href="https://www.ffmpeg.org/">video capturing software</a> to running browser container.</p>
-</div>
-<div class="paragraph">
-<p>To use this feature you should:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Pull video recorder image once:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>$ docker pull selenoid/video-recorder:latest-release</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>When running Selenoid <strong>in Docker container</strong>:</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Mount a directory from the host machine (e.g. <code>~/.aerokube/selenoid/video</code>) to store video files to <code>/opt/selenoid/video</code>.</p>
-</li>
-<li>
-<p>Pass an additional <code>OVERRIDE_VIDEO_OUTPUT_DIR</code> environment variable with absolute path to video directory on host machine. This is required because video recorder container, automatically created by Selenoid should save video to host machine video storage directory.</p>
-</li>
-</ol>
-</div>
-</li>
-<li>
-<p>When running Selenoid <strong>as a binary</strong> - videos will be stored in <code>video</code> directory inside current working directory.</p>
-<div class="listingblock">
-<div class="title">Example Docker Command</div>
-<div class="content">
-<pre>$ docker run -d
---name selenoid                                 \
--p 4444:4444                                    \
--v /var/run/docker.sock:/var/run/docker.sock    \
--v `pwd`/config/:/etc/selenoid/:ro              \
--v `pwd`/video/:/opt/selenoid/video/            \
--e OVERRIDE_VIDEO_OUTPUT_DIR=`pwd`/video/       \
-aerokube/selenoid:latest-release</pre>
-</div>
-</div>
-</li>
-</ol>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-All these actions are automatically done when starting Selenoid via <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> <code>selenoid start</code> command.
-</td>
-</tr>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_on_windows"><a class="anchor" href="#_on_windows"></a>2.7.1. On Windows</h4>
-<div class="paragraph">
-<p>With absolute path your command will look like:</p>
-</div>
-<div class="listingblock">
-<div class="title">Windows PowerShell</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">&gt; docker volume create selenoid-videos
-&gt; $current = $PWD -replace &quot;\\&quot;, &quot;/&quot; -replace &quot;C&quot;, &quot;c&quot;    <i class="conum" data-value="1"></i><b>(1)</b>
-&gt; docker run -d                                         `
---name selenoid                                         `
--p 4444:4444                                            `
--v //var/run/docker.sock:/var/run/docker.sock           `
--v ${current}/config/:/etc/selenoid/:ro                 `
--v /c/selenoid/video/:/opt/selenoid/video/              ` <i class="conum" data-value="2"></i><b>(2)</b>
--e OVERRIDE_VIDEO_OUTPUT_DIR=/c/selenoid/video/         ` <i class="conum" data-value="3"></i><b>(3)</b>
-aerokube/selenoid:latest-release</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Simple macros to get $PWD with compatible form assumed your directory located on <code>C:</code> drive</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Should be absolute path in compatible form</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>Should be same as in (2)</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_downloading_video_files_from_selenoid"><a class="anchor" href="#_downloading_video_files_from_selenoid"></a>2.7.2. Downloading Video Files from Selenoid</h4>
-<div class="paragraph">
-<p>You can access recorded video files using the following URL:</p>
-</div>
-<div class="listingblock">
-<div class="title">Direct Link to File</div>
-<div class="content">
-<pre>http://selenoid-host.example.com:4444/video/&lt;filename&gt;.mp4</pre>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Direct link will work only after session has finished because Selenoid renames temporary filename to <code>&lt;session-id&gt;.mp4</code> (by default) at the session close.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>To see all available files use:</p>
-</div>
-<div class="listingblock">
-<div class="title">Listing All Video Files</div>
-<div class="content">
-<pre>http://selenoid-host.example.com:4444/video/</pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_deleting_video_files"><a class="anchor" href="#_deleting_video_files"></a>2.7.3. Deleting Video Files</h4>
-<div class="paragraph">
-<p>Selenoid intentionally has no built-in logic to automatically remove old video files. To limit storage space consumption you have two alternatives:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Schedule scripts automatically removing files older than desired date and time. An example command under Unix operating systems can look like:</p>
-<div class="listingblock">
-<div class="title">Shell Command to Remove Old Video Files</div>
-<div class="content">
-<pre>$ find /path/to/video/dir -mindepth 1 -maxdepth 1 -mmin +120 -name '*.mp4' | xargs rm -rf</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Notice <code>-mmin +120</code> argument meaning to only process files older than 2 hours (120 minutes).</p>
-</div>
-</li>
-<li>
-<p>Send video removal requests (e.g. from passed test cases). Just use <code>DELETE</code> HTTP method and Selenoid video URL:</p>
-<div class="listingblock">
-<div class="title">Deleting Video File via HTTP API</div>
-<div class="content">
-<pre>$ curl -X DELETE http://selenoid-host.example.com:4444/video/&lt;filename&gt;.mp4</pre>
-</div>
-</div>
-</li>
-</ol>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_saving_session_logs"><a class="anchor" href="#_saving_session_logs"></a>2.8. Saving Session Logs</h3>
-<div class="paragraph">
-<p>Selenoid can save log files for every running session to a separate file. By default log files are saved as <code>&lt;session-id&gt;.log</code> but you can alter file name via <code>logName</code> capability.</p>
-</div>
-<div class="paragraph">
-<p>To enable this feature you only need to add <code>-log-output-dir &lt;/path/to/some/dir&gt;</code> flag to Selenoid:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ ./selenoid -log-output-dir /path/to/some/dir</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>When running Selenoid <strong>in Docker container</strong> - don&#8217;t forget to mount logs directory from the host machine:</p>
-</div>
-<div class="listingblock">
-<div class="title">Example Docker Command</div>
-<div class="content">
-<pre>$ docker run -d
---name selenoid                                 \
--p 4444:4444                                    \
--v /var/run/docker.sock:/var/run/docker.sock    \
--v `pwd`/config/:/etc/selenoid/:ro              \
--v `pwd`/logs/:/opt/selenoid/logs/              \
-aerokube/selenoid:latest-release -log-output-dir /opt/selenoid/logs</pre>
-</div>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-This feature is automatically enabled when starting Selenoid via <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> <code>selenoid start</code> command.
-</td>
-</tr>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_downloading_log_files_from_selenoid"><a class="anchor" href="#_downloading_log_files_from_selenoid"></a>2.8.1. Downloading Log Files from Selenoid</h4>
-<div class="paragraph">
-<p>You can access saved log files using the following URL:</p>
-</div>
-<div class="listingblock">
-<div class="title">Direct Link to Log File</div>
-<div class="content">
-<pre>http://selenoid-host.example.com:4444/logs/&lt;filename&gt;.log</pre>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Direct link will work only after session has finished because Selenoid renames temporary filename to <code>&lt;session-id&gt;.log</code> (by default) at the session close.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>To see all available files use:</p>
-</div>
-<div class="listingblock">
-<div class="title">Listing All Log Files</div>
-<div class="content">
-<pre>http://selenoid-host.example.com:4444/logs/</pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_deleting_log_files"><a class="anchor" href="#_deleting_log_files"></a>2.8.2. Deleting Log Files</h4>
-<div class="paragraph">
-<p>Similarly to video files it&#8217;s up to you when to delete old log files. Either remove log files from the directory using a scheduled job or send log removal requests:</p>
-</div>
-<div class="listingblock">
-<div class="title">Deleting Log File via HTTP API</div>
-<div class="content">
-<pre>$ curl -X DELETE http://selenoid-host.example.com:4444/logs/&lt;filename&gt;.log</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>2.9. Selenoid with Docker Compose</h3>
+<h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>4.7. Selenoid with Docker Compose</h3>
 <div class="paragraph">
 <p>To avoid network problems between browser drivers inside containers and Selenoid when using <a href="https://docs.docker.com/compose/">Docker Compose</a> for combining with another services (such as UI or ggr) you need to enable <strong>bridge</strong> network mode for all services:</p>
 </div>
@@ -2156,7 +3191,7 @@ Direct link will work only after session has finished because Selenoid renames t
 </div>
 </div>
 <div class="sect2">
-<h3 id="_log_files"><a class="anchor" href="#_log_files"></a>2.10. Log Files</h3>
+<h3 id="_log_files"><a class="anchor" href="#_log_files"></a>4.8. Log Files</h3>
 <div class="paragraph">
 <p>A typical log file looks like the following:</p>
 </div>
@@ -2181,7 +3216,7 @@ Direct link will work only after session has finished because Selenoid renames t
 <p>Every line contains:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 1. Log entry contents</caption>
+<caption class="title">Table 3. Log entry contents</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -2236,7 +3271,7 @@ Direct link will work only after session has finished because Selenoid renames t
 <p>The following statuses are available:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 2. Log entry statuses</caption>
+<caption class="title">Table 4. Log entry statuses</caption>
 <colgroup>
 <col style="width: 50%;">
 <col style="width: 50%;">
@@ -2476,7 +3511,7 @@ Direct link will work only after session has finished because Selenoid renames t
 </table>
 </div>
 <div class="sect2">
-<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>2.11. Selenoid CLI Flags</h3>
+<h3 id="_selenoid_cli_flags"><a class="anchor" href="#_selenoid_cli_flags"></a>4.9. Selenoid CLI Flags</h3>
 <div class="paragraph">
 <p>The following flags are supported by <code>selenoid</code> command:</p>
 </div>
@@ -2498,12 +3533,14 @@ Direct link will work only after session has finished because Selenoid renames t
     Disable wait queue
 -enable-file-upload
     File upload support
+-graceful-period duration
+    graceful shutdown period in time.Duration format, e.g. 300s or 500ms (default 5m0s)
 -limit int
     Simultaneous container runs (default 5)
 -listen string
     Network address to accept connections (default ":4444")
 -log-conf string
-    Container logging configuration file (default "config/container-logs.json")
+    Container logging configuration file
 -log-output-dir string
     Directory to save session log to
 -max-timeout duration
@@ -2551,989 +3588,8 @@ Direct link will work only after session has finished because Selenoid renames t
     -conf /etc/selenoid/browsers.json -limit 10 -video-output-dir /opt/selenoid/video/</code></pre>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_advanced_features"><a class="anchor" href="#_advanced_features"></a>3. Advanced Features</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_special_capabilities"><a class="anchor" href="#_special_capabilities"></a>3.1. Special Capabilities</h3>
-<div class="paragraph">
-<p>Selenoid can improve some automation aspects with custom capabilities.
-You can pass it in tests to enable/disable some features.</p>
-</div>
 <div class="sect3">
-<h4 id="_live_browser_screen_enablevnc"><a class="anchor" href="#_live_browser_screen_enablevnc"></a>3.1.1. Live Browser Screen: enableVNC</h4>
-<div class="paragraph">
-<p>Selenoid supports showing browser screen during test execution.
-This works with containers having <a href="https://en.wikipedia.org/wiki/Virtual_Network_Computing">VNC</a> server installed (VNC column of <a href="#_browser_image_information">Browser Image information</a>).
-To see browser screen:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: boolean</div>
-<div class="content">
-<pre>enableVNC: true</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Then launch <a href="http://aerokube.com/selenoid-ui/latest/">Selenoid UI</a> to see the screen.</p>
-</div>
-<div class="paragraph">
-<p>This works by proxying VNC port from started container to <code><a href="http://localhost:4444/vnc/&lt;session-id&gt" class="bare">http://localhost:4444/vnc/&lt;session-id&gt</a>;</code> to WebSocket, where <code>&lt;session-id&gt;</code> is Selenium session ID.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_custom_screen_resolution_screenresolution"><a class="anchor" href="#_custom_screen_resolution_screenresolution"></a>3.1.2. Custom Screen Resolution: screenResolution</h4>
-<div class="paragraph">
-<p>Selenoid allows you to set custom screen resolution in containers being run:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: string, format: &lt;width&gt;x&lt;height&gt;x&lt;colors-depth&gt;</div>
-<div class="content">
-<pre>screenResolution: "1280x1024x24"</pre>
-</div>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-<div class="ulist">
-<ul>
-<li>
-<p>This capability sets only screen resolution - not browser window size.
-Most of browsers have some default window size value this is why your screenshot size can be smaller than screen resolution specified in capability.
-You should manually resize window to desired width and height.</p>
-</li>
-<li>
-<p>So far as our containers run headless browsers in Xvfb without installed window manager <code>maximize</code> operation does not work.
-You need to use <code>setSize</code> method instead.</p>
-</li>
-</ul>
-</div>
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_video_recording_enablevideo_videoname_videoscreensize_videoframerate_videocodec"><a class="anchor" href="#_video_recording_enablevideo_videoname_videoscreensize_videoframerate_videocodec"></a>3.1.3. Video Recording: enableVideo, videoName, videoScreenSize, videoFrameRate, videoCodec</h4>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-This feature requires some preparation. Please refer to <a href="#_video_recording">Video Recording</a> section for more details.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>To enable video recording for session, add:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: boolean</div>
-<div class="content">
-<pre>enableVideo: true</pre>
-</div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>By default saved video files are named <code>&lt;session-id&gt;.mp4</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
-To provide custom video name specify:</p>
-<div class="listingblock">
-<div class="title">Type: string</div>
-<div class="content">
-<pre>videoName: "my-cool-video.mp4"</pre>
-</div>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-It is important to add <code>mp4</code> file extension.
-</td>
-</tr>
-</table>
-</div>
-</li>
-<li>
-<p>By default the entire screen picture is being recorded.
-Specifying <code>screenResolution</code> capability changes recorded video size (width and height) accordingly.
-You can override video screen size by passing a capability. In case of <code>videoScreenSize</code>
-resolution is less than actual, screen on video will be trimmed starting from top-left corner:</p>
-<div class="listingblock">
-<div class="title">Type: string</div>
-<div class="content">
-<pre>videoScreenSize: "1024x768"</pre>
-</div>
-</div>
-</li>
-<li>
-<p>Default video frame rate is <code>12</code> frames per second. Specifying <code>videoFrameRate</code> capability changes this value:</p>
-<div class="listingblock">
-<div class="title">Type: int</div>
-<div class="content">
-<pre>videoFrameRate: 24</pre>
-</div>
-</div>
-</li>
-<li>
-<p>By default Selenoid is using <code>libx264</code> codec for video output. If this codec is consuming too much CPU, you can change it using <code>videoCodec</code> capability:</p>
-<div class="listingblock">
-<div class="title">Type: string</div>
-<div class="content">
-<pre>videoCodec: "mpeg4"</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>To obtain the full list of <a href="https://stackoverflow.com/questions/3377300/what-are-all-codecs-and-formats-supported-by-ffmpeg">supported values</a>:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>$ docker run -it --rm --entrypoint /usr/bin/ffmpeg selenoid/video-recorder -codecs</code></pre>
-</div>
-</div>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_saving_session_logs_enablelog_logname"><a class="anchor" href="#_saving_session_logs_enablelog_logname"></a>3.1.4. Saving Session Logs: enableLog, logName</h4>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-This feature requires some preparation. Please refer to <a href="#_saving_session_logs">Saving Session Logs</a> section for more details.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>To enable saving logs for a session, add:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: boolean</div>
-<div class="content">
-<pre>enableLog: true</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>If you wish to automatically save logs for all sessions, you can enable this behavior globally with Selenoid <code>-save-all-logs</code> flag.</p>
-</div>
-<div class="paragraph">
-<p>By default saved log files are named <code>&lt;session-id&gt;.log</code> where <code>&lt;session-id&gt;</code> is a unique identifier of Selenium session.
-To provide custom log file name specify:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: string</div>
-<div class="content">
-<pre>logName: "my-cool-log.log"</pre>
-</div>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-It is important to add <code>log</code> file extension.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_custom_test_name_name"><a class="anchor" href="#_custom_test_name_name"></a>3.1.5. Custom Test Name: name</h4>
-<div class="paragraph">
-<p>For debugging purposes it is often useful to give a distinct name to every test case.
-When working with Selenoid you can set test case name by passing the following capability:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: string</div>
-<div class="content">
-<pre>name: "myCoolTestName"</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The main application of this capability - is debugging tests in the UI which is showing specified name for every running session.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_custom_session_timeout_sessiontimeout"><a class="anchor" href="#_custom_session_timeout_sessiontimeout"></a>3.1.6. Custom Session Timeout: sessionTimeout</h4>
-<div class="paragraph">
-<p>Sometimes you may want to change idle timeout for selected browser session. To achieve this - pass the following capability:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: string</div>
-<div class="content">
-<pre>sessionTimeout: 30m</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Timeout is specified Golang duration format e.g. <code>30m</code> or <code>10s</code> or <code>1h5m</code> and can be no more than the value set by <code>-max-timeout</code> flag.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_per_session_time_zone_timezone"><a class="anchor" href="#_per_session_time_zone_timezone"></a>3.1.7. Per-session Time Zone: timeZone</h4>
-<div class="paragraph">
-<p>Some tests require particular time zone to be set in operating system.
-To achieve this with Selenoid use:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: string</div>
-<div class="content">
-<pre>timeZone: "Europe/Moscow"</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>You can find most of available time zones <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones">here</a>.
-Without this capability launched browser containers will have the same timezone as Selenoid one.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_per_session_environment_variables_env"><a class="anchor" href="#_per_session_environment_variables_env"></a>3.1.8. Per-session Environment Variables: env</h4>
-<div class="paragraph">
-<p>Sometimes you may want to set some environment variables for every test case (for example to test with different default locales). To achieve this pass one more capability:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: array, format: &lt;key&gt;=&lt;value&gt;</div>
-<div class="content">
-<pre>env: ["LANG=ru_RU.UTF-8", "LANGUAGE=ru:en", "LC_ALL=ru_RU.UTF-8"]</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Environment variables from this capability are appended to variables from configuration file.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_links_to_application_containers_applicationcontainers"><a class="anchor" href="#_links_to_application_containers_applicationcontainers"></a>3.1.9. Links to Application Containers: applicationContainers</h4>
-<div class="paragraph">
-<p>Sometimes you may need to link browser container to application container running on the same host machine.
-This allows you to use cool URLs like <code><a href="http://my-cool-app/" class="bare">http://my-cool-app/</a></code> in tests.
-To achieve this simply pass information about one or more desired links via capability:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: array, format: &lt;container-name&gt;[:alias]</div>
-<div class="content">
-<pre>applicationContainers: ["spring-application-main:my-cool-app", "spring-application-gateway"]</pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_hosts_entries_hostsentries"><a class="anchor" href="#_hosts_entries_hostsentries"></a>3.1.10. Hosts Entries: hostsEntries</h4>
-<div class="paragraph">
-<p>Although you can configure a separate list of <code>/etc/hosts</code> entries for every browser image in <a href="#_browsers_configuration_file">Browsers Configuration File</a>
-sometimes you may need to add more entries for particular test cases. This can be easily achieved with:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: array, format: &lt;hostname&gt;:&lt;ip-address&gt;</div>
-<div class="content">
-<pre>hostsEntries: ["example.com:192.168.0.1", "test.com:192.168.0.2"]</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Entries will be inserted to <code>/etc/hosts</code> before entries from browsers configuration file.
-Thus entries from capabilities override entries from configuration file if some hosts are equal.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_custom_dns_servers_dnsservers"><a class="anchor" href="#_custom_dns_servers_dnsservers"></a>3.1.11. Custom DNS Servers: dnsServers</h4>
-<div class="paragraph">
-<p>By default Selenoid browser containers are using global DNS settings of Docker daemon. Sometimes you may need to override used DNS servers list for particular test cases. This can be easily achieved with:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: array, format: &lt;dns-ip-address&gt;</div>
-<div class="content">
-<pre>dnsServers: ["192.168.0.1", "192.168.0.2"]</pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_more_docker_networks_additionalnetworks"><a class="anchor" href="#_more_docker_networks_additionalnetworks"></a>3.1.12. More Docker Networks: additionalNetworks</h4>
-<div class="paragraph">
-<p>By default Selenoid browser containers are started in Docker network specified by <code>-container-network</code> flag. If you tested application is running in another network you may need to connect browser container to this network:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: array, format: &lt;network-name&gt;</div>
-<div class="content">
-<pre>additionalNetworks: ["my-custom-net-1", "my-custom-net-2"]</pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_container_labels_labels"><a class="anchor" href="#_container_labels_labels"></a>3.1.13. Container Labels: labels</h4>
-<div class="paragraph">
-<p>In big clusters you may want to pass additional metadata to every browser session: environment, VCS revision, build number and so on. These labels can be then used to enrich session logs and send them to a centralized log storage. Later this metadata can be used for more efficient search through logs.</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: map, format: "&lt;key&gt;": "&lt;value&gt;"</div>
-<div class="content">
-<pre>labels: {"environment": "testing", "build-number": "14353"}</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Labels from this capability override labels from browsers configuration file. When <code>name</code> capability is specified - it is automatically added as a label to container.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_android_skin_skin"><a class="anchor" href="#_android_skin_skin"></a>3.1.14. Android Skin: skin</h4>
-<div class="paragraph">
-<p>For <a href="#_android">Android</a> containers you can select emulator skin with capabilities. List of available skins:</p>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 3. Available Android Skins</caption>
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Skin</th>
-<th class="tableblock halign-left valign-top">Screen Resolution</th>
-<th class="tableblock halign-left valign-top">DPI</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">QVGA</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">240x320</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">WQVGA400</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">240x400</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">WQVGA432</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">240x432</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">120</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">HVGA</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">320x480</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">160</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">WVGA800</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">480x800</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">240</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">WVGA854</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">480x854</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">240</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">WSVGA</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">1024x600</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">160</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">WXGA720</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">720x1280</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">320</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">WXGA800</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">1280x800</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">160</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">WXGA800-7in</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">800x1280</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">213</p></td>
-</tr>
-</tbody>
-</table>
-<div class="paragraph">
-<p>To select a skin - set <code>skin</code> capability:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: string, format: &lt;desired-skin&gt;</div>
-<div class="content">
-<pre>skin: "WXGA720"</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>You can also pass desired screen resolution as follows:</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: string, format: &lt;desired-screen-resolution&gt;</div>
-<div class="content">
-<pre>skin: "720x1280"</pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_s3_key_pattern_s3keypattern"><a class="anchor" href="#_s3_key_pattern_s3keypattern"></a>3.1.15. S3 Key Pattern: s3KeyPattern</h4>
-<div class="paragraph">
-<p>This capability allows to override S3 key pattern (specified by <code>-s3-key-pattern</code> flag) used when uploading files to S3.</p>
-</div>
-<div class="listingblock">
-<div class="title">Type: string</div>
-<div class="content">
-<pre>s3KeyPattern: "$quota/$fileType$fileExtension"</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The same key placeholders are supported. Please refer to <a href="#_uploading_files_to_s3">Uploading Files To S3</a> section for more details.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_specifying_capabilities_via_protocol_extensions"><a class="anchor" href="#_specifying_capabilities_via_protocol_extensions"></a>3.1.16. Specifying Capabilities via Protocol Extensions</h4>
-<div class="paragraph">
-<p>Some Selenium clients allow passing only a limited number of capabilities specified in <a href="https://w3c.github.io/webdriver/webdriver-spec.html">WebDriver specification</a>. For such cases Selenoid supports reading capabilities using <a href="https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions">WebDriver protocol extensions</a> feature. The following two examples deliver the same result. Usually capabilities are passed like this:</p>
-</div>
-<div class="listingblock">
-<div class="title">Passing Capabilities as Usually</div>
-<div class="content">
-<pre>{"browserName": "firefox", "version": "57.0", "screenResolution": "1280x1024x24"}</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Selenoid is using <code>selenoid:options</code> key to read protocol extension capabilities:</p>
-</div>
-<div class="listingblock">
-<div class="title">Passing Capabilities using Protocol Extensions</div>
-<div class="content">
-<pre>{"browserName": "firefox", "version": "57.0", "selenoid:options": {"screenResolution": "1280x1024x24"}}</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_using_selenoid_without_docker"><a class="anchor" href="#_using_selenoid_without_docker"></a>3.2. Using Selenoid without Docker</h3>
-<div class="paragraph">
-<p>Selenoid is using containers to start browsers. However cases exist when running browser in container is not possible. For example on Windows you have Internet Explorer which can not be run inside container. Selenoid can be used as a lightweight Selenium server replacement to run IE, Firefox or Chrome on Windows. For example to use Selenoid with IE:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Download latest <a href="http://www.seleniumhq.org/download/">IEDriverServer</a> archive and unpack it to some directory (<code><code>C:\</code></code> in this example).</p>
-</li>
-<li>
-<p>Download latest <a href="https://github.com/aerokube/selenoid/releases/latest">Selenoid</a> binary.</p>
-</li>
-<li>
-<p>Create <code><code>browsers.json</code></code> configuration file:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="json">{
-  <span class="key"><span class="delimiter">&quot;</span><span class="content">internet explorer</span><span class="delimiter">&quot;</span></span>: {
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">default</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">11</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">versions</span><span class="delimiter">&quot;</span></span>: {
-      <span class="key"><span class="delimiter">&quot;</span><span class="content">11</span><span class="delimiter">&quot;</span></span>: {
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">image</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">C:</span><span class="char">\\</span><span class="content">IEDriverServer.exe</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">--log-level=DEBUG</span><span class="delimiter">&quot;</span></span>]
-      }
-    }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Notice that backslashes in Windows paths should be escaped as <code><code>\\</code></code>.
-In this example we define a browser with name <code><code>internet explorer</code></code>  and version <code><code>11</code></code>.</p>
-</div>
-</li>
-<li>
-<p>Start Selenoid:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>./selenoid_win_amd64.exe -conf ./browsers.json -disable-docker</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Run your tests against ...</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>http://localhost:4444/wd/hub</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>... with the following capabilities:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>browserName = internet explorer
-version = 11</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>To start <a href="https://www.google.com/chrome/">Chrome</a> instead just download <a href="https://sites.google.com/a/chromium.org/chromedriver/">Chromedriver</a> binary and modify <code><code>browsers.json</code></code> accordingly.</p>
-</li>
-<li>
-<p>By default Selenoid does not process launched driver logs. Launch Selenoid with <code>-capture-driver-logs</code> flag to append driver logs for every session to main log.</p>
-</li>
-</ol>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_usage_statistics"><a class="anchor" href="#_usage_statistics"></a>3.3. Usage Statistics</h3>
-<div class="paragraph">
-<p>Selenoid calculates usage statistics that can be accessed with HTTP request:</p>
-</div>
-<div class="listingblock">
-<div class="title">Request</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">$ curl http://localhost:4444/status</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">Result</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="javascript">{
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">total</span><span class="delimiter">&quot;</span></span>: <span class="integer">80</span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">used</span><span class="delimiter">&quot;</span></span>: <span class="integer">10</span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">queued</span><span class="delimiter">&quot;</span></span>: <span class="integer">0</span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">pending</span><span class="delimiter">&quot;</span></span>: <span class="integer">1</span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">browsers</span><span class="delimiter">&quot;</span></span>: {
-      <span class="key"><span class="delimiter">&quot;</span><span class="content">firefox</span><span class="delimiter">&quot;</span></span>: {
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">46.0</span><span class="delimiter">&quot;</span></span>: {
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">user1</span><span class="delimiter">&quot;</span></span>: {
-            <span class="key"><span class="delimiter">&quot;</span><span class="content">count</span><span class="delimiter">&quot;</span></span>:<span class="integer">1</span>,
-            <span class="key"><span class="delimiter">&quot;</span><span class="content">sessions</span><span class="delimiter">&quot;</span></span>:[
-                {
-                    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">a7a2b801-21db-4dae-a99b-4cbc0b81de96</span><span class="delimiter">&quot;</span></span>,
-                    <span class="key"><span class="delimiter">&quot;</span><span class="content">vnc</span><span class="delimiter">&quot;</span></span>: <span class="predefined-constant">false</span>,
-                    <span class="key"><span class="delimiter">&quot;</span><span class="content">screen</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1920x1080x24</span><span class="delimiter">&quot;</span></span>
-                 }
-            ]
-          },
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">user2</span><span class="delimiter">&quot;</span></span>: {
-            <span class="key"><span class="delimiter">&quot;</span><span class="content">count</span><span class="delimiter">&quot;</span></span>:<span class="integer">6</span>,
-            <span class="key"><span class="delimiter">&quot;</span><span class="content">sessions</span><span class="delimiter">&quot;</span></span>:[
-                <span class="comment">//...</span>
-            ]
-          },
-        },
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">48.0</span><span class="delimiter">&quot;</span></span>: {
-          <span class="key"><span class="delimiter">&quot;</span><span class="content">user2</span><span class="delimiter">&quot;</span></span>: {
-            <span class="key"><span class="delimiter">&quot;</span><span class="content">count</span><span class="delimiter">&quot;</span></span>:<span class="integer">3</span>,
-            <span class="key"><span class="delimiter">&quot;</span><span class="content">sessions</span><span class="delimiter">&quot;</span></span>:[
-                <span class="comment">//...</span>
-            ]
-          }
-        }
-      }
-    }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Users are extracted from basic HTTP authentication headers.</p>
-</div>
-<div class="sect3">
-<h4 id="_what_statistics_mean"><a class="anchor" href="#_what_statistics_mean"></a>3.3.1. What Statistics Mean</h4>
-<div class="paragraph">
-<p>A typical session lifecycle looks like the following:</p>
-</div>
-<div class="paragraph">
-<div class="title">Typical Session Lifecycle</div>
-<p><span class="image"><img src="img/lifecycle.png" alt="lifecycle"></span></p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>A new session request arrives to Selenoid.</p>
-</li>
-<li>
-<p>Selenoid <code>-limit</code> flag specifies how many sessions can be created simultaneously. It is shown as <code>total</code> in statistics. When requests reach the limit - subsequent requests are placed in queue. <code>Queued</code> requests just block and continue to wait.</p>
-</li>
-<li>
-<p>When there is a free slot for request Selenoid decides whether a Docker container or standalone driver process should be created. All requests during startup are marked as <code>pending</code>. Before proceeding to next step Selenoid waits for required port to be open. This is done by sending HEAD requests to the port.</p>
-</li>
-<li>
-<p>When a container or driver is started (ping is successful) Selenoid does a new session request just in the same way as standard Selenium client.</p>
-</li>
-<li>
-<p>Depending on what is returned as response on the previous step session is marked as <code>created</code> or <code>failed</code>. Created and running sessions are also included to <code>used</code> value.</p>
-</li>
-<li>
-<p>When a session is created Selenoid just proxies the rest of session requests to the same container or driver.</p>
-</li>
-<li>
-<p>New session request can fail because of Selenium errors or issues with container \ driver startup. In that case an error is returned to user.</p>
-</li>
-</ol>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_sending_statistics_to_external_systems"><a class="anchor" href="#_sending_statistics_to_external_systems"></a>3.3.2. Sending Statistics to External Systems</h4>
-<div class="paragraph">
-<p>To send Selenoid statistics described in previous section you can use <a href="https://github.com/influxdata/telegraf">Telegraf</a>. For example to send status to <a href="https://github.com/graphite-project">Graphite</a>:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Pull latest Telegraf Docker container:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code># docker pull telegraf:alpine</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Generate configuration file:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash"># mkdir -p /etc/telegraf
-# docker run --rm telegraf:alpine   \
-    --input-filter httpjson         \
-    --output-filter graphite config &gt; /etc/telegraf/telegraf.conf</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Edit file like the following:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="go">[agent]
-interval = <span class="string"><span class="delimiter">&quot;</span><span class="content">10s</span><span class="delimiter">&quot;</span></span> <i class="conum" data-value="1"></i><b>(1)</b>
-
-[[outputs.graphite]]
-servers = [<span class="string"><span class="delimiter">&quot;</span><span class="content">my-graphite-host.example.com:2024</span><span class="delimiter">&quot;</span></span>] <i class="conum" data-value="2"></i><b>(2)</b>
-prefix = <span class="string"><span class="delimiter">&quot;</span><span class="content">one_min</span><span class="delimiter">&quot;</span></span> <i class="conum" data-value="3"></i><b>(3)</b>
-template = <span class="string"><span class="delimiter">&quot;</span><span class="content">host.measurement.field</span><span class="delimiter">&quot;</span></span>
-
-[[inputs.httpjson]]
-name = <span class="string"><span class="delimiter">&quot;</span><span class="content">selenoid</span><span class="delimiter">&quot;</span></span>
-servers = [
-<span class="string"><span class="delimiter">&quot;</span><span class="content">http://localhost:4444/status</span><span class="delimiter">&quot;</span></span> <i class="conum" data-value="4"></i><b>(4)</b>
-]</code></pre>
-</div>
-</div>
-<div class="colist arabic">
-<table>
-<tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>adjust interval if needed</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>adjust host and port</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>something before hostname, can be blank</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>this is localhost only if Telegraf is run on Selenoid host</td>
-</tr>
-</table>
-</div>
-</li>
-<li>
-<p>Start Telegraf container:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash"># docker run --net host -d  \
-    --name telegraf         \
-    -v /etc/telegraf:/etc   \
-    telegraf:alpine --config /etc/telegraf.conf</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Metrics will be sent to <em>my-graphite-host.example.com:2024</em>. Metric names will be like the following:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>one_min.selenoid_example_com.httpjson_selenoid.pending
-one_min.selenoid_example_com.httpjson_selenoid.queued
-one_min.selenoid_example_com.httpjson_selenoid.total</code></pre>
-</div>
-</div>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>telegraf+influxdb+graphana</p>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_file_upload"><a class="anchor" href="#_file_upload"></a>3.4. File Upload</h3>
-<div class="paragraph">
-<p>Some tests require to upload files. This feature works out of the box in the majority of Selenium clients. A typical Java code snippet look like the following:</p>
-</div>
-<div class="listingblock">
-<div class="title">Uploading files with Java</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="java"><span class="comment">// Find file input element</span>
-WebElement input = driver.findElement(By.cssSelector(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>));
-
-<span class="comment">// Make sure element is visible</span>
-((JavascriptExecutor) driver).executeScript(<span class="string"><span class="delimiter">&quot;</span><span class="content">arguments[0].style.display = 'block';</span><span class="delimiter">&quot;</span></span>, input);
-
-<span class="comment">// Configure your client to upload local files to remote Selenium instance</span>
-driver.setFileDetector(<span class="keyword">new</span> LocalFileDetector());
-
-<span class="comment">// Specify you local file path here (not path inside browser container!)</span>
-input.sendKeys(<span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">&quot;</span></span>);</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">Uploading files with Python</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="python"><span class="keyword">from</span> <span class="include">selenium.webdriver.remote.file_detector</span> <span class="keyword">import</span> <span class="include">LocalFileDetector</span>
-
-<span class="comment"># ...</span>
-
-input = driver.find_element_by_css_selector(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>)
-driver.execute_script(<span class="string"><span class="delimiter">&quot;</span><span class="content">arguments[0].style.display = 'block';</span><span class="delimiter">&quot;</span></span>, <span class="predefined">input</span>)
-driver.file_detector = LocalFileDetector()
-<span class="predefined">input</span>.send_keys(<span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">&quot;</span></span>)</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">Uploading files with Webdriver.io</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="javascript"><span class="keyword">var</span> filePath = path.join(<span class="string"><span class="delimiter">'</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">'</span></span>);
-browser.uploadFile(filePath);
-browser.chooseFile(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>, filePath);</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Read the following note if you are using Selenoid <strong>without Docker</strong>.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-This feature is supported in WebDriver protocol by sending zipped file contents to <code>/file</code> handle. However not all driver binaries support this feature. For example this is not implemented in <a href="http://github.com/mozilla/geckodriver">Geckodriver</a> or <a href="https://github.com/SeleniumHQ/selenium/tree/master/cpp/iedriver">IEDriver</a>. When proxying requests <strong>directly</strong> to these drivers (i.e. when <strong>not using Docker</strong>) you need to start Selenoid with <code>-enable-file-upload</code> flag. In that case Selenoid will provide required API to tests. Firefox container images already include this parameter where needed.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_accessing_files_downloaded_with_browser"><a class="anchor" href="#_accessing_files_downloaded_with_browser"></a>3.5. Accessing Files Downloaded with Browser</h3>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>This feature only works when browsers are run in containers.</p>
-</li>
-<li>
-<p>Files are accessible only when browser session is running.</p>
-</li>
-</ol>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Your tests may need to download files with browsers. To analyze these files a common requirement is then to somehow extract downloaded files from browser containers. A possible solution can be dealing with container volumes. But Selenoid provides a <code>/download</code> API and dramatically simplifies downloading files. Having a running session <code>f2bcd32b-d932-4cdc-a639-687ab8e4f840</code> you can access all downloaded files using an URL:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>http://selenoid-host.example.com:4444/download/f2bcd32b-d932-4cdc-a639-687ab8e4f840/myfile.txt</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>In order for this feature to work an HTTP file server should be listening inside browser container on port <code>8080</code>. Download directory inside container to be used in tests is usually <code>~/Downloads</code>.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_accessing_clipboard"><a class="anchor" href="#_accessing_clipboard"></a>3.6. Accessing Clipboard</h3>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Clipboard is accessible only when browser session is running.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Sometimes you may need to interact with the clipboard to check that your application copy-paste feature works. Selenoid has a dedicated API to interact with the clipboard. To use it:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Start a new session, for example with ID <code>f2bcd32b-d932-4cdc-a639-687ab8e4f840</code>.</p>
-</li>
-<li>
-<p>To get clipboard value send the following HTTP request:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>$ curl http://selenoid-host.example.com:4444/clipboard/f2bcd32b-d932-4cdc-a639-687ab8e4f840
-
-some-clipboard-value</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>To update clipboard value:</p>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>$ curl -X POST --data 'some-clipboard-value' http://seleonid-host.example.com:4444/clipboard/f2bcd32b-d932-4cdc-a639-687ab8e4f840</code></pre>
-</div>
-</div>
-</li>
-</ol>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_accessing_browser_developer_tools"><a class="anchor" href="#_accessing_browser_developer_tools"></a>3.7. Accessing Browser Developer Tools</h3>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Currently only <a href="https://chromedevtools.github.io/devtools-protocol/">Chrome Developer Tools</a> are supported.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Selenoid is proxying Chrome Developer Tools websocket to browser container. Just use the following URL to access this websocket:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>ws://selenoid.example.com:4444/devtools/&lt;session-id&gt;</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_uploading_files_to_s3"><a class="anchor" href="#_uploading_files_to_s3"></a>3.8. Uploading Files To S3</h3>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>This feature only becomes available when Selenoid is compiled with <code>s3</code> build tag (missing by default) as follows:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ go build -tags s3</pre>
-</div>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Selenoid can upload recorded video and log files for every running session to S3-compatible storage.</p>
-</div>
-<div class="paragraph">
-<p>To enable this feature you need to specify S3 access information as follows:</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ ./selenoid -s3-endpoint https://s3.us-east-2.amazonaws.com -s3-region us-east-2 -s3-bucket-name my-bucket -s3-access-key &lt;your-access-key&gt; -s3-secret-key &lt;your-secret-key&gt;</pre>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags then environment variables and shared credentials file are automatically tried as a fallback.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>By default uploaded file name is preserved, i.e. S3 path is <code>/&lt;session-id&gt;.log</code> or <code>/myCustomVideo.mp4</code>. You can optionally provide your custom key pattern using <code>-s3-key-pattern</code> flag and a set of placeholders:</p>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 4. S3 Key Placeholders</caption>
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Placeholder</th>
-<th class="tableblock halign-left valign-top">Meaning</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$browserName</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium browser name capability value</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$browserVersion</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium browser version capability value</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$date</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by current date, e.g. <code>2018-11-01</code></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$fileName</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by source file name</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$fileExtension</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by source file extension</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$fileType</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by <code>log</code> for log files and <code>video</code> for video files</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$platformName</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium platform capability value</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$quota</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by quota name (usually coming from Ggr)</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">$sessionId</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Replaced by Selenium session ID</p></td>
-</tr>
-</tbody>
-</table>
-<div class="paragraph">
-<p>For example, when launching Selenoid with <code>-s3-key-pattern $browserName/$sessionId/log.txt</code> files will be accessible as <code>firefox/0ee0b48b-e29b-6749-b4f1-2277b8f8d6c5/log.txt</code>. You can also override key pattern for every session with <code>s3KeyPattern</code> capability.</p>
-</div>
-<div class="paragraph">
-<p>Sometimes you may want to upload only video files or files matching some complicated pattern or to not upload some files. To achieve this use <code>-s3-include-files</code> and <code>-s3-exclude-files</code> flags. These flags accept <a href="https://en.wikipedia.org/wiki/Glob_(programming)">globs</a> such as <code>*.mp4</code>.</p>
-</div>
-<div class="sect3">
-<h4 id="_s3_cli_flags"><a class="anchor" href="#_s3_cli_flags"></a>3.8.1. S3 CLI Flags</h4>
+<h4 id="_s3_cli_flags"><a class="anchor" href="#_s3_cli_flags"></a>4.9.1. S3 CLI Flags</h4>
 <div class="paragraph">
 <p>The following flags are supported by <code>selenoid</code> command when compiled with S3 support:</p>
 </div>
@@ -3565,44 +3621,10 @@ If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags th
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_saving_session_metadata"><a class="anchor" href="#_saving_session_metadata"></a>3.9. Saving Session Metadata</h3>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-This feature only becomes available when Selenoid is compiled with <code>metadata</code> build tag (missing by default).
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Selenoid can save session metadata to a separate JSON file. Main use case is to somehow post-process session logs, e.g. send them to map-reduce cluster. No additional configuration is needed to enable this feature. When enabled and <code>-log-output-dir</code> flag is set - Selenoid will automatically save JSON files <code>&lt;log-output-dir&gt;/&lt;session-id&gt;.json</code> with the following content:</p>
-</div>
-<div class="listingblock">
-<div class="title">Example metadata JSON file</div>
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="javascript">{
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">62a4d82d-edf6-43d5-886f-895b77ff23b7</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">capabilities</span><span class="delimiter">&quot;</span></span>: {
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">browserName</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">chrome</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">70.0</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">MyCoolTest</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">screenResolution</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">1920x1080x24</span><span class="delimiter">&quot;</span></span>
-    },
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">started</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2018-11-15T16:23:12.440916+03:00</span><span class="delimiter">&quot;</span></span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">finished</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">2018-11-15T16:23:12.480928+03:00</span><span class="delimiter">&quot;</span></span>
-}</code></pre>
-</div>
-</div>
-</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_contributing_development"><a class="anchor" href="#_contributing_development"></a>4. Contributing &amp; Development</h2>
+<h2 id="_contributing_development"><a class="anchor" href="#_contributing_development"></a>5. Contributing &amp; Development</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To build Selenoid:</p>
@@ -3673,7 +3695,7 @@ $ docker build -t selenoid:latest .</code></pre>
 </table>
 </div>
 <div class="sect2">
-<h3 id="_documentation"><a class="anchor" href="#_documentation"></a>4.1. Documentation</h3>
+<h3 id="_documentation"><a class="anchor" href="#_documentation"></a>5.1. Documentation</h3>
 <div class="paragraph">
 <p>Locally can be generated with:</p>
 </div>
@@ -4687,7 +4709,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-03-12 11:29:15 UTC
+Last updated 2019-03-12 15:43:53 UTC
 </div>
 </div>
 <!-- Yandex.Metrika counter -->
