@@ -1,4 +1,4 @@
-== File Upload
+== Uploading Files To Browser
 
 Some tests require to upload files. This feature works out of the box in the majority of Selenium clients. A typical Java code snippet look like the following:
 
