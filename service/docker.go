@@ -3,9 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/docker/go-units"
 	"log"
 	"net"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/aerokube/selenoid/config"
@@ -37,6 +39,38 @@ var ports = struct {
 	Clipboard:  "9090",
 }
 
+// MemLimit - memory limit for Docker container
+type MemLimit int64
+
+func (limit *MemLimit) String() string {
+	return units.HumanSize(float64(*limit))
+}
+
+func (limit *MemLimit) Set(s string) error {
+	v, err := units.RAMInBytes(s)
+	if err != nil {
+		return fmt.Errorf("set memory limit: %v", err)
+	}
+	*limit = MemLimit(v)
+	return nil
+}
+
+// CpuLimit - CPU limit for Docker container
+type CpuLimit int64
+
+func (limit *CpuLimit) String() string {
+	return strconv.FormatFloat(float64(*limit/1000000000), 'f', -1, 64)
+}
+
+func (limit *CpuLimit) Set(s string) error {
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return fmt.Errorf("set cpu limit: %v", err)
+	}
+	*limit = CpuLimit(v * 1000000000)
+	return nil
+}
+
 // Docker - docker container manager
 type Docker struct {
 	ServiceBase
@@ -62,6 +96,14 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	if err != nil {
 		return nil, fmt.Errorf("configuring ports: %v", err)
 	}
+	mem, err := getMemory(d.Service, d.Environment)
+	if err != nil {
+		return nil, fmt.Errorf("invalid memory limit: %v", err)
+	}
+	cpu, err := getCpu(d.Service, d.Environment)
+	if err != nil {
+		return nil, fmt.Errorf("invalid CPU limit: %v", err)
+	}
 	selenium := portConfig.SeleniumPort
 	fileserver := portConfig.FileserverPort
 	clipboard := portConfig.ClipboardPort
@@ -81,8 +123,8 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		ShmSize:      getShmSize(d.Service),
 		Privileged:   d.Privileged,
 		Resources: ctr.Resources{
-			Memory:   d.Memory,
-			NanoCPUs: d.CPU,
+			Memory: mem,
+			NanoCPUs: cpu,
 		},
 		ExtraHosts: getExtraHosts(d.Service, d.Caps),
 	}
@@ -327,6 +369,30 @@ func getShmSize(service *config.Browser) int64 {
 		return service.ShmSize
 	}
 	return int64(268435456)
+}
+
+func getMemory(service *config.Browser, env Environment) (int64, error) {
+	if service.Mem != "" {
+		var mem MemLimit
+		err := mem.Set(service.Mem)
+		if err != nil {
+			return 0, fmt.Errorf("parse memory limit: %v", err)
+		}
+		return int64(mem), nil
+	}
+	return env.Memory, nil
+}
+
+func getCpu(service *config.Browser, env Environment) (int64, error) {
+	if service.Cpu != "" {
+		var cpu CpuLimit
+		err := cpu.Set(service.Cpu)
+		if err != nil {
+			return 0, fmt.Errorf("parse CPU limit: %v", err)
+		}
+		return int64(cpu), nil
+	}
+	return env.CPU, nil
 }
 
 func getContainerHostname(caps session.Caps) string {

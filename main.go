@@ -15,7 +15,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/docker/go-units"
 	"golang.org/x/net/websocket"
 
 	"fmt"
@@ -32,36 +31,6 @@ import (
 	"github.com/aerokube/util/docker"
 	"github.com/docker/docker/client"
 )
-
-type memLimit int64
-
-func (limit *memLimit) String() string {
-	return units.HumanSize(float64(*limit))
-}
-
-func (limit *memLimit) Set(s string) error {
-	v, err := units.RAMInBytes(s)
-	if err != nil {
-		return fmt.Errorf("set memory limit: %v", err)
-	}
-	*limit = memLimit(v)
-	return nil
-}
-
-type cpuLimit int64
-
-func (limit *cpuLimit) String() string {
-	return strconv.FormatFloat(float64(*limit/1000000000), 'f', -1, 64)
-}
-
-func (limit *cpuLimit) Set(s string) error {
-	v, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		return fmt.Errorf("set cpu limit: %v", err)
-	}
-	*limit = cpuLimit(v * 1000000000)
-	return nil
-}
 
 var (
 	hostname                 string
@@ -101,8 +70,8 @@ var (
 )
 
 func init() {
-	var mem memLimit
-	var cpu cpuLimit
+	var mem service.MemLimit
+	var cpu service.CpuLimit
 	flag.BoolVar(&disableDocker, "disable-docker", false, "Disable docker support")
 	flag.BoolVar(&disableQueue, "disable-queue", false, "Disable wait queue")
 	flag.BoolVar(&enableFileUpload, "enable-file-upload", false, "File upload support")
