@@ -265,7 +265,7 @@ func ping(w http.ResponseWriter, _ *http.Request) {
 		LastReloadTime string `json:"lastReloadTime"`
 		NumRequests    uint64 `json:"numRequests"`
 		Version        string `json:"version"`
-	}{time.Since(startTime).String(), conf.LastReloadTime.String(), getSerial(), gitRevision})
+	}{time.Since(startTime).String(), conf.LastReloadTime.Format(time.RFC3339), getSerial(), gitRevision})
 }
 
 func video(w http.ResponseWriter, r *http.Request) {
