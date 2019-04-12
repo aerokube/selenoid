@@ -108,6 +108,12 @@ func testMux() http.Handler {
 						"HostPort": "%s"
 						}
 					],
+					"7070/tcp": [
+						{
+						"HostIp": "0.0.0.0",
+						"HostPort": "%s"
+						}
+					],
 					"8080/tcp": [
 						{
 						"HostIp": "0.0.0.0",
@@ -153,8 +159,13 @@ func testMux() http.Handler {
 			  "State": {},
 			  "Mounts": []
 			}
-			`, p, p, p, p, p)
+			`, p, p, p, p, p, p)
 			w.Write([]byte(output))
+		},
+	))
+	mux.HandleFunc("/v1.29/networks/net-1/connect", http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
 		},
 	))
 	return mux
@@ -192,6 +203,8 @@ func testConfig(env *service.Environment) *config.Config {
 				Volumes: []string{"/test:/test"},
 				Labels:  map[string]string{"key": "value"},
 				Sysctl:  map[string]string{"sysctl net.ipv4.tcp_timestamps": "2"},
+				Mem: "512m",
+				Cpu: "1.0",
 			},
 		},
 	}
@@ -273,12 +286,14 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 		VideoScreenSize:       "1024x768",
 		VideoFrameRate:        25,
 		VideoCodec:            "libx264",
+		Log:                   true,
 		LogName:               "testfile",
 		Env:                   []string{"LANG=ru_RU.UTF-8", "LANGUAGE=ru:en"},
 		HostsEntries:          []string{"example.com:192.168.0.1", "test.com:192.168.0.2"},
 		DNSServers:            []string{"192.168.0.1", "192.168.0.2"},
 		Labels:                map[string]string{"label1": "some-value", "label2": ""},
 		ApplicationContainers: []string{"one", "two"},
+		AdditionalNetworks:    []string{"net-1"},
 		TimeZone:              "Europe/Moscow",
 		ContainerHostname:     "some-hostname",
 		TestName:              "my-cool-test",

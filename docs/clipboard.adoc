@@ -15,5 +15,5 @@ some-clipboard-value
 . To update clipboard value:
 +
 ```
-$ curl -X POST --data 'some-clipboard-value' http://seleonid-host.example.com:4444/clipboard/f2bcd32b-d932-4cdc-a639-687ab8e4f840
+$ curl -X POST --data 'some-clipboard-value' http://selenoid-host.example.com:4444/clipboard/f2bcd32b-d932-4cdc-a639-687ab8e4f840
 ```

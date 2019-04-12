@@ -64,7 +64,7 @@ WARNING: Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 |===
 | Image | VNC Image | Selenoid Version | Geckodriver Version | Firefox Version | Client Version
 
-| selenoid/firefox:48.0 | selenoid/vnc:firefox_48.0 | 1.3.9 | 0.13.0 | 48.0.2 (page load timeout, native events and proxies don't work) .16+<.^|
+| selenoid/firefox:48.0 | selenoid/vnc:firefox_48.0 | 1.3.9 | 0.13.0 | 48.0.2 (page load timeout, native events and proxies don't work) .19+<.^|
 **Java, selenium-webdriver.js**: 3.4.0 and above
 **Python**: 3.5.0 and above 
 | selenoid/firefox:49.0 | selenoid/vnc:firefox_49.0 | 1.3.9 | 0.13.0 | 49.0.2 (page load timeout, native events and switching between windows don't work) 
@@ -82,6 +82,9 @@ WARNING: Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 | selenoid/firefox:61.0 | selenoid/vnc:firefox_61.0 | 1.6.2 | 0.21.0 | 61.0
 | selenoid/firefox:62.0 | selenoid/vnc:firefox_62.0 | 1.7.2 | 0.22.0 | 62.0
 | selenoid/firefox:63.0 | selenoid/vnc:firefox_63.0 | 1.8.1 | 0.23.0 | 63.0
+| selenoid/firefox:64.0 | selenoid/vnc:firefox_64.0 | 1.8.4 | 0.23.0 | 64.0
+| selenoid/firefox:65.0 | selenoid/vnc:firefox_65.0 | 1.9.0 | 0.24.0 | 65.0
+| selenoid/firefox:66.0 | selenoid/vnc:firefox_66.0 | 1.9.1 | 0.24.0 | 66.0.1
 |===
 
 
@@ -113,7 +116,10 @@ WARNING: Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 | selenoid/chrome:67.0 | selenoid/vnc:chrome_67.0 | 2.39 | 67.0.3396.62
 | selenoid/chrome:68.0 | selenoid/vnc:chrome_68.0 | 2.41 | 68.0.3440.106
 | selenoid/chrome:69.0 | selenoid/vnc:chrome_69.0 | 2.42 | 69.0.3497.100
-| selenoid/chrome:70.0 | selenoid/vnc:chrome_70.0 | 2.43 | 70.0.3538.67
+| selenoid/chrome:70.0 | selenoid/vnc:chrome_70.0 | 2.44 | 70.0.3538.110
+| selenoid/chrome:71.0 | selenoid/vnc:chrome_71.0 | 2.44 | 71.0.3578.80
+| selenoid/chrome:72.0 | selenoid/vnc:chrome_72.0 | 2.46 | 72.0.3626.121
+| selenoid/chrome:73.0 | selenoid/vnc:chrome_73.0 | 73.0.3683.68 | 73.0.3683.75
 |===
 
 [NOTE]
@@ -168,6 +174,8 @@ We do not consider these images really stable. Many of base operations like work
 | selenoid/opera:54.0 | selenoid/vnc:opera_54.0 | 2.37 | 54.0.2952.46
 | selenoid/opera:55.0 | selenoid/vnc:opera_55.0 | 2.37 | 55.0.2994.37
 | selenoid/opera:56.0 | selenoid/vnc:opera_56.0 | 2.40 | 56.0.3051.31
+| selenoid/opera:57.0 | selenoid/vnc:opera_57.0 | 2.41 | 57.0.3098.76
+| selenoid/opera:58.0 | selenoid/vnc:opera_58.0 | 2.42 | 58.0.3135.79
 |===
 
 [NOTE]

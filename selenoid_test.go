@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/mafredri/cdp"
+	"github.com/mafredri/cdp/rpcc"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -20,6 +22,7 @@ import (
 
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
+	ggr "github.com/aerokube/ggr/config"
 )
 
 var (
@@ -30,7 +33,12 @@ func init() {
 	enableFileUpload = true
 	videoOutputDir, _ = ioutil.TempDir("", "selenoid-test")
 	logOutputDir, _ = ioutil.TempDir("", "selenoid-test")
+	saveAllLogs = true
 	gitRevision = "test-revision"
+	ggrHost = &ggr.Host{
+		Name: "some-host.example.com",
+		Port: 4444,
+	}
 	srv = httptest.NewServer(handler())
 }
 
@@ -350,6 +358,23 @@ func TestProxySession(t *testing.T) {
 	AssertThat(t, resp, Code{http.StatusOK})
 
 	AssertThat(t, queue.Used(), EqualTo{1})
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
+func TestProxySessionPanicOnAbortHandler(t *testing.T) {
+
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	req, _ := http.NewRequest(http.MethodGet, With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/url?abort-handler=true", sess["sessionId"])), nil)
+	resp, err = http.DefaultClient.Do(req)
+	AssertThat(t, err, Not{nil})
+
 	sessions.Remove(sess["sessionId"])
 	queue.Release()
 }
@@ -723,4 +748,36 @@ func TestClipboardMissingSession(t *testing.T) {
 	rsp, err := http.Get(With(srv.URL).Path("/clipboard/missing-session"))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusNotFound})
+}
+
+func TestDevtools(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	u := fmt.Sprintf("ws://%s/devtools/%s", srv.Listener.Addr().String(), sess["sessionId"])
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+
+	conn, err := rpcc.DialContext(ctx, u)
+	AssertThat(t, err, Is{nil})
+	defer conn.Close()
+
+	c := cdp.NewClient(conn)
+	err = c.Page.Enable(ctx)
+	AssertThat(t, err, Is{nil})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
+func TestParseGgrHost(t *testing.T) {
+	h := parseGgrHost("some-host.example.com:4444")
+	AssertThat(t, h.Name, EqualTo{"some-host.example.com"})
+	AssertThat(t, h.Port, EqualTo{4444})
 }

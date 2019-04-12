@@ -17,6 +17,7 @@ const metadataFileExtension = ".json"
 func init() {
 	mp := &MetadataProcessor{}
 	event.AddSessionStoppedListener(mp)
+	log.Println("[-] [INIT] [Will save sessions metadata]")
 }
 
 type MetadataProcessor struct {

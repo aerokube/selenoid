@@ -6,10 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aerokube/selenoid/protect"
+	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -52,6 +54,8 @@ func (m *HTTPTest) StartWithCancel() (*service.StartedService, error) {
 		HostPort: session.HostPort{
 			Fileserver: u.Host,
 			Clipboard:  u.Host,
+			VNC:        u.Host,
+			Devtools:   u.Host,
 		},
 		Cancel: func() {
 			log.Println("Stopping HTTPTest Service...")
@@ -121,6 +125,13 @@ func Selenium() http.Handler {
 			http.Error(w, "Session not found", http.StatusNotFound)
 			return
 		}
+		if r.FormValue("abort-handler") != "" {
+			out := "this call was relayed by the reverse proxy"
+			// Setting wrong Content-Length leads to abort handler error
+			w.Header().Add("Content-Length", strconv.Itoa(2*len(out)))
+			fmt.Fprintln(w, out)
+			return
+		}
 		d, _ := time.ParseDuration(r.FormValue("timeout"))
 		if r.Method != http.MethodDelete {
 			<-time.After(d)
@@ -134,7 +145,41 @@ func Selenium() http.Handler {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("test-data"))
 	})
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(_ *http.Request) bool {
+			return true
+		},
+	}
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Upgrade") != "" {
+			c, err := upgrader.Upgrade(w, r, nil)
+			if err != nil {
+				panic(err)
+			}
+			defer c.Close()
+			for {
+				mt, message, err := c.ReadMessage()
+				if err != nil {
+					break
+				}
+				type req struct {
+					ID uint64 `json:"id"`
+				}
+				var r req
+				err = json.Unmarshal(message, &r)
+				if err != nil {
+					panic(err)
+				}
+				output, err := json.Marshal(r)
+				if err != nil {
+					panic(err)
+				}
+				err = c.WriteMessage(mt, output)
+				if err != nil {
+					break
+				}
+			}
+		}
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("test-clipboard-value"))
 	})

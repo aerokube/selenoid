@@ -18,6 +18,8 @@ Selenoid requires a simple JSON configuration file of the following format:
           "env" : ["TZ=Europe/Moscow"],              <10>
           "hosts" : ["example.com:192.168.0.1"],     <11>
           "shmSize" : 268435456,                     <12>
+          "cpu" : "1.0",                             <13>
+          "mem" : "512m",                            <14>
         },
         "50.0" :{
             // ...
@@ -41,6 +43,8 @@ Selenoid requires a simple JSON configuration file of the following format:
 <10> _Optional._ Environment variables to be passed to browser container or driver process
 <11> _Optional._ Custom `/etc/hosts` entries to be passed to browser container in `hostname:ip` format.
 <12> _Optional._ Shared memory size in bytes to be set for container. Some browsers (e.g. Chrome) may work unstable when having insufficient `shmSize`. Default value is 256 megabytes. 
+<13> _Optional. Containers only._ Container CPU limit in Docker units. 
+<14> _Optional. Containers only._ Container memory limit in Docker units. 
 
 This file represents a mapping between a list of supported browser versions and Docker container images or driver binaries.
 

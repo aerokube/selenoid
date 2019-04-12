@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"log"
@@ -14,13 +15,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/docker/go-units"
 	"golang.org/x/net/websocket"
 
 	"fmt"
 
 	"path/filepath"
 
+	ggr "github.com/aerokube/ggr/config"
 	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
@@ -30,36 +31,6 @@ import (
 	"github.com/aerokube/util/docker"
 	"github.com/docker/docker/client"
 )
-
-type memLimit int64
-
-func (limit *memLimit) String() string {
-	return units.HumanSize(float64(*limit))
-}
-
-func (limit *memLimit) Set(s string) error {
-	v, err := units.RAMInBytes(s)
-	if err != nil {
-		return fmt.Errorf("set memory limit: %v", err)
-	}
-	*limit = memLimit(v)
-	return nil
-}
-
-type cpuLimit int64
-
-func (limit *cpuLimit) String() string {
-	return strconv.FormatFloat(float64(*limit/1000000000), 'f', -1, 64)
-}
-
-func (limit *cpuLimit) Set(s string) error {
-	v, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		return fmt.Errorf("set cpu limit: %v", err)
-	}
-	*limit = cpuLimit(v * 1000000000)
-	return nil
-}
 
 var (
 	hostname                 string
@@ -72,6 +43,7 @@ var (
 	newSessionAttemptTimeout time.Duration
 	sessionDeleteTimeout     time.Duration
 	serviceStartupTimeout    time.Duration
+	gracefulPeriod           time.Duration
 	limit                    int
 	retryCount               int
 	containerNetwork         string
@@ -83,6 +55,8 @@ var (
 	videoOutputDir           string
 	videoRecorderImage       string
 	logOutputDir             string
+	saveAllLogs              bool
+	ggrHost                  *ggr.Host
 	conf                     *config.Config
 	queue                    *protect.Queue
 	manager                  service.Manager
@@ -96,14 +70,14 @@ var (
 )
 
 func init() {
-	var mem memLimit
-	var cpu cpuLimit
+	var mem service.MemLimit
+	var cpu service.CpuLimit
 	flag.BoolVar(&disableDocker, "disable-docker", false, "Disable docker support")
 	flag.BoolVar(&disableQueue, "disable-queue", false, "Disable wait queue")
 	flag.BoolVar(&enableFileUpload, "enable-file-upload", false, "File upload support")
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
 	flag.StringVar(&confPath, "conf", "config/browsers.json", "Browsers configuration file")
-	flag.StringVar(&logConfPath, "log-conf", "config/container-logs.json", "Container logging configuration file")
+	flag.StringVar(&logConfPath, "log-conf", "", "Container logging configuration file")
 	flag.IntVar(&limit, "limit", 5, "Simultaneous container runs")
 	flag.IntVar(&retryCount, "retry-count", 1, "New session attempts retry count")
 	flag.DurationVar(&timeout, "timeout", 60*time.Second, "Session idle timeout in time.Duration format")
@@ -120,6 +94,8 @@ func init() {
 	flag.StringVar(&videoOutputDir, "video-output-dir", "video", "Directory to save recorded video to")
 	flag.StringVar(&videoRecorderImage, "video-recorder-image", "selenoid/video-recorder:latest-release", "Image to use as video recorder")
 	flag.StringVar(&logOutputDir, "log-output-dir", "", "Directory to save session log to")
+	flag.BoolVar(&saveAllLogs, "save-all-logs", false, "Whether to save all logs without considering capabilities")
+	flag.DurationVar(&gracefulPeriod, "graceful-period", 300*time.Second, "graceful shutdown period in time.Duration format, e.g. 300s or 500ms")
 	flag.Parse()
 
 	if version {
@@ -131,6 +107,9 @@ func init() {
 	hostname, err = os.Hostname()
 	if err != nil {
 		log.Fatalf("[-] [INIT] [%s: %v]", os.Args[0], err)
+	}
+	if ggrHostEnv := os.Getenv("GGR_HOST"); ggrHostEnv != "" {
+		ggrHost = parseGgrHost(ggrHostEnv)
 	}
 	queue = protect.New(limit, disableQueue)
 	conf = config.NewConfig()
@@ -144,7 +123,6 @@ func init() {
 			log.Printf("[-] [INIT] [%s: %v]", os.Args[0], err)
 		}
 	})
-	cancelOnSignal()
 	inDocker := false
 	_, err = os.Stat("/.dockerenv")
 	if err == nil {
@@ -172,6 +150,9 @@ func init() {
 			log.Fatalf("[-] [INIT] [Failed to create log output dir %s: %v]", logOutputDir, err)
 		}
 		log.Printf("[-] [INIT] [Logs Dir: %s]", logOutputDir)
+		if saveAllLogs {
+			log.Printf("[-] [INIT] [Saving all logs]")
+		}
 	}
 
 	upload.Init()
@@ -187,6 +168,7 @@ func init() {
 		VideoOutputDir:       videoOutputDir,
 		VideoContainerImage:  videoRecorderImage,
 		LogOutputDir:         logOutputDir,
+		SaveAllLogs:          saveAllLogs,
 		Privileged:           !disablePrivileged,
 	}
 	if disableDocker {
@@ -223,26 +205,21 @@ func init() {
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
 }
 
-func cancelOnSignal() {
-	sig := make(chan os.Signal)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-sig
-		log.Println("[-] [-] [SHUTTING_DOWN] [-] [-] [-] [-] [-] [-] [-]")
-		sessions.Each(func(k string, s *session.Session) {
-			if enableFileUpload {
-				os.RemoveAll(path.Join(os.TempDir(), k))
-			}
-			s.Cancel()
-		})
-		if !disableDocker {
-			err := cli.Close()
-			if err != nil {
-				log.Fatalf("[-] [SHUTTING_DOWN] [Error closing docker client: %v]", err)
-			}
-		}
-		os.Exit(0)
-	}()
+func parseGgrHost(s string) *ggr.Host {
+	h, p, err := net.SplitHostPort(s)
+	if err != nil {
+		log.Fatalf("[-] [INIT] [Invalid Ggr host: %v]", err)
+	}
+	ggrPort, err := strconv.Atoi(p)
+	if err != nil {
+		log.Fatalf("[-] [INIT] [Invalid Ggr host: %v]", err)
+	}
+	host := &ggr.Host{
+		Name: h,
+		Port: ggrPort,
+	}
+	log.Printf("[-] [INIT] [Will prefix all session IDs with a hash-sum: %s]", host.Sum())
+	return host
 }
 
 func onSIGHUP(fn func()) {
@@ -256,11 +233,18 @@ func onSIGHUP(fn func()) {
 	}()
 }
 
-func mux() http.Handler {
+var seleniumPaths = struct {
+	CreateSession, ProxySession string
+}{
+	CreateSession: "/session",
+	ProxySession:  "/session/",
+}
+
+func selenium() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/session", queue.Try(queue.Check(queue.Protect(post(create)))))
-	mux.HandleFunc("/session/", proxy)
-	mux.HandleFunc("/status", status)
+	mux.HandleFunc(seleniumPaths.CreateSession, queue.Try(queue.Check(queue.Protect(post(create)))))
+	mux.HandleFunc(seleniumPaths.ProxySession, proxy)
+	mux.HandleFunc(paths.Status, status)
 	return mux
 }
 
@@ -286,10 +270,10 @@ func ping(w http.ResponseWriter, _ *http.Request) {
 
 func video(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodDelete {
-		deleteFileIfExists(w, r, videoOutputDir, videoPath, "DELETED_VIDEO_FILE")
+		deleteFileIfExists(w, r, videoOutputDir, paths.Video, "DELETED_VIDEO_FILE")
 		return
 	}
-	fileServer := http.StripPrefix(videoPath, http.FileServer(http.Dir(videoOutputDir)))
+	fileServer := http.StripPrefix(paths.Video, http.FileServer(http.Dir(videoOutputDir)))
 	fileServer.ServeHTTP(w, r)
 }
 
@@ -309,36 +293,47 @@ func deleteFileIfExists(w http.ResponseWriter, r *http.Request, dir string, pref
 	log.Printf("[%d] [%s] [%s]", serial(), status, fileName)
 }
 
-const (
-	videoPath = "/video/"
-	logsPath  = "/logs/"
-	errorPath = "/error"
-)
+var paths = struct {
+	Video, VNC, Logs, Devtools, Download, Clipboard, File, Ping, Status, Error, WdHub string
+}{
+	Video:     "/video/",
+	VNC:       "/vnc/",
+	Logs:      "/logs/",
+	Devtools:  "/devtools/",
+	Download:  "/download/",
+	Clipboard: "/clipboard/",
+	Status:    "/status",
+	File:      "/file",
+	Ping:      "/ping",
+	Error:     "/error",
+	WdHub:     "/wd/hub",
+}
 
 func handler() http.Handler {
 	root := http.NewServeMux()
-	root.HandleFunc("/wd/hub/", func(w http.ResponseWriter, r *http.Request) {
+	root.HandleFunc(paths.WdHub+"/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		r.URL.Scheme = "http"
 		r.URL.Host = (&request{r}).localaddr()
-		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/wd/hub")
-		mux().ServeHTTP(w, r)
+		r.URL.Path = strings.TrimPrefix(r.URL.Path, paths.WdHub)
+		selenium().ServeHTTP(w, r)
 	})
-	root.HandleFunc(errorPath, func(w http.ResponseWriter, r *http.Request) {
+	root.HandleFunc(paths.Error, func(w http.ResponseWriter, r *http.Request) {
 		util.JsonError(w, "Session timed out or not found", http.StatusNotFound)
 	})
-	root.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+	root.HandleFunc(paths.Status, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
 	})
-	root.HandleFunc("/ping", ping)
-	root.Handle("/vnc/", websocket.Handler(vnc))
-	root.HandleFunc(logsPath, logs)
-	root.HandleFunc(videoPath, video)
-	root.HandleFunc("/download/", reverseProxy(func(sess *session.Session) string { return sess.HostPort.Fileserver }, "DOWNLOADING_FILE"))
-	root.HandleFunc("/clipboard/", reverseProxy(func(sess *session.Session) string { return sess.HostPort.Clipboard }, "CLIPBOARD"))
+	root.HandleFunc(paths.Ping, ping)
+	root.Handle(paths.VNC, websocket.Handler(vnc))
+	root.Handle(paths.Devtools, websocket.Server{Handler: devtools})
+	root.HandleFunc(paths.Logs, logs)
+	root.HandleFunc(paths.Video, video)
+	root.HandleFunc(paths.Download, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Fileserver }, "DOWNLOADING_FILE"))
+	root.HandleFunc(paths.Clipboard, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Clipboard }, "CLIPBOARD"))
 	if enableFileUpload {
-		root.HandleFunc("/file", fileUpload)
+		root.HandleFunc(paths.File, fileUpload)
 	}
 	return root
 }
@@ -351,5 +346,42 @@ func showVersion() {
 func main() {
 	log.Printf("[-] [INIT] [Timezone: %s]", time.Local)
 	log.Printf("[-] [INIT] [Listening on %s]", listen)
-	log.Fatal(http.ListenAndServe(listen, handler()))
+
+	stop := make(chan os.Signal)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	server := &http.Server{
+		Addr:    listen,
+		Handler: handler(),
+	}
+	e := make(chan error)
+	go func() {
+		e <- server.ListenAndServe()
+	}()
+	select {
+	case err := <-e:
+		log.Fatalf("[-] [INIT] [Failed to start: %v]", err)
+	case <-stop:
+	}
+
+	log.Printf("[-] [SHUTTING_DOWN] [%s]", gracefulPeriod)
+	ctx, cancel := context.WithTimeout(context.Background(), gracefulPeriod)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("[-] [SHUTTING_DOWN] [Failed to shut down: %v]", err)
+	}
+
+	sessions.Each(func(k string, s *session.Session) {
+		if enableFileUpload {
+			os.RemoveAll(path.Join(os.TempDir(), k))
+		}
+		s.Cancel()
+	})
+
+	if !disableDocker {
+		err := cli.Close()
+		if err != nil {
+			log.Fatalf("[-] [SHUTTING_DOWN] [Error closing Docker client: %v]", err)
+		}
+	}
 }

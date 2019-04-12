@@ -50,16 +50,19 @@ type State struct {
 
 // Browser configuration
 type Browser struct {
-	Image   interface{}       `json:"image"`
-	Port    string            `json:"port"`
-	Path    string            `json:"path"`
-	Tmpfs   map[string]string `json:"tmpfs,omitempty"`
-	Volumes []string          `json:"volumes,omitempty"`
-	Env     []string          `json:"env,omitempty"`
-	Hosts   []string          `json:"hosts,omitempty"`
-	ShmSize int64             `json:"shmSize,omitempty"`
-	Labels  map[string]string `json:"labels,omitempty"`
-	Sysctl  map[string]string `json:"sysctl,omitempty"`
+	Image           interface{}       `json:"image"`
+	Port            string            `json:"port"`
+	Path            string            `json:"path"`
+	Tmpfs           map[string]string `json:"tmpfs,omitempty"`
+	Volumes         []string          `json:"volumes,omitempty"`
+	Env             []string          `json:"env,omitempty"`
+	Hosts           []string          `json:"hosts,omitempty"`
+	ShmSize         int64             `json:"shmSize,omitempty"`
+	Labels          map[string]string `json:"labels,omitempty"`
+	Sysctl          map[string]string `json:"sysctl,omitempty"`
+	Mem          string `json:"mem,omitempty"`
+	Cpu          string `json:"cpu,omitempty"`
+	PublishAllPorts bool              `json:"publishAllPorts,omitempty"`
 }
 
 // Versions configuration
@@ -101,12 +104,12 @@ func (config *Config) Load(browsers, containerLogs string) error {
 		return fmt.Errorf("browsers config: %v", err)
 	}
 	log.Printf("[-] [INIT] [Loaded configuration from %s]", browsers)
-	var cl *container.LogConfig
-	err = loadJSON(containerLogs, &cl)
-	if err != nil {
-		log.Printf("[-] [INIT] [Using default containers log configuration because of: %v]", err)
-		cl = &container.LogConfig{}
-	} else {
+	cl := &container.LogConfig{}
+	if containerLogs != "" {
+		err = loadJSON(containerLogs, cl)
+		if err != nil {
+			return fmt.Errorf("log config: %v", err)
+		}
 		log.Printf("[-] [INIT] [Loaded log configuration from %s]", containerLogs)
 	}
 	config.lock.Lock()

@@ -53,6 +53,10 @@ The following statuses are available:
 | DEFAULT_VERSION | Selenoid is using default browser version 
 | DELETED_LOG_FILE | Log file was deleted by user 
 | DELETED_VIDEO_FILE | Video file was deleted by user 
+| DEVTOOLS_CLIENT_DISCONNECTED | User devtools client disconnected 
+| DEVTOOLS_DISABLED | An attempt to access browser devtools when it is not enabled with capability 
+| DEVTOOLS_ERROR | An error occurred when trying to send devtools traffic
+| DEVTOOLS_SESSION_CLOSED | Sending devtools traffic was stopped 
 | DOWNLOADING_FILE | User requested to download file from browser container 
 | ENVIRONMENT_NOT_AVAILABLE | Browser with desired name and version does not exist
 | FAILED_TO_KILL_VIDEO_CONTAINER | Failed to kill video container after timeout 
@@ -83,9 +87,9 @@ The following statuses are available:
 | UPLOADING_FILE | An issue occurred while uploading file 
 | UPLOADED_FILE | File successfully uploaded
 | VIDEO_ERROR | An error occurred when post-processing recorded video 
+| VNC_CLIENT_DISCONNECTED | User VNC client disconnected
 | VNC_ENABLED | User requested VNC traffic 
 | VNC_ERROR | An error occurred when trying to send VNC traffic 
 | VNC_SESSION_CLOSED | Sending VNC traffic was stopped 
-| VNC_CLIENT_DISCONNECTED | User VNC client disconnected
 | VNC_NOT_ENABLED | User requested VNC traffic but did not specify `enableVNC` capability
 |===

@@ -161,7 +161,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		browser.Caps.VideoName = getTemporaryFileName(videoOutputDir, videoFileExtension)
 	}
 	finalLogName := browser.Caps.LogName
-	if logOutputDir != "" {
+	if logOutputDir != "" && (saveAllLogs || browser.Caps.Log) {
 		browser.Caps.LogName = getTemporaryFileName(logOutputDir, logFileExtension)
 	}
 	starter, ok := manager.Find(browser.Caps, requestId)
@@ -276,16 +276,17 @@ func create(w http.ResponseWriter, r *http.Request) {
 		Started: time.Now()}
 	cancelAndRenameFiles := func() {
 		cancel()
+		sessionId := preprocessSessionId(s.ID)
 		e := event.Event{
 			RequestId: requestId,
-			SessionId: s.ID,
+			SessionId: sessionId,
 			Session:   sess,
 		}
-		event.SessionStopped(event.StoppedSession{e})
 		if browser.Caps.Video && !disableDocker {
 			oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
 			if finalVideoName == "" {
-				finalVideoName = s.ID + videoFileExtension
+				finalVideoName = sessionId + videoFileExtension
+				e.Session.Caps.VideoName = finalVideoName
 			}
 			newVideoName := filepath.Join(videoOutputDir, finalVideoName)
 			err := os.Rename(oldVideoName, newVideoName)
@@ -300,12 +301,13 @@ func create(w http.ResponseWriter, r *http.Request) {
 				event.FileCreated(createdFile)
 			}
 		}
-		if logOutputDir != "" {
+		if logOutputDir != "" && (saveAllLogs || browser.Caps.Log) {
 			//The following logic will fail if -capture-driver-logs is enabled and a session is requested in driver mode.
 			//Specifying both -log-output-dir and -capture-driver-logs in that case is considered a misconfiguration.
 			oldLogName := filepath.Join(logOutputDir, browser.Caps.LogName)
 			if finalLogName == "" {
-				finalLogName = s.ID + logFileExtension
+				finalLogName = sessionId + logFileExtension
+				e.Session.Caps.LogName = finalLogName
 			}
 			newLogName := filepath.Join(logOutputDir, finalLogName)
 			err := os.Rename(oldLogName, newLogName)
@@ -320,11 +322,19 @@ func create(w http.ResponseWriter, r *http.Request) {
 				event.FileCreated(createdFile)
 			}
 		}
+		event.SessionStopped(event.StoppedSession{e})
 	}
 	sess.Cancel = cancelAndRenameFiles
 	sessions.Put(s.ID, sess)
 	queue.Create()
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%d] [%.2fs]", requestId, s.ID, i, util.SecondsSince(sessionStartTime))
+}
+
+func preprocessSessionId(sid string) string {
+	if ggrHost != nil {
+		return ggrHost.Sum() + sid
+	}
+	return sid
 }
 
 const (
@@ -379,6 +389,7 @@ func getSessionTimeout(sessionTimeout string, maxTimeout time.Duration, defaultT
 		if st <= maxTimeout {
 			return st, nil
 		}
+		return maxTimeout, nil
 	}
 	return defaultTimeout, nil
 }
@@ -403,51 +414,60 @@ func generateRandomFileName(extension string) string {
 
 func proxy(w http.ResponseWriter, r *http.Request) {
 	done := make(chan func())
-	go func(w http.ResponseWriter, r *http.Request) {
-		cancel := func() {}
-		defer func() {
-			done <- cancel
-		}()
-		(&httputil.ReverseProxy{
-			Director: func(r *http.Request) {
-				requestId := serial()
-				fragments := strings.Split(r.URL.Path, slash)
-				id := fragments[2]
-				sess, ok := sessions.Get(id)
-				if ok {
-					sess.Lock.Lock()
-					defer sess.Lock.Unlock()
-					select {
-					case <-sess.TimeoutCh:
-					default:
-						close(sess.TimeoutCh)
-					}
-					if r.Method == http.MethodDelete && len(fragments) == 3 {
-						if enableFileUpload {
-							os.RemoveAll(filepath.Join(os.TempDir(), id))
-						}
-						cancel = sess.Cancel
-						sessions.Remove(id)
-						queue.Release()
-						log.Printf("[%d] [SESSION_DELETED] [%s]", requestId, id)
-					} else {
-						sess.TimeoutCh = onTimeout(sess.Timeout, func() {
-							request{r}.session(id).Delete(requestId)
-						})
-						if len(fragments) == 4 && fragments[len(fragments)-1] == "file" && enableFileUpload {
-							r.Header.Set("X-Selenoid-File", filepath.Join(os.TempDir(), id))
-							r.URL.Path = "/file"
-							return
-						}
-					}
-					r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
-					return
+	go func() {
+		(<-done)()
+	}()
+	cancel := func() {}
+	defer func() {
+		done <- cancel
+	}()
+	requestId := serial()
+	(&httputil.ReverseProxy{
+		Director: func(r *http.Request) {
+			fragments := strings.Split(r.URL.Path, slash)
+			id := fragments[2]
+			sess, ok := sessions.Get(id)
+			if ok {
+				sess.Lock.Lock()
+				defer sess.Lock.Unlock()
+				select {
+				case <-sess.TimeoutCh:
+				default:
+					close(sess.TimeoutCh)
 				}
-				r.URL.Path = errorPath
-			},
-		}).ServeHTTP(w, r)
-	}(w, r)
-	go (<-done)()
+				if r.Method == http.MethodDelete && len(fragments) == 3 {
+					if enableFileUpload {
+						os.RemoveAll(filepath.Join(os.TempDir(), id))
+					}
+					cancel = sess.Cancel
+					sessions.Remove(id)
+					queue.Release()
+					log.Printf("[%d] [SESSION_DELETED] [%s]", requestId, id)
+				} else {
+					sess.TimeoutCh = onTimeout(sess.Timeout, func() {
+						request{r}.session(id).Delete(requestId)
+					})
+					if len(fragments) == 4 && fragments[len(fragments)-1] == "file" && enableFileUpload {
+						r.Header.Set("X-Selenoid-File", filepath.Join(os.TempDir(), id))
+						r.URL.Path = "/file"
+						return
+					}
+				}
+				r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
+				return
+			}
+			r.URL.Path = paths.Error
+		},
+		ErrorHandler: defaultErrorHandler(requestId),
+	}).ServeHTTP(w, r)
+}
+
+func defaultErrorHandler(requestId uint64) func(http.ResponseWriter, *http.Request, error) {
+	return func(w http.ResponseWriter, r *http.Request, err error) {
+		user, remote := util.RequestInfo(r)
+		log.Printf("[%d] [CLIENT_DISCONNECTED] [%s] [%s] [Error: %v]", requestId, user, remote, err)
+		w.WriteHeader(http.StatusBadGateway)
+	}
 }
 
 func reverseProxy(hostFn func(sess *session.Session) string, status string) func(http.ResponseWriter, *http.Request) {
@@ -463,6 +483,7 @@ func reverseProxy(hostFn func(sess *session.Session) string, status string) func
 					r.URL.Path = remainingPath
 					log.Printf("[%d] [%s] [%s] [%s]", requestId, status, sid, remainingPath)
 				},
+				ErrorHandler: defaultErrorHandler(requestId),
 			}).ServeHTTP(w, r)
 		} else {
 			util.JsonError(w, fmt.Sprintf("Unknown session %s", sid), http.StatusNotFound)
@@ -561,13 +582,13 @@ func vnc(wsconn *websocket.Conn) {
 }
 
 func logs(w http.ResponseWriter, r *http.Request) {
-	fileNameOrSessionID := strings.TrimPrefix(r.URL.Path, logsPath)
+	fileNameOrSessionID := strings.TrimPrefix(r.URL.Path, paths.Logs)
 	if logOutputDir != "" && (fileNameOrSessionID == "" || strings.HasSuffix(fileNameOrSessionID, logFileExtension)) {
 		if r.Method == http.MethodDelete {
-			deleteFileIfExists(w, r, logOutputDir, logsPath, "DELETED_LOG_FILE")
+			deleteFileIfExists(w, r, logOutputDir, paths.Logs, "DELETED_LOG_FILE")
 			return
 		}
-		fileServer := http.StripPrefix(logsPath, http.FileServer(http.Dir(logOutputDir)))
+		fileServer := http.StripPrefix(paths.Logs, http.FileServer(http.Dir(logOutputDir)))
 		fileServer.ServeHTTP(w, r)
 		return
 	}
@@ -609,6 +630,33 @@ func status(w http.ResponseWriter, _ *http.Request) {
 				"ready":   ready,
 			},
 		})
+}
+
+func devtools(wsconn *websocket.Conn) {
+	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
+	sess, ok := sessions.Get(sid)
+	requestId := serial()
+	if ok {
+		origin := "http://localhost/"
+		u := fmt.Sprintf("ws://%s/", sess.HostPort.Devtools)
+		conn, err := websocket.Dial(u, "", origin)
+		if err != nil {
+			log.Printf("[%d] [DEVTOOLS_ERROR] [%v]", requestId, err)
+			return
+		}
+		log.Printf("[%d] [DEVTOOLS] [%s]", requestId, sid)
+		defer conn.Close()
+		wsconn.PayloadType = websocket.BinaryFrame
+		go func() {
+			io.Copy(wsconn, conn)
+			wsconn.Close()
+			log.Printf("[%d] [DEVTOOLS_SESSION_CLOSED] [%s]", requestId, sid)
+		}()
+		io.Copy(conn, wsconn)
+		log.Printf("[%d] [DEVTOOLS_CLIENT_DISCONNECTED] [%s]", requestId, sid)
+	} else {
+		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
+	}
 }
 
 func onTimeout(t time.Duration, f func()) chan struct{} {

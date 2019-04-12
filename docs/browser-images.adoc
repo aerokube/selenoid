@@ -4,7 +4,6 @@ We maintain a set of prebuilt Docker container images for different browsers inc
 * https://hub.docker.com/r/selenoid/firefox/[Firefox]
 * https://hub.docker.com/r/selenoid/chrome/[Google Chrome]
 * https://hub.docker.com/r/selenoid/opera/[Opera]
-* https://hub.docker.com/r/selenoid/phantomjs/[PhantomJS]
 
 All these images are free to use. See image tags for a list of supported versions. Build files are stored in http://github.com/aerokube/selenoid-images[selenoid-images] repository.
 Feel free to create issues or request images for new versions.

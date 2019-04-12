@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/pkg/errors"
 	"log"
+	"mime"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,6 +31,7 @@ func init() {
 	flag.BoolVar(&(s3.KeepFiles), "s3-keep-files", false, "Do not remove uploaded files")
 	flag.StringVar(&(s3.IncludeFiles), "s3-include-files", "", "Pattern used to match and include files")
 	flag.StringVar(&(s3.ExcludeFiles), "s3-exclude-files", "", "Pattern used to match and exclude files")
+	flag.BoolVar(&(s3.ForcePathStyle), "s3-force-path-style", false, "Force path-style addressing for file upload")
 	AddUploader(s3)
 }
 
@@ -44,6 +46,7 @@ type S3Uploader struct {
 	KeepFiles         bool
 	IncludeFiles      string
 	ExcludeFiles      string
+	ForcePathStyle    bool
 
 	manager *s3manager.Uploader
 }
@@ -51,8 +54,9 @@ type S3Uploader struct {
 func (s3 *S3Uploader) Init() {
 	if s3.Endpoint != "" {
 		config := &aws.Config{
-			Endpoint: aws.String(s3.Endpoint),
-			Region:   aws.String(s3.Region),
+			Endpoint:         aws.String(s3.Endpoint),
+			Region:           aws.String(s3.Region),
+			S3ForcePathStyle: aws.Bool(s3.ForcePathStyle),
 		}
 		if s3.AccessKey != "" && s3.SecretKey != "" {
 			config.Credentials = credentials.NewStaticCredentials(s3.AccessKey, s3.SecretKey, "")
@@ -61,7 +65,7 @@ func (s3 *S3Uploader) Init() {
 		if err != nil {
 			log.Fatalf("[-] [INIT] [Failed to initialize S3 support: %v]", err)
 		}
-		log.Printf("[-] [INIT] [Initialized S3 support: endpoint = %s, region = %s, bucketName = %s, accessKey = %s, keyPattern = %s, includeFiles = %s, excludeFiles = %s]", s3.Endpoint, s3.Region, s3.BucketName, s3.AccessKey, s3.KeyPattern, s3.IncludeFiles, s3.ExcludeFiles)
+		log.Printf("[-] [INIT] [Initialized S3 support: endpoint = %s, region = %s, bucketName = %s, accessKey = %s, keyPattern = %s, includeFiles = %s, excludeFiles = %s, forcePathStyle = %t]", s3.Endpoint, s3.Region, s3.BucketName, s3.AccessKey, s3.KeyPattern, s3.IncludeFiles, s3.ExcludeFiles, s3.ForcePathStyle)
 		s3.manager = s3manager.NewUploader(sess)
 	}
 }
@@ -88,6 +92,10 @@ func (s3 *S3Uploader) Upload(createdFile event.CreatedFile) (bool, error) {
 			Key:    aws.String(key),
 			Body:   file,
 		}
+		contentType := mime.TypeByExtension(filepath.Ext(filename))
+		if contentType != "" {
+			uploadInput.ContentType = aws.String(contentType)
+		}
 		if s3.ReducedRedundancy {
 			uploadInput.StorageClass = aws.String("REDUCED_REDUNDANCY")
 		}
@@ -95,8 +103,11 @@ func (s3 *S3Uploader) Upload(createdFile event.CreatedFile) (bool, error) {
 		if err != nil {
 			return false, fmt.Errorf("failed to S3 upload %s as %s: %v", filename, key, err)
 		}
-		if !s3.KeepFiles && os.Remove(filename) != nil {
-			return true, fmt.Errorf("failed to remove uploaded file %s: %v", filename, err)
+		if !s3.KeepFiles {
+			err := os.Remove(filename)
+			if err != nil {
+				return true, fmt.Errorf("failed to remove uploaded file %s: %v", filename, err)
+			}
 		}
 		return true, nil
 	}
@@ -130,13 +141,13 @@ func GetS3Key(keyPattern string, createdFile event.CreatedFile) string {
 		pt = sess.Caps.S3KeyPattern
 	}
 	filename := createdFile.Name
-	key := strings.Replace(pt, "$fileName", strings.ToLower(filepath.Base(filename)), -1)
+	key := strings.Replace(pt, "$fileName", filepath.Base(filename), -1)
 	key = strings.Replace(key, "$fileExtension", strings.ToLower(filepath.Ext(filename)), -1)
 	key = strings.Replace(key, "$browserName", strings.ToLower(sess.Caps.Name), -1)
 	key = strings.Replace(key, "$browserVersion", strings.ToLower(sess.Caps.Version), -1)
 	key = strings.Replace(key, "$platformName", strings.ToLower(sess.Caps.Platform), -1)
 	key = strings.Replace(key, "$quota", strings.ToLower(sess.Quota), -1)
-	key = strings.Replace(key, "$sessionId", strings.ToLower(createdFile.SessionId), -1)
+	key = strings.Replace(key, "$sessionId", createdFile.SessionId, -1)
 	key = strings.Replace(key, "$fileType", strings.ToLower(createdFile.Type), -1)
 	key = strings.Replace(key, "$date", time.Now().Format("2006-01-02"), -1)
 	key = strings.Replace(key, " ", "-", -1)

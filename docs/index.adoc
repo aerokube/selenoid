@@ -9,6 +9,7 @@
 :icons: font
 :source-highlighter: coderay
 :docinfo: shared
+:favicon: img/favicon.png
 
 This reference covers version: _{revnumber}_
 
@@ -21,6 +22,21 @@ include::faq.adoc[leveloffset=+1]
 include::windows.adoc[leveloffset=+1]
 include::browser-images.adoc[leveloffset=+1]
 
+== Main Features
+include::video.adoc[leveloffset=+1]
+include::logs.adoc[leveloffset=+1]
+include::file-upload.adoc[leveloffset=+1]
+include::file-download.adoc[leveloffset=+1]
+include::clipboard.adoc[leveloffset=+1]
+include::devtools.adoc[leveloffset=+1]
+include::special-capabilities.adoc[leveloffset=+1]
+
+== Advanced Features
+include::usage-statistics.adoc[leveloffset=+1]
+include::s3.adoc[leveloffset=+1]
+include::metadata.adoc[leveloffset=+1]
+include::selenoid-without-docker.adoc[leveloffset=+1]
+
 == Configuration
 include::docker-settings.adoc[leveloffset=+1]
 include::browsers-configuration-file.adoc[leveloffset=+1]
@@ -28,21 +44,9 @@ include::logging-configuration-file.adoc[leveloffset=+1]
 include::reloading-configuration.adoc[leveloffset=+1]
 include::updating-browsers.adoc[leveloffset=+1]
 include::timezone.adoc[leveloffset=+1]
-include::video.adoc[leveloffset=+1]
-include::logs.adoc[leveloffset=+1]
-include::s3.adoc[leveloffset=+1]
-include::metadata.adoc[leveloffset=+1]
 include::docker-compose.adoc[leveloffset=+1]
 include::log-files.adoc[leveloffset=+1]
 include::cli-flags.adoc[leveloffset=+1]
-
-== Advanced Features
-include::special-capabilities.adoc[leveloffset=+1]
-include::selenoid-without-docker.adoc[leveloffset=+1]
-include::usage-statistics.adoc[leveloffset=+1]
-include::file-upload.adoc[leveloffset=+1]
-include::file-download.adoc[leveloffset=+1]
-include::clipboard.adoc[leveloffset=+1]
 
 include::contributing.adoc[]
 

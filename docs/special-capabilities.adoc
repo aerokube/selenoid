@@ -88,9 +88,18 @@ To obtain the full list of https://stackoverflow.com/questions/3377300/what-are-
 $ docker run -it --rm --entrypoint /usr/bin/ffmpeg selenoid/video-recorder -codecs
 ```
 
-=== Saving Session Logs: logName
+=== Saving Session Logs: enableLog, logName
 
 NOTE: This feature requires some preparation. Please refer to <<Saving Session Logs>> section for more details.
+
+To enable saving logs for a session, add:
+
+.Type: boolean
+----
+enableLog: true
+----
+
+If you wish to automatically save logs for all sessions, you can enable this behavior globally with Selenoid `-save-all-logs` flag.
 
 By default saved log files are named `<session-id>.log` where `<session-id>` is a unique identifier of Selenium session.
 To provide custom log file name specify:
@@ -180,6 +189,15 @@ By default Selenoid browser containers are using global DNS settings of Docker d
 .Type: array, format: <dns-ip-address>
 ----
 dnsServers: ["192.168.0.1", "192.168.0.2"]
+----
+
+=== More Docker Networks: additionalNetworks
+
+By default Selenoid browser containers are started in Docker network specified by `-container-network` flag. If you tested application is running in another network you may need to connect browser container to this network:
+
+.Type: array, format: <network-name>
+----
+additionalNetworks: ["my-custom-net-1", "my-custom-net-2"]
 ----
 
 === Container Labels: labels
