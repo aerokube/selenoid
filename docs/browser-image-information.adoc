@@ -176,6 +176,8 @@ We do not consider these images really stable. Many of base operations like work
 | selenoid/opera:56.0 | selenoid/vnc:opera_56.0 | 2.40 | 56.0.3051.31
 | selenoid/opera:57.0 | selenoid/vnc:opera_57.0 | 2.41 | 57.0.3098.76
 | selenoid/opera:58.0 | selenoid/vnc:opera_58.0 | 2.42 | 58.0.3135.79
+| - | - | - | 59.0.x.x (no stable release exists)
+| selenoid/opera:60.0 | selenoid/vnc:opera_60.0 | 2.45 | 60.0.3255.56
 |===
 
 [NOTE]
