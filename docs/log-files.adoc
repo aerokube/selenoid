@@ -76,6 +76,7 @@ The following statuses are available:
 | SESSION_ATTEMPTED | Started Docker container or driver binary and trying to create a new session with it 
 | SESSION_ATTEMPT_TIMED_OUT | An attempt to create a new session timed out
 | SESSION_CREATED | A new session was created and returned to user
+| SESSION_TIMED_OUT | Existing session was terminated by timeout
 | SESSION_DELETED | Existing session was deleted by user request
 | SESSION_FAILED | An attempt to create a new session failed - user receives an error
 | SESSION_NOT_FOUND | Requested VNC or logs for unknown session.
