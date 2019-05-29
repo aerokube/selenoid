@@ -203,8 +203,8 @@ func testConfig(env *service.Environment) *config.Config {
 				Volumes: []string{"/test:/test"},
 				Labels:  map[string]string{"key": "value"},
 				Sysctl:  map[string]string{"sysctl net.ipv4.tcp_timestamps": "2"},
-				Mem: "512m",
-				Cpu: "1.0",
+				Mem:     "512m",
+				Cpu:     "1.0",
 			},
 		},
 	}
