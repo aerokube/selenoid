@@ -444,7 +444,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2019-06-05</span>
+<span id="revdate">2019-06-07</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -4687,7 +4687,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-06-05 08:50:50 UTC
+Last updated 2019-06-07 04:00:53 UTC
 </div>
 </div>
 <style>
@@ -4779,93 +4779,31 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 .CodeRay .change .change{color:#66f}
 .CodeRay .head .head{color:#f4f}
 </style>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-23854888-2"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-23854888-2');
+</script>
+
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript" >
-    (function (d, w, c) {
-        (w[c] = w[c] || []).push(function() {
-            try {
-                w.yaCounter43539754 = new Ya.Metrika({
-                    id:43539754,
-                    clickmap:true,
-                    trackLinks:true,
-                    accurateTrackBounce:true,
-                    webvisor:true,
-                    trackHash:true
-                });
-            } catch(e) { }
-        });
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
 
-        var n = d.getElementsByTagName("script")[0],
-            s = d.createElement("script"),
-            f = function () { n.parentNode.insertBefore(s, n); };
-        s.type = "text/javascript";
-        s.async = true;
-        s.src = "https://mc.yandex.ru/metrika/watch.js";
-
-        if (w.opera == "[object Opera]") {
-            d.addEventListener("DOMContentLoaded", f, false);
-        } else { f(); }
-    })(document, window, "yandex_metrika_callbacks");
+    ym(43539754, "init", {
+        clickmap:true,
+        trackLinks:true,
+        accurateTrackBounce:true,
+        webvisor:true,
+        trackHash:true
+    });
 </script>
 <noscript><div><img src="https://mc.yandex.ru/watch/43539754" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
-
-<script type="text/javascript" async="">
-    try {
-        var AG_onLoad = function (func) {
-            if (document.readyState === "complete" || document.readyState === "interactive") func();
-            else if (document.addEventListener) document.addEventListener("DOMContentLoaded", func);
-            else if (document.attachEvent) document.attachEvent("DOMContentLoaded", func)
-        };
-        var AG_removeElementById = function (id) {
-            var element = document.getElementById(id);
-            if (element && element.parentNode) {
-                element.parentNode.removeChild(element);
-            }
-        };
-        var AG_removeElementBySelector = function (selector) {
-            if (!document.querySelectorAll) {
-                return;
-            }
-            var nodes = document.querySelectorAll(selector);
-            if (nodes) {
-                for (var i = 0; i < nodes.length; i++) {
-                    if (nodes[i] && nodes[i].parentNode) {
-                        nodes[i].parentNode.removeChild(nodes[i]);
-                    }
-                }
-            }
-        };
-        var AG_each = function (selector, fn) {
-            if (!document.querySelectorAll) return;
-            var elements = document.querySelectorAll(selector);
-            for (var i = 0; i < elements.length; i++) {
-                fn(elements[i]);
-            }
-            ;
-        };
-        var AdFox_getCodeScript = function () {
-        };
-        AG_onLoad(function () {
-            AG_each('iframe[id^="AdFox_iframe_"]', function (el) {
-                if (el && el.parentNode) {
-                    el.parentNode.removeChild(el);
-                }
-            });
-        });
-        try {
-            Object.defineProperty(window, 'noAdsAtAll', {
-                get: function () {
-                    return true;
-                }
-            });
-        } catch (ex) {
-        }
-        window.uabInject = function () {
-        };
-    } catch (ex) {
-        console.error('Error executing AG js: ' + ex);
-    }
-</script>
 </body>
 </html>
