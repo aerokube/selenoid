@@ -445,7 +445,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2019-06-12</span>
+<span id="revdate">2019-06-16</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -563,8 +563,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#_firefox">A.1. Firefox</a></li>
 <li><a href="#_chrome">A.2. Chrome</a></li>
-<li><a href="#_opera">A.3. Opera</a></li>
-<li><a href="#_android">A.4. Android</a></li>
+<li><a href="#_chrome_mobile">A.3. Chrome Mobile</a></li>
+<li><a href="#_opera">A.4. Opera</a></li>
+<li><a href="#_android">A.5. Android</a></li>
 </ul>
 </li>
 </ul>
@@ -4298,14 +4299,14 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/chrome:74.0</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/vnc:chrome_74.0</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">74.0.3729.157</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">74.0.3729.6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">74.0.3729.157</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/chrome:75.0</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/vnc:chrome_75.0</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">75.0.3770.80</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">75.0.3770.8</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">75.0.3770.80</p></td>
 </tr>
 </tbody>
 </table>
@@ -4332,9 +4333,66 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_opera"><a class="anchor" href="#_opera"></a>A.3. Opera</h3>
+<h3 id="_chrome_mobile"><a class="anchor" href="#_chrome_mobile"></a>A.3. Chrome Mobile</h3>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Hardware server or virtual machine with nested virtualization support is required to run Chrome Mobile images.
+</td>
+</tr>
+</table>
+</div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 8. Opera Presto Images</caption>
+<caption class="title">Table 8. Chrome Mobile Images</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Image</th>
+<th class="tableblock halign-left valign-top">Android version</th>
+<th class="tableblock halign-left valign-top">Appium version</th>
+<th class="tableblock halign-left valign-top">Chromedriver version</th>
+<th class="tableblock halign-left valign-top">Chrome version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/chrome-mobile:73.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.13.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">73.0.3683.68</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">73.0.3683.90</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/chrome-mobile:74.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.13.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">74.0.3729.6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">74.0.3729.157</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/chrome-mobile:75.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8.1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.13.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">75.0.3770.8</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">75.0.3770.89</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_opera"><a class="anchor" href="#_opera"></a>A.4. Opera</h3>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 9. Opera Presto Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -4381,7 +4439,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </table>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 9. Opera Blink Images</caption>
+<caption class="title">Table 10. Opera Blink Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -4590,7 +4648,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_android"><a class="anchor" href="#_android"></a>A.4. Android</h3>
+<h3 id="_android"><a class="anchor" href="#_android"></a>A.5. Android</h3>
 <div class="admonitionblock warning">
 <table>
 <tr>
@@ -4604,7 +4662,7 @@ Hardware server or virtual machine with nested virtualization support is require
 </table>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 10. Android Images</caption>
+<caption class="title">Table 11. Android Images</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -4688,7 +4746,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-06-12 12:17:41 UTC
+Last updated 2019-06-16 09:45:51 UTC
 </div>
 </div>
 <style>
