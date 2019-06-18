@@ -122,7 +122,7 @@ WARNING: Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 | selenoid/chrome:72.0 | selenoid/vnc:chrome_72.0 | 2.46 | 72.0.3626.121
 | selenoid/chrome:73.0 | selenoid/vnc:chrome_73.0 | 73.0.3683.68 | 73.0.3683.75
 | selenoid/chrome:74.0 | selenoid/vnc:chrome_74.0 | 74.0.3729.6 | 74.0.3729.157
-| selenoid/chrome:75.0 | selenoid/vnc:chrome_75.0 | 75.0.3770.8 | 75.0.3770.80
+| selenoid/chrome:75.0 | selenoid/vnc:chrome_75.0 | 75.0.3770.90 | 75.0.3770.90
 |===
 
 [NOTE]
