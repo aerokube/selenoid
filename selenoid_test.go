@@ -675,6 +675,13 @@ func TestServeAndDeleteVideoFile(t *testing.T) {
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
 
+	rsp, err = http.Get(With(srv.URL).Path("/video/?json"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+	var files []string
+	AssertThat(t, rsp, IsJson{&files})
+	AssertThat(t, files, EqualTo{[]string{"testfile"}})
+
 	deleteReq, _ := http.NewRequest(http.MethodDelete, With(srv.URL).Path("/video/testfile"), nil)
 	rsp, err = http.DefaultClient.Do(deleteReq)
 	AssertThat(t, err, Is{nil})
@@ -694,6 +701,13 @@ func TestServeAndDeleteLogFile(t *testing.T) {
 	rsp, err := http.Get(With(srv.URL).Path("/logs/logfile.log"))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
+
+	rsp, err = http.Get(With(srv.URL).Path("/logs/?json"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+	var files []string
+	AssertThat(t, rsp, IsJson{&files})
+	AssertThat(t, len(files) > 0, Is{true})
 
 	deleteReq, _ := http.NewRequest(http.MethodDelete, With(srv.URL).Path("/logs/logfile.log"), nil)
 	rsp, err = http.DefaultClient.Do(deleteReq)

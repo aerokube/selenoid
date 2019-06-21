@@ -581,11 +581,22 @@ func vnc(wsconn *websocket.Conn) {
 	}
 }
 
+const (
+	jsonParam = "json"
+)
+
 func logs(w http.ResponseWriter, r *http.Request) {
+	requestId := serial()
 	fileNameOrSessionID := strings.TrimPrefix(r.URL.Path, paths.Logs)
 	if logOutputDir != "" && (fileNameOrSessionID == "" || strings.HasSuffix(fileNameOrSessionID, logFileExtension)) {
 		if r.Method == http.MethodDelete {
-			deleteFileIfExists(w, r, logOutputDir, paths.Logs, "DELETED_LOG_FILE")
+			deleteFileIfExists(requestId, w, r, logOutputDir, paths.Logs, "DELETED_LOG_FILE")
+			return
+		}
+		user, remote := util.RequestInfo(r)
+		log.Printf("[%d] [LOG_LISTING] [%s] [%s]", requestId, user, remote)
+		if _, ok := r.URL.Query()[jsonParam]; ok {
+			listFilesAsJson(requestId, w, logOutputDir, "LOG_ERROR")
 			return
 		}
 		fileServer := http.StripPrefix(paths.Logs, http.FileServer(http.Dir(logOutputDir)))
@@ -593,6 +604,21 @@ func logs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	websocket.Handler(streamLogs).ServeHTTP(w, r)
+}
+
+func listFilesAsJson(requestId uint64, w http.ResponseWriter, dir string, errStatus string) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		log.Printf("[%d] [%s] [%s]", requestId, errStatus, fmt.Sprintf("Failed to list directory %s: %v", logOutputDir, err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	var ret []string
+	for _, f := range files {
+		ret = append(ret, f.Name())
+	}
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ret)
 }
 
 func streamLogs(wsconn *websocket.Conn) {
