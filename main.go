@@ -327,11 +327,11 @@ func handler() http.Handler {
 	})
 	root.HandleFunc(paths.Ping, ping)
 	root.Handle(paths.VNC, websocket.Handler(vnc))
-	root.Handle(paths.Devtools, websocket.Server{Handler: devtools})
 	root.HandleFunc(paths.Logs, logs)
 	root.HandleFunc(paths.Video, video)
 	root.HandleFunc(paths.Download, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Fileserver }, "DOWNLOADING_FILE"))
 	root.HandleFunc(paths.Clipboard, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Clipboard }, "CLIPBOARD"))
+	root.HandleFunc(paths.Devtools, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Devtools }, "DEVTOOLS"))
 	if enableFileUpload {
 		root.HandleFunc(paths.File, fileUpload)
 	}

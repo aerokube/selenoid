@@ -632,33 +632,6 @@ func status(w http.ResponseWriter, _ *http.Request) {
 		})
 }
 
-func devtools(wsconn *websocket.Conn) {
-	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
-	sess, ok := sessions.Get(sid)
-	requestId := serial()
-	if ok {
-		origin := "http://localhost/"
-		u := fmt.Sprintf("ws://%s/", sess.HostPort.Devtools)
-		conn, err := websocket.Dial(u, "", origin)
-		if err != nil {
-			log.Printf("[%d] [DEVTOOLS_ERROR] [%v]", requestId, err)
-			return
-		}
-		log.Printf("[%d] [DEVTOOLS] [%s]", requestId, sid)
-		defer conn.Close()
-		wsconn.PayloadType = websocket.BinaryFrame
-		go func() {
-			io.Copy(wsconn, conn)
-			wsconn.Close()
-			log.Printf("[%d] [DEVTOOLS_SESSION_CLOSED] [%s]", requestId, sid)
-		}()
-		io.Copy(conn, wsconn)
-		log.Printf("[%d] [DEVTOOLS_CLIENT_DISCONNECTED] [%s]", requestId, sid)
-	} else {
-		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
-	}
-}
-
 func onTimeout(t time.Duration, f func()) chan struct{} {
 	cancel := make(chan struct{})
 	go func(cancel chan struct{}) {
