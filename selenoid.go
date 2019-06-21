@@ -581,11 +581,22 @@ func vnc(wsconn *websocket.Conn) {
 	}
 }
 
+const (
+	jsonParam = "json"
+)
+
 func logs(w http.ResponseWriter, r *http.Request) {
+	requestId := serial()
 	fileNameOrSessionID := strings.TrimPrefix(r.URL.Path, paths.Logs)
 	if logOutputDir != "" && (fileNameOrSessionID == "" || strings.HasSuffix(fileNameOrSessionID, logFileExtension)) {
 		if r.Method == http.MethodDelete {
-			deleteFileIfExists(w, r, logOutputDir, paths.Logs, "DELETED_LOG_FILE")
+			deleteFileIfExists(requestId, w, r, logOutputDir, paths.Logs, "DELETED_LOG_FILE")
+			return
+		}
+		user, remote := util.RequestInfo(r)
+		log.Printf("[%d] [LOG_LISTING] [%s] [%s]", requestId, user, remote)
+		if _, ok := r.URL.Query()[jsonParam]; ok {
+			listFilesAsJson(requestId, w, logOutputDir, "LOG_ERROR")
 			return
 		}
 		fileServer := http.StripPrefix(paths.Logs, http.FileServer(http.Dir(logOutputDir)))
@@ -593,6 +604,21 @@ func logs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	websocket.Handler(streamLogs).ServeHTTP(w, r)
+}
+
+func listFilesAsJson(requestId uint64, w http.ResponseWriter, dir string, errStatus string) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		log.Printf("[%d] [%s] [%s]", requestId, errStatus, fmt.Sprintf("Failed to list directory %s: %v", logOutputDir, err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	var ret []string
+	for _, f := range files {
+		ret = append(ret, f.Name())
+	}
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ret)
 }
 
 func streamLogs(wsconn *websocket.Conn) {
@@ -630,33 +656,6 @@ func status(w http.ResponseWriter, _ *http.Request) {
 				"ready":   ready,
 			},
 		})
-}
-
-func devtools(wsconn *websocket.Conn) {
-	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
-	sess, ok := sessions.Get(sid)
-	requestId := serial()
-	if ok {
-		origin := "http://localhost/"
-		u := fmt.Sprintf("ws://%s/", sess.HostPort.Devtools)
-		conn, err := websocket.Dial(u, "", origin)
-		if err != nil {
-			log.Printf("[%d] [DEVTOOLS_ERROR] [%v]", requestId, err)
-			return
-		}
-		log.Printf("[%d] [DEVTOOLS] [%s]", requestId, sid)
-		defer conn.Close()
-		wsconn.PayloadType = websocket.BinaryFrame
-		go func() {
-			io.Copy(wsconn, conn)
-			wsconn.Close()
-			log.Printf("[%d] [DEVTOOLS_SESSION_CLOSED] [%s]", requestId, sid)
-		}()
-		io.Copy(conn, wsconn)
-		log.Printf("[%d] [DEVTOOLS_CLIENT_DISCONNECTED] [%s]", requestId, sid)
-	} else {
-		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
-	}
 }
 
 func onTimeout(t time.Duration, f func()) chan struct{} {

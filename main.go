@@ -269,15 +269,23 @@ func ping(w http.ResponseWriter, _ *http.Request) {
 }
 
 func video(w http.ResponseWriter, r *http.Request) {
+	requestId := serial()
 	if r.Method == http.MethodDelete {
-		deleteFileIfExists(w, r, videoOutputDir, paths.Video, "DELETED_VIDEO_FILE")
+		deleteFileIfExists(requestId, w, r, videoOutputDir, paths.Video, "DELETED_VIDEO_FILE")
+		return
+	}
+	user, remote := util.RequestInfo(r)
+	log.Printf("[%d] [LOG_LISTING] [%s] [%s]", requestId, user, remote)
+	if _, ok := r.URL.Query()[jsonParam]; ok {
+		listFilesAsJson(requestId, w, videoOutputDir, "VIDEO_ERROR")
 		return
 	}
 	fileServer := http.StripPrefix(paths.Video, http.FileServer(http.Dir(videoOutputDir)))
 	fileServer.ServeHTTP(w, r)
 }
 
-func deleteFileIfExists(w http.ResponseWriter, r *http.Request, dir string, prefix string, status string) {
+func deleteFileIfExists(requestId uint64, w http.ResponseWriter, r *http.Request, dir string, prefix string, status string) {
+	user, remote := util.RequestInfo(r)
 	fileName := strings.TrimPrefix(r.URL.Path, prefix)
 	filePath := filepath.Join(dir, fileName)
 	_, err := os.Stat(filePath)
@@ -290,7 +298,7 @@ func deleteFileIfExists(w http.ResponseWriter, r *http.Request, dir string, pref
 		http.Error(w, fmt.Sprintf("Failed to delete file %s: %v", filePath, err), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("[%d] [%s] [%s]", serial(), status, fileName)
+	log.Printf("[%d] [%s] [%s] [%s] [%s]", requestId, status, user, remote, fileName)
 }
 
 var paths = struct {
@@ -327,11 +335,11 @@ func handler() http.Handler {
 	})
 	root.HandleFunc(paths.Ping, ping)
 	root.Handle(paths.VNC, websocket.Handler(vnc))
-	root.Handle(paths.Devtools, websocket.Server{Handler: devtools})
 	root.HandleFunc(paths.Logs, logs)
 	root.HandleFunc(paths.Video, video)
 	root.HandleFunc(paths.Download, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Fileserver }, "DOWNLOADING_FILE"))
 	root.HandleFunc(paths.Clipboard, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Clipboard }, "CLIPBOARD"))
+	root.HandleFunc(paths.Devtools, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Devtools }, "DEVTOOLS"))
 	if enableFileUpload {
 		root.HandleFunc(paths.File, fileUpload)
 	}
