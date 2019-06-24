@@ -1,0 +1,20 @@
+{
+  "short_name": "Aerokube Selenoid",
+  "name": "Aerokube Selenoid | Powerful implementation of Selenium hub using Docker containers to launch browsers",
+  "icons": [
+    {
+      "src": "/images/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./",
+  "display": "standalone",
+  "theme_color": "#673ab7",
+  "background_color": "#eeeeee"
+}
