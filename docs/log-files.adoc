@@ -59,11 +59,9 @@ The following statuses are available:
 | DEVTOOLS_SESSION_CLOSED | Sending devtools traffic was stopped
 | DOWNLOADING_FILE | User requested to download file from browser container
 | ENVIRONMENT_NOT_AVAILABLE | Browser with desired name and version does not exist
-| FAILED_TO_KILL_VIDEO_CONTAINER | Failed to kill video container after timeout
 | FAILED_TO_REMOVE_CONTAINER | Failed to remove Docker container
 | FAILED_TO_TERMINATE_PROCESS | An error occurred while terminating driver process
 | INIT | Server is starting
-| KILLED_VIDEO_CONTAINER | Waiting for video container to stop timed out and it was killed
 | LOG_LISTING | Received a request to list all log files
 | LOG_ERROR | An error occurred when post-processing session logs
 | METADATA | Metadata processing messages
