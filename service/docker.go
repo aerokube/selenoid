@@ -123,7 +123,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		ShmSize:      getShmSize(d.Service),
 		Privileged:   d.Privileged,
 		Resources: ctr.Resources{
-			Memory: mem,
+			Memory:   mem,
 			NanoCPUs: cpu,
 		},
 		ExtraHosts: getExtraHosts(d.Service, d.Caps),
@@ -218,7 +218,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 
 	var publishedPortsInfo map[string]string
 	if d.Service.PublishAllPorts {
-		publishedPortsInfo = getContainerPorts(d.Environment.Network, stat)
+		publishedPortsInfo = getContainerPorts(stat)
 	}
 
 	s := StartedService{
@@ -460,7 +460,7 @@ func getHostPort(env Environment, servicePort string, caps session.Caps, stat ty
 	return hp
 }
 
-func getContainerPorts(networkName string, stat types.ContainerJSON) map[string]string {
+func getContainerPorts(stat types.ContainerJSON) map[string]string {
 	ns := stat.NetworkSettings
 
 	var exposedPorts = make(map[string]string)
@@ -562,14 +562,12 @@ func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint6
 	}
 	notRunning, doesNotExist := cli.ContainerWait(ctx, containerId, ctr.WaitConditionNotRunning)
 	select {
-	case <-notRunning:
 	case <-doesNotExist:
+	case <-notRunning:
+		removeContainer(ctx, cli, requestId, containerId)
+		return
 	case <-time.After(env.SessionDeleteTimeout):
-		err = cli.ContainerRemove(ctx, containerId, types.ContainerRemoveOptions{Force: true})
-		if err != nil {
-			log.Printf("[%d] [FAILED_TO_KILL_VIDEO_CONTAINER] [%s] [%v]", requestId, containerId, err)
-		}
-		log.Printf("[%d] [KILLED_VIDEO_CONTAINER] [%s] [%v]", requestId, containerId, err)
+		removeContainer(ctx, cli, requestId, containerId)
 		return
 	}
 	log.Printf("[%d] [STOPPED_VIDEO_CONTAINER] [%s]", requestId, containerId)
