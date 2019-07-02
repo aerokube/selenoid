@@ -594,11 +594,11 @@ func logs(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		user, remote := util.RequestInfo(r)
-		log.Printf("[%d] [LOG_LISTING] [%s] [%s]", requestId, user, remote)
 		if _, ok := r.URL.Query()[jsonParam]; ok {
 			listFilesAsJson(requestId, w, logOutputDir, "LOG_ERROR")
 			return
 		}
+		log.Printf("[%d] [LOG_LISTING] [%s] [%s]", requestId, user, remote)
 		fileServer := http.StripPrefix(paths.Logs, http.FileServer(http.Dir(logOutputDir)))
 		fileServer.ServeHTTP(w, r)
 		return
