@@ -445,7 +445,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2019-07-01</span>
+<span id="revdate">2019-07-02</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -1563,17 +1563,111 @@ some-clipboard-value</code></pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Currently only <a href="https://chromedevtools.github.io/devtools-protocol/">Chrome Developer Tools</a> are supported.
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Currently only <a href="https://chromedevtools.github.io/devtools-protocol/">Chrome Developer Tools</a> are supported.</p>
+</li>
+<li>
+<p>This feature will work only for Chrome 63+.</p>
+</li>
+<li>
+<p>We recommend to use the most recent Chrome version possible.</p>
+</li>
+</ol>
+</div>
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Selenoid is proxying Chrome Developer Tools websocket to browser container. Just use the following URL to access this websocket:</p>
+<p>Selenoid is proxying Chrome Developer Tools API to browser container.  For every running Selenium session to access the API just use the following URL:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>ws://selenoid.example.com:4444/devtools/&lt;session-id&gt;</code></pre>
+<pre class="CodeRay highlight"><code>&lt;ws or http&gt;://selenoid.example.com:4444/devtools/&lt;session-id&gt;/&lt;method&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here <code>&lt;method&gt;</code> is one of the following:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Supported Developer Tools Methods</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Method</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Protocol</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meaning</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">/browser</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WebSocket</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Developer Tools browser websocket</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">/</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WebSocket</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An alias for /browser</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">/page</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WebSocket</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Developer Tools current page (target) websocket - mainly useful when only one browser tab is open</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">/page/&lt;target-id&gt;</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">WebSocket</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Developer Tools specified page (target) websocket - allows to connect to concrete browser tab</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">/protocol/json</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">HTTP</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A list of supported Developer Tools protocol methods in JSON format (some client libraries are using it)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>For example an URL to connect to current page websocket would be:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>ws://selenoid.example.com:4444/devtools/&lt;session-id&gt;/page</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Accessing Developer Tools API with Webdriver.io and Puppeteer</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript">const { remote } = require(<span class="string"><span class="delimiter">'</span><span class="content">webdriverio</span><span class="delimiter">'</span></span>);
+const puppeteer = require(<span class="string"><span class="delimiter">'</span><span class="content">puppeteer</span><span class="delimiter">'</span></span>);
+const host = <span class="string"><span class="delimiter">'</span><span class="content">selenoid.example.com</span><span class="delimiter">'</span></span>;
+(async () =&gt; {
+    const browser = await remote({
+        <span class="key">hostname</span>: host,
+        <span class="key">capabilities</span>: {
+            <span class="key">browserName</span>: <span class="string"><span class="delimiter">'</span><span class="content">chrome</span><span class="delimiter">'</span></span>,
+            <span class="key">browserVersion</span>: <span class="string"><span class="delimiter">'</span><span class="content">75.0</span><span class="delimiter">'</span></span>
+        }
+    });
+
+    const devtools = await puppeteer.connect(
+        { <span class="key">browserWSEndpoint</span>: <span class="error">`</span>ws:<span class="comment">//${host}:4444/devtools/${browser.sessionId}` }</span>
+    );
+    const page = await devtools.newPage();
+    await page.<span class="reserved">goto</span>(<span class="string"><span class="delimiter">'</span><span class="content">http://aerokube.com</span><span class="delimiter">'</span></span>);
+    await page.screenshot({<span class="key">path</span>: <span class="string"><span class="delimiter">'</span><span class="content">screenshot.png</span><span class="delimiter">'</span></span>});
+    const title = await page.title();
+
+    console.log(title);
+
+    await devtools.close();
+    await browser.deleteSession();
+
+})().<span class="keyword">catch</span>((e) =&gt; console.error(e));</code></pre>
 </div>
 </div>
 </div>
@@ -1915,7 +2009,7 @@ Thus entries from capabilities override entries from configuration file if some 
 <p>For <a href="#_android">Android</a> containers you can select emulator skin with capabilities. List of available skins:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 1. Available Android Skins</caption>
+<caption class="title">Table 2. Available Android Skins</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -2274,7 +2368,7 @@ If you omit <code>-s3-access-key</code> and <code>-s3-secret-key</code> flags th
 <p>By default uploaded file name is preserved, i.e. S3 path is <code>/&lt;session-id&gt;.log</code> or <code>/myCustomVideo.mp4</code>. You can optionally provide your custom key pattern using <code>-s3-key-pattern</code> flag and a set of placeholders:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 2. S3 Key Placeholders</caption>
+<caption class="title">Table 3. S3 Key Placeholders</caption>
 <colgroup>
 <col style="width: 50%;">
 <col style="width: 50%;">
@@ -3143,7 +3237,7 @@ To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
 <p>Every line contains:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 3. Log entry contents</caption>
+<caption class="title">Table 4. Log entry contents</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -3198,7 +3292,7 @@ To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
 <p>The following statuses are available:</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 4. Log entry statuses</caption>
+<caption class="title">Table 5. Log entry statuses</caption>
 <colgroup>
 <col style="width: 50%;">
 <col style="width: 50%;">
@@ -3646,7 +3740,7 @@ $ docker build -t selenoid:latest .</code></pre>
 <div class="sect2">
 <h3 id="_firefox"><a class="anchor" href="#_firefox"></a>A.1. Firefox</h3>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 5. Firefox Images with Selenium Server</caption>
+<caption class="title">Table 6. Firefox Images with Selenium Server</caption>
 <colgroup>
 <col style="width: 20%;">
 <col style="width: 20%;">
@@ -3956,7 +4050,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 </table>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 6. Firefox Images with Selenoid</caption>
+<caption class="title">Table 7. Firefox Images with Selenoid</caption>
 <colgroup>
 <col style="width: 16.6666%;">
 <col style="width: 16.6666%;">
@@ -4124,7 +4218,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <div class="sect2">
 <h3 id="_chrome"><a class="anchor" href="#_chrome"></a>A.2. Chrome</h3>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 7. Chrome Images</caption>
+<caption class="title">Table 8. Chrome Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -4347,7 +4441,7 @@ Hardware server or virtual machine with nested virtualization support is require
 </table>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 8. Chrome Mobile Images</caption>
+<caption class="title">Table 9. Chrome Mobile Images</caption>
 <colgroup>
 <col style="width: 20%;">
 <col style="width: 20%;">
@@ -4392,7 +4486,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div class="sect2">
 <h3 id="_opera"><a class="anchor" href="#_opera"></a>A.4. Opera</h3>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 9. Opera Presto Images</caption>
+<caption class="title">Table 10. Opera Presto Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -4439,7 +4533,7 @@ Hardware server or virtual machine with nested virtualization support is require
 </table>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 10. Opera Blink Images</caption>
+<caption class="title">Table 11. Opera Blink Images</caption>
 <colgroup>
 <col style="width: 25%;">
 <col style="width: 25%;">
@@ -4662,7 +4756,7 @@ Hardware server or virtual machine with nested virtualization support is require
 </table>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 11. Android Images</caption>
+<caption class="title">Table 12. Android Images</caption>
 <colgroup>
 <col style="width: 33.3333%;">
 <col style="width: 33.3333%;">
@@ -4746,7 +4840,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-07-01 15:33:31 UTC
+Last updated 2019-07-02 09:18:45 UTC
 </div>
 </div>
 <style>
