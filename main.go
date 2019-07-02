@@ -275,11 +275,11 @@ func video(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	user, remote := util.RequestInfo(r)
-	log.Printf("[%d] [LOG_LISTING] [%s] [%s]", requestId, user, remote)
 	if _, ok := r.URL.Query()[jsonParam]; ok {
 		listFilesAsJson(requestId, w, videoOutputDir, "VIDEO_ERROR")
 		return
 	}
+	log.Printf("[%d] [VIDEO_LISTING] [%s] [%s]", requestId, user, remote)
 	fileServer := http.StripPrefix(paths.Video, http.FileServer(http.Dir(videoOutputDir)))
 	fileServer.ServeHTTP(w, r)
 }
