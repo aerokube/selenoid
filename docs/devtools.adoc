@@ -35,7 +35,7 @@ ws://selenoid.example.com:4444/devtools/<session-id>/page
 [source,javascript]
 ----
 const { remote } = require('webdriverio');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const host = 'selenoid.example.com';
 (async () => {
     const browser = await remote({
