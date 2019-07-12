@@ -64,7 +64,7 @@ WARNING: Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 |===
 | Image | VNC Image | Selenoid Version | Geckodriver Version | Firefox Version | Client Version
 
-| selenoid/firefox:48.0 | selenoid/vnc:firefox_48.0 | 1.3.9 | 0.13.0 | 48.0.2 (page load timeout, native events and proxies don't work) .20+<.^|
+| selenoid/firefox:48.0 | selenoid/vnc:firefox_48.0 | 1.3.9 | 0.13.0 | 48.0.2 (page load timeout, native events and proxies don't work) .21+<.^|
 **Java, selenium-webdriver.js**: 3.4.0 and above
 **Python**: 3.5.0 and above
 | selenoid/firefox:49.0 | selenoid/vnc:firefox_49.0 | 1.3.9 | 0.13.0 | 49.0.2 (page load timeout, native events and switching between windows don't work)
@@ -86,6 +86,7 @@ WARNING: Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 | selenoid/firefox:65.0 | selenoid/vnc:firefox_65.0 | 1.9.0 | 0.24.0 | 65.0
 | selenoid/firefox:66.0 | selenoid/vnc:firefox_66.0 | 1.9.1 | 0.24.0 | 66.0.1
 | selenoid/firefox:67.0 | selenoid/vnc:firefox_67.0 | 1.9.1 | 0.24.0 | 67.0
+| selenoid/firefox:68.0 | selenoid/vnc:firefox_68.0 | 1.9.2 | 0.24.0 | 68.0
 |===
 
 
@@ -194,6 +195,7 @@ We do not consider these images really stable. Many of base operations like work
 | selenoid/opera:58.0 | selenoid/vnc:opera_58.0 | 2.42 | 58.0.3135.79
 | - | - | - | 59.0.x.x (no stable release exists)
 | selenoid/opera:60.0 | selenoid/vnc:opera_60.0 | 2.45 | 60.0.3255.56
+| - | - | - | 61.0.x.x (no stable release exists)
 |===
 
 [NOTE]
