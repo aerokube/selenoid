@@ -69,6 +69,7 @@ func (s *sess) url() string {
 
 func (s *sess) Delete(requestId uint64) {
 	log.Printf("[%d] [SESSION_TIMED_OUT] [%s]", requestId, s.id)
+	SessionTimedOutMetric.Inc()
 	r, err := http.NewRequest(http.MethodDelete, s.url(), nil)
 	if err != nil {
 		log.Printf("[%d] [DELETE_FAILED] [%s] [%v]", requestId, s.id, err)
@@ -188,6 +189,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
 		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%d]", requestId, u.String(), i)
+		SessionAttemptedMetric.Inc()
 		rsp, err := httpClient.Do(req.WithContext(ctx))
 		select {
 		case <-ctx.Done():
@@ -202,6 +204,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 				}
 				err := fmt.Errorf("New session attempts retry count exceeded")
 				log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), err)
+				SessionFailedMetric.Inc()
 				util.JsonError(w, err.Error(), http.StatusInternalServerError)
 			case context.Canceled:
 				log.Printf("[%d] [CLIENT_DISCONNECTED] [%s] [%s] [%.2fs]", requestId, user, remote, util.SecondsSince(sessionStartTime))
@@ -216,6 +219,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 				rsp.Body.Close()
 			}
 			log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), err)
+			SessionFailedMetric.Inc()
 			util.JsonError(w, err.Error(), http.StatusInternalServerError)
 			queue.Drop()
 			cancel()
@@ -259,6 +263,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	if s.ID == "" {
 		log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), resp.Status)
+		SessionFailedMetric.Inc()
 		queue.Drop()
 		cancel()
 		return
@@ -328,6 +333,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 	sessions.Put(s.ID, sess)
 	queue.Create()
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%d] [%.2fs]", requestId, s.ID, i, util.SecondsSince(sessionStartTime))
+	SessionCreatedMetric.WithLabelValues(s.ID, browser.Caps.Name, browser.Caps.Version).Inc()
+
 }
 
 func preprocessSessionId(sid string) string {
