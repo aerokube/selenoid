@@ -88,10 +88,12 @@ var (
 		Name: "selenoid_session_failed",
 		Help: "The total number of failed sessions",
 	})
-	SessionTimedOutMetric = promauto.NewCounter(prometheus.CounterOpts{
+	SessionTimedOutMetric = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "selenoid_session_timeout",
 		Help: "The total number of timed out sessions ",
-	})
+	},
+		[]string{"id"},
+	)
 )
 
 func init() {
