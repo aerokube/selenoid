@@ -69,7 +69,7 @@ func (s *sess) url() string {
 
 func (s *sess) Delete(requestId uint64) {
 	log.Printf("[%d] [SESSION_TIMED_OUT] [%s]", requestId, s.id)
-	SessionTimedOutMetric.WithLabelValues(s.id).Inc()
+	SessionTimedOutMetric.Inc()
 	r, err := http.NewRequest(http.MethodDelete, s.url(), nil)
 	if err != nil {
 		log.Printf("[%d] [DELETE_FAILED] [%s] [%v]", requestId, s.id, err)
@@ -333,7 +333,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	sessions.Put(s.ID, sess)
 	queue.Create()
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%d] [%.2fs]", requestId, s.ID, i, util.SecondsSince(sessionStartTime))
-	SessionCreatedMetric.WithLabelValues(s.ID, browser.Caps.Name, browser.Caps.Version).Inc()
+	SessionCreatedMetric.WithLabelValues(browser.Caps.Name, browser.Caps.Version).Inc()
 
 }
 
