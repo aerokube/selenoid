@@ -197,6 +197,7 @@ We do not consider these images really stable. Many of base operations like work
 | - | - | - | 59.0.x.x (no stable release exists)
 | selenoid/opera:60.0 | selenoid/vnc:opera_60.0 | 2.45 | 60.0.3255.56
 | - | - | - | 61.0.x.x (no stable release exists)
+| selenoid/opera:62.0 | selenoid/vnc:opera_62.0 | 75.0.3770.100 | 62.0.3331.99 (need to use browserName = chrome)
 |===
 
 [NOTE]
