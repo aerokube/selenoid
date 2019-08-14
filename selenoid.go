@@ -129,7 +129,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		queue.Drop()
 		return
 	}
-	if browser.W3CCaps.Caps.Name != "" && browser.Caps.Name == "" {
+	if browser.W3CCaps.Caps.BrowserName() != "" && browser.Caps.BrowserName() == "" {
 		browser.Caps = browser.W3CCaps.Caps
 	}
 	browser.Caps.ProcessExtensionCapabilities()
@@ -166,7 +166,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	starter, ok := manager.Find(browser.Caps, requestId)
 	if !ok {
-		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s]", requestId, browser.Caps.Name, browser.Caps.Version)
+		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s]", requestId, browser.Caps.BrowserName(), browser.Caps.Version)
 		util.JsonError(w, "Requested environment is not available", http.StatusBadRequest)
 		queue.Drop()
 		return

@@ -93,6 +93,11 @@ func TestGetKey(t *testing.T) {
 	key := upload.GetS3Key(testPattern, input)
 	AssertThat(t, key, EqualTo{"some-user/some-Session-id_internet-explorer_11_windows/log.txt"})
 
+	input.Session.Caps.Name = ""
+	input.Session.Caps.DeviceName = "internet explorer"
+	key = upload.GetS3Key(testPattern, input)
+	AssertThat(t, key, EqualTo{"some-user/some-Session-id_internet-explorer_11_windows/log.txt"})
+
 	input.Session.Caps.S3KeyPattern = "$quota/$fileType$fileExtension"
 	key = upload.GetS3Key(testPattern, input)
 	AssertThat(t, key, EqualTo{"some-user/log.txt"})
