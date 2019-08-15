@@ -60,8 +60,8 @@ type Browser struct {
 	ShmSize         int64             `json:"shmSize,omitempty"`
 	Labels          map[string]string `json:"labels,omitempty"`
 	Sysctl          map[string]string `json:"sysctl,omitempty"`
-	Mem          string `json:"mem,omitempty"`
-	Cpu          string `json:"cpu,omitempty"`
+	Mem             string            `json:"mem,omitempty"`
+	Cpu             string            `json:"cpu,omitempty"`
 	PublishAllPorts bool              `json:"publishAllPorts,omitempty"`
 }
 
@@ -155,7 +155,7 @@ func (config *Config) State(sessions *session.Map, limit, queued, pending int) *
 	}
 	sessions.Each(func(id string, session *session.Session) {
 		state.Used++
-		browserName := session.Caps.Name
+		browserName := session.Caps.BrowserName()
 		version := session.Caps.Version
 		_, ok := state.Browsers[browserName]
 		if !ok {
