@@ -71,9 +71,7 @@ var (
 	version     bool
 	gitRevision = "HEAD"
 	buildStamp  = "unknown"
-)
 
-var (
 	SessionCreatedMetric = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: "selenoid_session_created",
 		Help: "The total number sessions created",
