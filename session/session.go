@@ -52,6 +52,14 @@ func (c *Caps) ProcessExtensionCapabilities() {
 	}
 }
 
+func (c *Caps) BrowserName() string {
+	browserName := c.Name
+	if browserName != "" {
+		return browserName
+	}
+	return c.DeviceName
+}
+
 // Container - container information
 type Container struct {
 	ID        string            `json:"id"`
