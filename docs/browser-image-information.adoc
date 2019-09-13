@@ -1,4 +1,7 @@
 == Browser Image information
+
+NOTE: Build files for all these images are open-sourced and stored in https://github.com/aerokube/selenoid-images[repository].
+
 === Firefox
 
 .Firefox Images with Selenium Server
@@ -207,6 +210,10 @@ We do not consider these images really stable. Many of base operations like work
 . These images work with any modern Selenium client version.
 . Images for older Opera versions were not built because we have no Debian packages. If you have such packages - we could create more images.
 ====
+
+=== Internet Explorer and Microsoft Edge
+
+We don't build ready to use images for these browsers because of Windows license limitations. However we provide detailed instructions on building such images https://github.com/aerokube/windows-images[here]. The same approach can be used for preparing images with Firefox, Chrome and Opera under Windows.
 
 === Android
 
