@@ -565,7 +565,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_chrome">A.2. Chrome</a></li>
 <li><a href="#_chrome_mobile">A.3. Chrome Mobile</a></li>
 <li><a href="#_opera">A.4. Opera</a></li>
-<li><a href="#_android">A.5. Android</a></li>
+<li><a href="#_internet_explorer_and_microsoft_edge">A.5. Internet Explorer and Microsoft Edge</a></li>
+<li><a href="#_android">A.6. Android</a></li>
 </ul>
 </li>
 </ul>
@@ -2876,7 +2877,41 @@ We recommend to use our <a href="https://github.com/aerokube/cm">configuration t
 <div class="sect3">
 <h4 id="_syncing_browser_images_from_existing_file"><a class="anchor" href="#_syncing_browser_images_from_existing_file"></a>4.2.4. Syncing Browser Images from Existing File</h4>
 <div class="paragraph">
-<p>In some usage scenarios you may want to store browsers configuration file under version control and initialize Selenoid from this file. For example this is true if you wish to have consistently reproducing infrastructure and using such tools as <a href="https://aws.amazon.com/cloudformation/">Amazon Cloud Formation</a>. In order to pull browser images do the following:</p>
+<p>In some usage scenarios you may want to store browsers configuration file under version control and initialize Selenoid from this file. For example this is true if you wish to have consistently reproducing infrastructure and using such tools as <a href="https://aws.amazon.com/cloudformation/">Amazon Cloud Formation</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Why this is not the part of Selenoid? Well, this is easy to implement, but under heavy load the result can be unpredictable.
+For example after updating the file and reloading Selenoid it should pull new images. How long will you wait for new sessions then?
+What to do if Docker Registry is inaccessible? So for maintenance reasons it is easier to delegate such simple logic to external script.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In order to pull browser images use on of the following options:</p>
+</div>
+<div class="paragraph">
+<p><strong>Option 1: using CM</strong></p>
+</div>
+<div class="paragraph">
+<p>Recent <a href="https://github.com/aerokube/cm">CM</a> tool versions are able to configure Selenoid from existing <code>browsers.json</code> file as follows:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># ./cm selenoid start --browsers-json /path/to/your/browsers.json</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This way is mainly useful when installing Selenoid from scratch or updating it i.e. as a part of CI build job.</p>
+</div>
+<div class="paragraph">
+<p><strong>Option 2: using jq</strong></p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -2893,19 +2928,8 @@ We recommend to use our <a href="https://github.com/aerokube/cm">configuration t
 </li>
 </ol>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Why this is not the part of Selenoid? Well, this is easy to implement, but under heavy load the result can be unpredictable.
-For example after updating the file and reloading Selenoid it should pull new images. How long will you wait for new sessions then?
-What to do if Docker Registry is inaccessible? So for maintenance reasons it is easier to delegate such simple logic to external script.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>This way can be applied to a running cluster with tests with no downtime.</p>
 </div>
 </div>
 </div>
@@ -3737,6 +3761,18 @@ $ docker build -t selenoid:latest .</code></pre>
 <div class="sect1">
 <h2 id="_browser_image_information"><a class="anchor" href="#_browser_image_information"></a>Appendix A: Browser Image information</h2>
 <div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Build files for all these images are open-sourced and stored in <a href="https://github.com/aerokube/selenoid-images">repository</a>.
+</td>
+</tr>
+</table>
+</div>
 <div class="sect2">
 <h3 id="_firefox"><a class="anchor" href="#_firefox"></a>A.1. Firefox</h3>
 <table class="tableblock frame-all grid-all stretch">
@@ -4773,7 +4809,13 @@ Hardware server or virtual machine with nested virtualization support is require
 </div>
 </div>
 <div class="sect2">
-<h3 id="_android"><a class="anchor" href="#_android"></a>A.5. Android</h3>
+<h3 id="_internet_explorer_and_microsoft_edge"><a class="anchor" href="#_internet_explorer_and_microsoft_edge"></a>A.5. Internet Explorer and Microsoft Edge</h3>
+<div class="paragraph">
+<p>We don&#8217;t build ready to use images for these browsers because of Windows license limitations. However we provide detailed instructions on building such images <a href="https://github.com/aerokube/windows-images">here</a>. The same approach can be used for preparing images with Firefox, Chrome and Opera under Windows.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_android"><a class="anchor" href="#_android"></a>A.6. Android</h3>
 <div class="admonitionblock warning">
 <table>
 <tr>
@@ -4871,7 +4913,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-09-13 06:43:23 UTC
+Last updated 2019-09-13 08:04:43 UTC
 </div>
 </div>
 <style>
