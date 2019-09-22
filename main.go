@@ -245,6 +245,7 @@ func selenium() http.Handler {
 	mux.HandleFunc(seleniumPaths.CreateSession, queue.Try(queue.Check(queue.Protect(post(create)))))
 	mux.HandleFunc(seleniumPaths.ProxySession, proxy)
 	mux.HandleFunc(paths.Status, status)
+	mux.HandleFunc(paths.Welcome, welcome)
 	return mux
 }
 
@@ -302,7 +303,7 @@ func deleteFileIfExists(requestId uint64, w http.ResponseWriter, r *http.Request
 }
 
 var paths = struct {
-	Video, VNC, Logs, Devtools, Download, Clipboard, File, Ping, Status, Error, WdHub string
+	Video, VNC, Logs, Devtools, Download, Clipboard, File, Ping, Status, Error, WdHub, Welcome string
 }{
 	Video:     "/video/",
 	VNC:       "/vnc/",
@@ -315,6 +316,7 @@ var paths = struct {
 	Ping:      "/ping",
 	Error:     "/error",
 	WdHub:     "/wd/hub",
+	Welcome:   "/",
 }
 
 func handler() http.Handler {
@@ -343,6 +345,7 @@ func handler() http.Handler {
 	if enableFileUpload {
 		root.HandleFunc(paths.File, fileUpload)
 	}
+	root.HandleFunc(paths.Welcome, welcome)
 	return root
 }
 

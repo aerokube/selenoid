@@ -658,6 +658,11 @@ func status(w http.ResponseWriter, _ *http.Request) {
 		})
 }
 
+func welcome(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf("You are using Selenoid %s!", gitRevision)))
+}
+
 func onTimeout(t time.Duration, f func()) chan struct{} {
 	cancel := make(chan struct{})
 	go func(cancel chan struct{}) {

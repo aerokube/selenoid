@@ -806,3 +806,13 @@ func TestParseGgrHost(t *testing.T) {
 	AssertThat(t, h.Name, EqualTo{"some-host.example.com"})
 	AssertThat(t, h.Port, EqualTo{4444})
 }
+
+func TestWelcomeScreen(t *testing.T) {
+	rsp, err := http.Get(With(srv.URL).Path("/"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
+	rsp, err = http.Get(With(srv.URL).Path("/wd/hub"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+}
