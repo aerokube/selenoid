@@ -445,7 +445,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2019-09-22</span>
+<span id="revdate">2019-09-28</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -454,21 +454,26 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#_quick_start_guide">1.1. Quick Start Guide</a>
 <ul class="sectlevel3">
-<li><a href="#_prepare_configuration">1.1.1. Prepare Configuration</a></li>
-<li><a href="#_start_selenoid">1.1.2. Start Selenoid</a></li>
-<li><a href="#_run_your_tests">1.1.3. Run Your Tests</a></li>
+<li><a href="#_start_selenoid">1.1.1. Start Selenoid</a></li>
+<li><a href="#_run_your_tests">1.1.2. Run Your Tests</a></li>
 </ul>
 </li>
-<li><a href="#_frequently_asked_questions">1.2. Frequently Asked Questions</a>
+<li><a href="#_starting_selenoid_manually">1.2. Starting Selenoid Manually</a>
 <ul class="sectlevel3">
-<li><a href="#_logs_and_dirs">1.2.1. Logs and Dirs</a></li>
-<li><a href="#_limits_and_timeouts">1.2.2. Limits and Timeouts</a></li>
-<li><a href="#_resources_consumption">1.2.3. Resources Consumption</a></li>
-<li><a href="#_features_not_working">1.2.4. Features not Working</a></li>
+<li><a href="#_prepare_configuration">1.2.1. Prepare Configuration</a></li>
+<li><a href="#_browser_images">1.2.2. Browser Images</a></li>
+<li><a href="#_start_selenoid_2">1.2.3. Start Selenoid</a></li>
+<li><a href="#_selenoid_under_windows">1.2.4. Selenoid under Windows</a></li>
 </ul>
 </li>
-<li><a href="#_selenoid_under_windows">1.3. Selenoid under Windows</a></li>
-<li><a href="#_browser_images">1.4. Browser Images</a></li>
+<li><a href="#_frequently_asked_questions">1.3. Frequently Asked Questions</a>
+<ul class="sectlevel3">
+<li><a href="#_logs_and_dirs">1.3.1. Logs and Dirs</a></li>
+<li><a href="#_limits_and_timeouts">1.3.2. Limits and Timeouts</a></li>
+<li><a href="#_resources_consumption">1.3.3. Resources Consumption</a></li>
+<li><a href="#_features_not_working">1.3.4. Features not Working</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#_main_features">2. Main Features</a>
@@ -569,6 +574,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_android">A.6. Android</a></li>
 </ul>
 </li>
+<li><a href="#_cloud_platforms">Appendix B: Cloud Platforms</a>
+<ul class="sectlevel2">
+<li><a href="#_digitalocean">B.1. DigitalOcean</a></li>
+<li><a href="#_google_cloud">B.2. Google Cloud</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -589,46 +600,115 @@ It is using Docker to launch browsers. Please refer to <a href="https://github.c
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_quick_start_guide"><a class="anchor" href="#_quick_start_guide"></a>1.1. Quick Start Guide</h3>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
+<div class="sect3">
+<h4 id="_start_selenoid"><a class="anchor" href="#_start_selenoid"></a>1.1.1. Start Selenoid</h4>
+<div class="sect4">
+<h5 id="_option_1_you_have_a_workstation_virtual_machine_or_server"><a class="anchor" href="#_option_1_you_have_a_workstation_virtual_machine_or_server"></a>Option 1: you have a workstation, virtual machine or server</h5>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Make sure you have recent <a href="https://www.docker.com/">Docker</a> version installed.</p>
+</li>
+<li>
+<p>Download <a href="http://aerokube.com/cm/latest/">Configuration Manager</a> (Selenoid quick installation binary) for your platform from <a href="https://github.com/aerokube/cm/releases/latest">releases</a> page.</p>
+</li>
+<li>
+<p>On Linux or Mac give execution permissions to binary:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ chmod +x cm</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Run one command to start Selenoid:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./cm selenoid start --vnc</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Optionally run one more command to start Selenoid UI:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ ./cm selenoid-ui start</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_option_2_you_have_digitalocean_or_google_cloud"><a class="anchor" href="#_option_2_you_have_digitalocean_or_google_cloud"></a>Option 2: you have DigitalOcean or Google Cloud</h5>
 <div class="paragraph">
-<p>The fastest way to start Selenoid is to use <a href="http://aerokube.com/cm/latest/">Configuration Manager</a>. Just download the binary for your platform
-from <a href="https://github.com/aerokube/cm/releases/latest">releases</a> page and run one command:</p>
+<p>We deliver ready to use images with Selenoid and Selenoid UI. Take a look at <a href="#_cloud_platforms">Cloud Platforms</a> section for more details.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_run_your_tests"><a class="anchor" href="#_run_your_tests"></a>1.1.2. Run Your Tests</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Run your tests against Selenoid like you do with regular Selenium hub:</p>
+<div class="listingblock">
+<div class="title">Tests Endpoint</div>
+<div class="content">
+<pre>http://localhost:4444/wd/hub</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If something does not work, you can easily check that Selenoid is running with opening <strong>status</strong> url:</p>
 </div>
 <div class="listingblock">
+<div class="title">Current Selenoid Status</div>
 <div class="content">
-<pre>./cm selenoid start --vnc</pre>
+<pre>http://localhost:4444/status</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Running this command will configure and start Selenoid automatically. Please refer to corresponding <a href="http://aerokube.com/cm/latest/">Quick Start with Configuration Manager</a> section for more details.</p>
+<p>A successful request should return a JSON with browser usage statistics.</p>
 </div>
-</td>
-</tr>
-</table>
+</li>
+<li>
+<p>To open Selenoid UI navigate to the following page in your browser:</p>
+<div class="listingblock">
+<div class="title">UI Default URL</div>
+<div class="content">
+<pre>http://localhost:8080/</pre>
 </div>
-<div class="paragraph">
-<p>This guide shows how to start Selenoid manually. When in doubt take a look at Configuration Manager first.</p>
 </div>
-<div class="admonitionblock warning">
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_starting_selenoid_manually"><a class="anchor" href="#_starting_selenoid_manually"></a>1.2. Starting Selenoid Manually</h3>
+<div class="admonitionblock note">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-This guide assumes you already know how to deal with command line and know basic Docker commands.
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>This guide shows how to start Selenoid manually. When in doubt take a look at Configuration Manager first.</p>
+</li>
+<li>
+<p>This guide assumes you already know how to deal with command line and know basic Docker commands.</p>
+</li>
+</ol>
+</div>
 </td>
 </tr>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_prepare_configuration"><a class="anchor" href="#_prepare_configuration"></a>1.1.1. Prepare Configuration</h4>
+<h4 id="_prepare_configuration"><a class="anchor" href="#_prepare_configuration"></a>1.2.1. Prepare Configuration</h4>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -673,7 +753,70 @@ For Chrome and Opera images "path" is "/" instead of "/wd/hub"
 </div>
 </div>
 <div class="sect3">
-<h4 id="_start_selenoid"><a class="anchor" href="#_start_selenoid"></a>1.1.2. Start Selenoid</h4>
+<h4 id="_browser_images"><a class="anchor" href="#_browser_images"></a>1.2.2. Browser Images</h4>
+<div class="paragraph">
+<p>We maintain a set of prebuilt Docker container images for different browsers including:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://hub.docker.com/r/selenoid/android/">Android</a></p>
+</li>
+<li>
+<p><a href="https://hub.docker.com/r/selenoid/firefox/">Firefox</a></p>
+</li>
+<li>
+<p><a href="https://hub.docker.com/r/selenoid/chrome/">Google Chrome</a></p>
+</li>
+<li>
+<p><a href="https://hub.docker.com/r/selenoid/opera/">Opera</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All these images are free to use. See image tags for a list of supported versions. Build files are stored in <a href="http://github.com/aerokube/selenoid-images">selenoid-images</a> repository.
+Feel free to create issues or request images for new versions.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Complete list of browser images can be found in <a href="#_browser_image_information">Browser Image information</a></p>
+</li>
+<li>
+<p>These images support all UTF-8 locales. This can be important if you want to save files using national alphabet symbols. You can enable your preferred locale in browsers configuration file by setting respective environment variables:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>{
+    &quot;chrome&quot;: {
+        &quot;default&quot;: &quot;64.0&quot;,
+        &quot;versions&quot;: {
+            &quot;64.0&quot;: {
+                &quot;image&quot;: &quot;selenoid/vnc:chrome_64.0&quot;,
+                //...
+                &quot;env&quot; : [&quot;LANG=ru_RU.UTF-8&quot;, &quot;LANGUAGE=ru:en&quot;, &quot;LC_ALL=ru_RU.UTF-8&quot;]
+            }
+        }
+    }
+}</code></pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_start_selenoid_2"><a class="anchor" href="#_start_selenoid_2"></a>1.2.3. Start Selenoid</h4>
 <div class="sect4">
 <h5 id="_option_1_start_selenoid_binary"><a class="anchor" href="#_option_1_start_selenoid_binary"></a>Option 1: start Selenoid binary</h5>
 <div class="olist arabic">
@@ -765,14 +908,34 @@ aerokube/selenoid:latest-release</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_run_your_tests"><a class="anchor" href="#_run_your_tests"></a>1.1.3. Run Your Tests</h4>
+<h4 id="_selenoid_under_windows"><a class="anchor" href="#_selenoid_under_windows"></a>1.2.4. Selenoid under Windows</h4>
 <div class="paragraph">
-<p>Run your tests against Selenoid like you do with regular Selenium hub:</p>
+<p>While we normally recommend to start Selenoid using <a href="http://aerokube.com/cm/latest">Configuration Manager</a> on any platform,
+it is possible to start it under Windows manually.</p>
 </div>
-<div class="listingblock">
-<div class="title">Tests Endpoint</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Most of the differences are related to Docker, so please refer to Docker documentation on any errors first.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The main difference from Unix operating systems is how volumes are mounted.
+In any Windows paths back slashes (<code>\</code>) should be replaced by forward slashes (<code>/</code>) and drive letter should be lower cased.
+Also start with forward slash and remove colon.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 1. Mount directory</div>
 <div class="content">
-<pre>http://localhost:4444/wd/hub</pre>
+<div class="paragraph">
+<p><code>C:\Users\admin</code> becomes <code>/c/Users/admin</code></p>
+</div>
 </div>
 </div>
 <div class="admonitionblock note">
@@ -782,45 +945,48 @@ aerokube/selenoid:latest-release</code></pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Selenoid was created to be run in big Selenium clusters and thus has no built-in user interface. This is why trying to open an URL above in browser returns <strong>404</strong> and this is the expected behavior.
+Another story with <code>docker.sock</code>, which should be mounted as <code>-v //var/run/docker.sock:/var/run/docker.sock</code> (note two forward slashes at the beginning)
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>If something does not work, you can easily check that Selenoid is running with opening <strong>status</strong> url:</p>
+<p>So assuming that configuration file is located at <code>C:\Users\admin\selenoid</code> a typical startup command can look like:</p>
 </div>
 <div class="listingblock">
-<div class="title">Current Selenoid Status</div>
 <div class="content">
-<pre>http://localhost:4444/status</pre>
+<pre>docker run -d --name selenoid                   `
+-p 4444:4444                                    `
+-v //var/run/docker.sock:/var/run/docker.sock   `
+-v /c/Users/admin/selenoid:/etc/selenoid:ro                 `
+aerokube/selenoid:latest-release</pre>
 </div>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
 <div class="paragraph">
-<p>A successful request should return a JSON with browser usage statistics. You can additionally use <a href="http://github.com/aerokube/selenoid-ui">Selenoid UI</a> to see browser screen or consumption statistics.
-The simplest way is to download and run its binary from <a href="https://github.com/aerokube/selenoid-ui/releases">releases</a> page and start it:</p>
+<p>You can use simple Powershell macros to automatically get correct <code>$PWD</code> value (assumed you are on <code>C:</code>):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>./selenoid-ui</pre>
+<pre>&gt; $current = $PWD -replace "\\", "/" -replace "C", "c"</pre>
 </div>
 </div>
-<div class="paragraph">
-<p>See <a href="http://aerokube.com/selenoid-ui/latest/">UI documentation</a> for more installation options.
-By default UI is listening on port 8080. To start using it open the following page in your browser:</p>
-</div>
-<div class="listingblock">
-<div class="title">UI Default URL</div>
-<div class="content">
-<pre>http://localhost:8080/</pre>
-</div>
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_frequently_asked_questions"><a class="anchor" href="#_frequently_asked_questions"></a>1.2. Frequently Asked Questions</h3>
+<h3 id="_frequently_asked_questions"><a class="anchor" href="#_frequently_asked_questions"></a>1.3. Frequently Asked Questions</h3>
 <div class="sect3">
-<h4 id="_logs_and_dirs"><a class="anchor" href="#_logs_and_dirs"></a>1.2.1. Logs and Dirs</h4>
+<h4 id="_logs_and_dirs"><a class="anchor" href="#_logs_and_dirs"></a>1.3.1. Logs and Dirs</h4>
 <div class="paragraph">
 <p><strong>Where are Selenoid logs?</strong></p>
 </div>
@@ -848,7 +1014,7 @@ By default UI is listening on port 8080. To start using it open the following pa
 </div>
 </div>
 <div class="sect3">
-<h4 id="_limits_and_timeouts"><a class="anchor" href="#_limits_and_timeouts"></a>1.2.2. Limits and Timeouts</h4>
+<h4 id="_limits_and_timeouts"><a class="anchor" href="#_limits_and_timeouts"></a>1.3.2. Limits and Timeouts</h4>
 <div class="paragraph">
 <p><strong>How can I limit overall browsers consumption?</strong></p>
 </div>
@@ -882,7 +1048,7 @@ By default UI is listening on port 8080. To start using it open the following pa
 </div>
 </div>
 <div class="sect3">
-<h4 id="_resources_consumption"><a class="anchor" href="#_resources_consumption"></a>1.2.3. Resources Consumption</h4>
+<h4 id="_resources_consumption"><a class="anchor" href="#_resources_consumption"></a>1.3.3. Resources Consumption</h4>
 <div class="paragraph">
 <p><strong>How many resources browser containers consume?</strong></p>
 </div>
@@ -897,7 +1063,7 @@ By default UI is listening on port 8080. To start using it open the following pa
 </div>
 </div>
 <div class="sect3">
-<h4 id="_features_not_working"><a class="anchor" href="#_features_not_working"></a>1.2.4. Features not Working</h4>
+<h4 id="_features_not_working"><a class="anchor" href="#_features_not_working"></a>1.3.4. Features not Working</h4>
 <div class="paragraph">
 <p><strong>Selenoid does not start: open config/browsers.json: no such file or directory</strong></p>
 </div>
@@ -989,141 +1155,10 @@ $ docker run -e DOCKER_API_VERSION=1.32 &lt;rest-of-args&gt; aerokube/selenoid:s
 <div class="paragraph">
 <p>No, we did not implement this feature intentionally. We consider that all such cluster maintenance tasks can influence performance and stability when done automatically.</p>
 </div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_selenoid_under_windows"><a class="anchor" href="#_selenoid_under_windows"></a>1.3. Selenoid under Windows</h3>
 <div class="paragraph">
-<p>While we normally recommend to start Selenoid using <a href="http://aerokube.com/cm/latest">Configuration Manager</a> on any platform,
-it is possible to start it under Windows manually.</p>
+<p>Unresolved directive in index.adoc - include::windows.adoc[leveloffset=+1]
+Unresolved directive in index.adoc - include::browser-images.adoc[leveloffset=+1]</p>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Most of the differences are related to Docker, so please refer to Docker documentation on any errors first.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>The main difference from Unix operating systems is how volumes are mounted.
-In any Windows paths back slashes (<code>\</code>) should be replaced by forward slashes (<code>/</code>) and drive letter should be lower cased.
-Also start with forward slash and remove colon.</p>
-</div>
-<div class="exampleblock">
-<div class="title">Example 1. Mount directory</div>
-<div class="content">
-<div class="paragraph">
-<p><code>C:\Users\admin</code> becomes <code>/c/Users/admin</code></p>
-</div>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Another story with <code>docker.sock</code>, which should be mounted as <code>-v //var/run/docker.sock:/var/run/docker.sock</code> (note two forward slashes at the beginning)
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>So assuming that configuration file is located at <code>C:\Users\admin\selenoid</code> a typical startup command can look like:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>docker run -d --name selenoid                   `
--p 4444:4444                                    `
--v //var/run/docker.sock:/var/run/docker.sock   `
--v /c/Users/admin/selenoid:/etc/selenoid:ro                 `
-aerokube/selenoid:latest-release</pre>
-</div>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>You can use simple Powershell macros to automatically get correct <code>$PWD</code> value (assumed you are on <code>C:</code>):</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>&gt; $current = $PWD -replace "\\", "/" -replace "C", "c"</pre>
-</div>
-</div>
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_browser_images"><a class="anchor" href="#_browser_images"></a>1.4. Browser Images</h3>
-<div class="paragraph">
-<p>We maintain a set of prebuilt Docker container images for different browsers including:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://hub.docker.com/r/selenoid/firefox/">Firefox</a></p>
-</li>
-<li>
-<p><a href="https://hub.docker.com/r/selenoid/chrome/">Google Chrome</a></p>
-</li>
-<li>
-<p><a href="https://hub.docker.com/r/selenoid/opera/">Opera</a></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>All these images are free to use. See image tags for a list of supported versions. Build files are stored in <a href="http://github.com/aerokube/selenoid-images">selenoid-images</a> repository.
-Feel free to create issues or request images for new versions.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Complete list of browser images can be found in <a href="#_browser_image_information">Browser Image information</a></p>
-</li>
-<li>
-<p>These images support all UTF-8 locales. This can be important if you want to save files using national alphabet symbols. You can enable your preferred locale in browsers configuration file by setting respective environment variables:</p>
-</li>
-</ol>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code>{
-    &quot;chrome&quot;: {
-        &quot;default&quot;: &quot;64.0&quot;,
-        &quot;versions&quot;: {
-            &quot;64.0&quot;: {
-                &quot;image&quot;: &quot;selenoid/vnc:chrome_64.0&quot;,
-                //...
-                &quot;env&quot; : [&quot;LANG=ru_RU.UTF-8&quot;, &quot;LANGUAGE=ru:en&quot;, &quot;LC_ALL=ru_RU.UTF-8&quot;]
-            }
-        }
-    }
-}</code></pre>
-</div>
-</div>
-</td>
-</tr>
-</table>
 </div>
 </div>
 </div>
@@ -4922,11 +4957,90 @@ Hardware server or virtual machine with nested virtualization support is require
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_cloud_platforms"><a class="anchor" href="#_cloud_platforms"></a>Appendix B: Cloud Platforms</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Selenoid ready-to-use images are present in popular cloud platforms and can be run in a few clicks. This section contains step-by-step instructions on launching Selenoid in these platforms.</p>
+</div>
+<div class="sect2">
+<h3 id="_digitalocean"><a class="anchor" href="#_digitalocean"></a>B.1. DigitalOcean</h3>
+<div class="paragraph">
+<p>Selenoid can be run from <a href="https://marketplace.digitalocean.com/">DigitalOcean Marketplace</a> as follows:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <a href="https://marketplace.digitalocean.com/apps/selenoid">Selenoid page</a>:</p>
+<div class="paragraph">
+<p><span class="image"><img src="img/digitalocean-marketplace-page.png" alt="digitalocean-marketplace"></span></p>
+</div>
+</li>
+<li>
+<p>Click on <strong>Create Selenoid Droplet</strong> button.</p>
+</li>
+<li>
+<p>Choose a plan, i.e. virtual machine size:</p>
+<div class="paragraph">
+<p><span class="image"><img src="img/digitalocean-vm-flavor.png" alt="digitalocean-vm-flavor"></span></p>
+</div>
+</li>
+<li>
+<p>Choose a data center region near you:</p>
+<div class="paragraph">
+<p><span class="image"><img src="img/digitalocean-vm-datacenter.png" alt="digitalocean-vm-datacenter"></span></p>
+</div>
+</li>
+<li>
+<p>Select or add an SSH key for your droplet.</p>
+</li>
+<li>
+<p>Select a name for your virtual machine:</p>
+<div class="paragraph">
+<p><span class="image"><img src="img/digitalocean-vm-name.png" alt="digitalocean-vm-name"></span></p>
+</div>
+</li>
+<li>
+<p>Click on <strong>Create Droplet</strong> button.</p>
+</li>
+<li>
+<p>Wait for virtual machine to start. Selenoid user interface is available at <code><a href="http://&lt;vm-ip-address&gt;:8080/" class="bare">http://&lt;vm-ip-address&gt;:8080/</a></code>. Selenium tests should be run against <code><a href="http://&lt;vm-ip-address&gt;:4444/wd/hub" class="bare">http://&lt;vm-ip-address&gt;:4444/wd/hub</a></code>.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_google_cloud"><a class="anchor" href="#_google_cloud"></a>B.2. Google Cloud</h3>
+<div class="paragraph">
+<p>Selenoid can be run from <a href="https://console.cloud.google.com/marketplace">Google Cloud Marketplace</a> as follows:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <a href="https://console.cloud.google.com/marketplace/details/aerokube/selenoid">Selenoid page</a> and click the <strong>Launch on Compute Engine</strong> button:</p>
+<div class="paragraph">
+<p><span class="image"><img src="img/google-cloud-marketplace-page.png" alt="google-cloud-marketplace"></span></p>
+</div>
+</li>
+<li>
+<p>Type virtual machine name, size and click the <strong>Deploy</strong> button:</p>
+<div class="paragraph">
+<p><span class="image"><img src="img/google-cloud-vm-settings.png" alt="google-cloud-vm-settings"></span></p>
+</div>
+</li>
+<li>
+<p>Wait for virtual machine to start. Selenoid user interface is available at <code><a href="http://&lt;vm-ip-address&gt;:8080/" class="bare">http://&lt;vm-ip-address&gt;:8080/</a></code>. Selenium tests should be run against <code><a href="http://&lt;vm-ip-address&gt;:4444/wd/hub" class="bare">http://&lt;vm-ip-address&gt;:4444/wd/hub</a></code>.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-09-22 14:05:13 UTC
+Last updated 2019-09-28 08:39:02 UTC
 </div>
 </div>
 <style>
