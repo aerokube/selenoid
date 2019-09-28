@@ -1,0 +1,40 @@
+== Cloud Platforms
+
+Selenoid ready-to-use images are present in popular cloud platforms and can be run in a few clicks. This section contains step-by-step instructions on launching Selenoid in these platforms.
+
+=== DigitalOcean
+
+Selenoid can be run from https://marketplace.digitalocean.com/[DigitalOcean Marketplace] as follows:
+
+. Go to https://marketplace.digitalocean.com/apps/selenoid[Selenoid page]:
++
+image:img/digitalocean-marketplace-page.png[digitalocean-marketplace]
+
+. Click on **Create Selenoid Droplet** button.
+. Choose a plan, i.e. virtual machine size:
++
+image:img/digitalocean-vm-flavor.png[digitalocean-vm-flavor]
+. Choose a data center region near you:
++
+image:img/digitalocean-vm-datacenter.png[digitalocean-vm-datacenter]
+
+. Select or add an SSH key for your droplet.
+. Select a name for your virtual machine:
++
+image:img/digitalocean-vm-name.png[digitalocean-vm-name]
+. Click on **Create Droplet** button.
+. Wait for virtual machine to start. Selenoid user interface is available at `http://<vm-ip-address>:8080/`. Selenium tests should be run against `http://<vm-ip-address>:4444/wd/hub`.
+
+=== Google Cloud
+
+Selenoid can be run from https://console.cloud.google.com/marketplace[Google Cloud Marketplace] as follows:
+
+. Go to https://console.cloud.google.com/marketplace/details/aerokube/selenoid[Selenoid page] and click the **Launch on Compute Engine** button:
++
+image:img/google-cloud-marketplace-page.png[google-cloud-marketplace]
+
+. Type virtual machine name, size and click the **Deploy** button:
++
+image:img/google-cloud-vm-settings.png[google-cloud-vm-settings]
+
+. Wait for virtual machine to start. Selenoid user interface is available at `http://<vm-ip-address>:8080/`. Selenium tests should be run against `http://<vm-ip-address>:4444/wd/hub`.
