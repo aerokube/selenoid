@@ -9,6 +9,8 @@
 :icons: font
 :source-highlighter: coderay
 :docinfo: shared
+:title: Selenoid - A cross browser Selenium solution for Docker
+:description: A Selenium testing platform running browsers and mobile platforms in Docker containers. Fully compatible with Selenium Webdriver protocol. Live and automated testing are supported. Runs on your own hardware and on virtual machines in any popular cloud platform.
 :favicon: img/favicon.png
 
 This reference covers version: _{revnumber}_
