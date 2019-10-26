@@ -1,8 +1,59 @@
-== Accessing Files Downloaded with Browser
+== Downloading Files From Browser
+
+=== Downloading Files in Different Browsers
+
+==== Chrome
+
+.Downloading files with Java
+[source,java]
+----
+ChromeOptions chromeOptions = new ChromeOptions();
+chromeOptions.setExperimentalOption("prefs", new HashMap<String, Object>(){
+    {
+        put("profile.default_content_settings.popups", 0);
+        put("download.default_directory", "/home/selenium/Downloads");
+        put("download.prompt_for_download", false);
+        put("download.directory_upgrade", true);
+        put("safebrowsing.enabled", false);
+        put("plugins.always_open_pdf_externally", true);
+        put("plugins.plugins_disabled", new ArrayList<String>(){
+            {
+                add("Chrome PDF Viewer");
+            }
+        });
+    }
+});
+
+WebDriver driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), chromeOptions);
+driver.navigate().to("http://example.com/myfile.odt");
+----
+
+==== Firefox
+
+.Downloading files with Java
+[source,java]
+----
+FirefoxOptions firefoxOptions = new FirefoxOptions();
+firefoxOptions.setCapability("moz:firefoxOptions", new HashMap<String, Object>(){
+    {
+        put("prefs", new HashMap<String, Object>(){
+            {
+                put("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream");
+            }
+        });
+    }
+});
+
+
+WebDriver driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), firefoxOptions);
+driver.navigate().to("http://example.com/myfile.odt");
+----
+
+=== Accessing Files Downloaded with Browser
 
 [NOTE]
 ====
-. This feature only works when browsers are run in containers.
+. This feature only works when browsers are being run in containers.
 . Files are accessible only when browser session is running.
 ====
 
