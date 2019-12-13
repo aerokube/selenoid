@@ -457,7 +457,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2019-11-19</span>
+<span id="revdate">2019-12-13</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -1509,8 +1509,8 @@ driver.file_detector = LocalFileDetector()
 <div class="title">Uploading files with Webdriver.io</div>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="javascript"><span class="keyword">var</span> filePath = path.join(<span class="string"><span class="delimiter">'</span><span class="content">/path/to/file/on/machine/which/runs/tests</span><span class="delimiter">'</span></span>);
-browser.uploadFile(filePath);
-browser.chooseFile(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>, filePath);</code></pre>
+<span class="keyword">var</span> remoteFilePath = browser.uploadFile(filePath);
+<span class="predefined">$</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">input[type='file']</span><span class="delimiter">&quot;</span></span>).setValue(remoteFilePath);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -5137,7 +5137,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-11-19 06:38:23 UTC
+Last updated 2019-12-13 12:07:42 UTC
 </div>
 </div>
 <style>
