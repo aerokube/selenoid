@@ -67,7 +67,7 @@ WARNING: Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 |===
 | Image | VNC Image | Selenoid Version | Geckodriver Version | Firefox Version | Client Version
 
-| selenoid/firefox:48.0 | selenoid/vnc:firefox_48.0 | 1.3.9 | 0.13.0 | 48.0.2 (page load timeout, native events and proxies don't work) .23+<.^|
+| selenoid/firefox:48.0 | selenoid/vnc:firefox_48.0 | 1.3.9 | 0.13.0 | 48.0.2 (page load timeout, native events and proxies don't work) .24+<.^|
 **Java, selenium-webdriver.js**: 3.4.0 and above
 **Python**: 3.5.0 and above
 | selenoid/firefox:49.0 | selenoid/vnc:firefox_49.0 | 1.3.9 | 0.13.0 | 49.0.2 (page load timeout, native events and switching between windows don't work)
@@ -92,6 +92,7 @@ WARNING: Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 | selenoid/firefox:68.0 | selenoid/vnc:firefox_68.0 | 1.9.2 | 0.24.0 | 68.0
 | selenoid/firefox:69.0 | selenoid/vnc:firefox_69.0 | 1.9.2 | 0.24.0 | 69.0
 | selenoid/firefox:70.0 | selenoid/vnc:firefox_70.0 | 1.9.2 | 0.26.0 | 70.0
+| selenoid/firefox:71.0 | selenoid/vnc:firefox_71.0 | 1.9.3 | 0.26.0 | 71.0
 |===
 
 
