@@ -35,8 +35,8 @@ input.send_keys("/path/to/file/on/machine/which/runs/tests")
 [source,javascript]
 ----
 var filePath = path.join('/path/to/file/on/machine/which/runs/tests');
-browser.uploadFile(filePath);
-browser.chooseFile("input[type='file']", filePath);
+var remoteFilePath = browser.uploadFile(filePath);
+$("input[type='file']").setValue(remoteFilePath);
 ----
 
 Read the following note if you are using Selenoid **without Docker**.
