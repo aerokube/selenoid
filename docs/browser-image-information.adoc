@@ -154,6 +154,23 @@ WARNING: Hardware server or virtual machine with nested virtualization support i
 | selenoid/chrome-mobile:75.0 | 8.1 | 1.13.0 | 75.0.3770.8 | 75.0.3770.89
 |===
 
+An example `browsers.json` for Chrome Mobile images looks like the following:
+[source,javascript]
+----
+{
+    "chrome": {
+        "default": "mobile-75.0",
+        "versions": {
+            "mobile-75.0": {
+                "image": "selenoid/chrome-mobile:75.0",
+                "port": "4444",
+                "path": "/wd/hub"
+            }
+        }
+    }
+}
+----
+
 === Opera
 
 .Opera Presto Images
@@ -244,3 +261,22 @@ WARNING: Hardware server or virtual machine with nested virtualization support i
 . These images include VNC server and Android Quick Boot snapshot.
 . Neither Chromedriver nor Chrome Mobile are installed. To test hybrid apps build your own image using provided automation script.
 ====
+
+An example `browsers.json` for Android images looks like the following:
+[source,javascript]
+----
+{
+    "android": {
+        "default": "6.0",
+        "versions": {
+            "6.0": {
+                "image": "selenoid/android:6.0",
+                "port": "4444",
+                "path": "/wd/hub"
+            }
+        }
+    }
+}
+----
+
+An example Java test can be found https://github.com/aerokube/demo-tests/blob/master/src/test/java/com/aerokube/selenoid/AndroidRemoteApkTest.java[here].
