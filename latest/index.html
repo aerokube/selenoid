@@ -457,7 +457,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2019-12-13</span>
+<span id="revdate">2019-12-16</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -480,10 +480,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_frequently_asked_questions">1.3. Frequently Asked Questions</a>
 <ul class="sectlevel3">
-<li><a href="#_logs_and_dirs">1.3.1. Logs and Dirs</a></li>
-<li><a href="#_limits_and_timeouts">1.3.2. Limits and Timeouts</a></li>
-<li><a href="#_resources_consumption">1.3.3. Resources Consumption</a></li>
-<li><a href="#_features_not_working">1.3.4. Features not Working</a></li>
+<li><a href="#_selenoid_in_kubernetes">1.3.1. Selenoid in Kubernetes</a></li>
+<li><a href="#_logs_and_dirs">1.3.2. Logs and Dirs</a></li>
+<li><a href="#_limits_and_timeouts">1.3.3. Limits and Timeouts</a></li>
+<li><a href="#_resources_consumption">1.3.4. Resources Consumption</a></li>
+<li><a href="#_features_not_working">1.3.5. Features not Working</a></li>
 </ul>
 </li>
 </ul>
@@ -607,8 +608,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>This reference covers version: <em>latest</em></p>
 </div>
 <div class="paragraph">
-<p>Selenoid is a powerful <a href="http://golang.org/">Go</a> implementation of original <a href="http://github.com/SeleniumHQ/selenium">Selenium</a> hub code.
-It is using Docker to launch browsers. Please refer to <a href="https://github.com/aerokube/selenoid">GitHub repository</a> if you need sources.</p>
+<p>Selenoid is a powerful <a href="http://golang.org/">Golang</a> implementation of original <a href="http://github.com/SeleniumHQ/selenium">Selenium</a> hub code.
+It is using Docker to launch browsers. Please refer to <a href="https://github.com/aerokube/selenoid">GitHub repository</a> if you need source code.</p>
 </div>
 </div>
 </div>
@@ -1003,7 +1004,35 @@ aerokube/selenoid:latest-release</pre>
 <div class="sect2">
 <h3 id="_frequently_asked_questions"><a class="anchor" href="#_frequently_asked_questions"></a>1.3. Frequently Asked Questions</h3>
 <div class="sect3">
-<h4 id="_logs_and_dirs"><a class="anchor" href="#_logs_and_dirs"></a>1.3.1. Logs and Dirs</h4>
+<h4 id="_selenoid_in_kubernetes"><a class="anchor" href="#_selenoid_in_kubernetes"></a>1.3.1. Selenoid in Kubernetes</h4>
+<div class="paragraph">
+<p>We are very frequently asked whether it is possible to run Selenoid in <a href="https://kubernetes.io">Kubernetes</a> cluster. The answer is - <strong>it is possible but we do not recommend doing this</strong>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Selenoid can <strong>only</strong> work directly with <a href="https://docs.docker.com/engine/api/latest/">Docker API</a> and was created to be run on a workstation or a virtual machine with Docker installed.</p>
+</li>
+<li>
+<p>Kubernetes contrarily has a completely different <a href="https://kubernetes.io/docs/concepts/overview/kubernetes-api/">API</a> and <strong>can be using Docker</strong> as a container runtime backend. In some clusters <a href="https://github.com/rkt/rkt">rkt</a> is used instead of Docker and in that case Selenoid will not work.</p>
+</li>
+<li>
+<p>Even if Selenoid works - <strong>all browser containers will be started on the same Kubernetes node</strong> where it is running.</p>
+</li>
+<li>
+<p>So far as Selenoid is using Docker API directly - Kubernetes will not be aware of additional containers started by Selenoid. This is dangerous and <strong>can potentially lead to overloaded Kubernetes nodes</strong>.</p>
+</li>
+<li>
+<p>You can only have <strong>one Selenoid replica maximum</strong>. This is because Selenoid internally stores a list of running sessions in memory.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If you need Selenium in Kubernetes or <a href="https://www.openshift.com/">Openshift</a>, we have a separate solution called <a href="https://aerokube.com/moon/">Moon</a>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_logs_and_dirs"><a class="anchor" href="#_logs_and_dirs"></a>1.3.2. Logs and Dirs</h4>
 <div class="paragraph">
 <p><strong>Where are Selenoid logs?</strong></p>
 </div>
@@ -1031,7 +1060,7 @@ aerokube/selenoid:latest-release</pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_limits_and_timeouts"><a class="anchor" href="#_limits_and_timeouts"></a>1.3.2. Limits and Timeouts</h4>
+<h4 id="_limits_and_timeouts"><a class="anchor" href="#_limits_and_timeouts"></a>1.3.3. Limits and Timeouts</h4>
 <div class="paragraph">
 <p><strong>How can I limit overall browsers consumption?</strong></p>
 </div>
@@ -1065,7 +1094,7 @@ aerokube/selenoid:latest-release</pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_resources_consumption"><a class="anchor" href="#_resources_consumption"></a>1.3.3. Resources Consumption</h4>
+<h4 id="_resources_consumption"><a class="anchor" href="#_resources_consumption"></a>1.3.4. Resources Consumption</h4>
 <div class="paragraph">
 <p><strong>How many resources browser containers consume?</strong></p>
 </div>
@@ -1080,7 +1109,7 @@ aerokube/selenoid:latest-release</pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_features_not_working"><a class="anchor" href="#_features_not_working"></a>1.3.4. Features not Working</h4>
+<h4 id="_features_not_working"><a class="anchor" href="#_features_not_working"></a>1.3.5. Features not Working</h4>
 <div class="paragraph">
 <p><strong>Selenoid does not start: open config/browsers.json: no such file or directory</strong></p>
 </div>
@@ -4591,6 +4620,12 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <td class="tableblock halign-left valign-top"><p class="tableblock">78.0.3904.87</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">78.0.3904.70</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/chrome:79.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/vnc:chrome_79.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">79.0.3945.36</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">79.0.3945.79</p></td>
+</tr>
 </tbody>
 </table>
 <div class="admonitionblock note">
@@ -4671,6 +4706,25 @@ Hardware server or virtual machine with nested virtualization support is require
 </tr>
 </tbody>
 </table>
+<div class="paragraph">
+<p>An example <code>browsers.json</code> for Chrome Mobile images looks like the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript">{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">chrome</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">default</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">mobile-75.0</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">versions</span><span class="delimiter">&quot;</span></span>: {
+            <span class="key"><span class="delimiter">&quot;</span><span class="content">mobile-75.0</span><span class="delimiter">&quot;</span></span>: {
+                <span class="key"><span class="delimiter">&quot;</span><span class="content">image</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">selenoid/chrome-mobile:75.0</span><span class="delimiter">&quot;</span></span>,
+                <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">4444</span><span class="delimiter">&quot;</span></span>,
+                <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/wd/hub</span><span class="delimiter">&quot;</span></span>
+            }
+        }
+    }
+}</code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_opera"><a class="anchor" href="#_opera"></a>A.4. Opera</h3>
@@ -5058,6 +5112,28 @@ Hardware server or virtual machine with nested virtualization support is require
 </tr>
 </table>
 </div>
+<div class="paragraph">
+<p>An example <code>browsers.json</code> for Android images looks like the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="javascript">{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">android</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">default</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">6.0</span><span class="delimiter">&quot;</span></span>,
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">versions</span><span class="delimiter">&quot;</span></span>: {
+            <span class="key"><span class="delimiter">&quot;</span><span class="content">6.0</span><span class="delimiter">&quot;</span></span>: {
+                <span class="key"><span class="delimiter">&quot;</span><span class="content">image</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">selenoid/android:6.0</span><span class="delimiter">&quot;</span></span>,
+                <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">4444</span><span class="delimiter">&quot;</span></span>,
+                <span class="key"><span class="delimiter">&quot;</span><span class="content">path</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/wd/hub</span><span class="delimiter">&quot;</span></span>
+            }
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>An example Java test can be found <a href="https://github.com/aerokube/demo-tests/blob/master/src/test/java/com/aerokube/selenoid/AndroidRemoteApkTest.java">here</a>.</p>
+</div>
 </div>
 </div>
 </div>
@@ -5144,7 +5220,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2019-12-13 12:24:10 UTC
+Last updated 2019-12-16 13:49:31 UTC
 </div>
 </div>
 <style>
