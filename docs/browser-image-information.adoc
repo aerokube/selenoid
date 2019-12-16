@@ -133,6 +133,7 @@ WARNING: Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 | selenoid/chrome:76.0 | selenoid/vnc:chrome_76.0 | 76.0.3809.87 | 76.0.3809.68
 | selenoid/chrome:77.0 | selenoid/vnc:chrome_77.0 | 77.0.3865.40 | 77.0.3865.75
 | selenoid/chrome:78.0 | selenoid/vnc:chrome_78.0 | 78.0.3904.87 | 78.0.3904.70
+| selenoid/chrome:79.0 | selenoid/vnc:chrome_79.0 | 79.0.3945.36 | 79.0.3945.79
 |===
 
 [NOTE]
@@ -153,6 +154,23 @@ WARNING: Hardware server or virtual machine with nested virtualization support i
 | selenoid/chrome-mobile:74.0 | 8.1 | 1.13.0 | 74.0.3729.6 | 74.0.3729.157
 | selenoid/chrome-mobile:75.0 | 8.1 | 1.13.0 | 75.0.3770.8 | 75.0.3770.89
 |===
+
+An example `browsers.json` for Chrome Mobile images looks like the following:
+[source,javascript]
+----
+{
+    "chrome": {
+        "default": "mobile-75.0",
+        "versions": {
+            "mobile-75.0": {
+                "image": "selenoid/chrome-mobile:75.0",
+                "port": "4444",
+                "path": "/wd/hub"
+            }
+        }
+    }
+}
+----
 
 === Opera
 
@@ -244,3 +262,22 @@ WARNING: Hardware server or virtual machine with nested virtualization support i
 . These images include VNC server and Android Quick Boot snapshot.
 . Neither Chromedriver nor Chrome Mobile are installed. To test hybrid apps build your own image using provided automation script.
 ====
+
+An example `browsers.json` for Android images looks like the following:
+[source,javascript]
+----
+{
+    "android": {
+        "default": "6.0",
+        "versions": {
+            "6.0": {
+                "image": "selenoid/android:6.0",
+                "port": "4444",
+                "path": "/wd/hub"
+            }
+        }
+    }
+}
+----
+
+An example Java test can be found https://github.com/aerokube/demo-tests/blob/master/src/test/java/com/aerokube/selenoid/AndroidRemoteApkTest.java[here].
