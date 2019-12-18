@@ -104,3 +104,7 @@ You are using `driver.close()` instead of `driver.quit()` and just closed the la
 **Can Selenoid pull browser images automatically?**
 
 No, we did not implement this feature intentionally. We consider that all such cluster maintenance tasks can influence performance and stability when done automatically.
+
+**Is it possible to run Selenoid in Docker macvlan network?**
+
+Yes, this is possible. See the following https://github.com/aerokube/selenoid/issues/795[Github issue] for possible solutions.
