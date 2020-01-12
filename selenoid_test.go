@@ -221,7 +221,36 @@ func TestSessionCreated(t *testing.T) {
 func TestSessionCreatedW3C(t *testing.T) {
 	manager = &HTTPTest{Handler: Selenium()}
 
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"capabilities":{"alwaysMatch":{"acceptInsecureCerts":true,"browserName":"firefox", "browserVersion":"latest", "selenoid:options":{"enableVNC": true}}}}`)))
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"capabilities":{"alwaysMatch":{"acceptInsecureCerts":true, "browserName":"firefox", "browserVersion":"latest", "selenoid:options":{"enableVNC": true}}}}`)))
+	AssertThat(t, err, Is{nil})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	resp, err = http.Get(With(srv.URL).Path("/status"))
+	AssertThat(t, err, Is{nil})
+	var state config.State
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
+	AssertThat(t, state.Used, EqualTo{1})
+	AssertThat(t, queue.Used(), EqualTo{1})
+
+	versions, firefoxPresent := state.Browsers["firefox"]
+	AssertThat(t, firefoxPresent, Is{true})
+	users, versionPresent := versions["latest"]
+	AssertThat(t, versionPresent, Is{true})
+	userInfo, userPresent := users["unknown"]
+	AssertThat(t, userPresent, Is{true})
+	AssertThat(t, userInfo, Not{nil})
+	AssertThat(t, len(userInfo.Sessions), EqualTo{1})
+	AssertThat(t, userInfo.Sessions[0].VNC, EqualTo{true})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
+func TestSessionCreatedFirstMatchOnly(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"capabilities":{"firstMatch":[{"browserName":"firefox", "browserVersion":"latest", "selenoid:options":{"enableVNC": true}}]}}`)))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
