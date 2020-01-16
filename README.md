@@ -61,6 +61,10 @@ Maintained by a growing community:
 
 Complete reference guide (including building instructions) can be found at: http://aerokube.com/selenoid/latest/
 
+## Selenoid in Kubernetes
+
+Selenoid was initially created to be deployed on hardware servers or virtual machines and is not suitable for Kubernetes. Detailed motivation is described [here](https://aerokube.com/selenoid/latest/#_selenoid_in_kubernetes). If you still need running Selenium tests in Kubernetes, then take a look at [Moon](https://github.com/aerokube/moon/) - our dedicated solution for Kubernetes. 
+
 ## Known Users
 
 [![JetBrains](docs/img/logo/jetbrains.png)](http://jetbrains.com/) [![Yandex](docs/img/logo/yandex.png)](https://yandex.com/company/) [![Sberbank Technology](docs/img/logo/sbertech.png)](http://sber-tech.com/) [![ThoughtWorks](docs/img/logo/thoughtworks.png)](https://thoughtworks.com/) [![SuperJob](docs/img/logo/superjob.png)](http://superjob.ru/) [![PropellerAds](docs/img/logo/propellerads.png)](http://propellerads.com/) [![AlfaBank](docs/img/logo/alfabank.png)](https://alfabank.com/) [![3CX](docs/img/logo/3cx.png)](https://www.3cx.com/) [![IQ Option](docs/img/logo/iq_option.png)](https://iqoption.com/) [![Mail.Ru Group](docs/img/logo/mail_ru.png)](https://corp.mail.ru/en/) [![Newegg.Com](docs/img/logo/newegg.png)](https://newegg.com/) [![Badoo](docs/img/logo/badoo.png)](https://badoo.com/team/) [![BCS](docs/img/logo/bcs.png)](https://bcs.ru/) [![Quality Lab](docs/img/logo/quality-lab.png)](https://quality-lab.ru) [![AT Consulting](docs/img/logo/at-consulting.png)](https://www.at-consulting.ru/) [![Royal Caribbean International](docs/img/logo/royal-caribbean.png)](https://www.royalcaribbean.com/) [![Sixt](docs/img/logo/sixt.png)](https://sixt.com/) [![Testjar](docs/img/logo/testjar.png)](http://www.testjar.com/) [![Flipdish](docs/img/logo/flipdish.png)](https://www.flipdish.com/)
