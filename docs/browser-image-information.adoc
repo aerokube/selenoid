@@ -154,6 +154,10 @@ WARNING: Hardware server or virtual machine with nested virtualization support i
 | selenoid/chrome-mobile:73.0 | 8.1 | 1.13.0 | 73.0.3683.68 | 73.0.3683.90
 | selenoid/chrome-mobile:74.0 | 8.1 | 1.13.0 | 74.0.3729.6 | 74.0.3729.157
 | selenoid/chrome-mobile:75.0 | 8.1 | 1.13.0 | 75.0.3770.8 | 75.0.3770.89
+| selenoid/chrome-mobile:76.0 | 9.0 | 1.16.0 | 76.0.3809.126 | 76.0.3809.132
+| selenoid/chrome-mobile:77.0 | 9.0 | 1.16.0 | 77.0.3865.40 | 77.0.3865.116
+| selenoid/chrome-mobile:78.0 | 9.0 | 1.16.0 | 78.0.3904.105 | 78.0.3904.96
+| selenoid/chrome-mobile:79.0 | 9.0 | 1.16.0 | 79.0.3945.36 | 79.0.3945.93
 |===
 
 An example `browsers.json` for Chrome Mobile images looks like the following:
@@ -257,6 +261,8 @@ WARNING: Hardware server or virtual machine with nested virtualization support i
 | selenoid/android:7.1 | 7.1 | 1.13.0
 | selenoid/android:8.0 | 8.0 | 1.13.0
 | selenoid/android:8.1 | 8.1 | 1.13.0
+| selenoid/android:9.0 | 9.0 | 1.16.0
+| selenoid/android:10.0 | 10.0 | 1.16.0
 |===
 
 [NOTE]
