@@ -4,7 +4,7 @@
 ====
 . This feature only works when browsers are run in containers.
 . Video can be recorded with both vnc or non-vnc browser images.
-. An additional `enableVideo` capability should be added to tests. See <<Special Capabilities>> section for more details.
+. An additional `enableVideo` capability should be added to tests. See https://github.com/aerokube/selenoid/blob/master/docs/special-capabilities.adoc[Special Capabilities] section for more details.
 ====
 
 Selenoid can capture browser screen and save it to https://en.wikipedia.org/wiki/MPEG-4[MPEG-4] video file using https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC[H264] codec.
