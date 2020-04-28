@@ -1,6 +1,21 @@
 == Selenoid with Docker Compose
 
-To avoid network problems between browser drivers inside containers and Selenoid when using https://docs.docker.com/compose/[Docker Compose] for combining with another services (such as UI or ggr) you need to enable *bridge* network mode for all services:
+In example https://docs.docker.com/compose/[Docker Compose] configurations below we assume that:
+
+. You created a directory `/path/to/config` with <<Browsers Configuration File>> inside named `browsers.json`.
++
+
+    $ mkdir -p /path/to/config
+
+. You created empty configuration directories for logs and videos:
++
+
+    $ mkdir -p /path/to/config/logs
+    $ mkdir -p /path/to/config/video
+
+=== Option 1. Running Selenoid in default Docker network
+
+In that case *bridge* network mode should be used for all services:
 
 [source,yaml]
 ----
@@ -10,18 +25,20 @@ services:
     network_mode: bridge
     image: aerokube/selenoid:latest-release
     volumes:
-      - "$PWD:/etc/selenoid"
+      - "/path/to/config:/etc/selenoid"
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "$PWD:/opt/selenoid/video"
-      - "$PWD:/opt/selenoid/logs"
+      - "/path/to/config/video:/opt/selenoid/video"
+      - "/path/to/config/logs:/opt/selenoid/logs"
     environment:
-      - OVERRIDE_VIDEO_OUTPUT_DIR=$PWD
+      - OVERRIDE_VIDEO_OUTPUT_DIR=/path/to/config/video
     command: ["-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video", "-log-output-dir", "/opt/selenoid/logs"]
     ports:
-      - "4444:4444"     
+      - "4444:4444"
 ----
 
-If you wish to run Selenoid in custom Docker network - then you have to add `-container-network` flag to Selenoid as follows:
+=== Option 2. Running Selenoid in custom Docker network
+
+In that case you have to add `-container-network` flag to Selenoid as follows:
 
 1. Create custom Docker network:
 
@@ -42,15 +59,13 @@ services:
       selenoid: null
     image: aerokube/selenoid:latest-release
     volumes:
-      - "$PWD:/etc/selenoid"
+      - "/path/to/config:/etc/selenoid"
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "$PWD:/opt/selenoid/video"
-      - "$PWD:/opt/selenoid/logs"
+      - "/path/to/config/video:/opt/selenoid/video"
+      - "/path/to/config/logs:/opt/selenoid/logs"
     environment:
-      - OVERRIDE_VIDEO_OUTPUT_DIR=$PWD
+      - OVERRIDE_VIDEO_OUTPUT_DIR=/path/to/config/video
     command: ["-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video", "-log-output-dir", "/opt/selenoid/logs", "-container-network", "selenoid"]
     ports:
       - "4444:4444"
 ----
-
-Complete example with Selenoid UI can be found in http://aerokube.com/selenoid-ui/latest/#_with_docker_compose[Selenoid UI Documentation]
