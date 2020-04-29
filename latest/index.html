@@ -457,7 +457,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2020-04-08</span>
+<span id="revdate">2020-04-29</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -568,7 +568,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </li>
 <li><a href="#_setting_timezone">4.6. Setting Timezone</a></li>
-<li><a href="#_selenoid_with_docker_compose">4.7. Selenoid with Docker Compose</a></li>
+<li><a href="#_selenoid_with_docker_compose">4.7. Selenoid with Docker Compose</a>
+<ul class="sectlevel3">
+<li><a href="#_option_1_running_selenoid_in_default_docker_network">4.7.1. Option 1. Running Selenoid in default Docker network</a></li>
+<li><a href="#_option_2_running_selenoid_in_custom_docker_network">4.7.2. Option 2. Running Selenoid in custom Docker network</a></li>
+</ul>
+</li>
 <li><a href="#_log_files">4.8. Log Files</a></li>
 <li><a href="#_selenoid_cli_flags">4.9. Selenoid CLI Flags</a>
 <ul class="sectlevel3">
@@ -3310,7 +3315,33 @@ To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
 <div class="sect2">
 <h3 id="_selenoid_with_docker_compose"><a class="anchor" href="#_selenoid_with_docker_compose"></a>4.7. Selenoid with Docker Compose</h3>
 <div class="paragraph">
-<p>To avoid network problems between browser drivers inside containers and Selenoid when using <a href="https://docs.docker.com/compose/">Docker Compose</a> for combining with another services (such as UI or ggr) you need to enable <strong>bridge</strong> network mode for all services:</p>
+<p>In example <a href="https://docs.docker.com/compose/">Docker Compose</a> configurations below we assume that:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>You created a directory <code>/path/to/config</code> with <a href="#_browsers_configuration_file">Browsers Configuration File</a> inside named <code>browsers.json</code>.</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ mkdir -p /path/to/config</pre>
+</div>
+</div>
+</li>
+<li>
+<p>You created empty configuration directories for logs and videos:</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ mkdir -p /path/to/config/logs
+$ mkdir -p /path/to/config/video</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="sect3">
+<h4 id="_option_1_running_selenoid_in_default_docker_network"><a class="anchor" href="#_option_1_running_selenoid_in_default_docker_network"></a>4.7.1. Option 1. Running Selenoid in default Docker network</h4>
+<div class="paragraph">
+<p>In that case <strong>bridge</strong> network mode should be used for all services:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -3320,19 +3351,22 @@ To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
     <span class="key">network_mode</span>: <span class="string"><span class="content">bridge</span></span>
     <span class="key">image</span>: <span class="string"><span class="content">aerokube/selenoid:latest-release</span></span>
     <span class="key">volumes</span>:
-      - <span class="string"><span class="delimiter">&quot;</span><span class="content">$PWD:/etc/selenoid</span><span class="delimiter">&quot;</span></span>
+      - <span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/config:/etc/selenoid</span><span class="delimiter">&quot;</span></span>
       - <span class="string"><span class="delimiter">&quot;</span><span class="content">/var/run/docker.sock:/var/run/docker.sock</span><span class="delimiter">&quot;</span></span>
-      - <span class="string"><span class="delimiter">&quot;</span><span class="content">$PWD:/opt/selenoid/video</span><span class="delimiter">&quot;</span></span>
-      - <span class="string"><span class="delimiter">&quot;</span><span class="content">$PWD:/opt/selenoid/logs</span><span class="delimiter">&quot;</span></span>
+      - <span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/config/video:/opt/selenoid/video</span><span class="delimiter">&quot;</span></span>
+      - <span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/config/logs:/opt/selenoid/logs</span><span class="delimiter">&quot;</span></span>
     <span class="key">environment</span>:
-      - <span class="string"><span class="content">OVERRIDE_VIDEO_OUTPUT_DIR=$PWD</span></span>
+      - <span class="string"><span class="content">OVERRIDE_VIDEO_OUTPUT_DIR=/path/to/config/video</span></span>
     <span class="key">command</span>: <span class="string"><span class="content">[&quot;-conf&quot;, &quot;/etc/selenoid/browsers.json&quot;, &quot;-video-output-dir&quot;, &quot;/opt/selenoid/video&quot;, &quot;-log-output-dir&quot;, &quot;/opt/selenoid/logs&quot;]</span></span>
     <span class="key">ports</span>:
       - <span class="string"><span class="delimiter">&quot;</span><span class="content">4444:4444</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_option_2_running_selenoid_in_custom_docker_network"><a class="anchor" href="#_option_2_running_selenoid_in_custom_docker_network"></a>4.7.2. Option 2. Running Selenoid in custom Docker network</h4>
 <div class="paragraph">
-<p>If you wish to run Selenoid in custom Docker network - then you have to add <code>-container-network</code> flag to Selenoid as follows:</p>
+<p>In that case you have to add <code>-container-network</code> flag to Selenoid as follows:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -3362,19 +3396,17 @@ To set custom timezone pass <code>TZ</code> environment variable to Docker:</p>
       <span class="key">selenoid</span>: <span class="string"><span class="content">null</span></span>
     <span class="key">image</span>: <span class="string"><span class="content">aerokube/selenoid:latest-release</span></span>
     <span class="key">volumes</span>:
-      - <span class="string"><span class="delimiter">&quot;</span><span class="content">$PWD:/etc/selenoid</span><span class="delimiter">&quot;</span></span>
+      - <span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/config:/etc/selenoid</span><span class="delimiter">&quot;</span></span>
       - <span class="string"><span class="delimiter">&quot;</span><span class="content">/var/run/docker.sock:/var/run/docker.sock</span><span class="delimiter">&quot;</span></span>
-      - <span class="string"><span class="delimiter">&quot;</span><span class="content">$PWD:/opt/selenoid/video</span><span class="delimiter">&quot;</span></span>
-      - <span class="string"><span class="delimiter">&quot;</span><span class="content">$PWD:/opt/selenoid/logs</span><span class="delimiter">&quot;</span></span>
+      - <span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/config/video:/opt/selenoid/video</span><span class="delimiter">&quot;</span></span>
+      - <span class="string"><span class="delimiter">&quot;</span><span class="content">/path/to/config/logs:/opt/selenoid/logs</span><span class="delimiter">&quot;</span></span>
     <span class="key">environment</span>:
-      - <span class="string"><span class="content">OVERRIDE_VIDEO_OUTPUT_DIR=$PWD</span></span>
+      - <span class="string"><span class="content">OVERRIDE_VIDEO_OUTPUT_DIR=/path/to/config/video</span></span>
     <span class="key">command</span>: <span class="string"><span class="content">[&quot;-conf&quot;, &quot;/etc/selenoid/browsers.json&quot;, &quot;-video-output-dir&quot;, &quot;/opt/selenoid/video&quot;, &quot;-log-output-dir&quot;, &quot;/opt/selenoid/logs&quot;, &quot;-container-network&quot;, &quot;selenoid&quot;]</span></span>
     <span class="key">ports</span>:
       - <span class="string"><span class="delimiter">&quot;</span><span class="content">4444:4444</span><span class="delimiter">&quot;</span></span></code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Complete example with Selenoid UI can be found in <a href="http://aerokube.com/selenoid-ui/latest/#_with_docker_compose">Selenoid UI Documentation</a></p>
 </div>
 </div>
 <div class="sect2">
@@ -4254,7 +4286,7 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <td class="tableblock halign-left valign-top"><p class="tableblock">1.3.9</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.13.0</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">48.0.2 (page load timeout, native events and proxies don&#8217;t work)</p></td>
-<td class="tableblock halign-left valign-middle" rowspan="27"><p class="tableblock"><strong>Java, selenium-webdriver.js</strong>: 3.4.0 and above
+<td class="tableblock halign-left valign-middle" rowspan="28"><p class="tableblock"><strong>Java, selenium-webdriver.js</strong>: 3.4.0 and above
 <strong>Python</strong>: 3.5.0 and above</p></td>
 </tr>
 <tr>
@@ -4438,6 +4470,13 @@ Firefox 53.0+ images require Selenium client 3.4.0 or newer.
 <td class="tableblock halign-left valign-top"><p class="tableblock">1.10.0</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">0.26.0</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">74.0.1</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/firefox:75.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">selenoid/vnc:firefox_75.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.10.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">0.26.0</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">75.0</p></td>
 </tr>
 </tbody>
 </table>
@@ -5309,7 +5348,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2020-04-08 12:02:22 UTC
+Last updated 2020-04-29 13:53:17 UTC
 </div>
 </div>
 <style>
