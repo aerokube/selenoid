@@ -25,6 +25,11 @@ import (
 	ggr "github.com/aerokube/ggr/config"
 )
 
+var _ = func() bool {
+	testing.Init()
+	return true
+}()
+
 var (
 	srv *httptest.Server
 )
