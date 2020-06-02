@@ -22,7 +22,7 @@ Here `<method>` is one of the following:
 | / | WebSocket | An alias for /browser
 | /page | WebSocket | Developer Tools current page (target) websocket - mainly useful when only one browser tab is open
 | /page/<target-id> | WebSocket | Developer Tools specified page (target) websocket - allows to connect to concrete browser tab
-| /protocol/json | HTTP | A list of supported Developer Tools protocol methods in JSON format (some client libraries are using it)
+| /json/protocol | HTTP | A list of supported Developer Tools protocol methods in JSON format (some client libraries are using it)
 |===
 
 For example an URL to connect to current page websocket would be:
