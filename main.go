@@ -285,6 +285,34 @@ func video(w http.ResponseWriter, r *http.Request) {
 	fileServer.ServeHTTP(w, r)
 }
 
+func videos(w http.ResponseWriter, r *http.Request) {
+	requestId := serial()
+	if r.Method == http.MethodDelete {
+		err := filepath.Walk(videoOutputDir,
+			func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+				if filepath.Ext(path) != ".mp4" {
+					return nil
+				}
+				err = os.Remove(path)
+				if err != nil {
+					log.Printf("[%d] [ERROR_DELETING_VIDEO_FILE] [%s] [%s]", requestId, path, err)
+					return err
+				}
+				return nil
+			})
+		if err != nil {
+			http.Error(w, fmt.Sprintf("[%d] [ERROR_DELETING_VIDEOS] [%s]", requestId, err), http.StatusInternalServerError)
+			return
+		}
+		log.Printf("[%d] [DELETED_VIDEO_FILES] [%s]", requestId, videoOutputDir)
+		return
+	}
+
+}
+
 func deleteFileIfExists(requestId uint64, w http.ResponseWriter, r *http.Request, dir string, prefix string, status string) {
 	user, remote := util.RequestInfo(r)
 	fileName := strings.TrimPrefix(r.URL.Path, prefix)
@@ -303,9 +331,10 @@ func deleteFileIfExists(requestId uint64, w http.ResponseWriter, r *http.Request
 }
 
 var paths = struct {
-	Video, VNC, Logs, Devtools, Download, Clipboard, File, Ping, Status, Error, WdHub, Welcome string
+	Video, Videos, VNC, Logs, Devtools, Download, Clipboard, File, Ping, Status, Error, WdHub, Welcome string
 }{
 	Video:     "/video/",
+	Videos:    "/videos",
 	VNC:       "/vnc/",
 	Logs:      "/logs/",
 	Devtools:  "/devtools/",
@@ -339,6 +368,7 @@ func handler() http.Handler {
 	root.Handle(paths.VNC, websocket.Handler(vnc))
 	root.HandleFunc(paths.Logs, logs)
 	root.HandleFunc(paths.Video, video)
+	root.HandleFunc(paths.Videos, videos)
 	root.HandleFunc(paths.Download, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Fileserver }, "DOWNLOADING_FILE"))
 	root.HandleFunc(paths.Clipboard, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Clipboard }, "CLIPBOARD"))
 	root.HandleFunc(paths.Devtools, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Devtools }, "DEVTOOLS"))
