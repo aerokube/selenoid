@@ -1,5 +1,7 @@
 module github.com/aerokube/selenoid
 
+		go 1.14
+
 require (
 	github.com/aandryashin/matchers v0.0.0-20161126170413-435295ea180e
 	github.com/aerokube/ggr v0.0.0-20181215175518-4a2e23fa1769
