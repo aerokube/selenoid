@@ -1,4 +1,4 @@
-name: build
+name: release
 
 on:
   release:
@@ -48,7 +48,7 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: ci/docker-push.sh latest-release
 
-      - name: Latest docs
+      - name: Release docs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ci/docs.sh $RELEASE_VERSION ${{ secrets.GITHUB_TOKEN }}
