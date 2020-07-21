@@ -17,7 +17,7 @@
 
     $ ./cm selenoid-ui start
 
-==== Option 2: you have DigitalOcean or Google Cloud
+==== Option 2: you have Google Cloud, DigitalOcean or Yandex Cloud
 
 We deliver ready to use images with Selenoid and Selenoid UI. Take a look at <<Cloud Platforms>> section for more details.
 
