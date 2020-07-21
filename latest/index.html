@@ -457,7 +457,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2020-07-17</span>
+<span id="revdate">2020-07-21</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -599,8 +599,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_cloud_platforms">Appendix B: Cloud Platforms</a>
 <ul class="sectlevel2">
-<li><a href="#_digitalocean">B.1. DigitalOcean</a></li>
-<li><a href="#_google_cloud">B.2. Google Cloud</a></li>
+<li><a href="#_google_cloud">B.1. Google Cloud</a></li>
+<li><a href="#_digitalocean">B.2. DigitalOcean</a></li>
+<li><a href="#_yandex_cloud">B.3. Yandex Cloud</a></li>
 </ul>
 </li>
 </ul>
@@ -663,7 +664,7 @@ It is using Docker to launch browsers. Please refer to <a href="https://github.c
 </div>
 </div>
 <div class="sect4">
-<h5 id="_option_2_you_have_digitalocean_or_google_cloud"><a class="anchor" href="#_option_2_you_have_digitalocean_or_google_cloud"></a>Option 2: you have DigitalOcean or Google Cloud</h5>
+<h5 id="_option_2_you_have_google_cloud_digitalocean_or_yandex_cloud"><a class="anchor" href="#_option_2_you_have_google_cloud_digitalocean_or_yandex_cloud"></a>Option 2: you have Google Cloud, DigitalOcean or Yandex Cloud</h5>
 <div class="paragraph">
 <p>We deliver ready to use images with Selenoid and Selenoid UI. Take a look at <a href="#_cloud_platforms">Cloud Platforms</a> section for more details.</p>
 </div>
@@ -5323,7 +5324,32 @@ Hardware server or virtual machine with nested virtualization support is require
 <p>Selenoid ready-to-use images are present in popular cloud platforms and can be run in a few clicks. This section contains step-by-step instructions on launching Selenoid in these platforms.</p>
 </div>
 <div class="sect2">
-<h3 id="_digitalocean"><a class="anchor" href="#_digitalocean"></a>B.1. DigitalOcean</h3>
+<h3 id="_google_cloud"><a class="anchor" href="#_google_cloud"></a>B.1. Google Cloud</h3>
+<div class="paragraph">
+<p>Selenoid can be run from <a href="https://console.cloud.google.com/marketplace">Google Cloud Marketplace</a> as follows:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <a href="https://console.cloud.google.com/marketplace/details/aerokube/selenoid">Selenoid page</a> and click the <strong>Launch on Compute Engine</strong> button:</p>
+<div class="paragraph">
+<p><span class="image"><img src="img/google-cloud-marketplace-page.png" alt="google-cloud-marketplace"></span></p>
+</div>
+</li>
+<li>
+<p>Type virtual machine name, size and click the <strong>Deploy</strong> button:</p>
+<div class="paragraph">
+<p><span class="image"><img src="img/google-cloud-vm-settings.png" alt="google-cloud-vm-settings"></span></p>
+</div>
+</li>
+<li>
+<p>Wait for virtual machine to start. Selenoid user interface is available at <code><a href="http://&lt;vm-ip-address&gt;:8080/" class="bare">http://&lt;vm-ip-address&gt;:8080/</a></code>. Selenium tests should be run against <code><a href="http://&lt;vm-ip-address&gt;:4444/wd/hub" class="bare">http://&lt;vm-ip-address&gt;:4444/wd/hub</a></code>.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_digitalocean"><a class="anchor" href="#_digitalocean"></a>B.2. DigitalOcean</h3>
 <div class="paragraph">
 <p>Selenoid can be run from <a href="https://marketplace.digitalocean.com/">DigitalOcean Marketplace</a> as follows:</p>
 </div>
@@ -5369,22 +5395,22 @@ Hardware server or virtual machine with nested virtualization support is require
 </div>
 </div>
 <div class="sect2">
-<h3 id="_google_cloud"><a class="anchor" href="#_google_cloud"></a>B.2. Google Cloud</h3>
+<h3 id="_yandex_cloud"><a class="anchor" href="#_yandex_cloud"></a>B.3. Yandex Cloud</h3>
 <div class="paragraph">
-<p>Selenoid can be run from <a href="https://console.cloud.google.com/marketplace">Google Cloud Marketplace</a> as follows:</p>
+<p>Selenoid can be run from <a href="https://cloud.yandex.com/marketplace">Yandex Cloud Marketplace</a> as follows:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Go to <a href="https://console.cloud.google.com/marketplace/details/aerokube/selenoid">Selenoid page</a> and click the <strong>Launch on Compute Engine</strong> button:</p>
+<p>Go to <a href="https://cloud.yandex.com/marketplace/products/f2e1m50sdg87g8eh716h">Selenoid page</a> and click the <strong>Launch</strong> button:</p>
 <div class="paragraph">
-<p><span class="image"><img src="img/google-cloud-marketplace-page.png" alt="google-cloud-marketplace"></span></p>
+<p><span class="image"><img src="img/yandex-cloud-marketplace-page.png" alt="yandex-cloud-marketplace"></span></p>
 </div>
 </li>
 <li>
-<p>Type virtual machine name, size and click the <strong>Deploy</strong> button:</p>
+<p>Type virtual machine name, select disk size, available computing resources and click the <strong>Create VM</strong> button:</p>
 <div class="paragraph">
-<p><span class="image"><img src="img/google-cloud-vm-settings.png" alt="google-cloud-vm-settings"></span></p>
+<p><span class="image"><img src="img/yandex-cloud-vm-settings.png" alt="yandex-cloud-vm-settings"></span></p>
 </div>
 </li>
 <li>
@@ -5399,7 +5425,7 @@ Hardware server or virtual machine with nested virtualization support is require
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2020-07-17 09:06:39 UTC
+Last updated 2020-07-21 04:08:34 UTC
 </div>
 </div>
 <style>
