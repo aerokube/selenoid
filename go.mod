@@ -10,7 +10,7 @@ require (
 	github.com/docker/docker v0.7.3-0.20190629173937-e105a74c5419
 	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.4.0
-	github.com/gorilla/websocket v1.4.0
+	github.com/gorilla/websocket v1.4.2
 	github.com/imdario/mergo v0.3.6
 	github.com/mafredri/cdp v0.21.0
 	github.com/pborman/uuid v0.0.0-20170612153648-e790cca94e6c
