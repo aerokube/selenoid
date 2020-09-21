@@ -175,7 +175,7 @@ WARNING: Hardware server or virtual machine with nested virtualization support i
 |===
 
 An example `browsers.json` for Chrome Mobile images looks like the following:
-[source,javascript]
+[source,json]
 ----
 {
     "chrome": {
@@ -271,16 +271,16 @@ WARNING: Hardware server or virtual machine with nested virtualization support i
 |===
 | Image | Android version | Appium version
 
-| selenoid/android:4.4 | 4.4 | 1.13.0
-| selenoid/android:5.0 | 5.0 | 1.13.0
-| selenoid/android:5.1 | 5.1 | 1.13.0
-| selenoid/android:6.0 | 6.0 | 1.13.0
-| selenoid/android:7.0 | 7.0 | 1.13.0
-| selenoid/android:7.1 | 7.1 | 1.13.0
-| selenoid/android:8.0 | 8.0 | 1.13.0
-| selenoid/android:8.1 | 8.1 | 1.13.0
-| selenoid/android:9.0 | 9.0 | 1.16.0
-| selenoid/android:10.0 | 10.0 | 1.16.0
+| selenoid/android:4.4 | 4.4 | 1.18.1
+| selenoid/android:5.0 | 5.0 | 1.18.1
+| selenoid/android:5.1 | 5.1 | 1.18.1
+| selenoid/android:6.0 | 6.0 | 1.18.1
+| selenoid/android:7.0 | 7.0 | 1.18.1
+| selenoid/android:7.1 | 7.1 | 1.18.1
+| selenoid/android:8.0 | 8.0 | 1.18.1
+| selenoid/android:8.1 | 8.1 | 1.18.1
+| selenoid/android:9.0 | 9.0 | 1.18.1
+| selenoid/android:10.0 | 10.0 | 1.18.1
 |===
 
 [NOTE]
@@ -290,7 +290,7 @@ WARNING: Hardware server or virtual machine with nested virtualization support i
 ====
 
 An example `browsers.json` for Android images looks like the following:
-[source,javascript]
+[source,json]
 ----
 {
     "android": {
