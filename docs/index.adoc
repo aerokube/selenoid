@@ -22,8 +22,6 @@ It is using Docker to launch browsers. Please refer to https://github.com/aeroku
 include::quick-start-guide.adoc[leveloffset=+1]
 include::starting-selenoid-manually.adoc[leveloffset=+1]
 include::faq.adoc[leveloffset=+1]
-include::windows.adoc[leveloffset=+1]
-include::browser-images.adoc[leveloffset=+1]
 
 == Main Features
 include::video.adoc[leveloffset=+1]
