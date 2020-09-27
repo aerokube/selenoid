@@ -12,10 +12,9 @@ Selenoid is a powerful implementation of [Selenium](http://github.com/SeleniumHQ
 ## Features
 
 ### One-command Installation
-Start browser automation in minutes by copy-pasting just **one command**:
+Start browser automation in minutes by downloading [Configuration Manager](https://github.com/aerokube/cm/releases) binary and running just **one command**:
 ```
-$ curl -s https://aerokube.com/cm/bash | bash \
-    && ./cm selenoid start --vnc --tmpfs 128
+$ ./cm selenoid start --vnc --tmpfs 128
 ```
 **That's it!** You can now use Selenoid instead of Selenium server. Specify the following Selenium URL in tests:
 ```
