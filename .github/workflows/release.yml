@@ -29,7 +29,7 @@ jobs:
         run: ci/build.sh
 
       - name: Prepare release version
-        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
+        run: echo "RELEASE_VERSION=${GITHUB_REF:10}" >> $GITHUB_ENV
 
       - uses: AButler/upload-release-assets@v2.0
         with:
