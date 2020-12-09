@@ -22,6 +22,7 @@ type Session struct {
 	VNC           bool               `json:"vnc"`
 	Screen        string             `json:"screen"`
 	Caps          session.Caps       `json:"caps"`
+	Started       time.Time          `json:"started"`
 }
 
 // Sessions - used count and individual sessions for quota user
@@ -182,6 +183,7 @@ func (config *Config) State(sessions *session.Map, limit, queued, pending int) *
 			VNC:           vnc,
 			Screen:        session.Caps.ScreenResolution,
 			Caps:          session.Caps,
+			Started:       session.Started,
 		}
 		if ctr != nil {
 			sess.Container = ctr.ID
