@@ -1,0 +1,162 @@
+== Starting Selenoid Manually
+
+[NOTE]
+====
+. This guide shows how to start Selenoid manually. When in doubt take a look at Configuration Manager first.
+. This guide assumes you already know how to deal with command line and know basic Docker commands.
+====
+
+=== Prepare Configuration
+
+. Create `config/browsers.json` configuration file with content:
++
+.config/browsers.json
+[source,javascript]
+----
+{
+    "firefox": {
+        "default": "57.0",
+        "versions": {
+            "57.0": {
+                "image": "selenoid/vnc:firefox_57.0",
+                "port": "4444",
+                "path": "/wd/hub"
+            }
+        }
+    }
+}
+----
++
+NOTE: For Chrome and Opera images "path" is "/" instead of "/wd/hub"
++
+. Pull browser Docker image:
++
+`$ docker pull selenoid/vnc:firefox_57.0`.
+
+=== Browser Images
+We maintain a set of prebuilt Docker container images for different browsers including:
+
+* https://hub.docker.com/r/selenoid/android/[Android]
+* https://hub.docker.com/r/selenoid/firefox/[Firefox]
+* https://hub.docker.com/r/selenoid/chrome/[Google Chrome]
+* https://hub.docker.com/r/selenoid/opera/[Opera]
+
+All these images are free to use. See image tags for a list of supported versions. Build files are stored in http://github.com/aerokube/selenoid-images[selenoid-images] repository.
+Feel free to create issues or request images for new versions.
+
+[NOTE]
+====
+. Complete list of browser images can be found in <<Browser Image information>>
+. These images support all UTF-8 locales. This can be important if you want to save files using national alphabet symbols. You can enable your preferred locale in browsers configuration file by setting respective environment variables:
+```
+{
+    "chrome": {
+        "default": "64.0",
+        "versions": {
+            "64.0": {
+                "image": "selenoid/vnc:chrome_64.0",
+                //...
+                "env" : ["LANG=ru_RU.UTF-8", "LANGUAGE=ru:en", "LC_ALL=ru_RU.UTF-8"]
+            }
+        }
+    }
+}
+```
+====
+
+=== Start Selenoid
+==== Option 1: start Selenoid binary
+
+. Download binary for your operating system from https://github.com/aerokube/selenoid/releases/latest[releases] page
+and save it as `selenoid` (or `selenoid.exe` on windows).
++
+NOTE: Add execution permission in case of *nix os-type with `chmod +x selenoid`.
+
+. Then run:
++
+.*nix
+----
+./selenoid
+----
++
+.Windows
+----
+selenoid.exe
+----
+
+. It should write to console something like:
++
+----
+2017/11/26 21:23:43 Loading configuration files...
+2017/11/26 21:23:43 Loaded configuration from [config/browsers.json]
+
+...
+
+2017/11/26 21:23:43 Listening on :4444
+----
+
+==== Option 2: start Selenoid container
+
+If you have https://docs.docker.com/engine/installation/[Docker] installed you can omit downloading binary and run it inside container.
+Prepare config, pull browser image, then run:
+
+.*nix
+[source,bash,subs="attributes+"]
+----
+docker run -d                                   \
+--name selenoid                                 \
+-p 4444:4444                                    \
+-v /var/run/docker.sock:/var/run/docker.sock    \
+-v `pwd`/config/:/etc/selenoid/:ro              \
+aerokube/selenoid:latest-release
+----
+
+.Windows PowerShell
+[source,bash,subs="attributes+"]
+----
+> $current = $PWD -replace "\\", "/" -replace "C", "c"  <1>
+> docker run -d                                         `
+--name selenoid                                         `
+-p 4444:4444                                            `
+-v //var/run/docker.sock:/var/run/docker.sock           `
+-v ${current}/config/:/etc/selenoid/:ro                 `
+aerokube/selenoid:latest-release
+----
+<1> Simple macros to get $PWD with compatible form assumed your directory located on `C:` drive
+
+=== Selenoid under Windows
+
+While we normally recommend to start Selenoid using http://aerokube.com/cm/latest[Configuration Manager] on any platform,
+it is possible to start it under Windows manually.
+
+NOTE: Most of the differences are related to Docker, so please refer to Docker documentation on any errors first.
+
+The main difference from Unix operating systems is how volumes are mounted.
+In any Windows paths back slashes (`\`) should be replaced by forward slashes (`/`) and drive letter should be lower cased.
+Also start with forward slash and remove colon.
+
+.Mount directory
+====
+`C:\Users\admin` becomes `/c/Users/admin`
+====
+
+NOTE: Another story with `docker.sock`, which should be mounted as `-v //var/run/docker.sock:/var/run/docker.sock` (note two forward slashes at the beginning)
+
+So assuming that configuration file is located at `C:\Users\admin\selenoid` a typical startup command can look like:
+
+----
+docker run -d --name selenoid                   `
+-p 4444:4444                                    `
+-v //var/run/docker.sock:/var/run/docker.sock   `
+-v /c/Users/admin/selenoid:/etc/selenoid:ro                 `
+aerokube/selenoid:latest-release
+----
+
+[TIP]
+====
+You can use simple Powershell macros to automatically get correct `$PWD` value (assumed you are on `C:`):
+
+----
+> $current = $PWD -replace "\\", "/" -replace "C", "c"
+----
+====

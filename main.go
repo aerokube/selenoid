@@ -242,9 +242,10 @@ var seleniumPaths = struct {
 
 func selenium() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc(seleniumPaths.CreateSession, queue.Try(queue.Check(queue.Protect(post(create)))))
+	mux.HandleFunc(seleniumPaths.CreateSession, post(queue.Try(queue.Check(queue.Protect(create)))))
 	mux.HandleFunc(seleniumPaths.ProxySession, proxy)
 	mux.HandleFunc(paths.Status, status)
+	mux.HandleFunc(paths.Welcome, welcome)
 	return mux
 }
 
@@ -265,19 +266,27 @@ func ping(w http.ResponseWriter, _ *http.Request) {
 		LastReloadTime string `json:"lastReloadTime"`
 		NumRequests    uint64 `json:"numRequests"`
 		Version        string `json:"version"`
-	}{time.Since(startTime).String(), conf.LastReloadTime.String(), getSerial(), gitRevision})
+	}{time.Since(startTime).String(), conf.LastReloadTime.Format(time.RFC3339), getSerial(), gitRevision})
 }
 
 func video(w http.ResponseWriter, r *http.Request) {
+	requestId := serial()
 	if r.Method == http.MethodDelete {
-		deleteFileIfExists(w, r, videoOutputDir, paths.Video, "DELETED_VIDEO_FILE")
+		deleteFileIfExists(requestId, w, r, videoOutputDir, paths.Video, "DELETED_VIDEO_FILE")
 		return
 	}
+	user, remote := util.RequestInfo(r)
+	if _, ok := r.URL.Query()[jsonParam]; ok {
+		listFilesAsJson(requestId, w, videoOutputDir, "VIDEO_ERROR")
+		return
+	}
+	log.Printf("[%d] [VIDEO_LISTING] [%s] [%s]", requestId, user, remote)
 	fileServer := http.StripPrefix(paths.Video, http.FileServer(http.Dir(videoOutputDir)))
 	fileServer.ServeHTTP(w, r)
 }
 
-func deleteFileIfExists(w http.ResponseWriter, r *http.Request, dir string, prefix string, status string) {
+func deleteFileIfExists(requestId uint64, w http.ResponseWriter, r *http.Request, dir string, prefix string, status string) {
+	user, remote := util.RequestInfo(r)
 	fileName := strings.TrimPrefix(r.URL.Path, prefix)
 	filePath := filepath.Join(dir, fileName)
 	_, err := os.Stat(filePath)
@@ -290,11 +299,11 @@ func deleteFileIfExists(w http.ResponseWriter, r *http.Request, dir string, pref
 		http.Error(w, fmt.Sprintf("Failed to delete file %s: %v", filePath, err), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("[%d] [%s] [%s]", serial(), status, fileName)
+	log.Printf("[%d] [%s] [%s] [%s] [%s]", requestId, status, user, remote, fileName)
 }
 
 var paths = struct {
-	Video, VNC, Logs, Devtools, Download, Clipboard, File, Ping, Status, Error, WdHub string
+	Video, VNC, Logs, Devtools, Download, Clipboard, File, Ping, Status, Error, WdHub, Welcome string
 }{
 	Video:     "/video/",
 	VNC:       "/vnc/",
@@ -307,6 +316,7 @@ var paths = struct {
 	Ping:      "/ping",
 	Error:     "/error",
 	WdHub:     "/wd/hub",
+	Welcome:   "/",
 }
 
 func handler() http.Handler {
@@ -327,14 +337,15 @@ func handler() http.Handler {
 	})
 	root.HandleFunc(paths.Ping, ping)
 	root.Handle(paths.VNC, websocket.Handler(vnc))
-	root.Handle(paths.Devtools, websocket.Server{Handler: devtools})
 	root.HandleFunc(paths.Logs, logs)
 	root.HandleFunc(paths.Video, video)
 	root.HandleFunc(paths.Download, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Fileserver }, "DOWNLOADING_FILE"))
 	root.HandleFunc(paths.Clipboard, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Clipboard }, "CLIPBOARD"))
+	root.HandleFunc(paths.Devtools, reverseProxy(func(sess *session.Session) string { return sess.HostPort.Devtools }, "DEVTOOLS"))
 	if enableFileUpload {
 		root.HandleFunc(paths.File, fileUpload)
 	}
+	root.HandleFunc(paths.Welcome, welcome)
 	return root
 }
 

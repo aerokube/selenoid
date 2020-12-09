@@ -1,5 +1,17 @@
 == Frequently Asked Questions
 
+=== Selenoid in Kubernetes
+
+We are very frequently asked whether it is possible to run Selenoid in https://kubernetes.io[Kubernetes] cluster. The answer is - **it is possible but we do not recommend doing this**:
+
+. Selenoid can **only** work directly with https://docs.docker.com/engine/api/latest/[Docker API] and was created to be run on a workstation or a virtual machine with Docker installed.
+. Kubernetes contrarily has a completely different https://kubernetes.io/docs/concepts/overview/kubernetes-api/[API] and **can be using Docker** as a container runtime backend. In some clusters https://github.com/rkt/rkt[rkt] is used instead of Docker and in that case Selenoid will not work.
+. Even if Selenoid works - **all browser containers will be started on the same Kubernetes node** where it is running.
+. So far as Selenoid is using Docker API directly - Kubernetes will not be aware of additional containers started by Selenoid. This is dangerous and **can potentially lead to overloaded Kubernetes nodes**.
+. You can only have **one Selenoid replica maximum**. This is because Selenoid internally stores a list of running sessions in memory.
+
+If you need Selenium in Kubernetes or https://www.openshift.com/[Openshift], we have a separate solution called https://aerokube.com/moon/[Moon].
+
 === Logs and Dirs
 
 **Where are Selenoid logs?**
@@ -24,7 +36,7 @@ You have to use `-limit` flag to specify total number of parallel sessions. Defa
 
 **Can I limit per-version browser consumption?**
 
-No, this is not supported. We consider the only reasonable limitation should be the overall browsers consumption. This is important to not overload the hardware. 
+No, this is not supported. We consider the only reasonable limitation should be the overall browsers consumption. This is important to not overload the hardware.
 
 **How can I adjust Selenoid timeouts?**
 
@@ -51,10 +63,10 @@ The only difference between these images - is a running VNC server (`x11vnc`) co
 This usually happens when Selenoid is started in Docker container with custom command-line arguments, e.g.:
 
     $ docker run <some-args> aerokube/selenoid:some-version -limit 10
-    
+
 In that case you have to specify path to configuration file explicitly (`cm` tool does this automatically):
 
-    $ docker run <some-args> aerokube/selenoid:some-version -limit 10 -conf /etc/selenoid/browsers.json 
+    $ docker run <some-args> aerokube/selenoid:some-version -limit 10 -conf /etc/selenoid/browsers.json
 
 **Getting error: create container: Error response from daemon: client version 1.36 is too new**
 
@@ -63,7 +75,7 @@ You have to run Selenoid binary \ container with `DOCKER_API_VERSION` variable s
     $ docker version | grep API
 
 Then run Selenoid like the following:
-    
+
     $ DOCKER_API_VERSION=1.32 ./selenoid <rest-of-args> # As a binary
     $ docker run -e DOCKER_API_VERSION=1.32 <rest-of-args> aerokube/selenoid:some-version # As Docker container
 
@@ -77,7 +89,7 @@ When running Selenoid as Docker container video feature can be not working (beca
 
 . You are passing an `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable pointing to a directory on the `host machine` where video files are actually stored
 . When passing custom arguments to Selenoid container (such as `-limit` or `-timeout`) you also have to pass `-video-output-dir /opt/selenoid/video` and mount host machine video dir to `/opt/selenoid/video`
-    
+
 **Can't get VNC feature to work: Disconnected**
 
 Please check the following:
@@ -92,3 +104,7 @@ You are using `driver.close()` instead of `driver.quit()` and just closed the la
 **Can Selenoid pull browser images automatically?**
 
 No, we did not implement this feature intentionally. We consider that all such cluster maintenance tasks can influence performance and stability when done automatically.
+
+**Is it possible to run Selenoid in Docker macvlan network?**
+
+Yes, this is possible. See the following https://github.com/aerokube/selenoid/issues/795[Github issue] for possible solutions.

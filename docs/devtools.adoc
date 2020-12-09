@@ -1,9 +1,63 @@
 == Accessing Browser Developer Tools
 
-NOTE: Currently only https://chromedevtools.github.io/devtools-protocol/[Chrome Developer Tools] are supported.
+[NOTE]
+====
+. Currently only https://chromedevtools.github.io/devtools-protocol/[Chrome Developer Tools] are supported.
+. This feature will work only for Chrome 63+.
+. We recommend to use the most recent Chrome version possible.
+====
 
-Selenoid is proxying Chrome Developer Tools websocket to browser container. Just use the following URL to access this websocket:
+Selenoid is proxying Chrome Developer Tools API to browser container.  For every running Selenium session to access the API just use the following URL:
 
 ```
-ws://selenoid.example.com:4444/devtools/<session-id>
+<ws or http>://selenoid.example.com:4444/devtools/<session-id>/<method>
 ```
+
+Here `<method>` is one of the following:
+
+.Supported Developer Tools Methods
+|===
+| Method | Protocol | Meaning
+| /browser | WebSocket | Developer Tools browser websocket
+| / | WebSocket | An alias for /browser
+| /page | WebSocket | Developer Tools current page (target) websocket - mainly useful when only one browser tab is open
+| /page/<target-id> | WebSocket | Developer Tools specified page (target) websocket - allows to connect to concrete browser tab
+| /json/protocol | HTTP | A list of supported Developer Tools protocol methods in JSON format (some client libraries are using it)
+|===
+
+For example an URL to connect to current page websocket would be:
+
+```
+ws://selenoid.example.com:4444/devtools/<session-id>/page
+```
+
+.Accessing Developer Tools API with Webdriver.io and Puppeteer
+[source,javascript]
+----
+const { remote } = require('webdriverio');
+const puppeteer = require('puppeteer-core');
+const host = 'selenoid.example.com';
+(async () => {
+    const browser = await remote({
+        hostname: host,
+        capabilities: {
+            browserName: 'chrome',
+            browserVersion: '75.0'
+        }
+    });
+
+    const devtools = await puppeteer.connect(
+        { browserWSEndpoint: `ws://${host}:4444/devtools/${browser.sessionId}` }
+    );
+    const page = await devtools.newPage();
+    await page.goto('http://aerokube.com');
+    await page.screenshot({path: 'screenshot.png'});
+    const title = await page.title();
+
+    console.log(title);
+
+    await devtools.close();
+    await browser.deleteSession();
+
+})().catch((e) => console.error(e));
+----

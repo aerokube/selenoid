@@ -9,18 +9,19 @@
 :icons: font
 :source-highlighter: coderay
 :docinfo: shared
+:title: Selenoid - A cross browser Selenium solution for Docker
+:description: A Selenium testing platform running browsers and mobile platforms in Docker containers. Fully compatible with Selenium Webdriver protocol. Live and automated testing are supported. Runs on your own hardware and on virtual machines in any popular cloud platform.
 :favicon: img/favicon.png
 
 This reference covers version: _{revnumber}_
 
-Selenoid is a powerful http://golang.org/[Go] implementation of original http://github.com/SeleniumHQ/selenium[Selenium] hub code.
-It is using Docker to launch browsers. Please refer to https://github.com/aerokube/selenoid[GitHub repository] if you need sources.
+Selenoid is a powerful http://golang.org/[Golang] implementation of original http://github.com/SeleniumHQ/selenium[Selenium] hub code.
+It is using Docker to launch browsers. Please refer to https://github.com/aerokube/selenoid[GitHub repository] if you need source code.
 
 == Getting Started
 include::quick-start-guide.adoc[leveloffset=+1]
+include::starting-selenoid-manually.adoc[leveloffset=+1]
 include::faq.adoc[leveloffset=+1]
-include::windows.adoc[leveloffset=+1]
-include::browser-images.adoc[leveloffset=+1]
 
 == Main Features
 include::video.adoc[leveloffset=+1]
@@ -52,3 +53,6 @@ include::contributing.adoc[]
 
 [appendix]
 include::browser-image-information.adoc[]
+
+[appendix]
+include::cloud-platforms.adoc[]

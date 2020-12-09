@@ -9,6 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aerokube/selenoid/event"
+	"github.com/aerokube/selenoid/service"
+	"github.com/imdario/mergo"
 	"io"
 	"io/ioutil"
 	"log"
@@ -119,7 +121,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 	var browser struct {
 		Caps    session.Caps `json:"desiredCapabilities"`
 		W3CCaps struct {
-			Caps session.Caps `json:"alwaysMatch"`
+			Caps       session.Caps    `json:"alwaysMatch"`
+			FirstMatch []*session.Caps `json:"firstMatch"`
 		} `json:"capabilities"`
 	}
 	err = json.Unmarshal(body, &browser)
@@ -129,44 +132,60 @@ func create(w http.ResponseWriter, r *http.Request) {
 		queue.Drop()
 		return
 	}
-	if browser.W3CCaps.Caps.Name != "" && browser.Caps.Name == "" {
+	if browser.W3CCaps.Caps.BrowserName() != "" && browser.Caps.BrowserName() == "" {
 		browser.Caps = browser.W3CCaps.Caps
 	}
-	browser.Caps.ProcessExtensionCapabilities()
-	sessionTimeout, err := getSessionTimeout(browser.Caps.SessionTimeout, maxTimeout, timeout)
-	if err != nil {
-		log.Printf("[%d] [BAD_SESSION_TIMEOUT] [%s]", requestId, browser.Caps.SessionTimeout)
-		util.JsonError(w, err.Error(), http.StatusBadRequest)
-		queue.Drop()
-		return
+	firstMatchCaps := browser.W3CCaps.FirstMatch
+	if len(firstMatchCaps) == 0 {
+		firstMatchCaps = append(firstMatchCaps, &session.Caps{})
 	}
-	resolution, err := getScreenResolution(browser.Caps.ScreenResolution)
-	if err != nil {
-		log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s]", requestId, browser.Caps.ScreenResolution)
-		util.JsonError(w, err.Error(), http.StatusBadRequest)
-		queue.Drop()
-		return
+	var caps session.Caps
+	var starter service.Starter
+	var ok bool
+	var sessionTimeout time.Duration
+	var finalVideoName, finalLogName string
+	for _, fmc := range firstMatchCaps {
+		caps = browser.Caps
+		mergo.Merge(&caps, *fmc)
+		caps.ProcessExtensionCapabilities()
+		sessionTimeout, err = getSessionTimeout(caps.SessionTimeout, maxTimeout, timeout)
+		if err != nil {
+			log.Printf("[%d] [BAD_SESSION_TIMEOUT] [%s]", requestId, caps.SessionTimeout)
+			util.JsonError(w, err.Error(), http.StatusBadRequest)
+			queue.Drop()
+			return
+		}
+		resolution, err := getScreenResolution(caps.ScreenResolution)
+		if err != nil {
+			log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s]", requestId, caps.ScreenResolution)
+			util.JsonError(w, err.Error(), http.StatusBadRequest)
+			queue.Drop()
+			return
+		}
+		caps.ScreenResolution = resolution
+		videoScreenSize, err := getVideoScreenSize(caps.VideoScreenSize, resolution)
+		if err != nil {
+			log.Printf("[%d] [BAD_VIDEO_SCREEN_SIZE] [%s]", requestId, caps.VideoScreenSize)
+			util.JsonError(w, err.Error(), http.StatusBadRequest)
+			queue.Drop()
+			return
+		}
+		caps.VideoScreenSize = videoScreenSize
+		finalVideoName = caps.VideoName
+		if caps.Video && !disableDocker {
+			caps.VideoName = getTemporaryFileName(videoOutputDir, videoFileExtension)
+		}
+		finalLogName = caps.LogName
+		if logOutputDir != "" && (saveAllLogs || caps.Log) {
+			caps.LogName = getTemporaryFileName(logOutputDir, logFileExtension)
+		}
+		starter, ok = manager.Find(caps, requestId)
+		if ok {
+			break
+		}
 	}
-	browser.Caps.ScreenResolution = resolution
-	videoScreenSize, err := getVideoScreenSize(browser.Caps.VideoScreenSize, resolution)
-	if err != nil {
-		log.Printf("[%d] [BAD_VIDEO_SCREEN_SIZE] [%s]", requestId, browser.Caps.VideoScreenSize)
-		util.JsonError(w, err.Error(), http.StatusBadRequest)
-		queue.Drop()
-		return
-	}
-	browser.Caps.VideoScreenSize = videoScreenSize
-	finalVideoName := browser.Caps.VideoName
-	if browser.Caps.Video && !disableDocker {
-		browser.Caps.VideoName = getTemporaryFileName(videoOutputDir, videoFileExtension)
-	}
-	finalLogName := browser.Caps.LogName
-	if logOutputDir != "" && (saveAllLogs || browser.Caps.Log) {
-		browser.Caps.LogName = getTemporaryFileName(logOutputDir, logFileExtension)
-	}
-	starter, ok := manager.Find(browser.Caps, requestId)
 	if !ok {
-		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s]", requestId, browser.Caps.Name, browser.Caps.Version)
+		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s]", requestId, caps.BrowserName(), caps.Version)
 		util.JsonError(w, "Requested environment is not available", http.StatusBadRequest)
 		queue.Drop()
 		return
@@ -265,7 +284,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	sess := &session.Session{
 		Quota:     user,
-		Caps:      browser.Caps,
+		Caps:      caps,
 		URL:       u,
 		Container: startedService.Container,
 		HostPort:  startedService.HostPort,
@@ -282,8 +301,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 			SessionId: sessionId,
 			Session:   sess,
 		}
-		if browser.Caps.Video && !disableDocker {
-			oldVideoName := filepath.Join(videoOutputDir, browser.Caps.VideoName)
+		if caps.Video && !disableDocker {
+			oldVideoName := filepath.Join(videoOutputDir, caps.VideoName)
 			if finalVideoName == "" {
 				finalVideoName = sessionId + videoFileExtension
 				e.Session.Caps.VideoName = finalVideoName
@@ -301,10 +320,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 				event.FileCreated(createdFile)
 			}
 		}
-		if logOutputDir != "" && (saveAllLogs || browser.Caps.Log) {
+		if logOutputDir != "" && (saveAllLogs || caps.Log) {
 			//The following logic will fail if -capture-driver-logs is enabled and a session is requested in driver mode.
 			//Specifying both -log-output-dir and -capture-driver-logs in that case is considered a misconfiguration.
-			oldLogName := filepath.Join(logOutputDir, browser.Caps.LogName)
+			oldLogName := filepath.Join(logOutputDir, caps.LogName)
 			if finalLogName == "" {
 				finalLogName = sessionId + logFileExtension
 				e.Session.Caps.LogName = finalLogName
@@ -581,18 +600,44 @@ func vnc(wsconn *websocket.Conn) {
 	}
 }
 
+const (
+	jsonParam = "json"
+)
+
 func logs(w http.ResponseWriter, r *http.Request) {
+	requestId := serial()
 	fileNameOrSessionID := strings.TrimPrefix(r.URL.Path, paths.Logs)
 	if logOutputDir != "" && (fileNameOrSessionID == "" || strings.HasSuffix(fileNameOrSessionID, logFileExtension)) {
 		if r.Method == http.MethodDelete {
-			deleteFileIfExists(w, r, logOutputDir, paths.Logs, "DELETED_LOG_FILE")
+			deleteFileIfExists(requestId, w, r, logOutputDir, paths.Logs, "DELETED_LOG_FILE")
 			return
 		}
+		user, remote := util.RequestInfo(r)
+		if _, ok := r.URL.Query()[jsonParam]; ok {
+			listFilesAsJson(requestId, w, logOutputDir, "LOG_ERROR")
+			return
+		}
+		log.Printf("[%d] [LOG_LISTING] [%s] [%s]", requestId, user, remote)
 		fileServer := http.StripPrefix(paths.Logs, http.FileServer(http.Dir(logOutputDir)))
 		fileServer.ServeHTTP(w, r)
 		return
 	}
 	websocket.Handler(streamLogs).ServeHTTP(w, r)
+}
+
+func listFilesAsJson(requestId uint64, w http.ResponseWriter, dir string, errStatus string) {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		log.Printf("[%d] [%s] [%s]", requestId, errStatus, fmt.Sprintf("Failed to list directory %s: %v", logOutputDir, err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	var ret []string
+	for _, f := range files {
+		ret = append(ret, f.Name())
+	}
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ret)
 }
 
 func streamLogs(wsconn *websocket.Conn) {
@@ -632,31 +677,9 @@ func status(w http.ResponseWriter, _ *http.Request) {
 		})
 }
 
-func devtools(wsconn *websocket.Conn) {
-	sid, _ := splitRequestPath(wsconn.Request().URL.Path)
-	sess, ok := sessions.Get(sid)
-	requestId := serial()
-	if ok {
-		origin := "http://localhost/"
-		u := fmt.Sprintf("ws://%s/", sess.HostPort.Devtools)
-		conn, err := websocket.Dial(u, "", origin)
-		if err != nil {
-			log.Printf("[%d] [DEVTOOLS_ERROR] [%v]", requestId, err)
-			return
-		}
-		log.Printf("[%d] [DEVTOOLS] [%s]", requestId, sid)
-		defer conn.Close()
-		wsconn.PayloadType = websocket.BinaryFrame
-		go func() {
-			io.Copy(wsconn, conn)
-			wsconn.Close()
-			log.Printf("[%d] [DEVTOOLS_SESSION_CLOSED] [%s]", requestId, sid)
-		}()
-		io.Copy(conn, wsconn)
-		log.Printf("[%d] [DEVTOOLS_CLIENT_DISCONNECTED] [%s]", requestId, sid)
-	} else {
-		log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
-	}
+func welcome(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf("You are using Selenoid %s!", gitRevision)))
 }
 
 func onTimeout(t time.Duration, f func()) chan struct{} {

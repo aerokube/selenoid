@@ -25,6 +25,11 @@ import (
 	ggr "github.com/aerokube/ggr/config"
 )
 
+var _ = func() bool {
+	testing.Init()
+	return true
+}()
+
 var (
 	srv *httptest.Server
 )
@@ -221,7 +226,7 @@ func TestSessionCreated(t *testing.T) {
 func TestSessionCreatedW3C(t *testing.T) {
 	manager = &HTTPTest{Handler: Selenium()}
 
-	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"capabilities":{"alwaysMatch":{"acceptInsecureCerts":true,"browserName":"firefox"}}}`)))
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"capabilities":{"alwaysMatch":{"acceptInsecureCerts":true, "browserName":"firefox", "browserVersion":"latest", "selenoid:options":{"enableVNC": true}}}}`)))
 	AssertThat(t, err, Is{nil})
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
@@ -232,6 +237,46 @@ func TestSessionCreatedW3C(t *testing.T) {
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
 	AssertThat(t, state.Used, EqualTo{1})
 	AssertThat(t, queue.Used(), EqualTo{1})
+
+	versions, firefoxPresent := state.Browsers["firefox"]
+	AssertThat(t, firefoxPresent, Is{true})
+	users, versionPresent := versions["latest"]
+	AssertThat(t, versionPresent, Is{true})
+	userInfo, userPresent := users["unknown"]
+	AssertThat(t, userPresent, Is{true})
+	AssertThat(t, userInfo, Not{nil})
+	AssertThat(t, len(userInfo.Sessions), EqualTo{1})
+	AssertThat(t, userInfo.Sessions[0].VNC, EqualTo{true})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
+func TestSessionCreatedFirstMatchOnly(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"capabilities":{"firstMatch":[{"browserName":"firefox", "browserVersion":"latest", "selenoid:options":{"enableVNC": true}}]}}`)))
+	AssertThat(t, err, Is{nil})
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	resp, err = http.Get(With(srv.URL).Path("/status"))
+	AssertThat(t, err, Is{nil})
+	var state config.State
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&state}})
+	AssertThat(t, state.Used, EqualTo{1})
+	AssertThat(t, queue.Used(), EqualTo{1})
+
+	versions, firefoxPresent := state.Browsers["firefox"]
+	AssertThat(t, firefoxPresent, Is{true})
+	users, versionPresent := versions["latest"]
+	AssertThat(t, versionPresent, Is{true})
+	userInfo, userPresent := users["unknown"]
+	AssertThat(t, userPresent, Is{true})
+	AssertThat(t, userInfo, Not{nil})
+	AssertThat(t, len(userInfo.Sessions), EqualTo{1})
+	AssertThat(t, userInfo.Sessions[0].VNC, EqualTo{true})
+
 	sessions.Remove(sess["sessionId"])
 	queue.Release()
 }
@@ -664,6 +709,13 @@ func TestServeAndDeleteVideoFile(t *testing.T) {
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
 
+	rsp, err = http.Get(With(srv.URL).Path("/video/?json"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+	var files []string
+	AssertThat(t, rsp, IsJson{&files})
+	AssertThat(t, files, EqualTo{[]string{"testfile"}})
+
 	deleteReq, _ := http.NewRequest(http.MethodDelete, With(srv.URL).Path("/video/testfile"), nil)
 	rsp, err = http.DefaultClient.Do(deleteReq)
 	AssertThat(t, err, Is{nil})
@@ -683,6 +735,13 @@ func TestServeAndDeleteLogFile(t *testing.T) {
 	rsp, err := http.Get(With(srv.URL).Path("/logs/logfile.log"))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
+
+	rsp, err = http.Get(With(srv.URL).Path("/logs/?json"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+	var files []string
+	AssertThat(t, rsp, IsJson{&files})
+	AssertThat(t, len(files) > 0, Is{true})
 
 	deleteReq, _ := http.NewRequest(http.MethodDelete, With(srv.URL).Path("/logs/logfile.log"), nil)
 	rsp, err = http.DefaultClient.Do(deleteReq)
@@ -780,4 +839,14 @@ func TestParseGgrHost(t *testing.T) {
 	h := parseGgrHost("some-host.example.com:4444")
 	AssertThat(t, h.Name, EqualTo{"some-host.example.com"})
 	AssertThat(t, h.Port, EqualTo{4444})
+}
+
+func TestWelcomeScreen(t *testing.T) {
+	rsp, err := http.Get(With(srv.URL).Path("/"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
+
+	rsp, err = http.Get(With(srv.URL).Path("/wd/hub"))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, rsp, Code{http.StatusOK})
 }
