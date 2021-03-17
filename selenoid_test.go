@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/aerokube/selenoid/session"
 	"github.com/mafredri/cdp"
 	"github.com/mafredri/cdp/rpcc"
 	"io/ioutil"
@@ -388,6 +389,28 @@ func TestSessionCreatedRedirect(t *testing.T) {
 	AssertThat(t, queue.Used(), EqualTo{1})
 	sessions.Remove(sid)
 	queue.Release()
+}
+
+func TestSessionCreatedRemoveExtensionCapabilities(t *testing.T) {
+	extensionCapsMissing := true
+	var browser struct {
+		W3CCaps struct {
+			Caps session.Caps `json:"alwaysMatch"`
+		} `json:"capabilities"`
+	}
+
+	root := http.NewServeMux()
+	root.Handle("/wd/hub/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := json.NewDecoder(r.Body).Decode(&browser)
+		AssertThat(t, err, Is{nil})
+		extensionCapsMissing = browser.W3CCaps.Caps.ExtensionCapabilities == nil
+	}))
+	manager = &HTTPTest{Handler: root}
+
+	resp, err := httpClient.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"capabilities":{"alwaysMatch":{"browserName": "firefox", "selenoid:options":{"enableVNC": true}}}}`)))
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, resp, Code{http.StatusOK})
+	AssertThat(t, extensionCapsMissing, Is{true})
 }
 
 func TestProxySession(t *testing.T) {
