@@ -19,8 +19,8 @@ $ docker run -d
 --name selenoid                                 \
 -p 4444:4444                                    \
 -v /var/run/docker.sock:/var/run/docker.sock    \
--v `pwd`/config/:/etc/selenoid/:ro              \
--v `pwd`/logs/:/opt/selenoid/logs/              \
+-v /your/directory/config/:/etc/selenoid/:ro              \
+-v /your/directory/logs/:/opt/selenoid/logs/              \
 aerokube/selenoid:latest-release -log-output-dir /opt/selenoid/logs
 ----
 

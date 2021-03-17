@@ -21,7 +21,7 @@ $ docker pull selenoid/video-recorder:latest-release
 . When running Selenoid **in Docker container**:
 .. Mount a directory from the host machine (e.g. `~/.aerokube/selenoid/video`) to store video files to `/opt/selenoid/video`.
 .. Pass an additional `OVERRIDE_VIDEO_OUTPUT_DIR` environment variable with absolute path to video directory on host machine. This is required because video recorder container, automatically created by Selenoid should save video to host machine video storage directory.
-. When running Selenoid **as a binary** - videos will be stored in `video` directory inside current working directory. 
+. When running Selenoid **as a binary** - videos will be stored in `video` directory inside current working directory.
 +
 .Example Docker Command
 ----
@@ -29,9 +29,9 @@ $ docker run -d                                 \
 --name selenoid                                 \
 -p 4444:4444                                    \
 -v /var/run/docker.sock:/var/run/docker.sock    \
--v `pwd`/config/:/etc/selenoid/:ro              \
--v `pwd`/video/:/opt/selenoid/video/            \
--e OVERRIDE_VIDEO_OUTPUT_DIR=`pwd`/video/       \
+-v /your/directory/config/:/etc/selenoid/:ro              \
+-v /your/directory/video/:/opt/selenoid/video/            \
+-e OVERRIDE_VIDEO_OUTPUT_DIR=/your/directory/video/       \
 aerokube/selenoid:latest-release
 ----
 
