@@ -49,10 +49,6 @@ func (c *Caps) ProcessExtensionCapabilities() {
 
 	if c.ExtensionCapabilities != nil {
 		mergo.Merge(c, *c.ExtensionCapabilities, mergo.WithOverride) //We probably need to handle returned error
-
-		//According to Selenium standard vendor-specific capabilities for
-		//intermediary node should not be proxied to endpoint node
-		c.ExtensionCapabilities = nil
 	}
 }
 

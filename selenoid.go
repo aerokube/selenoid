@@ -199,11 +199,19 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	u := startedService.Url
 	cancel := startedService.Cancel
+
+	browser.Caps.ExtensionCapabilities = nil
+	browser.W3CCaps.Caps.ExtensionCapabilities = nil
+	for _, c := range browser.W3CCaps.FirstMatch {
+		c.ExtensionCapabilities = nil
+	}
+
 	var resp *http.Response
 	i := 1
 	for ; ; i++ {
 		r.URL.Host, r.URL.Path = u.Host, path.Join(u.Path, r.URL.Path)
-		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(body))
+		newBody, _ := json.Marshal(browser)
+		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(newBody))
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
 		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%d]", requestId, u.String(), i)
@@ -495,6 +503,9 @@ func reverseProxy(hostFn func(sess *session.Session) string, status string) func
 		sid, remainingPath := splitRequestPath(r.URL.Path)
 		sess, ok := sessions.Get(sid)
 		if ok {
+			sess.TimeoutCh = onTimeout(sess.Timeout, func() {
+				request{r}.session(sid).Delete(requestId)
+			})
 			(&httputil.ReverseProxy{
 				Director: func(r *http.Request) {
 					r.URL.Scheme = "http"

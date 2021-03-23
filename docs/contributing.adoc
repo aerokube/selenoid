@@ -42,7 +42,7 @@ Locally can be generated with:
 
 [source,bash]
 ----
-$ docker run --rm -v `pwd`/docs/:/documents/      \
+$ docker run --rm -v ./docs/:/documents/      \
     asciidoctor/docker-asciidoctor                \
     asciidoctor -D /documents/output/ index.adoc
 ----
