@@ -5,5 +5,3 @@ COPY selenoid /usr/bin
 
 EXPOSE 4444
 ENTRYPOINT ["/usr/bin/selenoid", "-listen", ":4444", "-conf", "/etc/selenoid/browsers.json", "-video-output-dir", "/opt/selenoid/video/"]
-
-USER 4096:4096
