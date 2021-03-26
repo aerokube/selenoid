@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/aerokube/selenoid/session"
 	"github.com/mafredri/cdp"
 	"github.com/mafredri/cdp/rpcc"
 	"io/ioutil"
@@ -392,10 +391,16 @@ func TestSessionCreatedRedirect(t *testing.T) {
 }
 
 func TestSessionCreatedRemoveExtensionCapabilities(t *testing.T) {
-	extensionCapsMissing := true
+	desiredCapabilitiesPresent := true
+	alwaysMatchPresent := true
+	firstMatchPresent := true
+	chromeOptionsPresent := true
+
 	var browser struct {
+		Caps    map[string]interface{} `json:"desiredCapabilities"`
 		W3CCaps struct {
-			Caps session.Caps `json:"alwaysMatch"`
+			AlwaysMatch map[string]interface{}   `json:"alwaysMatch"`
+			FirstMatch  []map[string]interface{} `json:"firstMatch"`
 		} `json:"capabilities"`
 	}
 
@@ -403,14 +408,21 @@ func TestSessionCreatedRemoveExtensionCapabilities(t *testing.T) {
 	root.Handle("/wd/hub/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&browser)
 		AssertThat(t, err, Is{nil})
-		extensionCapsMissing = browser.W3CCaps.Caps.ExtensionCapabilities == nil
+		_, desiredCapabilitiesPresent = browser.Caps["selenoid:options"]
+		_, alwaysMatchPresent = browser.W3CCaps.AlwaysMatch["selenoid:options"]
+		_, chromeOptionsPresent = browser.W3CCaps.AlwaysMatch["goog:chromeOptions"]
+		AssertThat(t, len(browser.W3CCaps.FirstMatch), EqualTo{1})
+		_, firstMatchPresent = browser.W3CCaps.FirstMatch[0]["selenoid:options"]
 	}))
 	manager = &HTTPTest{Handler: root}
 
-	resp, err := httpClient.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"capabilities":{"alwaysMatch":{"browserName": "firefox", "selenoid:options":{"enableVNC": true}}}}`)))
+	resp, err := httpClient.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte(`{"desiredCapabilities": {"browserName": "chrome", "selenoid:options": {"enableVNC": true}}, "capabilities":{"alwaysMatch":{"browserName": "chrome", "goog:chromeOptions": {"args": ["headless"]}, "selenoid:options":{"enableVNC": true}}, "firstMatch": [{"platform": "linux", "selenoid:options": {"enableVideo": true}}]}}`)))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, resp, Code{http.StatusOK})
-	AssertThat(t, extensionCapsMissing, Is{true})
+	AssertThat(t, desiredCapabilitiesPresent, Is{false})
+	AssertThat(t, alwaysMatchPresent, Is{false})
+	AssertThat(t, chromeOptionsPresent, Is{true})
+	AssertThat(t, firstMatchPresent, Is{false})
 }
 
 func TestProxySession(t *testing.T) {

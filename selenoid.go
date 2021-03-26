@@ -200,17 +200,11 @@ func create(w http.ResponseWriter, r *http.Request) {
 	u := startedService.Url
 	cancel := startedService.Cancel
 
-	browser.Caps.ExtensionCapabilities = nil
-	browser.W3CCaps.Caps.ExtensionCapabilities = nil
-	for _, c := range browser.W3CCaps.FirstMatch {
-		c.ExtensionCapabilities = nil
-	}
-
 	var resp *http.Response
 	i := 1
 	for ; ; i++ {
 		r.URL.Host, r.URL.Path = u.Host, path.Join(u.Path, r.URL.Path)
-		newBody, _ := json.Marshal(browser)
+		newBody := removeSelenoidOptions(body)
 		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(newBody))
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
@@ -355,6 +349,37 @@ func create(w http.ResponseWriter, r *http.Request) {
 	sessions.Put(s.ID, sess)
 	queue.Create()
 	log.Printf("[%d] [SESSION_CREATED] [%s] [%d] [%.2fs]", requestId, s.ID, i, util.SecondsSince(sessionStartTime))
+}
+
+func removeSelenoidOptions(input []byte) []byte {
+	body := make(map[string]interface{})
+	_ = json.Unmarshal(input, &body)
+	const selenoidOptions = "selenoid:options"
+	if raw, ok := body["desiredCapabilities"]; ok {
+		if dc, ok := raw.(map[string]interface{}); ok {
+			delete(dc, selenoidOptions)
+		}
+	}
+	if raw, ok := body["capabilities"]; ok {
+		if c, ok := raw.(map[string]interface{}); ok {
+			if raw, ok := c["alwaysMatch"]; ok {
+				if am, ok := raw.(map[string]interface{}); ok {
+					delete(am, selenoidOptions)
+				}
+			}
+			if raw, ok := c["firstMatch"]; ok {
+				if fm, ok := raw.([]interface{}); ok {
+					for _, raw := range fm {
+						if c, ok := raw.(map[string]interface{}); ok {
+							delete(c, selenoidOptions)
+						}
+					}
+				}
+			}
+		}
+	}
+	ret, _ := json.Marshal(body)
+	return ret
 }
 
 func preprocessSessionId(sid string) string {
