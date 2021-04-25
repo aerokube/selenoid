@@ -548,7 +548,7 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2021-04-16</span>
+<span id="revdate">2021-04-25</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -1726,15 +1726,23 @@ driver.navigate().to(<span class="string"><span class="delimiter">&quot;</span><
 </table>
 </div>
 <div class="paragraph">
-<p>Your tests may need to download files with browsers. To analyze these files a common requirement is then to somehow extract downloaded files from browser containers. A possible solution can be dealing with container volumes. But Selenoid provides a <code>/download</code> API and dramatically simplifies downloading files. Having a running session <code>f2bcd32b-d932-4cdc-a639-687ab8e4f840</code> you can access all downloaded files using an URL:</p>
+<p>Your tests may need to download files with browsers. To analyze these files a common requirement is then to somehow extract downloaded files from browser containers. A possible solution can be dealing with container volumes. But Selenoid provides a <code>/download</code> API and dramatically simplifies downloading files. Having a running session <code>f2bcd32b-d932-4cdc-a639-687ab8e4f840</code> you can access all downloaded files using an HTTP request:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code>http://selenoid-host.example.com:4444/download/f2bcd32b-d932-4cdc-a639-687ab8e4f840/myfile.txt</code></pre>
+<pre class="CodeRay highlight"><code>GET http://selenoid-host.example.com:4444/download/f2bcd32b-d932-4cdc-a639-687ab8e4f840/myfile.txt</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>In order for this feature to work an HTTP file server should be listening inside browser container on port <code>8080</code>. Download directory inside container to be used in tests is usually <code>~/Downloads</code>.</p>
+</div>
+<div class="paragraph">
+<p>Similarly to delete downloaded files replace GET request with DELETE:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code>DELETE http://selenoid-host.example.com:4444/download/f2bcd32b-d932-4cdc-a639-687ab8e4f840/myfile.txt</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -4127,7 +4135,7 @@ $ docker build -t selenoid:latest .</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2021-04-16 04:12:46 UTC
+Last updated 2021-04-25 06:06:01 UTC
 </div>
 </div>
 <!-- Global site tag (gtag.js) - Google Analytics -->
