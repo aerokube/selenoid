@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.12">
+<meta name="generator" content="Asciidoctor 2.0.15">
 <meta name="description" content="A Selenium testing platform running browsers and mobile platforms in Docker containers. Fully compatible with Selenium Webdriver protocol. Live and automated testing are supported. Runs on your own hardware and on virtual machines in any popular cloud platform.">
 <meta name="author" content="Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community">
 <link rel="icon" type="image/png" href="img/favicon.png">
@@ -97,9 +97,6 @@ dl dd{margin-bottom:1.25em}
 abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
 abbr{text-transform:none}
 blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
-blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
-blockquote cite::before{content:"\2014 \0020"}
-blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
 blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
 @media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
 h1{font-size:2.75em}
@@ -264,7 +261,7 @@ pre.pygments .lineno::before{content:"";margin-right:-.125em}
 .quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
 .quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
 .quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
-.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
 p.tableblock:last-child{margin-bottom:0}
 td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
 td.tableblock>.content>:last-child{margin-bottom:-1.25em}
@@ -548,7 +545,7 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2021-04-25</span>
+<span id="revdate">2021-05-03</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -987,7 +984,7 @@ Prepare config, pull browser image, then run:</p>
 --name selenoid                                 \
 -p 4444:4444                                    \
 -v /var/run/docker.sock:/var/run/docker.sock    \
--v ./config/:/etc/selenoid/:ro              \
+-v /your/directory/config/:/etc/selenoid/:ro              \
 aerokube/selenoid:latest-release</code></pre>
 </div>
 </div>
@@ -4135,7 +4132,7 @@ $ docker build -t selenoid:latest .</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2021-04-25 06:06:01 UTC
+Last updated 2021-05-03 12:33:48 UTC
 </div>
 </div>
 <!-- Global site tag (gtag.js) - Google Analytics -->
