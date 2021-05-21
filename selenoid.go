@@ -506,6 +506,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 				r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
+				r.Host = "localhost"
 				return
 			}
 			r.URL.Path = paths.Error
