@@ -92,10 +92,8 @@ When running Selenoid as Docker container video feature can be not working (beca
 
 **Can't get VNC feature to work: Disconnected**
 
-Please check the following:
+Please check that you have `enableVNC = true` capability in your tests
 
-. You have `enableVNC = true` capability in your tests
-. You are using browser images with `vnc` in their name, e.g. `selenoid/vnc:firefox:58.0`.
 
 **Seeing black screen with a cross in VNC window**
 
