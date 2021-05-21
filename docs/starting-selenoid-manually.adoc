@@ -11,14 +11,14 @@
 . Create `config/browsers.json` configuration file with content:
 +
 .config/browsers.json
-[source,javascript]
+[source,json]
 ----
 {
     "firefox": {
         "default": "57.0",
         "versions": {
             "57.0": {
-                "image": "selenoid/vnc:firefox_57.0",
+                "image": "selenoid/firefox:88.0",
                 "port": "4444",
                 "path": "/wd/hub"
             }
@@ -31,7 +31,7 @@ NOTE: For Chrome and Opera images "path" is "/" instead of "/wd/hub"
 +
 . Pull browser Docker image:
 +
-`$ docker pull selenoid/vnc:firefox_57.0`.
+`$ docker pull selenoid/firefox:88.0`.
 
 === Browser Images
 We maintain a set of prebuilt Docker container images for different browsers including:
@@ -48,20 +48,21 @@ Feel free to create issues or request images for new versions.
 ====
 . Complete list of browser images can be found in <<Browser Image information>>
 . These images support all UTF-8 locales. This can be important if you want to save files using national alphabet symbols. You can enable your preferred locale in browsers configuration file by setting respective environment variables:
-```
+[source,json]
+----
 {
     "chrome": {
         "default": "64.0",
         "versions": {
             "64.0": {
-                "image": "selenoid/vnc:chrome_64.0",
+                "image": "selenoid/chrome:90.0",
                 //...
                 "env" : ["LANG=ru_RU.UTF-8", "LANGUAGE=ru:en", "LC_ALL=ru_RU.UTF-8"]
             }
         }
     }
 }
-```
+----
 ====
 
 === Start Selenoid
