@@ -529,6 +529,11 @@ func reverseProxy(hostFn func(sess *session.Session) string, status string) func
 		sid, remainingPath := splitRequestPath(r.URL.Path)
 		sess, ok := sessions.Get(sid)
 		if ok {
+			select {
+			case <-sess.TimeoutCh:
+			default:
+				close(sess.TimeoutCh)
+			}
 			sess.TimeoutCh = onTimeout(sess.Timeout, func() {
 				request{r}.session(sid).Delete(requestId)
 			})
