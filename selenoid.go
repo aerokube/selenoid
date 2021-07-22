@@ -206,6 +206,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 		r.URL.Host, r.URL.Path = u.Host, path.Join(u.Path, r.URL.Path)
 		newBody := removeSelenoidOptions(body)
 		req, _ := http.NewRequest(http.MethodPost, r.URL.String(), bytes.NewReader(newBody))
+		contentType := r.Header.Get("Content-Type")
+		if len(contentType) > 0 {
+			req.Header.Set("Content-Type", contentType)
+		}
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
 		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%d]", requestId, u.String(), i)
