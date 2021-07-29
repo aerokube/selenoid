@@ -210,6 +210,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		if len(contentType) > 0 {
 			req.Header.Set("Content-Type", contentType)
 		}
+		req.Host = "localhost"
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
 		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%d]", requestId, u.String(), i)
