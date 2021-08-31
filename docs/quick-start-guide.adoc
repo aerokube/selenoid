@@ -12,6 +12,16 @@
 . Run one command to start Selenoid:
 
     $ ./cm selenoid start --vnc
++
+[WARNING]
+====
+Running this command with `sudo` can lead to broken installation. Recommended way is running Selenoid as regular user. On Linux to have permissions to access Docker you may need to add your user to `docker` group:
+[source,bash]
+----
+$ sudo usermod -aG docker $USER
+----
+====
++
 
 . Optionally run one more command to start Selenoid UI:
 
