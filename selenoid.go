@@ -510,6 +510,10 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 				}
+				seUploadPath, uploadPath := "/se/file", "/file"
+				if strings.HasSuffix(r.URL.Path, seUploadPath) {
+					r.URL.Path = strings.TrimSuffix(r.URL.Path, seUploadPath)+uploadPath
+				}
 				r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
 				r.Host = "localhost"
 				return
