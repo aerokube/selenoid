@@ -7,8 +7,10 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/aerokube/selenoid/event"
+	"github.com/aerokube/selenoid/jsonerror"
 	"github.com/aerokube/selenoid/service"
 	"github.com/imdario/mergo"
 	"io"
@@ -114,7 +116,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	r.Body.Close()
 	if err != nil {
 		log.Printf("[%d] [ERROR_READING_REQUEST] [%v]", requestId, err)
-		util.JsonError(w, err.Error(), http.StatusBadRequest)
+		jsonerror.InvalidArgument(err).Encode(w)
 		queue.Drop()
 		return
 	}
@@ -128,7 +130,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &browser)
 	if err != nil {
 		log.Printf("[%d] [BAD_JSON_FORMAT] [%v]", requestId, err)
-		util.JsonError(w, err.Error(), http.StatusBadRequest)
+		jsonerror.InvalidArgument(err).Encode(w)
 		queue.Drop()
 		return
 	}
@@ -151,14 +153,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 		sessionTimeout, err = getSessionTimeout(caps.SessionTimeout, maxTimeout, timeout)
 		if err != nil {
 			log.Printf("[%d] [BAD_SESSION_TIMEOUT] [%s]", requestId, caps.SessionTimeout)
-			util.JsonError(w, err.Error(), http.StatusBadRequest)
+			jsonerror.InvalidArgument(err).Encode(w)
 			queue.Drop()
 			return
 		}
 		resolution, err := getScreenResolution(caps.ScreenResolution)
 		if err != nil {
 			log.Printf("[%d] [BAD_SCREEN_RESOLUTION] [%s]", requestId, caps.ScreenResolution)
-			util.JsonError(w, err.Error(), http.StatusBadRequest)
+			jsonerror.InvalidArgument(err).Encode(w)
 			queue.Drop()
 			return
 		}
@@ -166,7 +168,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		videoScreenSize, err := getVideoScreenSize(caps.VideoScreenSize, resolution)
 		if err != nil {
 			log.Printf("[%d] [BAD_VIDEO_SCREEN_SIZE] [%s]", requestId, caps.VideoScreenSize)
-			util.JsonError(w, err.Error(), http.StatusBadRequest)
+			jsonerror.InvalidArgument(err).Encode(w)
 			queue.Drop()
 			return
 		}
@@ -186,14 +188,14 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	if !ok {
 		log.Printf("[%d] [ENVIRONMENT_NOT_AVAILABLE] [%s] [%s]", requestId, caps.BrowserName(), caps.Version)
-		util.JsonError(w, "Requested environment is not available", http.StatusBadRequest)
+		jsonerror.InvalidArgument(errors.New("Requested environment is not available")).Encode(w)
 		queue.Drop()
 		return
 	}
 	startedService, err := starter.StartWithCancel()
 	if err != nil {
 		log.Printf("[%d] [SERVICE_STARTUP_FAILED] [%v]", requestId, err)
-		util.JsonError(w, err.Error(), http.StatusInternalServerError)
+		jsonerror.SessionNotCreated(err).Encode(w)
 		queue.Drop()
 		return
 	}
@@ -228,7 +230,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 				}
 				err := fmt.Errorf("New session attempts retry count exceeded")
 				log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), err)
-				util.JsonError(w, err.Error(), http.StatusInternalServerError)
+				jsonerror.UnknownError(err).Encode(w)
 			case context.Canceled:
 				log.Printf("[%d] [CLIENT_DISCONNECTED] [%s] [%s] [%.2fs]", requestId, user, remote, util.SecondsSince(sessionStartTime))
 			}
@@ -242,7 +244,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 				rsp.Body.Close()
 			}
 			log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), err)
-			util.JsonError(w, err.Error(), http.StatusInternalServerError)
+			jsonerror.SessionNotCreated(err).Encode(w)
 			queue.Drop()
 			cancel()
 			return
@@ -415,7 +417,7 @@ func getScreenResolution(input string) (string, error) {
 		return fmt.Sprintf("%sx24", input), nil
 	}
 	return "", fmt.Errorf(
-		"Malformed screenResolution capability: %s. Correct format is WxH (1920x1080) or WxHxD (1920x1080x24).",
+		"malformed screenResolution capability: %s, correct format is WxH (1920x1080) or WxHxD (1920x1080x24)",
 		input,
 	)
 }
@@ -430,7 +432,7 @@ func getVideoScreenSize(videoScreenSize string, screenResolution string) (string
 			return videoScreenSize, nil
 		}
 		return "", fmt.Errorf(
-			"Malformed videoScreenSize capability: %s. Correct format is WxH (1920x1080).",
+			"malformed videoScreenSize capability: %s, correct format is WxH (1920x1080)",
 			videoScreenSize,
 		)
 	}
@@ -512,7 +514,7 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				}
 				seUploadPath, uploadPath := "/se/file", "/file"
 				if strings.HasSuffix(r.URL.Path, seUploadPath) {
-					r.URL.Path = strings.TrimSuffix(r.URL.Path, seUploadPath)+uploadPath
+					r.URL.Path = strings.TrimSuffix(r.URL.Path, seUploadPath) + uploadPath
 				}
 				r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
 				r.Host = "localhost"
@@ -556,7 +558,7 @@ func reverseProxy(hostFn func(sess *session.Session) string, status string) func
 				ErrorHandler: defaultErrorHandler(requestId),
 			}).ServeHTTP(w, r)
 		} else {
-			util.JsonError(w, fmt.Sprintf("Unknown session %s", sid), http.StatusNotFound)
+			jsonerror.InvalidSessionID(fmt.Errorf("unknown session %s", sid)).Encode(w)
 			log.Printf("[%d] [SESSION_NOT_FOUND] [%s]", requestId, sid)
 		}
 	}
@@ -573,41 +575,42 @@ func fileUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	err := json.NewDecoder(r.Body).Decode(&jsonRequest)
 	if err != nil {
-		util.JsonError(w, err.Error(), http.StatusBadRequest)
+		jsonerror.InvalidArgument(err).Encode(w)
 		return
 	}
 	z, err := zip.NewReader(bytes.NewReader(jsonRequest.File), int64(len(jsonRequest.File)))
 	if err != nil {
-		util.JsonError(w, err.Error(), http.StatusBadRequest)
+		jsonerror.InvalidArgument(err).Encode(w)
 		return
 	}
 	if len(z.File) != 1 {
-		util.JsonError(w, fmt.Sprintf("Expected there to be only 1 file. There were: %d", len(z.File)), http.StatusBadRequest)
+		err := fmt.Errorf("expected there to be only 1 file. There were: %d", len(z.File))
+		jsonerror.InvalidArgument(err).Encode(w)
 		return
 	}
 	file := z.File[0]
 	src, err := file.Open()
 	if err != nil {
-		util.JsonError(w, err.Error(), http.StatusBadRequest)
+		jsonerror.InvalidArgument(err).Encode(w)
 		return
 	}
 	defer src.Close()
 	dir := r.Header.Get("X-Selenoid-File")
 	err = os.MkdirAll(dir, 0755)
 	if err != nil {
-		util.JsonError(w, err.Error(), http.StatusInternalServerError)
+		jsonerror.UnknownError(err).Encode(w)
 		return
 	}
 	fileName := filepath.Join(dir, file.Name)
 	dst, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		util.JsonError(w, err.Error(), http.StatusInternalServerError)
+		jsonerror.UnknownError(err).Encode(w)
 		return
 	}
 	defer dst.Close()
 	_, err = io.Copy(dst, src)
 	if err != nil {
-		util.JsonError(w, err.Error(), http.StatusInternalServerError)
+		jsonerror.UnknownError(err).Encode(w)
 		return
 	}
 
