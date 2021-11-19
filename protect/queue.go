@@ -1,6 +1,8 @@
 package protect
 
 import (
+	"errors"
+	"github.com/aerokube/selenoid/jsonerror"
 	"log"
 	"math"
 	"net/http"
@@ -28,7 +30,8 @@ func (q *Queue) Try(next http.HandlerFunc) http.HandlerFunc {
 			<-q.limit
 		default:
 			if noWait {
-				util.JsonError(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
+				err := errors.New(http.StatusText(http.StatusTooManyRequests))
+				jsonerror.UnknownError(err).Encode(w)
 				return
 			}
 		}
@@ -46,7 +49,8 @@ func (q *Queue) Check(next http.HandlerFunc) http.HandlerFunc {
 			if q.disabled {
 				user, remote := util.RequestInfo(r)
 				log.Printf("[-] [QUEUE_IS_FULL] [%s] [%s]", user, remote)
-				util.JsonError(w, "Queue Is Full", http.StatusTooManyRequests)
+				err := errors.New("Queue Is Full")
+				jsonerror.UnknownError(err).Encode(w)
 				return
 			}
 		}

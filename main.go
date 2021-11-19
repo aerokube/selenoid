@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"github.com/aerokube/selenoid/jsonerror"
+	"github.com/pkg/errors"
 	"log"
 	"net"
 	"net/http"
@@ -329,7 +331,7 @@ func handler() http.Handler {
 		selenium().ServeHTTP(w, r)
 	})
 	root.HandleFunc(paths.Error, func(w http.ResponseWriter, r *http.Request) {
-		util.JsonError(w, "Session timed out or not found", http.StatusNotFound)
+		jsonerror.InvalidSessionID(errors.New("session timed out or not found")).Encode(w)
 	})
 	root.HandleFunc(paths.Status, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
