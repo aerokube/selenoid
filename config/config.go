@@ -1,17 +1,16 @@
 package config
 
 import (
-	"log"
-
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"log"
+	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types/container"
-	"time"
 )
 
 // Session - session id and vnc flag
@@ -86,7 +85,7 @@ func NewConfig() *Config {
 }
 
 func loadJSON(filename string, v interface{}) error {
-	buf, err := ioutil.ReadFile(filename)
+	buf, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("read error: %v", err)
 	}

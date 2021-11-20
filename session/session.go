@@ -1,10 +1,11 @@
 package session
 
 import (
-	"github.com/imdario/mergo"
 	"net/url"
 	"sync"
 	"time"
+
+	"github.com/imdario/mergo"
 )
 
 // Caps - user capabilities

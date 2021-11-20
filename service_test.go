@@ -3,16 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	. "github.com/aandryashin/matchers"
-	"github.com/aerokube/selenoid/config"
-	"github.com/aerokube/selenoid/service"
-	"github.com/aerokube/selenoid/session"
-	"github.com/aerokube/util"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
-	"golang.org/x/net/websocket"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -21,6 +12,15 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	. "github.com/aandryashin/matchers"
+	"github.com/aerokube/selenoid/config"
+	"github.com/aerokube/selenoid/service"
+	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/util"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
+	"golang.org/x/net/websocket"
 )
 
 var (
@@ -222,7 +222,7 @@ func testConfig(env *service.Environment) *config.Config {
 }
 
 func testEnvironment() *service.Environment {
-	logOutputDir, _ = ioutil.TempDir("", "selenoid-test")
+	logOutputDir, _ = os.MkdirTemp("", "selenoid-test")
 	return &service.Environment{
 		CPU:                 int64(0),
 		Memory:              int64(0),

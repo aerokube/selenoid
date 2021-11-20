@@ -1,20 +1,22 @@
+//go:build s3
 // +build s3
 
 package main
 
 import (
 	"context"
+	"net"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"strings"
+	"testing"
+	"time"
+
 	. "github.com/aandryashin/matchers"
 	"github.com/aerokube/selenoid/event"
 	"github.com/aerokube/selenoid/session"
 	"github.com/aerokube/selenoid/upload"
-	"io/ioutil"
-	"net"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
-	"time"
 )
 
 var (
@@ -62,7 +64,7 @@ func TestS3Uploader(t *testing.T) {
 		ReducedRedundancy: true,
 	}
 	uploader.Init()
-	f, _ := ioutil.TempFile("", "some-file")
+	f, _ := os.CreateTemp("", "some-file")
 	input := event.CreatedFile{
 		Event: event.Event{
 			RequestId: 4342,

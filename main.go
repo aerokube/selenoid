@@ -4,27 +4,22 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"github.com/aerokube/selenoid/jsonerror"
-	"github.com/pkg/errors"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
-	"golang.org/x/net/websocket"
-
-	"fmt"
-
-	"path/filepath"
-
 	ggr "github.com/aerokube/ggr/config"
 	"github.com/aerokube/selenoid/config"
+	"github.com/aerokube/selenoid/jsonerror"
 	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
@@ -32,6 +27,8 @@ import (
 	"github.com/aerokube/util"
 	"github.com/aerokube/util/docker"
 	"github.com/docker/docker/client"
+	"github.com/pkg/errors"
+	"golang.org/x/net/websocket"
 )
 
 var (

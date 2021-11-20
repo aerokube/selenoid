@@ -1,15 +1,17 @@
+//go:build metadata
 // +build metadata
 
 package main
 
 import (
 	"encoding/json"
-	"github.com/aerokube/selenoid/event"
-	"github.com/aerokube/selenoid/session"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/aerokube/selenoid/event"
+	"github.com/aerokube/selenoid/session"
 )
 
 const metadataFileExtension = ".json"
@@ -37,7 +39,7 @@ func (mp *MetadataProcessor) OnSessionStopped(stoppedSession event.StoppedSessio
 			return
 		}
 		filename := filepath.Join(logOutputDir, stoppedSession.SessionId+metadataFileExtension)
-		err = ioutil.WriteFile(filename, data, 0644)
+		err = os.WriteFile(filename, data, 0644)
 		if err != nil {
 			log.Printf("[%d] [METADATA] [%s] [Failed to save to %s: %v]", stoppedSession.RequestId, stoppedSession.SessionId, filename, err)
 			return
