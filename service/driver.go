@@ -1,18 +1,18 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"net/url"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 
-	"errors"
 	"github.com/aerokube/selenoid/session"
 	"github.com/aerokube/util"
-	"os"
-	"path/filepath"
 )
 
 // Driver - driver processes manager
@@ -77,11 +77,11 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 	}
 	log.Printf("[%d] [PROCESS_STARTED] [%d] [%.2fs]", requestId, cmd.Process.Pid, util.SecondsSince(s))
 	log.Printf("[%d] [PROXY_TO] [%s]", requestId, u.String())
-        hp := session.HostPort{}
-        if d.Caps.VNC {
-                hp.VNC = "127.0.0.1:5900"
-        }
-        return &StartedService{Url: u, HostPort: hp, Cancel: func() { d.stopProcess(cmd) }}, nil
+	hp := session.HostPort{}
+	if d.Caps.VNC {
+		hp.VNC = "127.0.0.1:5900"
+	}
+	return &StartedService{Url: u, HostPort: hp, Cancel: func() { d.stopProcess(cmd) }}, nil
 }
 
 func (d *Driver) stopProcess(cmd *exec.Cmd) {

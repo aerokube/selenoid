@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/aerokube/selenoid/protect"
-	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -14,14 +12,14 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-
+	"testing"
 	"time"
 
-	"testing"
-
 	. "github.com/aandryashin/matchers"
+	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
+	"github.com/gorilla/websocket"
 	"github.com/pborman/uuid"
 )
 

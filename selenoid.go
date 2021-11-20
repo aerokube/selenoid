@@ -9,10 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/aerokube/selenoid/event"
-	"github.com/aerokube/selenoid/jsonerror"
-	"github.com/aerokube/selenoid/service"
-	"github.com/imdario/mergo"
 	"io"
 	"io/ioutil"
 	"log"
@@ -28,10 +24,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aerokube/selenoid/event"
+	"github.com/aerokube/selenoid/jsonerror"
+	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
 	"github.com/aerokube/util"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/imdario/mergo"
 	"golang.org/x/net/websocket"
 )
 

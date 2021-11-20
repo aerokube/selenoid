@@ -2,12 +2,12 @@ package protect
 
 import (
 	"errors"
-	"github.com/aerokube/selenoid/jsonerror"
 	"log"
 	"math"
 	"net/http"
 	"time"
 
+	"github.com/aerokube/selenoid/jsonerror"
 	"github.com/aerokube/util"
 )
 

@@ -3,26 +3,24 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/mafredri/cdp"
-	"github.com/mafredri/cdp/rpcc"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/aerokube/selenoid/config"
-
-	"encoding/json"
-	"path/filepath"
-
 	. "github.com/aandryashin/matchers"
 	. "github.com/aandryashin/matchers/httpresp"
 	ggr "github.com/aerokube/ggr/config"
+	"github.com/aerokube/selenoid/config"
+	"github.com/mafredri/cdp"
+	"github.com/mafredri/cdp/rpcc"
 )
 
 var _ = func() bool {

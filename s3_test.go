@@ -1,13 +1,10 @@
+//go:build s3
 // +build s3
 
 package main
 
 import (
 	"context"
-	. "github.com/aandryashin/matchers"
-	"github.com/aerokube/selenoid/event"
-	"github.com/aerokube/selenoid/session"
-	"github.com/aerokube/selenoid/upload"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -15,6 +12,11 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	. "github.com/aandryashin/matchers"
+	"github.com/aerokube/selenoid/event"
+	"github.com/aerokube/selenoid/session"
+	"github.com/aerokube/selenoid/upload"
 )
 
 var (

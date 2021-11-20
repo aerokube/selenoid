@@ -1,3 +1,4 @@
+//go:build s3
 // +build s3
 
 package upload
@@ -5,18 +6,19 @@ package upload
 import (
 	"flag"
 	"fmt"
-	"github.com/aerokube/selenoid/event"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	awssession "github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/pkg/errors"
 	"log"
 	"mime"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/aerokube/selenoid/event"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	awssession "github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/pkg/errors"
 )
 
 func init() {

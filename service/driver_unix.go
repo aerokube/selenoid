@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 package service
@@ -8,7 +9,7 @@ import (
 )
 
 func stopProc(cmd *exec.Cmd) error {
-		exitCode := cmd.Process.Signal(syscall.SIGINT)
-		cmd.Wait()
-		return exitCode
+	exitCode := cmd.Process.Signal(syscall.SIGINT)
+	cmd.Wait()
+	return exitCode
 }

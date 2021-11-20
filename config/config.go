@@ -1,17 +1,16 @@
 package config
 
 import (
-	"log"
-
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/aerokube/selenoid/session"
 	"github.com/docker/docker/api/types/container"
-	"time"
 )
 
 // Session - session id and vnc flag

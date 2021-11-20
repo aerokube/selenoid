@@ -1,15 +1,17 @@
+//go:build metadata
 // +build metadata
 
 package main
 
 import (
 	"encoding/json"
-	"github.com/aerokube/selenoid/event"
-	"github.com/aerokube/selenoid/session"
 	"io/ioutil"
 	"log"
 	"path/filepath"
 	"time"
+
+	"github.com/aerokube/selenoid/event"
+	"github.com/aerokube/selenoid/session"
 )
 
 const metadataFileExtension = ".json"
