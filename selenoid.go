@@ -442,7 +442,7 @@ func getSessionTimeout(sessionTimeout string, maxTimeout time.Duration, defaultT
 	if sessionTimeout != "" {
 		st, err := time.ParseDuration(sessionTimeout)
 		if err != nil {
-			return 0, fmt.Errorf("Invalid sessionTimeout capability: %v", err)
+			return 0, fmt.Errorf("invalid sessionTimeout capability: %v", err)
 		}
 		if st <= maxTimeout {
 			return st, nil
@@ -470,6 +470,8 @@ func generateRandomFileName(extension string) string {
 	return "selenoid" + hex.EncodeToString(randBytes) + extension
 }
 
+const vendorPrefix = "aerokube"
+
 func proxy(w http.ResponseWriter, r *http.Request) {
 	done := make(chan func())
 	go func() {
@@ -486,6 +488,15 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 			id := fragments[2]
 			sess, ok := sessions.Get(id)
 			if ok {
+				if len(fragments) >= 4 && fragments[3] == vendorPrefix {
+					newFragments := []string{"", fragments[4], id}
+					if len(fragments) >= 5 {
+						newFragments = append(newFragments, fragments[5:]...)
+					}
+					r.URL.Host = (&request{r}).localaddr()
+					r.URL.Path = path.Clean(strings.Join(newFragments, slash))
+					return
+				}
 				sess.Lock.Lock()
 				defer sess.Lock.Unlock()
 				select {
