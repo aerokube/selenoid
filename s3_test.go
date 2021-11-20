@@ -5,10 +5,10 @@ package main
 
 import (
 	"context"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -64,7 +64,7 @@ func TestS3Uploader(t *testing.T) {
 		ReducedRedundancy: true,
 	}
 	uploader.Init()
-	f, _ := ioutil.TempFile("", "some-file")
+	f, _ := os.CreateTemp("", "some-file")
 	input := event.CreatedFile{
 		Event: event.Event{
 			RequestId: 4342,

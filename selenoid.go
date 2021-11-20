@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -112,7 +111,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	sessionStartTime := time.Now()
 	requestId := serial()
 	user, remote := util.RequestInfo(r)
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
 		log.Printf("[%d] [ERROR_READING_REQUEST] [%v]", requestId, err)
@@ -680,7 +679,7 @@ func logs(w http.ResponseWriter, r *http.Request) {
 }
 
 func listFilesAsJson(requestId uint64, w http.ResponseWriter, dir string, errStatus string) {
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		log.Printf("[%d] [%s] [%s]", requestId, errStatus, fmt.Sprintf("Failed to list directory %s: %v", logOutputDir, err))
 		w.WriteHeader(http.StatusInternalServerError)

@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -34,8 +34,8 @@ var (
 
 func init() {
 	enableFileUpload = true
-	videoOutputDir, _ = ioutil.TempDir("", "selenoid-test")
-	logOutputDir, _ = ioutil.TempDir("", "selenoid-test")
+	videoOutputDir, _ = os.MkdirTemp("", "selenoid-test")
+	logOutputDir, _ = os.MkdirTemp("", "selenoid-test")
 	saveAllLogs = true
 	gitRevision = "test-revision"
 	ggrHost = &ggr.Host{
@@ -652,7 +652,7 @@ func TestFileUpload(t *testing.T) {
 	f, err := os.Open(jsonResponse["value"])
 	AssertThat(t, err, Is{nil})
 
-	content, err := ioutil.ReadAll(f)
+	content, err := io.ReadAll(f)
 	AssertThat(t, err, Is{nil})
 
 	AssertThat(t, string(content), EqualTo{"Hello World!"})
@@ -720,7 +720,7 @@ func TestPing(t *testing.T) {
 	AssertThat(t, rsp.Body, Is{Not{nil}})
 
 	var data map[string]interface{}
-	bt, readErr := ioutil.ReadAll(rsp.Body)
+	bt, readErr := io.ReadAll(rsp.Body)
 	AssertThat(t, readErr, Is{nil})
 	jsonErr := json.Unmarshal(bt, &data)
 	AssertThat(t, jsonErr, Is{nil})
@@ -743,7 +743,7 @@ func TestStatus(t *testing.T) {
 	AssertThat(t, rsp.Body, Is{Not{nil}})
 
 	var data map[string]interface{}
-	bt, readErr := ioutil.ReadAll(rsp.Body)
+	bt, readErr := io.ReadAll(rsp.Body)
 	AssertThat(t, readErr, Is{nil})
 	jsonErr := json.Unmarshal(bt, &data)
 	AssertThat(t, jsonErr, Is{nil})
@@ -760,7 +760,7 @@ func TestStatus(t *testing.T) {
 func TestServeAndDeleteVideoFile(t *testing.T) {
 	fileName := "testfile"
 	filePath := filepath.Join(videoOutputDir, fileName)
-	ioutil.WriteFile(filePath, []byte("test-data"), 0644)
+	os.WriteFile(filePath, []byte("test-data"), 0644)
 
 	rsp, err := http.Get(With(srv.URL).Path("/video/testfile"))
 	AssertThat(t, err, Is{nil})
@@ -787,7 +787,7 @@ func TestServeAndDeleteVideoFile(t *testing.T) {
 func TestServeAndDeleteLogFile(t *testing.T) {
 	fileName := "logfile.log"
 	filePath := filepath.Join(logOutputDir, fileName)
-	ioutil.WriteFile(filePath, []byte("test-data"), 0644)
+	os.WriteFile(filePath, []byte("test-data"), 0644)
 
 	rsp, err := http.Get(With(srv.URL).Path("/logs/logfile.log"))
 	AssertThat(t, err, Is{nil})
@@ -822,7 +822,7 @@ func TestFileDownload(t *testing.T) {
 	rsp, err := http.Get(With(srv.URL).Path(fmt.Sprintf("/download/%s/testfile", sess["sessionId"])))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
-	data, err := ioutil.ReadAll(rsp.Body)
+	data, err := io.ReadAll(rsp.Body)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, string(data), EqualTo{"test-data"})
 
@@ -848,7 +848,7 @@ func TestClipboard(t *testing.T) {
 	rsp, err := http.Get(With(srv.URL).Path(fmt.Sprintf("/clipboard/%s", sess["sessionId"])))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
-	data, err := ioutil.ReadAll(rsp.Body)
+	data, err := io.ReadAll(rsp.Body)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, string(data), EqualTo{"test-clipboard-value"})
 

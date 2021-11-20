@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -223,7 +222,7 @@ func testConfig(env *service.Environment) *config.Config {
 }
 
 func testEnvironment() *service.Environment {
-	logOutputDir, _ = ioutil.TempDir("", "selenoid-test")
+	logOutputDir, _ = os.MkdirTemp("", "selenoid-test")
 	return &service.Environment{
 		CPU:                 int64(0),
 		Memory:              int64(0),

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -15,7 +14,7 @@ import (
 const testLogConf = "config/container-logs.json"
 
 func configfile(s string) string {
-	tmp, err := ioutil.TempFile("", "config")
+	tmp, err := os.CreateTemp("", "config")
 	if err != nil {
 		log.Fatal(err)
 	}
