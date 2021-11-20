@@ -811,6 +811,18 @@ func TestServeAndDeleteLogFile(t *testing.T) {
 }
 
 func TestFileDownload(t *testing.T) {
+	testFileDownload(t, func(sessionId string) string {
+		return fmt.Sprintf("/download/%s/testfile", sessionId)
+	})
+}
+
+func TestFileDownloadProtocolExtension(t *testing.T) {
+	testFileDownload(t, func(sessionId string) string {
+		return fmt.Sprintf("/wd/hub/session/%s/aerokube/download/testfile", sessionId)
+	})
+}
+
+func testFileDownload(t *testing.T, path func(string) string) {
 	manager = &HTTPTest{Handler: Selenium()}
 
 	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
@@ -819,7 +831,7 @@ func TestFileDownload(t *testing.T) {
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
 
-	rsp, err := http.Get(With(srv.URL).Path(fmt.Sprintf("/download/%s/testfile", sess["sessionId"])))
+	rsp, err := http.Get(With(srv.URL).Path(path(sess["sessionId"])))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
 	data, err := io.ReadAll(rsp.Body)
@@ -837,6 +849,18 @@ func TestFileDownloadMissingSession(t *testing.T) {
 }
 
 func TestClipboard(t *testing.T) {
+	testClipboard(t, func(sessionId string) string {
+		return fmt.Sprintf("/clipboard/%s", sessionId)
+	})
+}
+
+func TestClipboardProtocolExtension(t *testing.T) {
+	testClipboard(t, func(sessionId string) string {
+		return fmt.Sprintf("/wd/hub/session/%s/aerokube/clipboard", sessionId)
+	})
+}
+
+func testClipboard(t *testing.T, path func(string) string) {
 	manager = &HTTPTest{Handler: Selenium()}
 
 	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
@@ -845,14 +869,14 @@ func TestClipboard(t *testing.T) {
 	var sess map[string]string
 	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
 
-	rsp, err := http.Get(With(srv.URL).Path(fmt.Sprintf("/clipboard/%s", sess["sessionId"])))
+	rsp, err := http.Get(With(srv.URL).Path(path(sess["sessionId"])))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
 	data, err := io.ReadAll(rsp.Body)
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, string(data), EqualTo{"test-clipboard-value"})
 
-	rsp, err = http.Post(With(srv.URL).Path(fmt.Sprintf("/clipboard/%s", sess["sessionId"])), "text/plain", bytes.NewReader([]byte("any-data")))
+	rsp, err = http.Post(With(srv.URL).Path(path(sess["sessionId"])), "text/plain", bytes.NewReader([]byte("any-data")))
 	AssertThat(t, err, Is{nil})
 	AssertThat(t, rsp, Code{http.StatusOK})
 
