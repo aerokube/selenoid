@@ -143,6 +143,16 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	}
 	cl := d.Client
 	env := getEnv(d.ServiceBase, d.Caps)
+
+	var es map[string]*network.EndpointSettings
+	if getContainerNetwork(d.Caps) != "" {
+		es = make(map[string]*network.EndpointSettings)
+		nes := &network.EndpointSettings{
+			IPAMConfig: &network.EndpointIPAMConfig{IPv4Address: getContainerIPAddress(d.Caps)},
+		}
+		es[getContainerNetwork(d.Caps)] = nes
+	}
+
 	container, err := cl.ContainerCreate(ctx,
 		&ctr.Config{
 			Hostname:     getContainerHostname(d.Caps),
@@ -152,7 +162,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			Labels:       getLabels(d.Service, d.Caps),
 		},
 		&hostConfig,
-		&network.NetworkingConfig{}, "")
+		&network.NetworkingConfig{EndpointsConfig: es}, "")
 	if err != nil {
 		return nil, fmt.Errorf("create container: %v", err)
 	}
@@ -400,6 +410,20 @@ func getContainerHostname(caps session.Caps) string {
 		return caps.ContainerHostname
 	}
 	return "localhost"
+}
+
+func getContainerNetwork(caps session.Caps) string {
+	if caps.ContainerNetwork != "" {
+		return caps.ContainerNetwork
+	}
+	return ""
+}
+
+func getContainerIPAddress(caps session.Caps) string {
+	if caps.ContainerIPAddress != "" {
+		return caps.ContainerIPAddress
+	}
+	return ""
 }
 
 func getExtraHosts(service *config.Browser, caps session.Caps) []string {

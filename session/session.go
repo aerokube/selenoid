@@ -28,6 +28,8 @@ type Caps struct {
 	LogName               string            `json:"logName,omitempty"`
 	TestName              string            `json:"name,omitempty"`
 	TimeZone              string            `json:"timeZone,omitempty"`
+	ContainerNetwork      string            `json:"containerNetwork,omitempty"`
+	ContainerIPAddress    string            `json:"containerIPAddress,omitempty"`
 	ContainerHostname     string            `json:"containerHostname,omitempty"`
 	Env                   []string          `json:"env,omitempty"`
 	ApplicationContainers []string          `json:"applicationContainers,omitempty"`
