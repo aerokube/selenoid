@@ -1,7 +1,6 @@
 == Quick Start Guide
 
 === Start Selenoid
-==== Option 1: you have a workstation, virtual machine or server
 
 . Make sure you have recent https://www.docker.com/[Docker] version installed.
 . Download http://aerokube.com/cm/latest/[Configuration Manager] (Selenoid quick installation binary) for your platform from https://github.com/aerokube/cm/releases/latest[releases] page.
@@ -26,10 +25,6 @@ $ sudo usermod -aG docker $USER
 . Optionally run one more command to start Selenoid UI:
 
     $ ./cm selenoid-ui start
-
-==== Option 2: you have Google Cloud, DigitalOcean or Yandex Cloud
-
-We deliver ready to use images with Selenoid and Selenoid UI. Take a look at <<Cloud Platforms>> section for more details.
 
 === Run Your Tests
 
