@@ -200,6 +200,10 @@ func create(w http.ResponseWriter, r *http.Request) {
 	}
 	u := startedService.Url
 	cancel := startedService.Cancel
+	host := "localhost"
+	if startedService.Container != nil {
+		host = startedService.Container.Origin
+	}
 
 	var resp *http.Response
 	i := 1
@@ -211,7 +215,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		if len(contentType) > 0 {
 			req.Header.Set("Content-Type", contentType)
 		}
-		req.Host = "localhost"
+		req.Host = host
 		ctx, done := context.WithTimeout(r.Context(), newSessionAttemptTimeout)
 		defer done()
 		log.Printf("[%d] [SESSION_ATTEMPTED] [%s] [%d]", requestId, u.String(), i)
@@ -528,6 +532,9 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				}
 				r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
 				r.Host = "localhost"
+				if sess.Container != nil {
+					r.Host = sess.Container.Origin
+				}
 				return
 			}
 			r.URL.Path = paths.Error

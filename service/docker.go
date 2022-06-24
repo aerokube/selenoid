@@ -221,11 +221,17 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		publishedPortsInfo = getContainerPorts(stat)
 	}
 
+	var origin string
+	if stat.Config != nil {
+		origin = net.JoinHostPort(stat.Config.Hostname, d.Service.Port)
+	}
+
 	s := StartedService{
 		Url: u,
 		Container: &session.Container{
 			ID:        browserContainerId,
 			IPAddress: getContainerIP(d.Environment.Network, stat),
+			Origin:    origin,
 			Ports:     publishedPortsInfo,
 		},
 		HostPort: hostPort,
