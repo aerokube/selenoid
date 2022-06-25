@@ -30,6 +30,7 @@ type Caps struct {
 	TimeZone              string            `json:"timeZone,omitempty"`
 	ContainerHostname     string            `json:"containerHostname,omitempty"`
 	User                  string            `json:"user,omitempty"`
+	Cmd                   []string          `json:"cmd,omitempty"`
 	Env                   []string          `json:"env,omitempty"`
 	ApplicationContainers []string          `json:"applicationContainers,omitempty"`
 	AdditionalNetworks    []string          `json:"additionalNetworks,omitempty"`

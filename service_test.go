@@ -290,6 +290,7 @@ func createDockerStarter(t *testing.T, env *service.Environment, cfg *config.Con
 		Log:                   true,
 		LogName:               "testfile",
 		User:                  "cap-user",
+		Cmd:                   []string{"/usr/bin/selenoid", "-p", "1234"},
 		Env:                   []string{"LANG=ru_RU.UTF-8", "LANGUAGE=ru:en"},
 		HostsEntries:          []string{"example.com:192.168.0.1", "test.com:192.168.0.2"},
 		DNSServers:            []string{"192.168.0.1", "192.168.0.2"},
