@@ -1,6 +1,8 @@
-FROM alpine:3
+FROM --platform=$BUILDPLATFORM alpine:3
 
 RUN apk add -U ca-certificates tzdata mailcap && rm -Rf /var/cache/apk/*
+
+ARG TARGETARCH
 COPY dist/selenoid_linux_$TARGETARCH /usr/bin/selenoid
 
 EXPOSE 4444
