@@ -147,6 +147,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		&ctr.Config{
 			Hostname:     getContainerHostname(d.Caps),
 			Image:        image.(string),
+			User:         getUser(d.Service, d.Caps),
 			Env:          env,
 			ExposedPorts: portConfig.ExposedPorts,
 			Labels:       getLabels(d.Service, d.Caps),
@@ -406,6 +407,15 @@ func getContainerHostname(caps session.Caps) string {
 		return caps.ContainerHostname
 	}
 	return "localhost"
+}
+
+func getUser(service *config.Browser, caps session.Caps) string {
+	user := service.User
+
+	if caps.User != "" {
+		user = caps.User
+	}
+	return user
 }
 
 func getExtraHosts(service *config.Browser, caps session.Caps) []string {
