@@ -57,6 +57,7 @@ type Browser struct {
 	Volumes         []string          `json:"volumes,omitempty"`
 	User            string            `json:"user,omitempty"`
 	Cmd             []string          `json:"cmd,omitempty"`
+	Entrypoint      []string          `json:"entrypoint,omitempty"`
 	Env             []string          `json:"env,omitempty"`
 	Hosts           []string          `json:"hosts,omitempty"`
 	ShmSize         int64             `json:"shmSize,omitempty"`

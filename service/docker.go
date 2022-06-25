@@ -149,6 +149,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			Image:        image.(string),
 			User:         getUser(d.Service, d.Caps),
 			Cmd:          getCmd(d.Service, d.Caps),
+			Entrypoint:   getEntrypoint(d.Service, d.Caps),
 			Env:          env,
 			ExposedPorts: portConfig.ExposedPorts,
 			Labels:       getLabels(d.Service, d.Caps),
@@ -426,6 +427,14 @@ func getCmd(service *config.Browser, caps session.Caps) []string {
 		cmd = caps.Cmd
 	}
 	return cmd
+}
+func getEntrypoint(service *config.Browser, caps session.Caps) []string {
+	entrypoint := service.Entrypoint
+
+	if len(caps.Entrypoint) > 0 {
+		entrypoint = caps.Entrypoint
+	}
+	return entrypoint
 }
 
 func getExtraHosts(service *config.Browser, caps session.Caps) []string {

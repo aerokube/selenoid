@@ -31,6 +31,7 @@ type Caps struct {
 	ContainerHostname     string            `json:"containerHostname,omitempty"`
 	User                  string            `json:"user,omitempty"`
 	Cmd                   []string          `json:"cmd,omitempty"`
+	Entrypoint            []string          `json:"entrypoint,omitempty"`
 	Env                   []string          `json:"env,omitempty"`
 	ApplicationContainers []string          `json:"applicationContainers,omitempty"`
 	AdditionalNetworks    []string          `json:"additionalNetworks,omitempty"`
