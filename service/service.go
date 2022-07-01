@@ -45,6 +45,7 @@ type StartedService struct {
 	Url       *url.URL
 	Container *session.Container
 	HostPort  session.HostPort
+	Origin    string
 	Cancel    func()
 }
 

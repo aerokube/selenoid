@@ -231,10 +231,10 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		Container: &session.Container{
 			ID:        browserContainerId,
 			IPAddress: getContainerIP(d.Environment.Network, stat),
-			Origin:    origin,
 			Ports:     publishedPortsInfo,
 		},
 		HostPort: hostPort,
+		Origin:   origin,
 		Cancel: func() {
 			if videoContainerId != "" {
 				stopVideoContainer(ctx, cl, requestId, videoContainerId, d.Environment)

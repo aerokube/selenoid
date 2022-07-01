@@ -81,7 +81,7 @@ func (d *Driver) StartWithCancel() (*StartedService, error) {
 	if d.Caps.VNC {
 		hp.VNC = "127.0.0.1:5900"
 	}
-	return &StartedService{Url: u, HostPort: hp, Cancel: func() { d.stopProcess(cmd) }}, nil
+	return &StartedService{Url: u, HostPort: hp, Origin: fmt.Sprintf("localhost:%s", port), Cancel: func() { d.stopProcess(cmd) }}, nil
 }
 
 func (d *Driver) stopProcess(cmd *exec.Cmd) {
