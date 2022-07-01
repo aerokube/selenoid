@@ -65,7 +65,6 @@ func (c *Caps) BrowserName() string {
 type Container struct {
 	ID        string            `json:"id"`
 	IPAddress string            `json:"ip"`
-	Origin    string            `json:"origin,omitempty"`
 	Ports     map[string]string `json:"exposedPorts,omitempty"`
 }
 
@@ -76,6 +75,7 @@ type Session struct {
 	URL       *url.URL
 	Container *Container
 	HostPort  HostPort
+	Origin    string
 	Cancel    func()
 	Timeout   time.Duration
 	TimeoutCh chan struct{}

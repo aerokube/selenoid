@@ -201,8 +201,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 	u := startedService.Url
 	cancel := startedService.Cancel
 	host := "localhost"
-	if startedService.Container != nil {
-		host = startedService.Container.Origin
+	if startedService.Origin != "" {
+		host = startedService.Origin
 	}
 
 	var resp *http.Response
@@ -300,6 +300,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 		URL:       u,
 		Container: startedService.Container,
 		HostPort:  startedService.HostPort,
+		Origin:    startedService.Origin,
 		Timeout:   sessionTimeout,
 		TimeoutCh: onTimeout(sessionTimeout, func() {
 			request{r}.session(s.ID).Delete(requestId)
@@ -532,8 +533,8 @@ func proxy(w http.ResponseWriter, r *http.Request) {
 				}
 				r.URL.Host, r.URL.Path = sess.URL.Host, path.Clean(sess.URL.Path+r.URL.Path)
 				r.Host = "localhost"
-				if sess.Container != nil {
-					r.Host = sess.Container.Origin
+				if sess.Origin != "" {
+					r.Host = sess.Origin
 				}
 				return
 			}
