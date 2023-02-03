@@ -16,6 +16,7 @@ type Caps struct {
 	W3CVersion            string            `json:"browserVersion,omitempty"`
 	Platform              string            `json:"platform,omitempty"`
 	W3CPlatform           string            `json:"platformName,omitempty"`
+	W3CDeviceName         string            `json:"appium:deviceName,omitempty"`
 	ScreenResolution      string            `json:"screenResolution,omitempty"`
 	Skin                  string            `json:"skin,omitempty"`
 	VNC                   bool              `json:"enableVNC,omitempty"`
@@ -47,6 +48,9 @@ func (c *Caps) ProcessExtensionCapabilities() {
 	if c.W3CPlatform != "" {
 		c.Platform = c.W3CPlatform
 	}
+	if c.W3CDeviceName != "" {
+		c.DeviceName = c.W3CDeviceName
+	}
 
 	if c.ExtensionCapabilities != nil {
 		mergo.Merge(c, *c.ExtensionCapabilities, mergo.WithOverride) //We probably need to handle returned error
@@ -58,7 +62,10 @@ func (c *Caps) BrowserName() string {
 	if browserName != "" {
 		return browserName
 	}
-	return c.DeviceName
+	if c.DeviceName != "" {
+		return c.DeviceName
+	}
+	return c.W3CDeviceName
 }
 
 // Container - container information
