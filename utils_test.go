@@ -188,6 +188,7 @@ func TestProcessExtensionCapabilities(t *testing.T) {
 	capsJson := `{
 		"version": "57.0",
 		"browserName": "firefox",
+		"appium:deviceName": "android",
 		"selenoid:options": {
 			"name": "ExampleTestName",
 			"enableVNC": true,
@@ -206,6 +207,7 @@ func TestProcessExtensionCapabilities(t *testing.T) {
 	caps.ProcessExtensionCapabilities()
 	AssertThat(t, caps.Name, EqualTo{"firefox"})
 	AssertThat(t, caps.Version, EqualTo{"57.0"})
+	AssertThat(t, caps.DeviceName, EqualTo{"android"})
 	AssertThat(t, caps.TestName, EqualTo{"ExampleTestName"})
 	AssertThat(t, caps.VNC, EqualTo{true})
 	AssertThat(t, caps.VideoFrameRate, EqualTo{uint16(24)})
@@ -249,4 +251,31 @@ func TestSumUsedTotalGreaterThanPending(t *testing.T) {
 	AssertThat(t, err, Not{nil})
 	AssertThat(t, queue.Pending(), EqualTo{0})
 	AssertThat(t, queue.Used(), EqualTo{2})
+}
+
+func TestBrowserName(t *testing.T) {
+	var caps session.Caps
+
+	var capsJson = `{
+		"appium:deviceName": "iPhone 7"
+	}`
+	err := json.Unmarshal([]byte(capsJson), &caps)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, caps.BrowserName(), EqualTo{"iPhone 7"})
+
+	capsJson = `{
+		"deviceName": "android 11"
+	}`
+	err = json.Unmarshal([]byte(capsJson), &caps)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, caps.BrowserName(), EqualTo{"android 11"})
+
+	capsJson = `{
+		"deviceName": "android 11",
+		"appium:deviceName": "iPhone 7",
+		"browserName": "firefox"
+	}`
+	err = json.Unmarshal([]byte(capsJson), &caps)
+	AssertThat(t, err, Is{nil})
+	AssertThat(t, caps.BrowserName(), EqualTo{"firefox"})
 }
