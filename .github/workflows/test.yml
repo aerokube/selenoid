@@ -7,14 +7,14 @@ jobs:
   golang:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Golang
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          go-version: ~1.19.3
+          go-version: ~1.20
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v3
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -27,6 +27,6 @@ jobs:
       - name: Build
         run: ci/build.sh
 
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v3
         with:
           flags: go
