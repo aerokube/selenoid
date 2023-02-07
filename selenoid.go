@@ -180,6 +180,9 @@ func create(w http.ResponseWriter, r *http.Request) {
 		if logOutputDir != "" && (saveAllLogs || caps.Log) {
 			caps.LogName = getTemporaryFileName(logOutputDir, logFileExtension)
 		}
+		if caps.CallbackUrl == "" {
+			caps.CallbackUrl = callbackUrl
+		}
 		starter, ok = manager.Find(caps, requestId)
 		if ok {
 			break
@@ -281,12 +284,23 @@ func create(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(resp.StatusCode)
 		}
 	} else {
-		tee := io.TeeReader(resp.Body, w)
 		w.WriteHeader(resp.StatusCode)
-		json.NewDecoder(tee).Decode(&s)
+		respBody, _ := io.ReadAll(resp.Body)
+		json.Unmarshal(respBody, &s)
 		if s.ID == "" {
 			s.ID = s.Value.ID
 		}
+		if caps.CallbackUrl != "" && s.ID != "" {
+			respBody, err = addCdpCapabilities(respBody, caps.CallbackUrl, s.ID)
+			if err != nil {
+				log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), resp.Status)
+				jsonerror.SessionNotCreated(err).Encode(w)
+				queue.Drop()
+				cancel()
+				return
+			}
+		}
+		w.Write(respBody)
 	}
 	if s.ID == "" {
 		log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), resp.Status)
@@ -391,6 +405,41 @@ func removeSelenoidOptions(input []byte) []byte {
 	}
 	ret, _ := json.Marshal(body)
 	return ret
+}
+
+func addCdpCapabilities(input []byte, baseUrl string, sessionId string) ([]byte, error) {
+	var body map[string]interface{}
+	if err := json.Unmarshal(input, &body); err != nil {
+		return nil, err
+	}
+
+	value, ok := body["value"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected key 'value' of type 'map', but got %T", body["value"])
+	}
+
+	caps, ok := value["capabilities"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected key 'capabilities' of type 'map', but got %T", value["capabilities"])
+	}
+
+	caps["se:cdpEnable"] = true
+	cdpUrl, err := url.JoinPath(baseUrl, "devtools", sessionId)
+	if err != nil {
+		return nil, fmt.Errorf("cannot construct devtools url: %v", err)
+	}
+	caps["se:cdp"] = cdpUrl
+
+	var version interface{}
+	if v, ok := caps["browserVersion"]; ok {
+		version = v
+	} else {
+		version = caps["version"]
+	}
+	caps["se:cdpVersion"] = version
+
+	result, _ := json.Marshal(body)
+	return result, nil
 }
 
 func preprocessSessionId(sid string) string {

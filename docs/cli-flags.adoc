@@ -37,6 +37,8 @@ The following flags are supported by `selenoid` command:
     New session attempts retry count (default 1)
 -save-all-logs
     Whether to save all logs without considering capabilities
+-callback-urlstring
+    Selenoid callback url
 -service-startup-timeout duration
     Service startup timeout in time.Duration format (default 30s)
 -session-attempt-timeout duration

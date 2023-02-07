@@ -256,6 +256,15 @@ s3KeyPattern: "$quota/$fileType$fileExtension"
 
 The same key placeholders are supported. Please refer to <<Uploading Files To S3>> section for more details.
 
+=== CDP Url: callbackUrl
+
+This capability allows to set Selenoid server URL to enable Selenium 4 CDP access.
+
+.Type: string
+----
+callbackUrl: "https://selenoid.example.com/"
+----
+
 === Specifying Capabilities via Protocol Extensions
 
 Some Selenium clients allow passing only a limited number of capabilities specified in https://w3c.github.io/webdriver/webdriver-spec.html[WebDriver specification]. For such cases Selenoid supports reading capabilities using https://w3c.github.io/webdriver/webdriver-spec.html#protocol-extensions[WebDriver protocol extensions] feature. The following two examples deliver the same result. Usually capabilities are passed like this:

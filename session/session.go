@@ -38,6 +38,7 @@ type Caps struct {
 	Labels                map[string]string `json:"labels,omitempty"`
 	SessionTimeout        string            `json:"sessionTimeout,omitempty"`
 	S3KeyPattern          string            `json:"s3KeyPattern,omitempty"`
+	CallbackUrl           string            `json:"callbackUrl,omitempty"`
 	ExtensionCapabilities *Caps             `json:"selenoid:options,omitempty"`
 }
 

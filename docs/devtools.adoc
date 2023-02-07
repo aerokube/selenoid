@@ -7,7 +7,7 @@
 . We recommend to use the most recent Chrome version possible.
 ====
 
-Selenoid is proxying Chrome Developer Tools API to browser container.  For every running Selenium session to access the API just use the following URL:
+Selenoid is proxying Chrome Developer Tools API to browser container. For every running Selenium session to access the API just use the following URL:
 
 ```
 <ws or http>://selenoid.example.com:4444/devtools/<session-id>/<method>
@@ -30,6 +30,13 @@ For example an URL to connect to current page websocket would be:
 ```
 ws://selenoid.example.com:4444/devtools/<session-id>/page
 ```
+
+.Accessing Developer Tools API with Selenium 4
+
+Selenium 4 and above has functionality allowing to access Chrome DevTools features. This works just out of the box.
+This feature needs full Selenoid server URL in order to work properly.
+To enable this feature, set the Selenoid `-callback-url` flag to the correct Selenoid address, such as `-callback-url="https://selenoid.example.com/"`.
+This can also be set through the `callbackUrl` capability.
 
 .Accessing Developer Tools API with Webdriver.io and Puppeteer
 [source,javascript]
