@@ -124,7 +124,7 @@ func init() {
 	})
 	inDocker := false
 	_, err = os.Stat("/.dockerenv")
-	if err == nil {
+	if err == nil || containerNetwork != service.DefaultContainerNetwork {
 		inDocker = true
 	}
 
