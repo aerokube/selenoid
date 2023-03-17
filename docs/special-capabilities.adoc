@@ -176,7 +176,7 @@ sometimes you may need to add more entries for particular test cases. This can b
 
 .Type: array, format: <hostname>:<ip-address>
 ----
-hostsEntries: ["example.com:192.168.0.1", "test.com:192.168.0.2"]
+hosts: ["example.com:192.168.0.1", "test.com:192.168.0.2"]
 ----
 
 Entries will be inserted to `/etc/hosts` before entries from browsers configuration file.
