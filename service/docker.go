@@ -143,14 +143,18 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	}
 	cl := d.Client
 	env := getEnv(d.ServiceBase, d.Caps)
+	cfg := &ctr.Config{
+		Image:        image.(string),
+		Env:          env,
+		ExposedPorts: portConfig.ExposedPorts,
+		Labels:       getLabels(d.Service, d.Caps),
+	}
+	hn := getContainerHostname(d.Caps)
+	if hn != "" {
+		cfg.Hostname = hn
+	}
 	container, err := cl.ContainerCreate(ctx,
-		&ctr.Config{
-			Hostname:     getContainerHostname(d.Caps),
-			Image:        image.(string),
-			Env:          env,
-			ExposedPorts: portConfig.ExposedPorts,
-			Labels:       getLabels(d.Service, d.Caps),
-		},
+		cfg,
 		&hostConfig,
 		&network.NetworkingConfig{}, nil, "")
 	if err != nil {
@@ -405,7 +409,7 @@ func getContainerHostname(caps session.Caps) string {
 	if caps.ContainerHostname != "" {
 		return caps.ContainerHostname
 	}
-	return "localhost"
+	return ""
 }
 
 func getExtraHosts(service *config.Browser, caps session.Caps) []string {
