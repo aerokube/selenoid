@@ -30,8 +30,9 @@ To build Docker container type:
 
 [source,bash]
 ----
-$ GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build
-$ docker build -t selenoid:latest .
+$ mkdir -p dist
+$ GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o dist/selenoid_linux_amd64
+$ docker buildx build --pull --platform linux/amd64 -t selenoid:latest .
 ----
 
 ====
