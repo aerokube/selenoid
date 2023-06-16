@@ -11,6 +11,8 @@ The following flags are supported by `selenoid` command:
     Network to be used for containers (default "default")
 -cpu value
     Containers cpu limit as float e.g. 0.2 or 1.0
+-in-docker
+    Indicate that selenoid process runs inside a container. Necessary to using with docker-compose and arm64 container
 -disable-docker
     Disable docker support
 -disable-privileged

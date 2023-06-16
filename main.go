@@ -34,6 +34,7 @@ import (
 var (
 	hostname                 string
 	disableDocker            bool
+	inDocker                 bool
 	disableQueue             bool
 	enableFileUpload         bool
 	listen                   string
@@ -72,6 +73,7 @@ func init() {
 	var mem service.MemLimit
 	var cpu service.CpuLimit
 	flag.BoolVar(&disableDocker, "disable-docker", false, "Disable docker support")
+	flag.BoolVar(&inDocker, "in-docker", false, "Indicate that selenoid process runs inside a container")
 	flag.BoolVar(&disableQueue, "disable-queue", false, "Disable wait queue")
 	flag.BoolVar(&enableFileUpload, "enable-file-upload", false, "File upload support")
 	flag.StringVar(&listen, "listen", ":4444", "Network address to accept connections")
@@ -122,9 +124,8 @@ func init() {
 			log.Printf("[-] [INIT] [%s: %v]", os.Args[0], err)
 		}
 	})
-	inDocker := false
 	_, err = os.Stat("/.dockerenv")
-	if err == nil || containerNetwork != service.DefaultContainerNetwork {
+	if err == nil {
 		inDocker = true
 	}
 
