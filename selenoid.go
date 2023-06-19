@@ -281,12 +281,25 @@ func create(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(resp.StatusCode)
 		}
 	} else {
-		tee := io.TeeReader(resp.Body, w)
-		w.WriteHeader(resp.StatusCode)
-		json.NewDecoder(tee).Decode(&s)
-		if s.ID == "" {
-			s.ID = s.Value.ID
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Printf("[%d] [ERROR_READING_RESPONSE] [%v]", requestId, err)
+			queue.Drop()
+			cancel()
+			return
 		}
+		newBody, sessionId, err := processBody(body, r.Host)
+		if err != nil {
+			log.Printf("[%d] [ERROR_PROCESSING_RESPONSE] [%v]", requestId, err)
+			queue.Drop()
+			cancel()
+			return
+		}
+		resp.Body = io.NopCloser(bytes.NewReader(newBody))
+		resp.ContentLength = int64(len(newBody))
+		w.WriteHeader(resp.StatusCode)
+		w.Write(newBody)
+		s.ID = sessionId
 	}
 	if s.ID == "" {
 		log.Printf("[%d] [SESSION_FAILED] [%s] [%s]", requestId, u.String(), resp.Status)
@@ -391,6 +404,30 @@ func removeSelenoidOptions(input []byte) []byte {
 	}
 	ret, _ := json.Marshal(body)
 	return ret
+}
+
+func processBody(input []byte, host string) ([]byte, string, error) {
+	body := make(map[string]interface{})
+	sessionId := ""
+	err := json.Unmarshal(input, &body)
+	if err != nil {
+		return nil, sessionId, fmt.Errorf("parse body response: %v", err)
+	}
+	if raw, ok := body["value"]; ok {
+		if v, ok := raw.(map[string]interface{}); ok {
+			if raw, ok := v["capabilities"]; ok {
+				if c, ok := raw.(map[string]interface{}); ok {
+					sessionId = v["sessionId"].(string)
+					c["se:cdp"] = fmt.Sprintf("ws://%s/devtools/%s/", host, sessionId)
+				}
+			}
+		}
+	}
+	ret, err := json.Marshal(body)
+	if err != nil {
+		return nil, sessionId, fmt.Errorf("marshal response: %v", err)
+	}
+	return ret, sessionId, nil
 }
 
 func preprocessSessionId(sid string) string {
