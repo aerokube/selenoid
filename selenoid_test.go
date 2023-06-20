@@ -916,6 +916,30 @@ func TestDevtools(t *testing.T) {
 	queue.Release()
 }
 
+func TestAddedSeCdpCapability(t *testing.T) {
+	manager = &HTTPTest{Handler: Selenium()}
+
+	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
+	AssertThat(t, err, Is{nil})
+
+	var sess map[string]string
+	AssertThat(t, resp, AllOf{Code{http.StatusOK}, IsJson{&sess}})
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+
+	conn, err := rpcc.DialContext(ctx, sess["se:cdp"])
+	AssertThat(t, err, Is{nil})
+	defer conn.Close()
+
+	c := cdp.NewClient(conn)
+	err = c.Page.Enable(ctx)
+	AssertThat(t, err, Is{nil})
+
+	sessions.Remove(sess["sessionId"])
+	queue.Release()
+}
+
 func TestParseGgrHost(t *testing.T) {
 	h := parseGgrHost("some-host.example.com:4444")
 	AssertThat(t, h.Name, EqualTo{"some-host.example.com"})
