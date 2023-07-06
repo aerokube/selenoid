@@ -54,6 +54,8 @@ var (
 	videoOutputDir           string
 	videoRecorderImage       string
 	logOutputDir             string
+	notifyHost               string
+	notifyHostUser           string
 	saveAllLogs              bool
 	ggrHost                  *ggr.Host
 	conf                     *config.Config
@@ -95,6 +97,8 @@ func init() {
 	flag.StringVar(&logOutputDir, "log-output-dir", "", "Directory to save session log to")
 	flag.BoolVar(&saveAllLogs, "save-all-logs", false, "Whether to save all logs without considering capabilities")
 	flag.DurationVar(&gracefulPeriod, "graceful-period", 300*time.Second, "graceful shutdown period in time.Duration format, e.g. 300s or 500ms")
+	flag.StringVar(&notifyHost, "notify-host", "", "Specify ggr host to notify")
+	flag.StringVar(&notifyHostUser, "notify-host-user", "", "Specify ggr host user to update quota")
 	flag.Parse()
 
 	if version {
@@ -202,6 +206,9 @@ func init() {
 		log.Fatalf("[-] [INIT] [New docker client: %v]", err)
 	}
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
+	if notifyHost != "" {
+		notifyGgr(notifyHost, notifyHostUser)
+	}
 }
 
 func parseGgrHost(s string) *ggr.Host {
@@ -219,6 +226,27 @@ func parseGgrHost(s string) *ggr.Host {
 	}
 	log.Printf("[-] [INIT] [Will prefix all session IDs with a hash-sum: %s]", host.Sum())
 	return host
+}
+
+func notifyGgr(ggrURL, user string) {
+	payload := map[string]interface{}{
+		"user": user,
+	}
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		fmt.Printf("Failed to marshal JSON payload: %v\n", err)
+		return
+	}
+
+	resp, err := http.Post(ggrURL, "application/json", strings.NewReader(string(jsonPayload)))
+	if err != nil {
+		fmt.Printf("Failed to notify the server: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("Notification sent successfully!")
 }
 
 func onSIGHUP(fn func()) {
