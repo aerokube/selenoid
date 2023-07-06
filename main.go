@@ -206,7 +206,7 @@ func init() {
 		log.Fatalf("[-] [INIT] [New docker client: %v]", err)
 	}
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
-	if notifyHost != "" {
+	if notifyHost != "" && notifyHostUser != "" {
 		serverURL := fmt.Sprintf("http://%s/notify", notifyHost)
 		notifyGgr(serverURL, notifyHostUser)
 	}
@@ -233,21 +233,30 @@ func notifyGgr(ggrURL, user string) {
 	payload := map[string]interface{}{
 		"user": user,
 	}
-
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		fmt.Printf("Failed to marshal JSON payload: %v\n", err)
 		return
 	}
+	// Create a ticker that ticks every 12 hours
+	ticker := time.NewTicker(12 * time.Hour)
+	defer ticker.Stop()
+	// Send the initial notification
+	sendNotification(ggrURL, jsonPayload)
+	// Continuously send notifications at the specified interval
+	for range ticker.C {
+		sendNotification(ggrURL, jsonPayload)
+	}
+}
 
-	resp, err := http.Post(ggrURL, "application/json", strings.NewReader(string(jsonPayload)))
+func sendNotification(ggrURL string, payload []byte) {
+	resp, err := http.Post(ggrURL, "application/json", bytes.NewBuffer(payload))
 	if err != nil {
-		fmt.Printf("Failed to notify the server: %v\n", err)
+		fmt.Printf("Failed to notify ggr server: %v\n", err)
 		return
 	}
 	defer resp.Body.Close()
-
-	fmt.Println("Notification sent successfully!")
+	fmt.Println("Notification to ggr sent successfully!")
 }
 
 func onSIGHUP(fn func()) {
