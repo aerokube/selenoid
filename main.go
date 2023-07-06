@@ -207,7 +207,8 @@ func init() {
 	}
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
 	if notifyHost != "" {
-		notifyGgr(notifyHost, notifyHostUser)
+		serverURL := fmt.Sprintf("http://%s/notify", notifyHost)
+		notifyGgr(serverURL, notifyHostUser)
 	}
 }
 
