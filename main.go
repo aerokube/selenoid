@@ -97,8 +97,8 @@ func init() {
 	flag.StringVar(&logOutputDir, "log-output-dir", "", "Directory to save session log to")
 	flag.BoolVar(&saveAllLogs, "save-all-logs", false, "Whether to save all logs without considering capabilities")
 	flag.DurationVar(&gracefulPeriod, "graceful-period", 300*time.Second, "graceful shutdown period in time.Duration format, e.g. 300s or 500ms")
-	flag.StringVar(&notifyHost, "notify-host", "", "Specify ggr host to notify")
-	flag.StringVar(&notifyHostUser, "notify-host-user", "", "Specify ggr host user to update quota")
+	flag.StringVar(&notifyHost, "notify-ggr", "", "Specify ggr host to notify")
+	flag.StringVar(&notifyHostUser, "notify-ggr-user", "", "Specify ggr host user to update quota")
 	flag.Parse()
 
 	if version {
