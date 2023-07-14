@@ -413,12 +413,19 @@ func processBody(input []byte, host string) ([]byte, string, error) {
 	if err != nil {
 		return nil, sessionId, fmt.Errorf("parse body response: %v", err)
 	}
-	if raw, ok := body["value"]; ok {
-		if v, ok := raw.(map[string]interface{}); ok {
-			if raw, ok := v["capabilities"]; ok {
-				if c, ok := raw.(map[string]interface{}); ok {
-					sessionId = v["sessionId"].(string)
-					c["se:cdp"] = fmt.Sprintf("ws://%s/devtools/%s/", host, sessionId)
+	// handle jsonwp response from older browsers (chrome < 75)
+	if rawId, ok := body["sessionId"]; ok {
+		if si, ok := rawId.(string); ok {
+			sessionId = si
+		}
+	} else {
+		if raw, ok := body["value"]; ok {
+			if v, ok := raw.(map[string]interface{}); ok {
+				if raw, ok := v["capabilities"]; ok {
+					if c, ok := raw.(map[string]interface{}); ok {
+						sessionId = v["sessionId"].(string)
+						c["se:cdp"] = fmt.Sprintf("ws://%s/devtools/%s/", host, sessionId)
+					}
 				}
 			}
 		}
