@@ -12,7 +12,7 @@
     # ifconfig | grep eth0
     eth0      Link encap:Ethernet  HWaddr 00:25:90:eb:fb:3e
 +
-Now we are setting this Mac-adress for `docker0` virtual interface:  
+Now we are setting this Mac-address for `docker0` virtual interface:  
     
     # ip link set docker0 address 00:25:90:eb:fb:3e
 
