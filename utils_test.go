@@ -18,8 +18,8 @@ import (
 	"github.com/aerokube/selenoid/protect"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"github.com/pborman/uuid"
 	assert "github.com/stretchr/testify/require"
 )
 
@@ -106,7 +106,7 @@ func Selenium() http.Handler {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		u := uuid.New()
+		u := uuid.NewString()
 		lock.Lock()
 		sessions[u] = struct{}{}
 		lock.Unlock()
