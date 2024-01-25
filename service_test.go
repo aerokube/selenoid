@@ -16,7 +16,6 @@ import (
 	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
-	"github.com/aerokube/util"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	assert "github.com/stretchr/testify/require"
@@ -60,7 +59,7 @@ func testMux() http.Handler {
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusCreated)
 			output := `{"id": "e90e34656806", "warnings": []}`
-			w.Write([]byte(output))
+			_, _ = w.Write([]byte(output))
 		},
 	))
 	mux.HandleFunc("/v1.29/containers/e90e34656806/start", http.HandlerFunc(
@@ -80,9 +79,9 @@ func testMux() http.Handler {
 			w.WriteHeader(http.StatusOK)
 			const streamTypeStderr = 2
 			header := []byte{streamTypeStderr, 0, 0, 0, 0, 0, 0, 9}
-			w.Write(header)
+			_, _ = w.Write(header)
 			data := []byte("test-data")
-			w.Write(data)
+			_, _ = w.Write(data)
 		},
 	))
 	mux.HandleFunc("/v%s/containers/e90e34656806", http.HandlerFunc(
@@ -160,7 +159,7 @@ func testMux() http.Handler {
 			  "Mounts": []
 			}
 			`, p, p, p, p, p, p)
-			w.Write([]byte(output))
+			_, _ = w.Write([]byte(output))
 		},
 	))
 	mux.HandleFunc("/v1.29/networks/net-1/connect", http.HandlerFunc(
@@ -310,7 +309,7 @@ func failingMux(numDeleteRequests *int) http.Handler {
 		func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusCreated)
 			output := `{"id": "e90e34656806", "warnings": []}`
-			w.Write([]byte(output))
+			_, _ = w.Write([]byte(output))
 		},
 	))
 	mux.HandleFunc("/v1.29/containers/e90e34656806/start", http.HandlerFunc(
@@ -334,7 +333,7 @@ func TestDeleteContainerOnStartupError(t *testing.T) {
 	env := testEnvironment()
 	starter := createDockerStarter(t, env, testConfig(env))
 	_, err := starter.StartWithCancel()
-	assert.NoError(t, err)
+	assert.Error(t, err)
 	assert.Equal(t, numDeleteRequests, 1)
 }
 
@@ -364,7 +363,7 @@ func TestGetVNC(t *testing.T) {
 	})
 	defer sessions.Remove("test-session")
 
-	u := fmt.Sprintf("ws://%s/vnc/test-session", util.HostPort(srv.URL))
+	u := fmt.Sprintf("ws://%s/vnc/test-session", hostPort(srv.URL))
 	assert.Equal(t, readDataFromWebSocket(t, u), "test-data")
 }
 
@@ -408,6 +407,6 @@ func TestGetLogs(t *testing.T) {
 	})
 	defer sessions.Remove("test-session")
 
-	u := fmt.Sprintf("ws://%s/logs/test-session", util.HostPort(srv.URL))
+	u := fmt.Sprintf("ws://%s/logs/test-session", hostPort(srv.URL))
 	assert.Equal(t, readDataFromWebSocket(t, u), "test-data")
 }

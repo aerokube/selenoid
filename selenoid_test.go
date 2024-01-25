@@ -480,7 +480,7 @@ func TestProxySessionPanicOnAbortHandler(t *testing.T) {
 
 	req, _ := http.NewRequest(http.MethodGet, With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s/url?abort-handler=true", sess["sessionId"])), nil)
 	resp, err = http.DefaultClient.Do(req)
-	assert.NoError(t, err)
+	assert.Error(t, err)
 
 	sessions.Remove(sess["sessionId"])
 	queue.Release()
@@ -502,7 +502,8 @@ func TestSessionDeleted(t *testing.T) {
 
 	req, _ := http.NewRequest(http.MethodDelete,
 		With(srv.URL).Path(fmt.Sprintf("/wd/hub/session/%s", sess["sessionId"])), nil)
-	http.DefaultClient.Do(req)
+	_, err = http.DefaultClient.Do(req)
+	assert.NoError(t, err)
 
 	resp, err = http.Get(With(srv.URL).Path("/status"))
 	assert.NoError(t, err)
@@ -927,18 +928,42 @@ func TestDevtools(t *testing.T) {
 }
 
 func TestAddedSeCdpCapability(t *testing.T) {
-	manager = &HTTPTest{Handler: Selenium()}
+	fn := func(input map[string]interface{}) {
+		input["value"] = map[string]interface{}{
+			"sessionId":    input["sessionId"],
+			"capabilities": make(map[string]interface{}),
+		}
+		delete(input, "sessionId")
+	}
+	manager = &HTTPTest{Handler: Selenium(fn)}
 
 	resp, err := http.Post(With(srv.URL).Path("/wd/hub/session"), "", bytes.NewReader([]byte("{}")))
 	assert.NoError(t, err)
 	assert.Equal(t, resp.StatusCode, http.StatusOK)
-	var sess map[string]string
+	var sess map[string]interface{}
 	assert.NoError(t, json.NewDecoder(resp.Body).Decode(&sess))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
 
-	conn, err := rpcc.DialContext(ctx, sess["se:cdp"])
+	rv, ok := sess["value"]
+	assert.True(t, ok)
+	value, ok := rv.(map[string]interface{})
+	assert.True(t, ok)
+	rc, ok := value["capabilities"]
+	assert.True(t, ok)
+	rs, ok := value["sessionId"]
+	assert.True(t, ok)
+	sessionId, ok := rs.(string)
+	assert.True(t, ok)
+	capabilities, ok := rc.(map[string]interface{})
+	assert.True(t, ok)
+	rws, ok := capabilities["se:cdp"]
+	assert.True(t, ok)
+	ws, ok := rws.(string)
+	assert.True(t, ok)
+	assert.NotEmpty(t, ws)
+	conn, err := rpcc.DialContext(ctx, ws)
 	assert.NoError(t, err)
 	defer conn.Close()
 
@@ -946,7 +971,7 @@ func TestAddedSeCdpCapability(t *testing.T) {
 	err = c.Page.Enable(ctx)
 	assert.NoError(t, err)
 
-	sessions.Remove(sess["sessionId"])
+	sessions.Remove(sessionId)
 	queue.Release()
 }
 

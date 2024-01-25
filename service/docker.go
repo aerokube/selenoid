@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/aerokube/selenoid/info"
+	"github.com/docker/docker/api/types"
 	"log"
 	"net"
 	"net/url"
@@ -14,8 +16,6 @@ import (
 
 	"github.com/aerokube/selenoid/config"
 	"github.com/aerokube/selenoid/session"
-	"github.com/aerokube/util"
-	"github.com/docker/docker/api/types"
 	ctr "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/strslice"
@@ -164,12 +164,12 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 	browserContainerId := container.ID
 	videoContainerId := ""
 	log.Printf("[%d] [STARTING_CONTAINER] [%s] [%s]", requestId, image, browserContainerId)
-	err = cl.ContainerStart(ctx, browserContainerId, types.ContainerStartOptions{})
+	err = cl.ContainerStart(ctx, browserContainerId, ctr.StartOptions{})
 	if err != nil {
 		removeContainer(ctx, cl, requestId, browserContainerId)
 		return nil, fmt.Errorf("start container: %v", err)
 	}
-	log.Printf("[%d] [CONTAINER_STARTED] [%s] [%s] [%.2fs]", requestId, image, browserContainerId, util.SecondsSince(browserContainerStartTime))
+	log.Printf("[%d] [CONTAINER_STARTED] [%s] [%s] [%.2fs]", requestId, image, browserContainerId, info.SecondsSince(browserContainerStartTime))
 
 	if len(d.AdditionalNetworks) > 0 {
 		for _, networkName := range d.AdditionalNetworks {
@@ -217,7 +217,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 		removeContainer(ctx, cl, requestId, browserContainerId)
 		return nil, fmt.Errorf("wait: %v", err)
 	}
-	log.Printf("[%d] [SERVICE_STARTED] [%s] [%s] [%.2fs]", requestId, image, browserContainerId, util.SecondsSince(serviceStartTime))
+	log.Printf("[%d] [SERVICE_STARTED] [%s] [%s] [%.2fs]", requestId, image, browserContainerId, info.SecondsSince(serviceStartTime))
 	log.Printf("[%d] [PROXY_TO] [%s] [%s]", requestId, browserContainerId, u.String())
 
 	var publishedPortsInfo map[string]string
@@ -245,7 +245,7 @@ func (d *Docker) StartWithCancel() (*StartedService, error) {
 			}
 			defer removeContainer(ctx, cl, requestId, browserContainerId)
 			if d.LogOutputDir != "" && (d.SaveAllLogs || d.Log) {
-				r, err := d.Client.ContainerLogs(ctx, browserContainerId, types.ContainerLogsOptions{
+				r, err := d.Client.ContainerLogs(ctx, browserContainerId, ctr.LogsOptions{
 					Timestamps: true,
 					ShowStdout: true,
 					ShowStderr: true,
@@ -545,13 +545,13 @@ func startVideoContainer(ctx context.Context, cl *client.Client, requestId uint6
 
 	videoContainerId := videoContainer.ID
 	log.Printf("[%d] [STARTING_VIDEO_CONTAINER] [%s] [%s]", requestId, videoContainerImage, videoContainerId)
-	err = cl.ContainerStart(ctx, videoContainerId, types.ContainerStartOptions{})
+	err = cl.ContainerStart(ctx, videoContainerId, ctr.StartOptions{})
 	if err != nil {
 		removeContainer(ctx, cl, requestId, browserContainer.ID)
 		removeContainer(ctx, cl, requestId, videoContainerId)
 		return "", fmt.Errorf("start video container: %v", err)
 	}
-	log.Printf("[%d] [VIDEO_CONTAINER_STARTED] [%s] [%s] [%.2fs]", requestId, videoContainerImage, videoContainerId, util.SecondsSince(videoContainerStartTime))
+	log.Printf("[%d] [VIDEO_CONTAINER_STARTED] [%s] [%s] [%.2fs]", requestId, videoContainerImage, videoContainerId, info.SecondsSince(videoContainerStartTime))
 	return videoContainerId, nil
 }
 
@@ -585,7 +585,7 @@ func stopVideoContainer(ctx context.Context, cli *client.Client, requestId uint6
 
 func removeContainer(ctx context.Context, cli *client.Client, requestId uint64, id string) {
 	log.Printf("[%d] [REMOVING_CONTAINER] [%s]", requestId, id)
-	err := cli.ContainerRemove(ctx, id, types.ContainerRemoveOptions{Force: true, RemoveVolumes: true})
+	err := cli.ContainerRemove(ctx, id, ctr.RemoveOptions{Force: true, RemoveVolumes: true})
 	if err != nil {
 		log.Printf("[%d] [FAILED_TO_REMOVE_CONTAINER] [%s] [%v]", requestId, id, err)
 		return
