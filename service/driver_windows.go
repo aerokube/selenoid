@@ -9,6 +9,6 @@ import (
 
 func stopProc(cmd *exec.Cmd) error {
 	error := cmd.Process.Kill()
-	cmd.Wait()
+	_ = cmd.Wait()
 	return error
 }

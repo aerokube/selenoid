@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/aerokube/selenoid/info"
+	"github.com/docker/docker/api"
 	"log"
 	"net"
 	"net/http"
@@ -24,8 +26,6 @@ import (
 	"github.com/aerokube/selenoid/service"
 	"github.com/aerokube/selenoid/session"
 	"github.com/aerokube/selenoid/upload"
-	"github.com/aerokube/util"
-	"github.com/aerokube/util/docker"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	"golang.org/x/net/websocket"
@@ -187,7 +187,7 @@ func init() {
 	}
 	ip, _, _ := net.SplitHostPort(u.Host)
 	environment.IP = ip
-	cli, err = docker.CreateCompatibleDockerClient(
+	cli, err = createCompatibleDockerClient(
 		func(specifiedApiVersion string) {
 			log.Printf("[-] [INIT] [Using Docker API version: %s]", specifiedApiVersion)
 		},
@@ -202,6 +202,57 @@ func init() {
 		log.Fatalf("[-] [INIT] [New docker client: %v]", err)
 	}
 	manager = &service.DefaultManager{Environment: &environment, Client: cli, Config: conf}
+}
+
+func createCompatibleDockerClient(onVersionSpecified, onVersionDetermined, onUsingDefaultVersion func(string)) (*client.Client, error) {
+	const dockerApiVersion = "DOCKER_API_VERSION"
+	dockerApiVersionEnv := os.Getenv(dockerApiVersion)
+	if dockerApiVersionEnv != "" {
+		onVersionSpecified(dockerApiVersionEnv)
+	} else {
+		maxMajorVersion, maxMinorVersion := parseVersion(api.DefaultVersion)
+		minMajorVersion, minMinorVersion := parseVersion("1.24")
+		for majorVersion := maxMajorVersion; majorVersion >= minMajorVersion; majorVersion-- {
+			for minorVersion := maxMinorVersion; minorVersion >= minMinorVersion; minorVersion-- {
+				apiVersion := fmt.Sprintf("%d.%d", majorVersion, minorVersion)
+				_ = os.Setenv(dockerApiVersion, apiVersion)
+				docker, err := client.NewClientWithOpts(client.FromEnv)
+				if err != nil {
+					return nil, err
+				}
+				if isDockerAPIVersionCorrect(docker) {
+					onVersionDetermined(apiVersion)
+					return docker, nil
+				}
+				_ = docker.Close()
+			}
+		}
+		onUsingDefaultVersion(api.DefaultVersion)
+	}
+	return client.NewClientWithOpts(client.FromEnv)
+}
+
+func parseVersion(ver string) (int, int) {
+	const point = "."
+	pieces := strings.Split(ver, point)
+	major, err := strconv.Atoi(pieces[0])
+	if err != nil {
+		return 0, 0
+	}
+	minor, err := strconv.Atoi(pieces[1])
+	if err != nil {
+		return 0, 0
+	}
+	return major, minor
+}
+
+func isDockerAPIVersionCorrect(docker *client.Client) bool {
+	ctx := context.Background()
+	apiInfo, err := docker.ServerVersion(ctx)
+	if err != nil {
+		return false
+	}
+	return apiInfo.APIVersion == docker.ClientVersion()
 }
 
 func parseGgrHost(s string) *ggr.Host {
@@ -260,7 +311,7 @@ func post(next http.HandlerFunc) http.HandlerFunc {
 
 func ping(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(struct {
+	_ = json.NewEncoder(w).Encode(struct {
 		Uptime         string `json:"uptime"`
 		LastReloadTime string `json:"lastReloadTime"`
 		NumRequests    uint64 `json:"numRequests"`
@@ -274,7 +325,7 @@ func video(w http.ResponseWriter, r *http.Request) {
 		deleteFileIfExists(requestId, w, r, videoOutputDir, paths.Video, "DELETED_VIDEO_FILE")
 		return
 	}
-	user, remote := util.RequestInfo(r)
+	user, remote := info.RequestInfo(r)
 	if _, ok := r.URL.Query()[jsonParam]; ok {
 		listFilesAsJson(requestId, w, videoOutputDir, "VIDEO_ERROR")
 		return
@@ -285,7 +336,7 @@ func video(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteFileIfExists(requestId uint64, w http.ResponseWriter, r *http.Request, dir string, prefix string, status string) {
-	user, remote := util.RequestInfo(r)
+	user, remote := info.RequestInfo(r)
 	fileName := strings.TrimPrefix(r.URL.Path, prefix)
 	filePath := filepath.Join(dir, fileName)
 	_, err := os.Stat(filePath)
@@ -332,7 +383,7 @@ func handler() http.Handler {
 	})
 	root.HandleFunc(paths.Status, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
+		_ = json.NewEncoder(w).Encode(conf.State(sessions, limit, queue.Queued(), queue.Pending()))
 	})
 	root.HandleFunc(paths.Ping, ping)
 	root.Handle(paths.VNC, websocket.Handler(vnc))
@@ -383,7 +434,7 @@ func main() {
 
 	sessions.Each(func(k string, s *session.Session) {
 		if enableFileUpload {
-			os.RemoveAll(path.Join(os.TempDir(), k))
+			_ = os.RemoveAll(path.Join(os.TempDir(), k))
 		}
 		s.Cancel()
 	})

@@ -78,7 +78,7 @@ type StartupError struct{}
 func (m *StartupError) StartWithCancel() (*service.StartedService, error) {
 	log.Println("Starting StartupError Service...")
 	log.Println("Failed to start StartupError Service...")
-	return nil, errors.New("Failed to start Service")
+	return nil, errors.New("failed to start Service")
 }
 
 func (m *StartupError) Find(caps session.Caps, requestId uint64) (service.Starter, bool) {
@@ -97,7 +97,7 @@ func (r With) Path(p string) string {
 	return fmt.Sprintf("%s%s", r, p)
 }
 
-func Selenium() http.Handler {
+func Selenium(nsp ...func(map[string]interface{})) http.Handler {
 	var lock sync.RWMutex
 	sessions := make(map[string]struct{})
 	mux := http.NewServeMux()
@@ -110,9 +110,13 @@ func Selenium() http.Handler {
 		lock.Lock()
 		sessions[u] = struct{}{}
 		lock.Unlock()
-		json.NewEncoder(w).Encode(struct {
-			S string `json:"sessionId"`
-		}{u})
+		ret := map[string]interface{}{
+			"sessionId": u,
+		}
+		for _, n := range nsp {
+			n(ret)
+		}
+		_ = json.NewEncoder(w).Encode(&ret)
 	})
 	mux.HandleFunc("/session/", func(w http.ResponseWriter, r *http.Request) {
 		u := strings.Split(r.URL.Path, "/")[2]
@@ -127,7 +131,7 @@ func Selenium() http.Handler {
 			out := "this call was relayed by the reverse proxy"
 			// Setting wrong Content-Length leads to abort handler error
 			w.Header().Add("Content-Length", strconv.Itoa(2*len(out)))
-			fmt.Fprintln(w, out)
+			_, _ = fmt.Fprintln(w, out)
 			return
 		}
 		d, _ := time.ParseDuration(r.FormValue("timeout"))
@@ -141,7 +145,7 @@ func Selenium() http.Handler {
 	})
 	mux.HandleFunc("/testfile", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("test-data"))
+		_, _ = w.Write([]byte("test-data"))
 	})
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(_ *http.Request) bool {
@@ -179,7 +183,7 @@ func Selenium() http.Handler {
 			}
 		}
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("test-clipboard-value"))
+		_, _ = w.Write([]byte("test-clipboard-value"))
 	})
 	return mux
 }
@@ -249,7 +253,7 @@ func TestSumUsedTotalGreaterThanPending(t *testing.T) {
 	req = req.WithContext(ctx)
 
 	_, err = http.DefaultClient.Do(req)
-	assert.NoError(t, err)
+	assert.Error(t, err)
 	assert.Equal(t, queue.Pending(), 0)
 	assert.Equal(t, queue.Used(), 2)
 }

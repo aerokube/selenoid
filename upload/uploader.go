@@ -1,11 +1,11 @@
 package upload
 
 import (
+	"github.com/aerokube/selenoid/info"
 	"log"
 	"time"
 
 	"github.com/aerokube/selenoid/event"
-	"github.com/aerokube/util"
 )
 
 var (
@@ -39,7 +39,7 @@ func AddUploader(u Uploader) {
 func (ul *Upload) OnFileCreated(createdFile event.CreatedFile) {
 	if len(ul.uploaders) > 0 {
 		for _, uploader := range ul.uploaders {
-			go func() {
+			go func(uploader Uploader) {
 				s := time.Now()
 				uploaded, err := uploader.Upload(createdFile)
 				if err != nil {
@@ -47,9 +47,9 @@ func (ul *Upload) OnFileCreated(createdFile event.CreatedFile) {
 					return
 				}
 				if uploaded {
-					log.Printf("[%d] [UPLOADED_FILE] [%s] [%.2fs]", createdFile.RequestId, createdFile.Name, util.SecondsSince(s))
+					log.Printf("[%d] [UPLOADED_FILE] [%s] [%.2fs]", createdFile.RequestId, createdFile.Name, info.SecondsSince(s))
 				}
-			}()
+			}(uploader)
 		}
 	}
 }
