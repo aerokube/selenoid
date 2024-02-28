@@ -931,7 +931,7 @@ func TestAddedSeCdpCapability(t *testing.T) {
 	fn := func(input map[string]interface{}) {
 		input["value"] = map[string]interface{}{
 			"sessionId":    input["sessionId"],
-			"capabilities": make(map[string]interface{}),
+			"capabilities": map[string]interface{}{"browserVersion": "some-version"},
 		}
 		delete(input, "sessionId")
 	}
@@ -958,6 +958,11 @@ func TestAddedSeCdpCapability(t *testing.T) {
 	assert.True(t, ok)
 	capabilities, ok := rc.(map[string]interface{})
 	assert.True(t, ok)
+	rcv, ok := capabilities["se:cdpVersion"]
+	assert.True(t, ok)
+	cv, ok := rcv.(string)
+	assert.True(t, ok)
+	assert.NotEmpty(t, cv)
 	rws, ok := capabilities["se:cdp"]
 	assert.True(t, ok)
 	ws, ok := rws.(string)

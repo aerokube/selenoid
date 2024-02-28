@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/aerokube/selenoid/info"
 	"io"
 	"log"
 	"net"
@@ -23,6 +22,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/aerokube/selenoid/info"
 
 	"github.com/aerokube/selenoid/event"
 	"github.com/aerokube/selenoid/jsonerror"
@@ -427,6 +428,11 @@ func processBody(input []byte, host string) ([]byte, string, error) {
 					if c, ok := raw.(map[string]interface{}); ok {
 						sessionId = v["sessionId"].(string)
 						c["se:cdp"] = fmt.Sprintf("ws://%s/devtools/%s/", host, sessionId)
+						if rbv, ok := c["browserVersion"]; ok {
+							if bv, ok := rbv.(string); ok {
+								c["se:cdpVersion"] = bv
+							}
+						}
 					}
 				}
 			}
