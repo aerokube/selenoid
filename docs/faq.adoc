@@ -56,6 +56,10 @@ This depends on your tests. We recommend to start with 1 CPU and 1 Gb of memory 
 
 The only difference between these images - is a running VNC server (`x11vnc`) consuming approximately 20 Megabytes of RAM in idle state which is negligible compared to browser memory consumption.
 
+**VNC is consuming all my container CPU**
+
+On RedHat-based distributions you should set `LimitNOFILE=1048576` for `containerd.service`
+
 === Features not Working
 
 **Selenoid does not start: open config/browsers.json: no such file or directory**
