@@ -544,7 +544,7 @@ table.CodeRay td.code{padding:0 0 0 .75em}
 <div class="details">
 <span id="author" class="author">Alexander Andryashin, Ivan Krutov, Kirill Merkushev and the Aerokube community</span><br>
 <span id="revnumber">version latest,</span>
-<span id="revdate">2024-05-20</span>
+<span id="revdate">2024-05-25</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -1193,6 +1193,12 @@ aerokube/selenoid:latest-release</pre>
 </div>
 <div class="paragraph">
 <p>The only difference between these images - is a running VNC server (<code>x11vnc</code>) consuming approximately 20 Megabytes of RAM in idle state which is negligible compared to browser memory consumption.</p>
+</div>
+<div class="paragraph">
+<p><strong>VNC is consuming all my container CPU</strong></p>
+</div>
+<div class="paragraph">
+<p>On RedHat-based distributions you should set <code>LimitNOFILE=1048576</code> for <code>containerd.service</code></p>
 </div>
 </div>
 <div class="sect3">
@@ -4021,7 +4027,7 @@ $ docker buildx build --pull --platform linux/amd64 -t selenoid:latest .</code><
 <div id="footer">
 <div id="footer-text">
 Version latest<br>
-Last updated 2024-05-20 17:58:31 UTC
+Last updated 2024-05-25 12:37:13 UTC
 </div>
 </div>
 <!-- Global site tag (gtag.js) - Google Analytics -->
