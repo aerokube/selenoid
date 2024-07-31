@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/aerokube/ggr v0.0.0-20240420103110-fc913c480489
 	github.com/aws/aws-sdk-go v1.53.5
-	github.com/docker/docker v26.1.3+incompatible
+	github.com/docker/docker v26.1.4+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/docker/go-units v0.5.0
 	github.com/google/uuid v1.6.0
